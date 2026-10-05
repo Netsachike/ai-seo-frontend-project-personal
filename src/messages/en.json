@@ -1,0 +1,374 @@
+{
+  "meta": {
+    "title": "Orbit",
+    "titleTemplate": "%s · Orbit",
+    "description": "See where your brand ranks in Google and AI answers, and let Orbit close the gap."
+  },
+  "common": {
+    "close": "Close",
+    "cancel": "Cancel",
+    "save": "Save changes",
+    "retry": "Try again",
+    "loading": "Loading"
+  },
+  "shared": {
+    "noData": "Nothing here yet. Your first scan finishes in about {minutes, plural, one {# minute} other {# minutes}}.",
+    "engineDown": "We couldn't reach {engine} this time. We'll retry at {time}; other engines are up to date.",
+    "publishFailed": "We couldn't publish to {site}. Check the WordPress connection, then retry.",
+    "genericError": "Something went wrong on our side. Try again, and if it keeps happening, tell us at {email}."
+  },
+  "engines": {
+    "chatgpt": "ChatGPT",
+    "gemini": "Gemini",
+    "perplexity": "Perplexity",
+    "claude": "Claude",
+    "aio": "AI Overviews",
+    "all": "All engines",
+    "allMonogram": "ALL"
+  },
+  "delta": {
+    "points": "{value} pts",
+    "flat": "No change",
+    "improved": "Improved by {value}",
+    "declined": "Declined by {value}"
+  },
+  "score": {
+    "label": "{label}: {score} of 100",
+    "emptyLabel": "{label}: no score yet",
+    "ofHundred": "of 100"
+  },
+  "owner": {
+    "orbit": "Orbit",
+    "you": "You"
+  },
+  "status": {
+    "live": "Live",
+    "published": "Published",
+    "scheduled": "Scheduled",
+    "draft": "Draft",
+    "needsApproval": "Needs approval",
+    "failed": "Failed"
+  },
+  "rank": {
+    "position": "#{position}",
+    "notRanking": "Not ranking"
+  },
+  "kpi": {
+    "ofTotal": " / {total}",
+    "mentionRate": {
+      "label": "Mention rate",
+      "note": "Mentioned in {mentioned} of {answers} AI answers"
+    },
+    "avgAiPosition": {
+      "label": "Avg. AI position",
+      "value": "#{value}",
+      "note": "Where you appear when you are listed"
+    },
+    "googleTop10": {
+      "label": "Google top 10",
+      "note": "Tracked keywords on page one"
+    },
+    "aiCitations": {
+      "label": "AI citations",
+      "note": "Answers that link to your site"
+    }
+  },
+  "charts": {
+    "noValue": "—",
+    "shareAria": "Share of voice: {summary}"
+  },
+  "approval": {
+    "approve": "Approve",
+    "edit": "Edit",
+    "reject": "Reject",
+    "approved": "Approved",
+    "rejected": "Rejected",
+    "alsoTelegram": "Also sent to Telegram",
+    "approvedToast": "Approved. Orbit will make the change and tell you when it's live.",
+    "rejectedToast": "Rejected. Orbit won't make this change.",
+    "failedToast": "We couldn't save your decision. Try again."
+  },
+  "task": {
+    "eta": "About {minutes, plural, one {# min} other {# min}} left",
+    "status": {
+      "waiting": "Waiting for you",
+      "working": "In progress",
+      "done": "Done",
+      "failed": "Failed"
+    }
+  },
+  "agent": {
+    "fromTelegram": "from Telegram",
+    "orbitSaid": "Orbit:",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "dayDividerWithNote": "{day} · {note}",
+    "sameAsTelegram": "same conversation as Telegram",
+    "panelTitle": "Ask Orbit",
+    "panelDescription": "Same conversation as Telegram.",
+    "openFull": "Open full conversation",
+    "loadError": "We couldn't load the conversation. Try again in a moment.",
+    "composerLabel": "Message Orbit",
+    "composerPlaceholder": "Ask about rankings, competitors or content",
+    "send": "Send"
+  },
+  "forms": {
+    "readOnly": "Read only",
+    "protocol": "https://",
+    "domainPlaceholder": "yourbrand.com"
+  },
+  "table": {
+    "columns": "Columns",
+    "showColumns": "Show columns",
+    "exportCsv": "Export CSV",
+    "empty": "No rows to show."
+  },
+  "dev": {
+    "title": "Components",
+    "heading": "Ink and Signal components",
+    "intro": "Every Phase 1 component in every state. Switch theme, direction and language above; the direction toggle previews RTL layout without changing the UI language.",
+    "controls": {
+      "theme": "Theme",
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System",
+      "direction": "Direction",
+      "ltr": "LTR",
+      "rtl": "RTL",
+      "language": "Language"
+    },
+    "nav": {
+      "label": "Sections",
+      "tokens": "Tokens",
+      "type": "Typography",
+      "buttons": "Buttons",
+      "forms": "Inputs",
+      "display": "Data display",
+      "charts": "Charts",
+      "agent": "Agent",
+      "table": "Data table",
+      "overlays": "Overlays"
+    },
+    "tokens": {
+      "title": "Color tokens",
+      "description": "Every color comes from these tokens. Signal is only ever a fill with signal-ink text on top."
+    },
+    "type": {
+      "title": "Typography",
+      "description": "Geist for UI, Geist Mono with tabular figures for every compared number.",
+      "monoSample": "/shop/yirgacheffe",
+      "samples": {
+        "display": "Be the answer.",
+        "h1": "Good morning, Ada",
+        "h2": "How much should Orbit do on its own?",
+        "h3": "Visibility vs competitors",
+        "bodyLg": "Claude skips you mostly because you have no page about how you source beans.",
+        "body": "Here's how Northwind Roasters showed up in Google and AI answers this month.",
+        "small": "Mentioned in 113 of 250 AI answers",
+        "caption": "Last checked today, 08:40",
+        "overline": "Avg. AI position"
+      }
+    },
+    "buttons": {
+      "title": "Buttons",
+      "description": "One primary per view. Destructive actions always sit behind a confirm dialog. Icon buttons carry an aria-label.",
+      "variant": "Variant",
+      "disabled": "Disabled",
+      "loading": "Loading",
+      "size": {
+        "sm": "Small 32",
+        "md": "Default 40",
+        "lg": "Large 48"
+      },
+      "label": {
+        "primary": "Run new scan",
+        "secondary": "Export report",
+        "ghost": "Reject",
+        "agent": "Ask Orbit",
+        "destructive": "Delete workspace",
+        "link": "Details"
+      },
+      "iconButtons": "Icon buttons",
+      "withIcon": "With icons",
+      "runScan": "Run new scan",
+      "continue": "Continue",
+      "aria": {
+        "settings": "Settings",
+        "add": "Add competitor",
+        "next": "Next step"
+      }
+    },
+    "forms": {
+      "title": "Inputs",
+      "description": "40px fields (48px in onboarding). Labels above, helper or error below. Errors show a border and a message.",
+      "brandName": "Brand name",
+      "brandNameHelper": "Shown in reports and outreach drafts.",
+      "workspaceName": "Workspace name",
+      "workspacePlaceholder": "Northwind Team",
+      "required": "Enter a name to continue.",
+      "email": "Email",
+      "changeEmail": "Change email",
+      "website": "Website",
+      "websiteHelper": "We remove https:// and trailing slashes as you type.",
+      "websiteLarge": "Website (onboarding size)",
+      "crawled": "Read {pages} pages",
+      "market": "Main market",
+      "markets": {
+        "us": "United States",
+        "gb": "United Kingdom",
+        "de": "Germany"
+      },
+      "voice": "Brand voice notes",
+      "voiceHelper": "Orbit follows these notes in every draft.",
+      "voiceSample": "Warm and plain. Talk about farms and roast dates, not luxury.",
+      "disabledField": "Maximum articles per month",
+      "checkboxes": "Checkboxes",
+      "notifyTelegram": "Notify me on Telegram",
+      "notifyEmail": "Email me the weekly report",
+      "someSelected": "Select all keywords",
+      "switches": "Switches",
+      "darkMode": "Dark mode",
+      "disabledSwitch": "Full autopilot",
+      "radios": "Radio group",
+      "autopilot": {
+        "ask": "Ask me first",
+        "content": "Auto-publish content",
+        "full": "Full autopilot"
+      },
+      "tabs": "Tabs",
+      "range": "Date range",
+      "ranges": {
+        "7d": "7d",
+        "30d": "30d",
+        "90d": "90d"
+      },
+      "views": "Keyword views",
+      "viewTabs": {
+        "all": "All {count}",
+        "improved": "Improved {count}",
+        "declined": "Declined {count}"
+      }
+    },
+    "display": {
+      "title": "Data display",
+      "description": "Score rings use bands: 0–39 danger, 40–69 warning, 70–100 success. Deltas always show an arrow, a sign and a color.",
+      "scoreRings": "Score rings (danger, warning, success, no data, small)",
+      "scoreLabel": "AI visibility score",
+      "deltas": "Delta chips",
+      "statuses": "Status badges",
+      "owners": "Owner chips",
+      "ranks": "Rank cells",
+      "engines": "Engine tiles",
+      "engineChips": "Engine filter chips",
+      "kpiCards": "KPI cards (refresh tweens the numbers)",
+      "refreshData": "Refresh data",
+      "emptyTitle": "Your first scan is running",
+      "emptyDescription": "Nothing here yet. Your first scan finishes in about {minutes, plural, one {# minute} other {# minutes}}.",
+      "emptyAction": "View scan progress",
+      "errorTitle": "One engine didn't answer",
+      "errorDescription": "We couldn't reach {engine} this time. We'll retry at {time}; other engines are up to date.",
+      "skeletons": "Skeleton",
+      "progress": "Progress"
+    },
+    "charts": {
+      "title": "Charts",
+      "description": "Colors come from CSS variables, so charts restyle on theme change without re-mounting. Your brand is always first, blue and thickest.",
+      "trendTitle": "Visibility vs competitors",
+      "trendDescription": "AI visibility score, daily",
+      "trendAria": "Your visibility rose from 48 to 64; Bluebird Coffee stayed ahead at 72.",
+      "range": "Date range",
+      "ranges": {
+        "7d": "7d",
+        "30d": "30d",
+        "90d": "90d"
+      },
+      "sovTitle": "Share of voice",
+      "sovDescription": "Mentions across all AI answers",
+      "distributionTitle": "Position distribution",
+      "bands": {
+        "top3": "1–3",
+        "top10": "4–10",
+        "top20": "11–20",
+        "top50": "21–50",
+        "top100": "51–100",
+        "none": "Not ranking"
+      },
+      "sparklines": "Sparklines"
+    },
+    "agent": {
+      "title": "Agent",
+      "description": "Messages, the approval gate and live task rows. Task progress is polled from the jobs API every 3 seconds.",
+      "sameAsTelegram": "same conversation as Telegram",
+      "approvalCard": "Approval card (pending)",
+      "approvalDone": "Approval card (decided)",
+      "doneTitle": "Refresh \"How to brew pour-over\"",
+      "editClicked": "The editor opens here in Phase 5.",
+      "taskRows": "Task rows",
+      "liveTask": "Writing \"How we source our beans\"",
+      "waitingTask": "Approve schema change",
+      "failedTask": "Publish to WordPress",
+      "doneTask": "Rechecked 50 questions across 5 AI engines",
+      "openPanel": "Open agent panel",
+      "shortcut": "⌘J"
+    },
+    "table": {
+      "title": "Data table",
+      "description": "Sticky header, end-aligned numbers, column picker and CSV export. Wide tables scroll inside their own container.",
+      "caption": "Tracked keywords",
+      "toggleLoading": "Loading state",
+      "toggleEmpty": "Empty state",
+      "emptyTitle": "No keywords tracked yet",
+      "emptyDescription": "Add the keywords your customers search for and Orbit checks them daily.",
+      "emptyAction": "Add keywords",
+      "cols": {
+        "keyword": "Keyword",
+        "position": "Position",
+        "volume": "Volume",
+        "difficulty": "Difficulty",
+        "url": "Ranking URL",
+        "status": "Status"
+      }
+    },
+    "overlays": {
+      "title": "Overlays",
+      "description": "Menus and tabs move at 200 ms, sheets and the agent panel at 320 ms. Sheets open from the logical end side.",
+      "dialog": "Dialog",
+      "dialogTitle": "Create workspace",
+      "dialogDescription": "A workspace holds its own team, billing and brands.",
+      "workspaceName": "Workspace name",
+      "workspacePlaceholder": "Northwind Team",
+      "cancel": "Cancel",
+      "create": "Create workspace",
+      "destructive": "Destructive confirm",
+      "alertTitle": "Remove Sam Rivera?",
+      "alertDescription": "Sam loses access to Northwind Team right away. You can invite them again later.",
+      "remove": "Remove member",
+      "sheet": "Sheet",
+      "sheetTitle": "Help and support",
+      "sheetDescription": "Docs, guides and a way to reach us.",
+      "sheetBody": "Support content arrives in Phase 6.",
+      "popover": "Popover",
+      "popoverTitle": "Credits",
+      "popoverDescription": "1,380 of 2,000 left this month.",
+      "tooltip": "Tooltip",
+      "tooltipBody": "Share of 50 tracked questions",
+      "menu": "Menu",
+      "menuLabel": "Account",
+      "menuSettings": "Settings",
+      "menuShortcut": "⌘,",
+      "menuMore": "More options",
+      "menuSignOut": "Sign out",
+      "toast": "Toast",
+      "toastBody": "Switched to Northwind Team",
+      "toastDescription": "Showing Northwind Roasters.",
+      "toastError": "We couldn't publish to WordPress. Check the connection, then retry.",
+      "toastErrorButton": "Error toast",
+      "command": "Command menu",
+      "commandDescription": "Search screens and run actions",
+      "commandPlaceholder": "Search or ask Orbit",
+      "commandEmpty": "No matches. Press Enter to ask Orbit.",
+      "commandGroup": "Actions",
+      "commandScan": "Run new scan"
+    }
+  }
+}

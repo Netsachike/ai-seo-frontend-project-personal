@@ -1,0 +1,80 @@
+"use client";
+
+import * as React from "react";
+import { ThemeProvider, useTheme } from "next-themes";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
+import { Direction } from "radix-ui";
+
+import { dirFor } from "@/i18n/config";
+import { setClientCookie } from "@/lib/cookies";
+import { THEME_COOKIE, type ThemePreference } from "@/lib/theme";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { Toaster } from "@/components/ui/sonner";
+
+function makeQueryClient() {
+  return new QueryClient({
+    defaultOptions: {
+      queries: {
+        staleTime: 30_000,
+        refetchOnWindowFocus: false,
+        retry: (count, error) => {
+          const status = (error as { status?: number } | null)?.status;
+          if (status && status >= 400 && status < 500) return false;
+          return count < 2;
+        },
+      },
+    },
+  });
+}
+
+let browserQueryClient: QueryClient | undefined;
+export function getQueryClient() {
+  if (typeof window === "undefined") return makeQueryClient();
+  browserQueryClient ??= makeQueryClient();
+  return browserQueryClient;
+}
+
+/** Mirrors the theme choice into a cookie so the server renders the right class next time. */
+function ThemeCookieSync() {
+  const { theme } = useTheme();
+  React.useEffect(() => {
+    if (theme) setClientCookie(THEME_COOKIE, theme);
+  }, [theme]);
+  return null;
+}
+
+export function Providers({
+  children,
+  locale,
+  initialTheme,
+}: {
+  children: React.ReactNode;
+  locale: string;
+  initialTheme: ThemePreference;
+}) {
+  const queryClient = getQueryClient();
+  const dir = dirFor(locale);
+
+  return (
+    <ThemeProvider
+      attribute="class"
+      defaultTheme={initialTheme}
+      enableSystem
+      disableTransitionOnChange
+      storageKey={THEME_COOKIE}
+    >
+      <ThemeCookieSync />
+      <QueryClientProvider client={queryClient}>
+        <NuqsAdapter>
+          <Direction.Provider dir={dir}>
+            <TooltipProvider>
+              {children}
+              <Toaster />
+            </TooltipProvider>
+          </Direction.Provider>
+        </NuqsAdapter>
+      </QueryClientProvider>
+    </ThemeProvider>
+  );
+}

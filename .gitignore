@@ -39,3 +39,14 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# agentic
+.agents
+.aider-desk
+.claude
+.codex
+.impeccable
+CLAUDE.md
+skills-lock.json
+!.env.example
+

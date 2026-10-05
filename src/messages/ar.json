@@ -1,0 +1,375 @@
+{
+  "_status": "draft",
+  "meta": {
+    "title": "Orbit",
+    "titleTemplate": "%s · Orbit",
+    "description": "اعرف أين تظهر علامتك التجارية في Google وإجابات الذكاء الاصطناعي، ودع Orbit يسد الفجوة."
+  },
+  "common": {
+    "close": "إغلاق",
+    "cancel": "إلغاء",
+    "save": "حفظ التغييرات",
+    "retry": "حاول مرة أخرى",
+    "loading": "جارٍ التحميل"
+  },
+  "shared": {
+    "noData": "لا يوجد شيء هنا بعد. ينتهي فحصك الأول خلال {minutes, plural, zero {أقل من دقيقة} one {دقيقة واحدة} two {دقيقتين} few {# دقائق} many {# دقيقة} other {# دقيقة}} تقريبًا.",
+    "engineDown": "تعذّر الوصول إلى {engine} هذه المرة. سنعيد المحاولة في {time}؛ المحركات الأخرى محدّثة.",
+    "publishFailed": "تعذّر النشر على {site}. تحقق من اتصال WordPress ثم أعد المحاولة.",
+    "genericError": "حدث خطأ من جهتنا. حاول مرة أخرى، وإذا تكرر الأمر راسلنا على {email}."
+  },
+  "engines": {
+    "chatgpt": "ChatGPT",
+    "gemini": "Gemini",
+    "perplexity": "Perplexity",
+    "claude": "Claude",
+    "aio": "نظرات عامة بالذكاء الاصطناعي",
+    "all": "كل المحركات",
+    "allMonogram": "ALL"
+  },
+  "delta": {
+    "points": "{value} نقطة",
+    "flat": "بلا تغيير",
+    "improved": "تحسّن بمقدار {value}",
+    "declined": "تراجع بمقدار {value}"
+  },
+  "score": {
+    "label": "{label}: {score} من 100",
+    "emptyLabel": "{label}: لا توجد نتيجة بعد",
+    "ofHundred": "من 100"
+  },
+  "owner": {
+    "orbit": "Orbit",
+    "you": "أنت"
+  },
+  "status": {
+    "live": "مباشر",
+    "published": "منشور",
+    "scheduled": "مجدول",
+    "draft": "مسودة",
+    "needsApproval": "بانتظار الموافقة",
+    "failed": "فشل"
+  },
+  "rank": {
+    "position": "#{position}",
+    "notRanking": "غير مُصنّف"
+  },
+  "kpi": {
+    "ofTotal": " / {total}",
+    "mentionRate": {
+      "label": "معدل الذكر",
+      "note": "ذُكرت في {mentioned} من {answers} إجابة"
+    },
+    "avgAiPosition": {
+      "label": "متوسط الترتيب في الذكاء الاصطناعي",
+      "value": "#{value}",
+      "note": "موقعك عندما تُذكر"
+    },
+    "googleTop10": {
+      "label": "أفضل 10 في Google",
+      "note": "كلمات مفتاحية في الصفحة الأولى"
+    },
+    "aiCitations": {
+      "label": "استشهادات الذكاء الاصطناعي",
+      "note": "إجابات ترتبط بموقعك"
+    }
+  },
+  "charts": {
+    "noValue": "—",
+    "shareAria": "حصة الظهور: {summary}"
+  },
+  "approval": {
+    "approve": "موافقة",
+    "edit": "تعديل",
+    "reject": "رفض",
+    "approved": "تمت الموافقة",
+    "rejected": "مرفوض",
+    "alsoTelegram": "أُرسل أيضًا إلى Telegram",
+    "approvedToast": "تمت الموافقة. سيُجري Orbit التغيير ويخبرك عند نشره.",
+    "rejectedToast": "تم الرفض. لن يُجري Orbit هذا التغيير.",
+    "failedToast": "تعذّر حفظ قرارك. حاول مرة أخرى."
+  },
+  "task": {
+    "eta": "متبقٍ {minutes, plural, one {دقيقة واحدة} two {دقيقتان} few {# دقائق} other {# دقيقة}} تقريبًا",
+    "status": {
+      "waiting": "بانتظارك",
+      "working": "قيد التنفيذ",
+      "done": "تم",
+      "failed": "فشل"
+    }
+  },
+  "agent": {
+    "fromTelegram": "من Telegram",
+    "orbitSaid": "Orbit:",
+    "today": "اليوم",
+    "yesterday": "أمس",
+    "dayDividerWithNote": "{day} · {note}",
+    "sameAsTelegram": "نفس المحادثة على Telegram",
+    "panelTitle": "اسأل Orbit",
+    "panelDescription": "نفس المحادثة على Telegram.",
+    "openFull": "فتح المحادثة كاملة",
+    "loadError": "تعذّر تحميل المحادثة. حاول بعد قليل.",
+    "composerLabel": "رسالة إلى Orbit",
+    "composerPlaceholder": "اسأل عن الترتيب أو المنافسين أو المحتوى",
+    "send": "إرسال"
+  },
+  "forms": {
+    "readOnly": "للقراءة فقط",
+    "protocol": "https://",
+    "domainPlaceholder": "yourbrand.com"
+  },
+  "table": {
+    "columns": "الأعمدة",
+    "showColumns": "إظهار الأعمدة",
+    "exportCsv": "تصدير CSV",
+    "empty": "لا توجد صفوف."
+  },
+  "dev": {
+    "title": "المكوّنات",
+    "heading": "مكوّنات Ink and Signal",
+    "intro": "كل مكوّنات المرحلة الأولى بكل حالاتها. بدّل السمة والاتجاه واللغة من الأعلى.",
+    "controls": {
+      "theme": "السمة",
+      "light": "فاتح",
+      "dark": "داكن",
+      "system": "النظام",
+      "direction": "الاتجاه",
+      "ltr": "يسار-يمين",
+      "rtl": "يمين-يسار",
+      "language": "اللغة"
+    },
+    "nav": {
+      "label": "الأقسام",
+      "tokens": "الألوان",
+      "type": "الخطوط",
+      "buttons": "الأزرار",
+      "forms": "الحقول",
+      "display": "عرض البيانات",
+      "charts": "الرسوم البيانية",
+      "agent": "الوكيل",
+      "table": "جدول البيانات",
+      "overlays": "النوافذ المنبثقة"
+    },
+    "tokens": {
+      "title": "رموز الألوان",
+      "description": "كل الألوان تأتي من هذه الرموز. لون Signal يُستخدم كتعبئة فقط."
+    },
+    "type": {
+      "title": "الخطوط",
+      "description": "Geist للواجهة، وGeist Mono بأرقام جدولية لكل رقم مُقارَن.",
+      "monoSample": "/shop/yirgacheffe",
+      "samples": {
+        "display": "كن أنت الإجابة.",
+        "h1": "صباح الخير يا آدا",
+        "h2": "ما مقدار ما يفعله Orbit وحده؟",
+        "h3": "الظهور مقارنة بالمنافسين",
+        "bodyLg": "يتجاهلك Claude غالبًا لأنه لا توجد لديك صفحة عن مصادر حبوبك.",
+        "body": "هكذا ظهرت Northwind Roasters في Google وإجابات الذكاء الاصطناعي هذا الشهر.",
+        "small": "ذُكرت في 113 من 250 إجابة",
+        "caption": "آخر فحص اليوم، 08:40",
+        "overline": "متوسط الترتيب"
+      }
+    },
+    "buttons": {
+      "title": "الأزرار",
+      "description": "زر أساسي واحد في كل شاشة. الإجراءات الخطرة تتطلب تأكيدًا دائمًا.",
+      "variant": "النوع",
+      "disabled": "معطّل",
+      "loading": "تحميل",
+      "size": {
+        "sm": "صغير 32",
+        "md": "افتراضي 40",
+        "lg": "كبير 48"
+      },
+      "label": {
+        "primary": "فحص جديد",
+        "secondary": "تصدير التقرير",
+        "ghost": "رفض",
+        "agent": "اسأل Orbit",
+        "destructive": "حذف مساحة العمل",
+        "link": "التفاصيل"
+      },
+      "iconButtons": "أزرار الأيقونات",
+      "withIcon": "مع أيقونات",
+      "runScan": "فحص جديد",
+      "continue": "متابعة",
+      "aria": {
+        "settings": "الإعدادات",
+        "add": "إضافة منافس",
+        "next": "الخطوة التالية"
+      }
+    },
+    "forms": {
+      "title": "الحقول",
+      "description": "الحقول بارتفاع 40 بكسل (48 في الإعداد الأولي). التسمية في الأعلى والرسالة في الأسفل.",
+      "brandName": "اسم العلامة التجارية",
+      "brandNameHelper": "يظهر في التقارير ومسودات التواصل.",
+      "workspaceName": "اسم مساحة العمل",
+      "workspacePlaceholder": "فريق Northwind",
+      "required": "أدخل اسمًا للمتابعة.",
+      "email": "البريد الإلكتروني",
+      "changeEmail": "تغيير البريد",
+      "website": "الموقع",
+      "websiteHelper": "نحذف https:// والشرطات المائلة الأخيرة أثناء الكتابة.",
+      "websiteLarge": "الموقع (حجم الإعداد الأولي)",
+      "crawled": "تمت قراءة {pages} صفحة",
+      "market": "السوق الرئيسية",
+      "markets": {
+        "us": "الولايات المتحدة",
+        "gb": "المملكة المتحدة",
+        "de": "ألمانيا"
+      },
+      "voice": "ملاحظات أسلوب العلامة",
+      "voiceHelper": "يتّبع Orbit هذه الملاحظات في كل مسودة.",
+      "voiceSample": "دافئ وبسيط. تحدّث عن المزارع وتواريخ التحميص، لا عن الفخامة.",
+      "disabledField": "الحد الأقصى للمقالات شهريًا",
+      "checkboxes": "مربعات الاختيار",
+      "notifyTelegram": "أبلغني على Telegram",
+      "notifyEmail": "أرسل لي التقرير الأسبوعي",
+      "someSelected": "تحديد كل الكلمات المفتاحية",
+      "switches": "مفاتيح التبديل",
+      "darkMode": "الوضع الداكن",
+      "disabledSwitch": "طيار آلي كامل",
+      "radios": "مجموعة اختيار",
+      "autopilot": {
+        "ask": "اسألني أولًا",
+        "content": "نشر المحتوى تلقائيًا",
+        "full": "طيار آلي كامل"
+      },
+      "tabs": "علامات التبويب",
+      "range": "النطاق الزمني",
+      "ranges": {
+        "7d": "7 أيام",
+        "30d": "30 يومًا",
+        "90d": "90 يومًا"
+      },
+      "views": "عروض الكلمات المفتاحية",
+      "viewTabs": {
+        "all": "الكل {count}",
+        "improved": "تحسّن {count}",
+        "declined": "تراجع {count}"
+      }
+    },
+    "display": {
+      "title": "عرض البيانات",
+      "description": "حلقات النتيجة: 0–39 خطر، 40–69 تحذير، 70–100 جيد. التغييرات تعرض دائمًا سهمًا وإشارة ولونًا.",
+      "scoreRings": "حلقات النتيجة",
+      "scoreLabel": "نتيجة الظهور في الذكاء الاصطناعي",
+      "deltas": "شارات التغيير",
+      "statuses": "شارات الحالة",
+      "owners": "شارات المسؤول",
+      "ranks": "خلايا الترتيب",
+      "engines": "رموز المحركات",
+      "engineChips": "مرشحات المحركات",
+      "kpiCards": "بطاقات المؤشرات",
+      "refreshData": "تحديث البيانات",
+      "emptyTitle": "فحصك الأول قيد التشغيل",
+      "emptyDescription": "لا يوجد شيء هنا بعد. ينتهي فحصك الأول خلال {minutes, plural, zero {أقل من دقيقة} one {دقيقة واحدة} two {دقيقتين} few {# دقائق} many {# دقيقة} other {# دقيقة}} تقريبًا.",
+      "emptyAction": "عرض تقدم الفحص",
+      "errorTitle": "محرك واحد لم يستجب",
+      "errorDescription": "تعذّر الوصول إلى {engine} هذه المرة. سنعيد المحاولة في {time}؛ المحركات الأخرى محدّثة.",
+      "skeletons": "هيكل التحميل",
+      "progress": "التقدم"
+    },
+    "charts": {
+      "title": "الرسوم البيانية",
+      "description": "الألوان من متغيرات CSS، لذا تتغير مع السمة دون إعادة تحميل. علامتك دائمًا الأولى والأزرق والأعرض.",
+      "trendTitle": "الظهور مقارنة بالمنافسين",
+      "trendDescription": "نتيجة الظهور اليومية",
+      "trendAria": "ارتفع ظهورك من 48 إلى 64؛ وبقيت Bluebird Coffee متقدمة عند 72.",
+      "range": "النطاق الزمني",
+      "ranges": {
+        "7d": "7 أيام",
+        "30d": "30 يومًا",
+        "90d": "90 يومًا"
+      },
+      "sovTitle": "حصة الظهور",
+      "sovDescription": "الإشارات في كل إجابات الذكاء الاصطناعي",
+      "distributionTitle": "توزيع المراكز",
+      "bands": {
+        "top3": "1–3",
+        "top10": "4–10",
+        "top20": "11–20",
+        "top50": "21–50",
+        "top100": "51–100",
+        "none": "غير مُصنّف"
+      },
+      "sparklines": "خطوط الاتجاه"
+    },
+    "agent": {
+      "title": "الوكيل",
+      "description": "الرسائل وبوابة الموافقة وصفوف المهام المباشرة.",
+      "sameAsTelegram": "نفس المحادثة على Telegram",
+      "approvalCard": "بطاقة موافقة (معلّقة)",
+      "approvalDone": "بطاقة موافقة (محسومة)",
+      "doneTitle": "تحديث \"طريقة تحضير القهوة بالتقطير\"",
+      "editClicked": "يُفتح المحرر هنا في المرحلة 5.",
+      "taskRows": "صفوف المهام",
+      "liveTask": "كتابة \"كيف نختار مصادر حبوبنا\"",
+      "waitingTask": "الموافقة على تغيير المخطط",
+      "failedTask": "النشر على WordPress",
+      "doneTask": "أُعيد فحص 50 سؤالًا عبر 5 محركات",
+      "openPanel": "فتح لوحة الوكيل",
+      "shortcut": "⌘J"
+    },
+    "table": {
+      "title": "جدول البيانات",
+      "description": "ترويسة ثابتة وأرقام محاذاة للنهاية واختيار الأعمدة وتصدير CSV.",
+      "caption": "الكلمات المفتاحية المتتبَّعة",
+      "toggleLoading": "حالة التحميل",
+      "toggleEmpty": "حالة فارغة",
+      "emptyTitle": "لا توجد كلمات مفتاحية بعد",
+      "emptyDescription": "أضف الكلمات التي يبحث عنها عملاؤك وسيفحصها Orbit يوميًا.",
+      "emptyAction": "إضافة كلمات مفتاحية",
+      "cols": {
+        "keyword": "الكلمة المفتاحية",
+        "position": "المركز",
+        "volume": "حجم البحث",
+        "difficulty": "الصعوبة",
+        "url": "الرابط",
+        "status": "الحالة"
+      }
+    },
+    "overlays": {
+      "title": "النوافذ المنبثقة",
+      "description": "القوائم وعلامات التبويب بسرعة 200 مللي ثانية، واللوحات الجانبية 320 مللي ثانية.",
+      "dialog": "نافذة حوار",
+      "dialogTitle": "إنشاء مساحة عمل",
+      "dialogDescription": "لكل مساحة عمل فريقها وفوترتها وعلاماتها التجارية.",
+      "workspaceName": "اسم مساحة العمل",
+      "workspacePlaceholder": "فريق Northwind",
+      "cancel": "إلغاء",
+      "create": "إنشاء مساحة العمل",
+      "destructive": "تأكيد خطِر",
+      "alertTitle": "إزالة Sam Rivera؟",
+      "alertDescription": "سيفقد Sam الوصول فورًا. يمكنك دعوته مرة أخرى لاحقًا.",
+      "remove": "إزالة العضو",
+      "sheet": "لوحة جانبية",
+      "sheetTitle": "المساعدة والدعم",
+      "sheetDescription": "المستندات والأدلة وطريقة للتواصل معنا.",
+      "sheetBody": "يصل محتوى الدعم في المرحلة 6.",
+      "popover": "نافذة منبثقة",
+      "popoverTitle": "الأرصدة",
+      "popoverDescription": "متبقٍ 1,380 من 2,000 هذا الشهر.",
+      "tooltip": "تلميح",
+      "tooltipBody": "حصة من 50 سؤالًا متتبَّعًا",
+      "menu": "قائمة",
+      "menuLabel": "الحساب",
+      "menuSettings": "الإعدادات",
+      "menuShortcut": "⌘,",
+      "menuMore": "خيارات أخرى",
+      "menuSignOut": "تسجيل الخروج",
+      "toast": "إشعار",
+      "toastBody": "تم التبديل إلى فريق Northwind",
+      "toastDescription": "عرض Northwind Roasters.",
+      "toastError": "تعذّر النشر على WordPress. تحقق من الاتصال ثم أعد المحاولة.",
+      "toastErrorButton": "إشعار خطأ",
+      "command": "قائمة الأوامر",
+      "commandDescription": "ابحث في الشاشات ونفّذ الإجراءات",
+      "commandPlaceholder": "ابحث أو اسأل Orbit",
+      "commandEmpty": "لا نتائج. اضغط Enter لسؤال Orbit.",
+      "commandGroup": "الإجراءات",
+      "commandScan": "فحص جديد"
+    }
+  }
+}

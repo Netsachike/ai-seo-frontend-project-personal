@@ -1,0 +1,6 @@
+public/mockServiceWorker.js
+src/lib/api/schema.d.ts
+.next
+node_modules
+package-lock.json
+
