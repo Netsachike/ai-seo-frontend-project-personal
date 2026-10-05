@@ -1,58 +1,60 @@
 import { create } from "zustand";
-import { persist, createJSONStorage } from "zustand/middleware";
 
 import { readClientCookie, setClientCookie } from "@/lib/cookies";
 
 export const WORKSPACE_COOKIE = "orbit_ws";
 export const BRAND_COOKIE = "orbit_brand";
+/** "1" when the sidebar is collapsed. A cookie so the server renders the right width. */
+export const SIDEBAR_COOKIE = "orbit_sidebar";
 
 /**
  * UI state only. Server data lives in React Query; URL state lives in nuqs.
- * The active workspace and brand are also mirrored to cookies so proxy.ts and
- * Server Components know them on the next request.
+ * The active workspace, brand and sidebar width are mirrored to cookies so
+ * proxy.ts and Server Components know them on the next request.
  */
 type UiState = {
-  sidebarCollapsed: boolean;
+  /** null until the user toggles it; the shell then falls back to the server's cookie value. */
+  sidebarCollapsed: boolean | null;
   agentPanelOpen: boolean;
+  /** Composer text shared by the agent panel and /agent, so ⌘K can hand a question over. */
+  agentDraft: string;
   commandOpen: boolean;
   workspaceId: string | null;
   brandSlug: string | null;
   setSidebarCollapsed: (collapsed: boolean) => void;
-  toggleSidebar: () => void;
   setAgentPanelOpen: (open: boolean) => void;
+  setAgentDraft: (draft: string) => void;
+  /** Opens the agent panel, optionally with a question ready to send. */
+  askOrbit: (draft?: string) => void;
   setCommandOpen: (open: boolean) => void;
   setWorkspace: (id: string) => void;
   setBrand: (slug: string) => void;
 };
 
-export const useUiStore = create<UiState>()(
-  persist(
-    (set) => ({
-      sidebarCollapsed: false,
-      agentPanelOpen: false,
-      commandOpen: false,
-      workspaceId: readClientCookie(WORKSPACE_COOKIE) ?? null,
-      brandSlug: readClientCookie(BRAND_COOKIE) ?? null,
-      setSidebarCollapsed: (sidebarCollapsed) => set({ sidebarCollapsed }),
-      toggleSidebar: () => set((s) => ({ sidebarCollapsed: !s.sidebarCollapsed })),
-      setAgentPanelOpen: (agentPanelOpen) => set({ agentPanelOpen }),
-      setCommandOpen: (commandOpen) => set({ commandOpen }),
-      setWorkspace: (workspaceId) => {
-        setClientCookie(WORKSPACE_COOKIE, workspaceId);
-        set({ workspaceId });
-      },
-      setBrand: (brandSlug) => {
-        setClientCookie(BRAND_COOKIE, brandSlug);
-        set({ brandSlug });
-      },
-    }),
-    {
-      name: "orbit-ui",
-      storage: createJSONStorage(() => localStorage),
-      partialize: (s) => ({ sidebarCollapsed: s.sidebarCollapsed }),
-    },
-  ),
-);
+export const useUiStore = create<UiState>()((set) => ({
+  sidebarCollapsed: null,
+  agentPanelOpen: false,
+  agentDraft: "",
+  commandOpen: false,
+  workspaceId: readClientCookie(WORKSPACE_COOKIE) ?? null,
+  brandSlug: readClientCookie(BRAND_COOKIE) ?? null,
+  setSidebarCollapsed: (sidebarCollapsed) => {
+    setClientCookie(SIDEBAR_COOKIE, sidebarCollapsed ? "1" : "0");
+    set({ sidebarCollapsed });
+  },
+  setAgentPanelOpen: (agentPanelOpen) => set({ agentPanelOpen }),
+  setAgentDraft: (agentDraft) => set({ agentDraft }),
+  askOrbit: (draft) => set((s) => ({ agentPanelOpen: true, agentDraft: draft ?? s.agentDraft })),
+  setCommandOpen: (commandOpen) => set({ commandOpen }),
+  setWorkspace: (workspaceId) => {
+    setClientCookie(WORKSPACE_COOKIE, workspaceId);
+    set({ workspaceId });
+  },
+  setBrand: (brandSlug) => {
+    setClientCookie(BRAND_COOKIE, brandSlug);
+    set({ brandSlug });
+  },
+}));
 
 /** Read outside React (API client middleware). */
 export function getActiveWorkspaceId(): string | null {

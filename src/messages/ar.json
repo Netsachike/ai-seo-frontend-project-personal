@@ -116,7 +116,16 @@
   "forms": {
     "readOnly": "للقراءة فقط",
     "protocol": "https://",
-    "domainPlaceholder": "yourbrand.com"
+    "domainPlaceholder": "yourbrand.com",
+    "showPassword": "إظهار كلمة المرور",
+    "hidePassword": "إخفاء كلمة المرور",
+    "passwordHints": {
+      "length": "8 أحرف على الأقل",
+      "number": "رقم واحد على الأقل",
+      "mixedCase": "أحرف كبيرة وصغيرة (مستحسن)",
+      "met": "مكتمل",
+      "notMet": "غير مكتمل"
+    }
   },
   "table": {
     "columns": "الأعمدة",
@@ -370,6 +379,266 @@
       "commandEmpty": "لا نتائج. اضغط Enter لسؤال Orbit.",
       "commandGroup": "الإجراءات",
       "commandScan": "فحص جديد"
+    }
+  },
+  "roles": {
+    "owner": "المالك",
+    "admin": "مسؤول",
+    "member": "عضو",
+    "viewer": "مُشاهد"
+  },
+  "shell": {
+    "skipToContent": "انتقل إلى المحتوى",
+    "mobileNavDescription": "الشاشات ومساحة العمل والحساب",
+    "nav": {
+      "label": "الرئيسية",
+      "soon": "قريبًا",
+      "labelSoon": "{label} (قريبًا)",
+      "groups": {
+        "insights": "الرؤى",
+        "grow": "النمو",
+        "workspace": "مساحة العمل"
+      },
+      "items": {
+        "overview": "نظرة عامة",
+        "visibility": "الظهور في الذكاء الاصطناعي",
+        "rankings": "الترتيب",
+        "competitors": "المنافسون",
+        "audit": "تدقيق الموقع",
+        "actions": "خطة العمل",
+        "content": "المحتوى",
+        "social": "التواصل الاجتماعي",
+        "agent": "اسأل Orbit",
+        "integrations": "التكاملات",
+        "reports": "التقارير",
+        "settings": "الإعدادات"
+      }
+    },
+    "sidebar": {
+      "expand": "توسيع الشريط الجانبي",
+      "collapse": "طي الشريط الجانبي",
+      "telegramTitle": "Orbit على تيليجرام",
+      "telegramConnected": "متصل باسم ‎@{handle}. تصل الموافقات إلى كليهما.",
+      "telegramConnectedRich": "متصل باسم <mono>@{handle}</mono>. تصل الموافقات إلى كليهما.",
+      "telegramOff": "غير متصل. اتصل للموافقة على العمل من هاتفك.",
+      "upgrade": "ترقية الخطة",
+      "userLine": "{role} · {plan}",
+      "manage": "إدارة",
+      "manageAria": "{name}: إدارة الخطة والفوترة"
+    },
+    "topbar": {
+      "openNav": "فتح التنقل",
+      "search": "ابحث أو اسأل Orbit",
+      "askOrbit": "اسأل Orbit"
+    },
+    "switcher": {
+      "workspaceTrigger": "مساحة العمل: {name}. تبديل مساحة العمل",
+      "brandTrigger": "العلامة التجارية: {name}. تبديل العلامة",
+      "switchWorkspace": "تبديل مساحة العمل",
+      "switchBrand": "تبديل العلامة التجارية",
+      "searchWorkspaces": "ابحث في مساحات العمل",
+      "searchBrands": "ابحث في العلامات التجارية",
+      "noMatches": "لا توجد نتائج.",
+      "viewAllWorkspaces": "عرض كل مساحات العمل",
+      "createWorkspace": "إنشاء مساحة عمل",
+      "addBrand": "إضافة علامة تجارية",
+      "switchedWorkspace": "تم التبديل إلى {name}",
+      "switchedBrand": "يتم الآن عرض {name}"
+    },
+    "createWorkspace": {
+      "title": "إنشاء مساحة عمل",
+      "description": "لكل مساحة عمل فريقها وفوترتها وعلاماتها التجارية.",
+      "name": "اسم مساحة العمل",
+      "helper": "عادةً اسم شركتك أو عميلك.",
+      "required": "أدخل اسمًا للمتابعة.",
+      "tooLong": "اجعله أقل من 80 حرفًا.",
+      "failed": "تعذّر إنشاء مساحة العمل. حاول مرة أخرى.",
+      "submit": "إنشاء مساحة عمل"
+    },
+    "credits": {
+      "label": "الأرصدة",
+      "aria": "الأرصدة: تبقّى {remaining} من {total}. فتح الفوترة",
+      "summary": "تبقّى {remaining} من {total} رصيد",
+      "breakdown": {
+        "scans": "عمليات الفحص",
+        "articles": "المقالات",
+        "prompts": "الأسئلة المتتبَّعة"
+      },
+      "renews": "يتجدد في {date}"
+    },
+    "language": {
+      "trigger": "اللغة: {language}. تغيير اللغة",
+      "search": "ابحث عن لغة",
+      "empty": "لا توجد لغة مطابقة.",
+      "heading": "لغة الواجهة"
+    },
+    "theme": {
+      "toLight": "التبديل إلى الوضع الفاتح",
+      "toDark": "التبديل إلى الوضع الداكن",
+      "light": "فاتح",
+      "dark": "داكن",
+      "system": "النظام"
+    },
+    "notifications": {
+      "trigger": "{count, plural, =0 {الإشعارات} other {الإشعارات، # غير مقروءة}}",
+      "title": "الإشعارات",
+      "markAll": "تعليم الكل كمقروء",
+      "error": "تعذّر تحميل الإشعارات. حاول بعد قليل.",
+      "emptyTitle": "لا جديد لديك",
+      "emptyDescription": "تظهر هنا الموافقات وعمليات الفحص المكتملة ودعوات الفريق.",
+      "unread": "غير مقروء",
+      "kinds": {
+        "approvalWaiting": "يحتاج Orbit إلى موافقتك: {title}",
+        "agentEvent": "نشر Orbit ‏«{title}» على {site}",
+        "scanFinished": "اكتمل الفحص: {gained, plural, one {إشارة جديدة واحدة} other {# إشارات جديدة}} على {engine}",
+        "teamInvite": "قبل {name} دعوتك"
+      }
+    },
+    "profile": {
+      "trigger": "قائمة حساب {name}",
+      "plan": "خطة {plan}",
+      "profile": "إعدادات الملف الشخصي",
+      "billing": "الأرصدة والفوترة",
+      "team": "أعضاء الفريق",
+      "darkMode": "الوضع الداكن",
+      "language": "اللغة",
+      "help": "المساعدة والدعم",
+      "feedback": "إرسال ملاحظات",
+      "signOut": "تسجيل الخروج"
+    },
+    "command": {
+      "title": "قائمة الأوامر",
+      "description": "انتقل إلى شاشة، أو بدّل مساحة العمل أو العلامة أو اللغة أو المظهر، أو اسأل Orbit.",
+      "placeholder": "ابحث أو اسأل Orbit",
+      "empty": "لا توجد نتائج. اضغط Enter لسؤال Orbit.",
+      "askGroup": "اسأل Orbit",
+      "ask": "اسأل Orbit: «{question}»",
+      "brands": "العلامات التجارية",
+      "workspaces": "مساحات العمل",
+      "switchTo": "التبديل إلى {name}",
+      "theme": "المظهر",
+      "themeItem": "المظهر: {theme}",
+      "language": "اللغة"
+    },
+    "help": {
+      "title": "المساعدة والدعم",
+      "description": "أدلة، وطريقة للتواصل مع الفريق.",
+      "docsTitle": "الأدلة",
+      "docs": {
+        "gettingStarted": "البدء مع Orbit",
+        "visibility": "كيف يُقاس الظهور في الذكاء الاصطناعي",
+        "approvals": "الموافقات والتشغيل التلقائي",
+        "telegram": "استخدام Orbit على تيليجرام"
+      },
+      "ticketTitle": "إرسال تذكرة",
+      "ticketDescription": "نرد عبر البريد الإلكتروني، عادةً خلال يوم عمل واحد.",
+      "subject": "الموضوع",
+      "message": "ما الذي يحدث؟",
+      "messageHelper": "اذكر الصفحة وما كنت تتوقع رؤيته.",
+      "submit": "إرسال التذكرة",
+      "subjectRequired": "أضف موضوعًا قصيرًا.",
+      "messageRequired": "أخبرنا بما يحدث.",
+      "sent": "تم إرسال التذكرة. سنرد عبر البريد الإلكتروني."
+    },
+    "feedback": {
+      "title": "إرسال ملاحظات",
+      "description": "تصل مباشرة إلى فريق المنتج.",
+      "type": "النوع",
+      "types": {
+        "idea": "فكرة",
+        "bug": "خطأ",
+        "other": "أخرى"
+      },
+      "message": "الرسالة",
+      "placeholders": {
+        "idea": "ما الذي سيجعل Orbit أكثر فائدة؟",
+        "bug": "ماذا حدث، وماذا كنت تتوقع؟",
+        "other": "بماذا تفكر؟"
+      },
+      "submit": "إرسال الملاحظات",
+      "required": "اكتب رسالة قبل الإرسال.",
+      "sent": "شكرًا. تم إرسال ملاحظاتك."
+    },
+    "placeholder": {
+      "title": "هذه الشاشة قادمة",
+      "description": "تُبنى في مرحلة لاحقة من النسخة الأولى. استخدم الشريط الجانبي للتجول."
+    }
+  },
+  "auth": {
+    "google": "المتابعة باستخدام Google",
+    "or": "أو",
+    "layout": {
+      "home": "الصفحة الرئيسية لـ Orbit",
+      "company": "[اسم الشركة]",
+      "terms": "الشروط",
+      "privacy": "الخصوصية"
+    },
+    "panel": {
+      "label": "عن Orbit",
+      "overline": "Google + بحث الذكاء الاصطناعي",
+      "headline": "كن أنت الإجابة.",
+      "body": "اعرف ترتيبك في Google وChatGPT وClaude وGemini وPerplexity. ثم دع Orbit يكتب ويصلح وينشر ما يسد الفجوة.",
+      "question": "أفضل اشتراك قهوة في الولايات المتحدة",
+      "answer": "أفضل الخيارات الآن: <mark>علامتك التجارية</mark> للقهوة أحادية المصدر، ثم محمصتان أكبر للخلطات.",
+      "mentioned": "▲ مذكور في 4 من 5 محركات",
+      "rankBadge": "#1 على Gemini"
+    },
+    "signIn": {
+      "metaTitle": "تسجيل الدخول",
+      "title": "مرحبًا بعودتك",
+      "description": "سجّل الدخول لترى ترتيب علامتك اليوم.",
+      "email": "البريد الإلكتروني للعمل",
+      "password": "كلمة المرور",
+      "forgot": "نسيت كلمة المرور؟",
+      "submit": "تسجيل الدخول",
+      "noAccount": "جديد على Orbit؟ <link>أنشئ حسابًا</link>"
+    },
+    "signUp": {
+      "metaTitle": "إنشاء حساب",
+      "title": "كن أنت الإجابة",
+      "description": "تتبّع علامتك في Google وChatGPT وClaude وGemini وPerplexity، ودع وكيلًا ينجز العمل.",
+      "name": "الاسم الكامل",
+      "email": "البريد الإلكتروني للعمل",
+      "password": "كلمة المرور",
+      "workspace": "اسم الشركة أو الفريق",
+      "workspaceHelper": "يصبح هذا أول مساحة عمل لك. يمكنك تغيير اسمها لاحقًا.",
+      "submit": "إنشاء حساب",
+      "consent": "بإنشاء حساب، فإنك توافق على <terms>الشروط</terms> و<privacy>سياسة الخصوصية</privacy>.",
+      "haveAccount": "لديك حساب بالفعل؟ <link>سجّل الدخول</link>"
+    },
+    "forgot": {
+      "metaTitle": "إعادة تعيين كلمة المرور",
+      "title": "أعد تعيين كلمة المرور",
+      "description": "أدخل بريدك الإلكتروني للعمل وسنرسل لك رمزًا من 6 أرقام.",
+      "email": "البريد الإلكتروني للعمل",
+      "submit": "إرسال الرمز",
+      "back": "العودة إلى تسجيل الدخول"
+    },
+    "verify": {
+      "metaTitle": "أدخل الرمز",
+      "title": "تحقق من بريدك الإلكتروني",
+      "titleReset": "اختر كلمة مرور جديدة",
+      "description": "أرسلنا رمزًا من 6 أرقام إلى <strong>{email}</strong>. تنتهي صلاحيته خلال 10 دقائق.",
+      "code": "رمز من 6 أرقام",
+      "newPassword": "كلمة المرور الجديدة",
+      "demoHint": "نسخة معاينة: استخدم الرمز 123456.",
+      "submit": "تأكيد البريد الإلكتروني",
+      "submitReset": "حفظ كلمة المرور وتسجيل الدخول",
+      "resendIn": "إرسال رمز جديد بعد {seconds} ث",
+      "resend": "إرسال رمز جديد",
+      "resent": "أرسلنا رمزًا جديدًا إلى {email}.",
+      "wrongEmail": "استخدم بريدًا إلكترونيًا آخر"
+    },
+    "errors": {
+      "emailInvalid": "أدخل بريدًا إلكترونيًا صالحًا، مثل you@company.com.",
+      "passwordRequired": "أدخل كلمة المرور.",
+      "invalidCredentials": "البريد الإلكتروني وكلمة المرور غير متطابقين. حاول مرة أخرى أو أعد تعيين كلمة المرور.",
+      "nameRequired": "أدخل اسمك.",
+      "tooLong": "اجعله أقل من 80 حرفًا.",
+      "passwordWeak": "استخدم 8 أحرف على الأقل، منها رقم.",
+      "workspaceRequired": "أدخل اسم الشركة أو الفريق.",
+      "codeIncomplete": "أدخل الأرقام الستة كلها.",
+      "codeInvalid": "الرمز غير مطابق. تحقق من أحدث رسالة أو اطلب رمزًا جديدًا."
     }
   }
 }

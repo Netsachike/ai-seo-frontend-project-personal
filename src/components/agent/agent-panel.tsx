@@ -115,7 +115,8 @@ export function AgentThreadView({ workspaceId, dense = false }: { workspaceId: s
   const t = useTranslations("agent");
   const thread = useAgentThread(workspaceId);
   const send = useSendAgentMessage(workspaceId);
-  const [draft, setDraft] = React.useState("");
+  const draft = useUiStore((s) => s.agentDraft);
+  const setDraft = useUiStore((s) => s.setAgentDraft);
   const endRef = React.useRef<HTMLDivElement>(null);
   const count = thread.data?.messages.length ?? 0;
 

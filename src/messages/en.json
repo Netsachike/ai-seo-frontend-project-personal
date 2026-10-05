@@ -115,7 +115,16 @@
   "forms": {
     "readOnly": "Read only",
     "protocol": "https://",
-    "domainPlaceholder": "yourbrand.com"
+    "domainPlaceholder": "yourbrand.com",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "passwordHints": {
+      "length": "At least 8 characters",
+      "number": "At least one number",
+      "mixedCase": "Upper and lower case letters (recommended)",
+      "met": "done",
+      "notMet": "not yet"
+    }
   },
   "table": {
     "columns": "Columns",
@@ -369,6 +378,276 @@
       "commandEmpty": "No matches. Press Enter to ask Orbit.",
       "commandGroup": "Actions",
       "commandScan": "Run new scan"
+    }
+  },
+  "roles": {
+    "owner": "Owner",
+    "admin": "Admin",
+    "member": "Member",
+    "viewer": "Viewer"
+  },
+  "shell": {
+    "skipToContent": "Skip to content",
+    "mobileNavDescription": "Screens, workspace and account",
+    "nav": {
+      "label": "Main",
+      "soon": "Soon",
+      "labelSoon": "{label} (coming soon)",
+      "groups": {
+        "insights": "Insights",
+        "grow": "Grow",
+        "workspace": "Workspace"
+      },
+      "items": {
+        "overview": "Overview",
+        "visibility": "AI visibility",
+        "rankings": "Rankings",
+        "competitors": "Competitors",
+        "audit": "Site audit",
+        "actions": "Action plan",
+        "content": "Content",
+        "social": "Social",
+        "agent": "Ask Orbit",
+        "integrations": "Integrations",
+        "reports": "Reports",
+        "settings": "Settings"
+      }
+    },
+    "sidebar": {
+      "expand": "Expand sidebar",
+      "collapse": "Collapse sidebar",
+      "telegramTitle": "Orbit on Telegram",
+      "telegramConnected": "Connected as @{handle}. Approvals go to both.",
+      "telegramConnectedRich": "Connected as <mono>@{handle}</mono>. Approvals go to both.",
+      "telegramOff": "Not connected. Connect to approve work from your phone.",
+      "upgrade": "Upgrade plan",
+      "userLine": "{role} · {plan}",
+      "manage": "Manage",
+      "manageAria": "{name}: manage plan and billing"
+    },
+    "topbar": {
+      "openNav": "Open navigation",
+      "search": "Search or ask Orbit",
+      "askOrbit": "Ask Orbit"
+    },
+    "shortcut": {
+      "mac": "⌘{key}",
+      "other": "Ctrl {key}"
+    },
+    "switcher": {
+      "workspaceTrigger": "Workspace: {name}. Switch workspace",
+      "brandTrigger": "Brand: {name}. Switch brand",
+      "switchWorkspace": "Switch workspace",
+      "switchBrand": "Switch brand",
+      "searchWorkspaces": "Search workspaces",
+      "searchBrands": "Search brands",
+      "noMatches": "No matches.",
+      "viewAllWorkspaces": "View all workspaces",
+      "createWorkspace": "Create workspace",
+      "addBrand": "Add brand",
+      "switchedWorkspace": "Switched to {name}",
+      "switchedBrand": "Now showing {name}"
+    },
+    "createWorkspace": {
+      "title": "Create workspace",
+      "description": "A workspace has its own team, billing and brands.",
+      "name": "Workspace name",
+      "helper": "Usually your company or client's name.",
+      "placeholder": "Northwind Team",
+      "required": "Enter a name to continue.",
+      "tooLong": "Keep it under 80 characters.",
+      "failed": "We couldn't create the workspace. Try again.",
+      "submit": "Create workspace"
+    },
+    "credits": {
+      "label": "Credits",
+      "aria": "Credits: {remaining} of {total} left. Open billing",
+      "summary": "{remaining} of {total} credits left",
+      "breakdown": {
+        "scans": "Scans",
+        "articles": "Articles",
+        "prompts": "Tracked questions"
+      },
+      "meter": "{used} / {limit}",
+      "renews": "Renews {date}"
+    },
+    "language": {
+      "trigger": "Language: {language}. Change language",
+      "search": "Search languages",
+      "empty": "No language matches.",
+      "heading": "Interface language"
+    },
+    "theme": {
+      "toLight": "Switch to light mode",
+      "toDark": "Switch to dark mode",
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
+    },
+    "notifications": {
+      "trigger": "{count, plural, =0 {Notifications} one {Notifications, # unread} other {Notifications, # unread}}",
+      "title": "Notifications",
+      "markAll": "Mark all as read",
+      "error": "We couldn't load notifications. Try again in a moment.",
+      "emptyTitle": "You're all caught up",
+      "emptyDescription": "Approvals, finished scans and team invites show up here.",
+      "unread": "Unread",
+      "kinds": {
+        "approvalWaiting": "Orbit needs your approval: {title}",
+        "agentEvent": "Orbit published \"{title}\" to {site}",
+        "scanFinished": "Scan finished: {gained, plural, one {# new mention} other {# new mentions}} on {engine}",
+        "teamInvite": "{name} accepted your invite"
+      }
+    },
+    "profile": {
+      "trigger": "Account menu for {name}",
+      "plan": "{plan} plan",
+      "profile": "Profile settings",
+      "billing": "Credits and billing",
+      "team": "Team members",
+      "darkMode": "Dark mode",
+      "language": "Language",
+      "help": "Help and support",
+      "feedback": "Send feedback",
+      "signOut": "Sign out"
+    },
+    "command": {
+      "title": "Command menu",
+      "description": "Go to a screen, switch workspace, brand, language or theme, or ask Orbit.",
+      "placeholder": "Search or ask Orbit",
+      "empty": "No matches. Press Enter to ask Orbit.",
+      "askGroup": "Ask Orbit",
+      "ask": "Ask Orbit: \"{question}\"",
+      "enter": "↵",
+      "brands": "Brands",
+      "workspaces": "Workspaces",
+      "switchTo": "Switch to {name}",
+      "theme": "Theme",
+      "themeItem": "Theme: {theme}",
+      "language": "Language"
+    },
+    "help": {
+      "title": "Help and support",
+      "description": "Guides, and a way to reach the team.",
+      "docsTitle": "Guides",
+      "docs": {
+        "gettingStarted": "Getting started with Orbit",
+        "visibility": "How AI visibility is measured",
+        "approvals": "Approvals and autopilot",
+        "telegram": "Using Orbit on Telegram"
+      },
+      "ticketTitle": "Submit a ticket",
+      "ticketDescription": "We reply by email, usually within one working day.",
+      "subject": "Subject",
+      "message": "What's happening?",
+      "messageHelper": "Include the page and what you expected to see.",
+      "submit": "Send ticket",
+      "subjectRequired": "Add a short subject.",
+      "messageRequired": "Tell us what's happening.",
+      "sent": "Ticket sent. We'll reply by email."
+    },
+    "feedback": {
+      "title": "Send feedback",
+      "description": "It goes straight to the product team.",
+      "type": "Type",
+      "types": {
+        "idea": "Idea",
+        "bug": "Bug",
+        "other": "Other"
+      },
+      "message": "Message",
+      "placeholders": {
+        "idea": "What would make Orbit more useful?",
+        "bug": "What happened, and what did you expect?",
+        "other": "What's on your mind?"
+      },
+      "submit": "Send feedback",
+      "required": "Write a message before sending.",
+      "sent": "Thanks. Your feedback was sent."
+    },
+    "placeholder": {
+      "title": "This screen is on its way",
+      "description": "It's built in a later phase of the MVP. Use the sidebar to look around."
+    }
+  },
+  "auth": {
+    "google": "Continue with Google",
+    "googleMonogram": "G",
+    "or": "or",
+    "layout": {
+      "home": "Orbit home",
+      "copyright": "© {year} {company}",
+      "company": "[COMPANY NAME]",
+      "terms": "Terms",
+      "privacy": "Privacy"
+    },
+    "panel": {
+      "label": "About Orbit",
+      "overline": "Google + AI search",
+      "headline": "Be the answer.",
+      "body": "See where you rank in Google, ChatGPT, Claude, Gemini and Perplexity. Then let Orbit write, fix and publish what closes the gap.",
+      "question": "best coffee subscription in the US",
+      "answer": "Top picks right now: <mark>Your brand</mark> for small-batch single origins, then two larger roasters for blends.",
+      "mentioned": "▲ Mentioned in 4 of 5 engines",
+      "rankBadge": "#1 on Gemini"
+    },
+    "signIn": {
+      "metaTitle": "Sign in",
+      "title": "Welcome back",
+      "description": "Sign in to see how your brand ranks today.",
+      "email": "Work email",
+      "password": "Password",
+      "forgot": "Forgot password?",
+      "submit": "Sign in",
+      "noAccount": "New to Orbit? <link>Create an account</link>"
+    },
+    "signUp": {
+      "metaTitle": "Create account",
+      "title": "Be the answer",
+      "description": "Track your brand in Google, ChatGPT, Claude, Gemini and Perplexity, and let an agent do the work.",
+      "name": "Full name",
+      "email": "Work email",
+      "password": "Password",
+      "workspace": "Company or team name",
+      "workspaceHelper": "This becomes your first workspace. You can rename it later.",
+      "workspacePlaceholder": "Northwind Team",
+      "submit": "Create account",
+      "consent": "By creating an account you agree to the <terms>Terms</terms> and <privacy>Privacy policy</privacy>.",
+      "haveAccount": "Already have an account? <link>Sign in</link>"
+    },
+    "forgot": {
+      "metaTitle": "Reset password",
+      "title": "Reset your password",
+      "description": "Enter your work email and we'll send you a 6-digit code.",
+      "email": "Work email",
+      "submit": "Send code",
+      "back": "Back to sign in"
+    },
+    "verify": {
+      "metaTitle": "Enter code",
+      "title": "Check your email",
+      "titleReset": "Choose a new password",
+      "description": "We sent a 6-digit code to <strong>{email}</strong>. It expires in 10 minutes.",
+      "code": "6-digit code",
+      "newPassword": "New password",
+      "demoHint": "Preview build: use the code 123456.",
+      "submit": "Verify email",
+      "submitReset": "Save password and sign in",
+      "resendIn": "Send a new code in {seconds}s",
+      "resend": "Send a new code",
+      "resent": "We sent a new code to {email}.",
+      "wrongEmail": "Use a different email"
+    },
+    "errors": {
+      "emailInvalid": "Enter a valid email, like you@company.com.",
+      "passwordRequired": "Enter your password.",
+      "invalidCredentials": "That email and password don't match. Try again or reset your password.",
+      "nameRequired": "Enter your name.",
+      "tooLong": "Keep it under 80 characters.",
+      "passwordWeak": "Use at least 8 characters, including a number.",
+      "workspaceRequired": "Enter a company or team name.",
+      "codeIncomplete": "Enter all 6 digits.",
+      "codeInvalid": "That code doesn't match. Check the latest email or send a new code."
     }
   }
 }
