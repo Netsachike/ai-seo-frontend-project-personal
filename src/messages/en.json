@@ -1,0 +1,1341 @@
+{
+  "meta": {
+    "title": "Orbit",
+    "titleTemplate": "%s · Orbit",
+    "description": "See where your brand ranks in Google and AI answers, and let Orbit close the gap."
+  },
+  "common": {
+    "close": "Close",
+    "cancel": "Cancel",
+    "save": "Save changes",
+    "retry": "Try again",
+    "loading": "Loading"
+  },
+  "shared": {
+    "noData": "Nothing here yet. Your first scan finishes in about {minutes, plural, one {# minute} other {# minutes}}.",
+    "engineDown": "We couldn't reach {engine} this time. We'll retry at {time}; other engines are up to date.",
+    "publishFailed": "We couldn't publish to {site}. Check the WordPress connection, then retry.",
+    "genericError": "Something went wrong on our side. Try again, and if it keeps happening, tell us at {email}.",
+    "errorTitle": "We couldn't load this"
+  },
+  "engines": {
+    "chatgpt": "ChatGPT",
+    "gemini": "Gemini",
+    "perplexity": "Perplexity",
+    "claude": "Claude",
+    "aio": "AI Overviews",
+    "all": "All engines",
+    "allMonogram": "ALL"
+  },
+  "delta": {
+    "points": "{value} pts",
+    "flat": "No change",
+    "improved": "Improved by {value}",
+    "declined": "Declined by {value}"
+  },
+  "score": {
+    "label": "{label}: {score} of 100",
+    "emptyLabel": "{label}: no score yet",
+    "ofHundred": "of 100"
+  },
+  "owner": {
+    "orbit": "Orbit",
+    "you": "You"
+  },
+  "status": {
+    "live": "Live",
+    "published": "Published",
+    "scheduled": "Scheduled",
+    "draft": "Draft",
+    "needsApproval": "Needs approval",
+    "failed": "Failed"
+  },
+  "rank": {
+    "position": "#{position}",
+    "notRanking": "Not ranking"
+  },
+  "kpi": {
+    "ofTotal": " / {total}",
+    "mentionRate": {
+      "label": "Mention rate",
+      "note": "Mentioned in {mentioned} of {answers} AI answers"
+    },
+    "avgAiPosition": {
+      "label": "Avg. AI position",
+      "value": "#{value}",
+      "note": "Where you appear when you are listed"
+    },
+    "googleTop10": {
+      "label": "Google top 10",
+      "note": "Tracked keywords on page one"
+    },
+    "aiCitations": {
+      "label": "AI citations",
+      "note": "Answers that link to your site"
+    }
+  },
+  "charts": {
+    "noValue": "—",
+    "shareAria": "Share of voice: {summary}"
+  },
+  "approval": {
+    "approve": "Approve",
+    "edit": "Edit",
+    "reject": "Reject",
+    "approved": "Approved",
+    "rejected": "Rejected",
+    "alsoTelegram": "Also sent to Telegram",
+    "approvedToast": "Approved. Orbit will make the change and tell you when it's live.",
+    "rejectedToast": "Rejected. Orbit won't make this change.",
+    "failedToast": "We couldn't save your decision. Try again."
+  },
+  "task": {
+    "eta": "About {minutes, plural, one {# min} other {# min}} left",
+    "status": {
+      "waiting": "Waiting for you",
+      "working": "In progress",
+      "done": "Done",
+      "failed": "Failed"
+    }
+  },
+  "agent": {
+    "fromTelegram": "from Telegram",
+    "orbitSaid": "Orbit:",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "dayDividerWithNote": "{day} · {note}",
+    "sameAsTelegram": "same conversation as Telegram",
+    "panelTitle": "Ask Orbit",
+    "panelDescription": "Same conversation as Telegram.",
+    "openFull": "Open full conversation",
+    "loadError": "We couldn't load the conversation. Try again in a moment.",
+    "composerLabel": "Message Orbit",
+    "composerPlaceholder": "Ask about rankings, competitors or content",
+    "send": "Send",
+    "typing": "Orbit is writing a reply"
+  },
+  "forms": {
+    "readOnly": "Read only",
+    "protocol": "https://",
+    "domainPlaceholder": "yourbrand.com",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "passwordHints": {
+      "length": "At least 8 characters",
+      "number": "At least one number",
+      "mixedCase": "Upper and lower case letters (recommended)",
+      "met": "done",
+      "notMet": "not yet"
+    }
+  },
+  "table": {
+    "columns": "Columns",
+    "showColumns": "Show columns",
+    "exportCsv": "Export CSV",
+    "empty": "No rows to show."
+  },
+  "dev": {
+    "title": "Components",
+    "heading": "Ink and Signal components",
+    "intro": "Every Phase 1 component in every state. Switch theme, direction and language above; the direction toggle previews RTL layout without changing the UI language.",
+    "controls": {
+      "theme": "Theme",
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System",
+      "direction": "Direction",
+      "ltr": "LTR",
+      "rtl": "RTL",
+      "language": "Language"
+    },
+    "nav": {
+      "label": "Sections",
+      "tokens": "Tokens",
+      "type": "Typography",
+      "buttons": "Buttons",
+      "forms": "Inputs",
+      "display": "Data display",
+      "charts": "Charts",
+      "agent": "Agent",
+      "table": "Data table",
+      "overlays": "Overlays"
+    },
+    "tokens": {
+      "title": "Color tokens",
+      "description": "Every color comes from these tokens. Signal is only ever a fill with signal-ink text on top."
+    },
+    "type": {
+      "title": "Typography",
+      "description": "Geist for UI, Geist Mono with tabular figures for every compared number.",
+      "monoSample": "/shop/yirgacheffe",
+      "samples": {
+        "display": "Be the answer.",
+        "h1": "Good morning, Ada",
+        "h2": "How much should Orbit do on its own?",
+        "h3": "Visibility vs competitors",
+        "bodyLg": "Claude skips you mostly because you have no page about how you source beans.",
+        "body": "Here's how Northwind Roasters showed up in Google and AI answers this month.",
+        "small": "Mentioned in 113 of 250 AI answers",
+        "caption": "Last checked today, 08:40",
+        "overline": "Avg. AI position"
+      }
+    },
+    "buttons": {
+      "title": "Buttons",
+      "description": "One primary per view. Destructive actions always sit behind a confirm dialog. Icon buttons carry an aria-label.",
+      "variant": "Variant",
+      "disabled": "Disabled",
+      "loading": "Loading",
+      "size": {
+        "sm": "Small 32",
+        "md": "Default 40",
+        "lg": "Large 48"
+      },
+      "label": {
+        "primary": "Run new scan",
+        "secondary": "Export report",
+        "ghost": "Reject",
+        "agent": "Ask Orbit",
+        "destructive": "Delete workspace",
+        "link": "Details"
+      },
+      "iconButtons": "Icon buttons",
+      "withIcon": "With icons",
+      "runScan": "Run new scan",
+      "continue": "Continue",
+      "aria": {
+        "settings": "Settings",
+        "add": "Add competitor",
+        "next": "Next step"
+      }
+    },
+    "forms": {
+      "title": "Inputs",
+      "description": "40px fields (48px in onboarding). Labels above, helper or error below. Errors show a border and a message.",
+      "brandName": "Brand name",
+      "brandNameHelper": "Shown in reports and outreach drafts.",
+      "workspaceName": "Workspace name",
+      "workspacePlaceholder": "Northwind Team",
+      "required": "Enter a name to continue.",
+      "email": "Email",
+      "changeEmail": "Change email",
+      "website": "Website",
+      "websiteHelper": "We remove https:// and trailing slashes as you type.",
+      "websiteLarge": "Website (onboarding size)",
+      "crawled": "Read {pages} pages",
+      "market": "Main market",
+      "markets": {
+        "us": "United States",
+        "gb": "United Kingdom",
+        "de": "Germany"
+      },
+      "voice": "Brand voice notes",
+      "voiceHelper": "Orbit follows these notes in every draft.",
+      "voiceSample": "Warm and plain. Talk about farms and roast dates, not luxury.",
+      "disabledField": "Maximum articles per month",
+      "checkboxes": "Checkboxes",
+      "notifyTelegram": "Notify me on Telegram",
+      "notifyEmail": "Email me the weekly report",
+      "someSelected": "Select all keywords",
+      "switches": "Switches",
+      "darkMode": "Dark mode",
+      "disabledSwitch": "Full autopilot",
+      "radios": "Radio group",
+      "autopilot": {
+        "ask": "Ask me first",
+        "content": "Auto-publish content",
+        "full": "Full autopilot"
+      },
+      "tabs": "Tabs",
+      "range": "Date range",
+      "ranges": {
+        "7d": "7d",
+        "30d": "30d",
+        "90d": "90d"
+      },
+      "views": "Keyword views",
+      "viewTabs": {
+        "all": "All {count}",
+        "improved": "Improved {count}",
+        "declined": "Declined {count}"
+      }
+    },
+    "display": {
+      "title": "Data display",
+      "description": "Score rings use bands: 0–39 danger, 40–69 warning, 70–100 success. Deltas always show an arrow, a sign and a color.",
+      "scoreRings": "Score rings (danger, warning, success, no data, small)",
+      "scoreLabel": "AI visibility score",
+      "deltas": "Delta chips",
+      "statuses": "Status badges",
+      "owners": "Owner chips",
+      "ranks": "Rank cells",
+      "engines": "Engine tiles",
+      "engineChips": "Engine filter chips",
+      "kpiCards": "KPI cards (refresh tweens the numbers)",
+      "refreshData": "Refresh data",
+      "emptyTitle": "Your first scan is running",
+      "emptyDescription": "Nothing here yet. Your first scan finishes in about {minutes, plural, one {# minute} other {# minutes}}.",
+      "emptyAction": "View scan progress",
+      "errorTitle": "One engine didn't answer",
+      "errorDescription": "We couldn't reach {engine} this time. We'll retry at {time}; other engines are up to date.",
+      "skeletons": "Skeleton",
+      "progress": "Progress"
+    },
+    "charts": {
+      "title": "Charts",
+      "description": "Colors come from CSS variables, so charts restyle on theme change without re-mounting. Your brand is always first, blue and thickest.",
+      "trendTitle": "Visibility vs competitors",
+      "trendDescription": "AI visibility score, daily",
+      "trendAria": "Your visibility rose from 48 to 64; Bluebird Coffee stayed ahead at 72.",
+      "range": "Date range",
+      "ranges": {
+        "7d": "7d",
+        "30d": "30d",
+        "90d": "90d"
+      },
+      "sovTitle": "Share of voice",
+      "sovDescription": "Mentions across all AI answers",
+      "distributionTitle": "Position distribution",
+      "bands": {
+        "top3": "1–3",
+        "top10": "4–10",
+        "top20": "11–20",
+        "top50": "21–50",
+        "top100": "51–100",
+        "none": "Not ranking"
+      },
+      "sparklines": "Sparklines"
+    },
+    "agent": {
+      "title": "Agent",
+      "description": "Messages, the approval gate and live task rows. Task progress is polled from the jobs API every 3 seconds.",
+      "sameAsTelegram": "same conversation as Telegram",
+      "approvalCard": "Approval card (pending)",
+      "approvalDone": "Approval card (decided)",
+      "doneTitle": "Refresh \"How to brew pour-over\"",
+      "editClicked": "The editor opens here in Phase 5.",
+      "taskRows": "Task rows",
+      "liveTask": "Writing \"How we source our beans\"",
+      "waitingTask": "Approve schema change",
+      "failedTask": "Publish to WordPress",
+      "doneTask": "Rechecked 50 questions across 5 AI engines",
+      "openPanel": "Open agent panel",
+      "shortcut": "⌘J"
+    },
+    "table": {
+      "title": "Data table",
+      "description": "Sticky header, end-aligned numbers, column picker and CSV export. Wide tables scroll inside their own container.",
+      "caption": "Tracked keywords",
+      "toggleLoading": "Loading state",
+      "toggleEmpty": "Empty state",
+      "emptyTitle": "No keywords tracked yet",
+      "emptyDescription": "Add the keywords your customers search for and Orbit checks them daily.",
+      "emptyAction": "Add keywords",
+      "cols": {
+        "keyword": "Keyword",
+        "position": "Position",
+        "volume": "Volume",
+        "difficulty": "Difficulty",
+        "url": "Ranking URL",
+        "status": "Status"
+      }
+    },
+    "overlays": {
+      "title": "Overlays",
+      "description": "Menus and tabs move at 200 ms, sheets and the agent panel at 320 ms. Sheets open from the logical end side.",
+      "dialog": "Dialog",
+      "dialogTitle": "Create workspace",
+      "dialogDescription": "A workspace holds its own team, billing and brands.",
+      "workspaceName": "Workspace name",
+      "workspacePlaceholder": "Northwind Team",
+      "cancel": "Cancel",
+      "create": "Create workspace",
+      "destructive": "Destructive confirm",
+      "alertTitle": "Remove Sam Rivera?",
+      "alertDescription": "Sam loses access to Northwind Team right away. You can invite them again later.",
+      "remove": "Remove member",
+      "sheet": "Sheet",
+      "sheetTitle": "Help and support",
+      "sheetDescription": "Docs, guides and a way to reach us.",
+      "sheetBody": "Support content arrives in Phase 6.",
+      "popover": "Popover",
+      "popoverTitle": "Credits",
+      "popoverDescription": "1,380 of 2,000 left this month.",
+      "tooltip": "Tooltip",
+      "tooltipBody": "Share of 50 tracked questions",
+      "menu": "Menu",
+      "menuLabel": "Account",
+      "menuSettings": "Settings",
+      "menuShortcut": "⌘,",
+      "menuMore": "More options",
+      "menuSignOut": "Sign out",
+      "toast": "Toast",
+      "toastBody": "Switched to Northwind Team",
+      "toastDescription": "Showing Northwind Roasters.",
+      "toastError": "We couldn't publish to WordPress. Check the connection, then retry.",
+      "toastErrorButton": "Error toast",
+      "command": "Command menu",
+      "commandDescription": "Search screens and run actions",
+      "commandPlaceholder": "Search or ask Orbit",
+      "commandEmpty": "No matches. Press Enter to ask Orbit.",
+      "commandGroup": "Actions",
+      "commandScan": "Run new scan"
+    }
+  },
+  "roles": {
+    "owner": "Owner",
+    "admin": "Admin",
+    "member": "Member",
+    "viewer": "Viewer"
+  },
+  "shell": {
+    "skipToContent": "Skip to content",
+    "mobileNavDescription": "Screens, workspace and account",
+    "nav": {
+      "label": "Main",
+      "soon": "Soon",
+      "labelSoon": "{label} (coming soon)",
+      "groups": {
+        "insights": "Insights",
+        "grow": "Grow",
+        "workspace": "Workspace"
+      },
+      "items": {
+        "overview": "Overview",
+        "visibility": "AI visibility",
+        "rankings": "Rankings",
+        "competitors": "Competitors",
+        "audit": "Site audit",
+        "actions": "Action plan",
+        "content": "Content",
+        "social": "Social",
+        "agent": "Ask Orbit",
+        "integrations": "Integrations",
+        "reports": "Reports",
+        "settings": "Settings"
+      }
+    },
+    "sidebar": {
+      "expand": "Expand sidebar",
+      "collapse": "Collapse sidebar",
+      "telegramTitle": "Orbit on Telegram",
+      "telegramConnected": "Connected as @{handle}. Approvals go to both.",
+      "telegramConnectedRich": "Connected as <mono>@{handle}</mono>. Approvals go to both.",
+      "telegramOff": "Not connected. Connect to approve work from your phone.",
+      "upgrade": "Upgrade plan",
+      "userLine": "{role} · {plan}",
+      "manage": "Manage",
+      "manageAria": "{name}: manage plan and billing"
+    },
+    "topbar": {
+      "openNav": "Open navigation",
+      "search": "Search or ask Orbit",
+      "askOrbit": "Ask Orbit"
+    },
+    "shortcut": {
+      "mac": "⌘{key}",
+      "other": "Ctrl {key}"
+    },
+    "switcher": {
+      "workspaceTrigger": "Workspace: {name}. Switch workspace",
+      "brandTrigger": "Brand: {name}. Switch brand",
+      "switchWorkspace": "Switch workspace",
+      "switchBrand": "Switch brand",
+      "searchWorkspaces": "Search workspaces",
+      "searchBrands": "Search brands",
+      "noMatches": "No matches.",
+      "viewAllWorkspaces": "View all workspaces",
+      "createWorkspace": "Create workspace",
+      "addBrand": "Add brand",
+      "switchedWorkspace": "Switched to {name}",
+      "switchedBrand": "Now showing {name}"
+    },
+    "createWorkspace": {
+      "title": "Create workspace",
+      "description": "A workspace has its own team, billing and brands.",
+      "name": "Workspace name",
+      "helper": "Usually your company or client's name.",
+      "placeholder": "Northwind Team",
+      "required": "Enter a name to continue.",
+      "tooLong": "Keep it under 80 characters.",
+      "failed": "We couldn't create the workspace. Try again.",
+      "submit": "Create workspace"
+    },
+    "credits": {
+      "label": "Credits",
+      "aria": "Credits: {remaining} of {total} left. Open billing",
+      "summary": "{remaining} of {total} credits left",
+      "breakdown": {
+        "scans": "Scans",
+        "articles": "Articles",
+        "prompts": "Tracked questions"
+      },
+      "meter": "{used} / {limit}",
+      "renews": "Renews {date}"
+    },
+    "language": {
+      "trigger": "Language: {language}. Change language",
+      "search": "Search languages",
+      "empty": "No language matches.",
+      "heading": "Interface language"
+    },
+    "theme": {
+      "toLight": "Switch to light mode",
+      "toDark": "Switch to dark mode",
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
+    },
+    "notifications": {
+      "trigger": "{count, plural, =0 {Notifications} one {Notifications, # unread} other {Notifications, # unread}}",
+      "title": "Notifications",
+      "markAll": "Mark all as read",
+      "error": "We couldn't load notifications. Try again in a moment.",
+      "emptyTitle": "You're all caught up",
+      "emptyDescription": "Approvals, finished scans and team invites show up here.",
+      "unread": "Unread",
+      "kinds": {
+        "approvalWaiting": "Orbit needs your approval: {title}",
+        "agentEvent": "Orbit published \"{title}\" to {site}",
+        "scanFinished": "Scan finished: {gained, plural, one {# new mention} other {# new mentions}} on {engine}",
+        "teamInvite": "{name} accepted your invite"
+      }
+    },
+    "profile": {
+      "trigger": "Account menu for {name}",
+      "plan": "{plan} plan",
+      "profile": "Profile settings",
+      "billing": "Credits and billing",
+      "team": "Team members",
+      "darkMode": "Dark mode",
+      "language": "Language",
+      "help": "Help and support",
+      "feedback": "Send feedback",
+      "signOut": "Sign out"
+    },
+    "command": {
+      "title": "Command menu",
+      "description": "Go to a screen, switch workspace, brand, language or theme, or ask Orbit.",
+      "placeholder": "Search or ask Orbit",
+      "empty": "No matches. Press Enter to ask Orbit.",
+      "askGroup": "Ask Orbit",
+      "ask": "Ask Orbit: \"{question}\"",
+      "enter": "↵",
+      "brands": "Brands",
+      "workspaces": "Workspaces",
+      "switchTo": "Switch to {name}",
+      "theme": "Theme",
+      "themeItem": "Theme: {theme}",
+      "language": "Language"
+    },
+    "help": {
+      "title": "Help and support",
+      "description": "Guides, and a way to reach the team.",
+      "docsTitle": "Guides",
+      "docs": {
+        "gettingStarted": "Getting started with Orbit",
+        "visibility": "How AI visibility is measured",
+        "approvals": "Approvals and autopilot",
+        "telegram": "Using Orbit on Telegram"
+      },
+      "ticketTitle": "Submit a ticket",
+      "ticketDescription": "We reply by email, usually within one working day.",
+      "subject": "Subject",
+      "message": "What's happening?",
+      "messageHelper": "Include the page and what you expected to see.",
+      "submit": "Send ticket",
+      "subjectRequired": "Add a short subject.",
+      "messageRequired": "Tell us what's happening.",
+      "sent": "Ticket sent. We'll reply by email."
+    },
+    "feedback": {
+      "title": "Send feedback",
+      "description": "It goes straight to the product team.",
+      "type": "Type",
+      "types": {
+        "idea": "Idea",
+        "bug": "Bug",
+        "other": "Other"
+      },
+      "message": "Message",
+      "placeholders": {
+        "idea": "What would make Orbit more useful?",
+        "bug": "What happened, and what did you expect?",
+        "other": "What's on your mind?"
+      },
+      "submit": "Send feedback",
+      "required": "Write a message before sending.",
+      "sent": "Thanks. Your feedback was sent."
+    },
+    "placeholder": {
+      "title": "This screen is on its way",
+      "description": "It's built in a later phase of the MVP. Use the sidebar to look around."
+    }
+  },
+  "auth": {
+    "google": "Continue with Google",
+    "googleMonogram": "G",
+    "or": "or",
+    "layout": {
+      "home": "Orbit home",
+      "copyright": "© {year} {company}",
+      "company": "[COMPANY NAME]",
+      "terms": "Terms",
+      "privacy": "Privacy"
+    },
+    "panel": {
+      "label": "About Orbit",
+      "overline": "Google + AI search",
+      "headline": "Be the answer.",
+      "body": "See where you rank in Google, ChatGPT, Claude, Gemini and Perplexity. Then let Orbit write, fix and publish what closes the gap.",
+      "question": "best coffee subscription in the US",
+      "answer": "Top picks right now: <mark>Your brand</mark> for small-batch single origins, then two larger roasters for blends.",
+      "mentioned": "▲ Mentioned in 4 of 5 engines",
+      "rankBadge": "#1 on Gemini"
+    },
+    "signIn": {
+      "metaTitle": "Sign in",
+      "title": "Welcome back",
+      "description": "Sign in to see how your brand ranks today.",
+      "email": "Work email",
+      "password": "Password",
+      "forgot": "Forgot password?",
+      "submit": "Sign in",
+      "noAccount": "New to Orbit? <link>Create an account</link>"
+    },
+    "signUp": {
+      "metaTitle": "Create account",
+      "title": "Be the answer",
+      "description": "Track your brand in Google, ChatGPT, Claude, Gemini and Perplexity, and let an agent do the work.",
+      "name": "Full name",
+      "email": "Work email",
+      "password": "Password",
+      "workspace": "Company or team name",
+      "workspaceHelper": "This becomes your first workspace. You can rename it later.",
+      "workspacePlaceholder": "Northwind Team",
+      "submit": "Create account",
+      "consent": "By creating an account you agree to the <terms>Terms</terms> and <privacy>Privacy policy</privacy>.",
+      "haveAccount": "Already have an account? <link>Sign in</link>"
+    },
+    "forgot": {
+      "metaTitle": "Reset password",
+      "title": "Reset your password",
+      "description": "Enter your work email and we'll send you a 6-digit code.",
+      "email": "Work email",
+      "submit": "Send code",
+      "back": "Back to sign in"
+    },
+    "verify": {
+      "metaTitle": "Enter code",
+      "title": "Check your email",
+      "titleReset": "Choose a new password",
+      "description": "We sent a 6-digit code to <strong>{email}</strong>. It expires in 10 minutes.",
+      "code": "6-digit code",
+      "newPassword": "New password",
+      "demoHint": "Preview build: use the code 123456.",
+      "submit": "Verify email",
+      "submitReset": "Save password and sign in",
+      "resendIn": "Send a new code in {seconds}s",
+      "resend": "Send a new code",
+      "resent": "We sent a new code to {email}.",
+      "wrongEmail": "Use a different email"
+    },
+    "errors": {
+      "emailInvalid": "Enter a valid email, like you@company.com.",
+      "passwordRequired": "Enter your password.",
+      "invalidCredentials": "That email and password don't match. Try again or reset your password.",
+      "nameRequired": "Enter your name.",
+      "tooLong": "Keep it under 80 characters.",
+      "passwordWeak": "Use at least 8 characters, including a number.",
+      "workspaceRequired": "Enter a company or team name.",
+      "codeIncomplete": "Enter all 6 digits.",
+      "codeInvalid": "That code doesn't match. Check the latest email or send a new code."
+    }
+  },
+  "autopilot": {
+    "label": "Autopilot mode",
+    "recommended": "Default",
+    "ask": {
+      "title": "Ask me first",
+      "description": "Orbit drafts articles and fixes. Nothing goes live until you approve it."
+    },
+    "content": {
+      "title": "Auto-publish content",
+      "description": "Articles publish on schedule. Changes to your site still need your approval."
+    },
+    "full": {
+      "title": "Full autopilot",
+      "description": "Orbit publishes and fixes on its own and sends you a summary after each change."
+    }
+  },
+  "integrationStatus": {
+    "connected": "Connected",
+    "notConnected": "Not connected",
+    "comingSoon": "Coming soon",
+    "connecting": "Connecting"
+  },
+  "onboarding": {
+    "progressLabel": "Setup progress",
+    "stepOf": "Step {step} of {total}",
+    "stepDone": "(done)",
+    "saveExit": "Save and exit",
+    "back": "Back",
+    "continue": "Continue",
+    "steps": {
+      "brand": "Brand",
+      "competitors": "Competitors",
+      "keywords": "Keywords",
+      "connect": "Connect",
+      "scan": "First scan"
+    },
+    "brand": {
+      "title": "What are we growing?",
+      "description": "Add your website and Orbit will learn your brand, products and audience.",
+      "hint": "About 4 minutes to finish setup",
+      "website": "Website",
+      "domainInvalid": "Enter a domain like yourbrand.com.",
+      "reading": "Reading your site",
+      "readingLong": "Reading your homepage, product pages and blog. This takes a few seconds.",
+      "read": "Read {pages, plural, one {# page} other {# pages}}",
+      "learned": "Here's what Orbit learned. Fix anything that's off.",
+      "name": "Brand name",
+      "nameRequired": "Enter your brand name.",
+      "industry": "Industry",
+      "market": "Main market",
+      "contentLanguage": "Content language",
+      "contentLanguageHelper": "What Orbit writes in and which answers it tracks. Your interface language is separate.",
+      "descriptionLabel": "What you sell, in one line",
+      "descriptionHelper": "Orbit uses this to pick the questions your customers ask AI engines.",
+      "descriptionPlaceholder": "Small-batch coffee roasted to order and sold by subscription.",
+      "industries": {
+        "foodDrink": "Food and drink",
+        "retail": "Retail and e-commerce",
+        "saas": "Software",
+        "health": "Health and wellness",
+        "travel": "Travel and hospitality",
+        "finance": "Finance",
+        "education": "Education",
+        "other": "Something else"
+      }
+    },
+    "competitors": {
+      "title": "Who are you up against?",
+      "description": "We found these from your search results. Keep up to {max}.",
+      "selected": "{count} of {max} selected",
+      "shared": "{count, plural, one {Shares # keyword} other {Shares # keywords}}",
+      "addedByYou": "Added by you",
+      "limitNote": "You've picked {max}. Turn one off to add another.",
+      "limitReached": "You can track up to {max}. Turn one off first.",
+      "addLabel": "Add a competitor",
+      "addHelper": "Paste their website. We'll find their name.",
+      "addPlaceholder": "competitor.com",
+      "add": "Add",
+      "domainInvalid": "Enter a domain like competitor.com.",
+      "duplicate": "That competitor is already on the list."
+    },
+    "keywords": {
+      "title": "What should people find you for?",
+      "description": "Pick the keywords and questions your customers ask. We suggested {count}.",
+      "meter": "{total} of {limit} selected",
+      "meterLabel": "Keywords and questions selected",
+      "planNote": "Left on your {plan} plan this month",
+      "planNoteGeneric": "Left on your plan this month",
+      "overLimit": "Remove {count, plural, one {# item} other {# items}} to stay within your plan.",
+      "keywordsTitle": "Google keywords",
+      "keywordsCaption": "Tracked daily in Google results",
+      "questionsTitle": "AI questions",
+      "questionsCaption": "Asked to 5 AI engines in every scan",
+      "selectAll": "Select all",
+      "clear": "Clear",
+      "custom": "Yours",
+      "volume": "{volume}/mo",
+      "volumeTitle": "Monthly Google searches",
+      "addKeyword": "Add a keyword",
+      "addKeywordPlaceholder": "Add a keyword",
+      "addQuestion": "Add a question",
+      "addQuestionPlaceholder": "Add a question",
+      "add": "Add"
+    },
+    "connect": {
+      "title": "Where should Orbit work?",
+      "description": "Connect Telegram to talk to Orbit, and your site so it can publish.",
+      "startScan": "Start first scan",
+      "skipHint": "You can connect these later in Integrations.",
+      "connect": "Connect",
+      "talkTitle": "Talk to Orbit",
+      "publishTitle": "Publish and measure",
+      "telegram": {
+        "name": "Telegram",
+        "description": "Get updates, approve changes and ask questions from your phone.",
+        "connectedAs": "Connected as @{handle}",
+        "qrLabel": "QR code that opens Orbit in Telegram",
+        "step1": "Scan the code or press Connect Telegram.",
+        "step2": "Press Start in the chat with Orbit.",
+        "step3": "Come back here. We'll confirm the connection.",
+        "connect": "Connect Telegram",
+        "orCode": "or send the code",
+        "copyAria": "Copy code {code}",
+        "copied": "Code copied",
+        "copyFailed": "We couldn't copy the code. Select it and copy it instead.",
+        "waiting": "Waiting for you to press Start in Telegram."
+      },
+      "wordpress": {
+        "name": "WordPress",
+        "description": "Orbit publishes approved articles and on-page fixes to your site."
+      },
+      "searchConsole": {
+        "name": "Google Search Console",
+        "description": "Real clicks and impressions, so rankings come from Google's own data."
+      },
+      "autopilotTitle": "How much should Orbit do on its own?",
+      "autopilotDescription": "You can change this anytime in Settings."
+    },
+    "scan": {
+      "title": "Running your first scan",
+      "doneTitle": "Your first scan is ready",
+      "description": "Asking {engines} AI engines {questions} questions about your market. This takes about 3 minutes.",
+      "dashboard": "Go to dashboard",
+      "telegramHint": "Orbit will also message you on Telegram when it's done.",
+      "leaveHint": "You can leave this page. The scan keeps running.",
+      "running": "Scanning",
+      "complete": "Scan complete",
+      "progress": "{percent} · about {minutes, plural, one {# minute} other {# minutes}} left",
+      "progressLabel": "Scan progress",
+      "summary": "Mentioned in {mentioned} of {answers} answers",
+      "queued": "Waiting",
+      "failed": "Didn't answer",
+      "mentioned": "Mentioned in {mentioned} of {questions}",
+      "engineDown": "We couldn't reach {engine} this time. We'll retry at {time}; other engines are up to date.",
+      "orbitPartial": "{engines, plural, one {One engine has} other {# engines have}} answered. Your dashboard fills in as the rest finish.",
+      "orbitDone": "You showed up in {mentioned} answers. I've already found a few quick wins; they're waiting in your action plan."
+    }
+  },
+  "insights": {
+    "range": {
+      "label": "Date range",
+      "7d": "7d",
+      "30d": "30d",
+      "90d": "90d",
+      "custom": "Custom range",
+      "customAria": "Custom range: {range}. Change",
+      "maxNote": "Up to 90 days",
+      "apply": "Apply"
+    },
+    "jobs": {
+      "eta": "{percent} · about {minutes, plural, one {# min} other {# min}} left",
+      "finished": "Done: {title}",
+      "job_scan": {
+        "started": "Scan started. Results update as each engine answers.",
+        "done": "Scan finished. Your numbers are up to date."
+      },
+      "job_audit": {
+        "started": "Audit started. Orbit is checking every page.",
+        "done": "Audit finished."
+      },
+      "job_fix": {
+        "started": "Orbit is making the approved fixes.",
+        "done": "Fixes are live. Orbit will recheck them tomorrow."
+      }
+    }
+  },
+  "overview": {
+    "greeting": "{part, select, morning {Good morning} afternoon {Good afternoon} other {Good evening}}, {name}",
+    "description": "Here's how {brand} showed up in Google and AI answers this month.",
+    "export": "Export report",
+    "exportStarted": "Your report is being prepared. We'll email you the PDF.",
+    "runScan": "Run new scan",
+    "scanRunning": "Scanning 5 AI engines",
+    "heroTitle": "AI visibility score",
+    "details": "Details",
+    "heroRank": "You're {rank, selectordinal, one {#st} two {#nd} few {#rd} other {#th}} of {count} brands. {leader} leads at {score}.",
+    "heroLeading": "You lead every tracked competitor. Keep the gap by refreshing pages that slip.",
+    "engineUnreachable": "Unreachable this time",
+    "engineNote": "Share of {count} tracked questions where each engine mentions you.",
+    "trendTitle": "Visibility vs competitors",
+    "trendDescription": "AI visibility score, daily",
+    "trendAria": "Your AI visibility score moved from {from} to {to} over the selected range.",
+    "sovTitle": "Share of voice",
+    "sovDescription": "Mentions across all AI answers",
+    "actions": {
+      "title": "Next best actions",
+      "description": "Ranked by expected impact on your visibility score",
+      "openPlan": "Open action plan",
+      "meta": "{impact} · {note}",
+      "impact": {
+        "high": "High impact",
+        "medium": "Medium impact",
+        "low": "Low impact"
+      },
+      "cta": {
+        "review": "Review draft",
+        "approve": "Approve",
+        "seeSites": "See sites"
+      }
+    },
+    "feed": {
+      "title": "What Orbit did",
+      "description": "Last 48 hours"
+    },
+    "firstScan": {
+      "title": "Your first scan is running",
+      "progress": "{percent} done",
+      "retrying": "Retrying"
+    }
+  },
+  "visibility": {
+    "title": "AI visibility",
+    "description": "How often AI engines mention and cite you, and where you rank in their answers. {count} questions, rechecked daily.",
+    "addQuestions": "Add questions",
+    "engineFilter": "Filter by engine",
+    "emptyTitle": "No answers to show yet",
+    "emptyDescription": "Nothing here yet. Your first scan finishes in about 3 minutes.",
+    "kpis": {
+      "score": "Visibility score",
+      "scoreNote": "{rank, selectordinal, one {#st} two {#nd} few {#rd} other {#th}} of {count} tracked brands",
+      "engineNote": "On {engine} only",
+      "position": "Avg. position",
+      "sentiment": "Positive sentiment",
+      "sentimentNote": "Of answers that mention you"
+    },
+    "byEngine": {
+      "title": "By engine",
+      "checked": "Last checked {when}",
+      "engine": "Engine",
+      "mentionRate": "Mention rate",
+      "position": "Avg. position",
+      "citations": "Citations",
+      "sentiment": "Sentiment",
+      "change": "Change",
+      "sentiments": {
+        "positive": "Positive",
+        "neutral": "Neutral",
+        "negative": "Negative"
+      }
+    },
+    "questions": {
+      "title": "Questions you track",
+      "legend": "Filled dot = that engine mentions you. Order: ChatGPT, Gemini, Perplexity, Claude, AI Overviews.",
+      "question": "Question",
+      "engines": "Engines",
+      "rank": "Your rank",
+      "competitor": "Top competitor",
+      "mentioned": "mentions you",
+      "notMentioned": "doesn't mention you",
+      "dotsLabel": "Mentioned by {count} of 5 engines"
+    },
+    "sources": {
+      "title": "Sources AI engines cite",
+      "description": "Being mentioned on these pages raises your odds of being cited",
+      "toTasks": "Turn gaps into tasks",
+      "tasksAdded": "{count, plural, one {Added # outreach task} other {Added # outreach tasks}} to your action plan.",
+      "citations": "{count, plural, one {# citation} other {# citations}}",
+      "status": {
+        "mentionsYou": "Mentions you",
+        "missing": "Missing",
+        "yourSite": "Your site"
+      }
+    },
+    "add": {
+      "questions": {
+        "title": "Add questions",
+        "description": "Orbit asks these to 5 AI engines in every scan.",
+        "label": "Questions, one per line",
+        "helper": "{count, plural, =0 {Nothing added yet} one {# question} other {# questions}}",
+        "placeholder": "best coffee for french press",
+        "required": "Add at least one question.",
+        "added": "{count, plural, one {Added # question} other {Added # questions}}. They're checked in the next scan.",
+        "submit": "Add questions"
+      },
+      "keywords": {
+        "title": "Add keywords",
+        "description": "Orbit checks these in Google every day.",
+        "label": "Keywords, one per line",
+        "helper": "{count, plural, =0 {Nothing added yet} one {# keyword} other {# keywords}}",
+        "placeholder": "cold brew coffee beans",
+        "required": "Add at least one keyword.",
+        "added": "{count, plural, one {Added # keyword} other {Added # keywords}}. First positions arrive tomorrow.",
+        "submit": "Add keywords"
+      }
+    }
+  },
+  "prompt": {
+    "metaTitle": "Question",
+    "breadcrumb": "Breadcrumb",
+    "crumbVisibility": "AI visibility",
+    "crumbQuestions": "Questions",
+    "intent": {
+      "commercial": "Commercial intent",
+      "informational": "Informational",
+      "comparison": "Comparison"
+    },
+    "marketLanguage": "{market} · {language}",
+    "checked": "Checked {when}",
+    "recheck": "Recheck now",
+    "rechecking": "Rechecking this question in 5 engines",
+    "closeGap": "Let Orbit close this gap",
+    "closeGapPrompt": "Close the gap on \"{question}\". What will you do, and what do you need from me?",
+    "unreachable": "Unreachable",
+    "notMentioned": "Not mentioned",
+    "position": "#{position}",
+    "mentionedAt": "Mentioned · #{position} of {listed}",
+    "cited": "Cited:",
+    "whyMissing": "Why you're missing:",
+    "planTitle": "Orbit's plan for this question",
+    "planDescription": "What closes the gap, and who does each part",
+    "addToPlan": "Add to action plan",
+    "inPlan": "In your action plan",
+    "planned": "{count, plural, one {Added # step} other {Added # steps}} to your action plan.",
+    "historyTitle": "Engines mentioning you",
+    "historyDescription": "Out of 5, last 8 weeks",
+    "historyAria": "Engines mentioning you went from {first} to {last} out of 5 over {weeks} weeks.",
+    "weeksAgo": "{weeks} weeks ago",
+    "thisWeek": "This week"
+  },
+  "rankings": {
+    "title": "Google rankings",
+    "description": "Daily positions for {count} tracked keywords.",
+    "device": "Device",
+    "desktop": "Desktop",
+    "mobile": "Mobile",
+    "addKeywords": "Add keywords",
+    "emptyTitle": "No keywords tracked yet",
+    "emptyDescription": "Add the keywords your customers search for and Orbit checks them in Google every day.",
+    "stats": {
+      "avg": "Avg. position",
+      "top3": "Top 3",
+      "top10": "Top 10",
+      "top100": "Top 100",
+      "notRanking": "Not ranking"
+    },
+    "avgTitle": "Average position",
+    "avgDescription": "Lower is better · last {days} days",
+    "avgAria": "Average position moved from {from} to {to}; lower is better.",
+    "distTitle": "Position distribution",
+    "distDescription": "Keywords per position band",
+    "bands": {
+      "top3": "1–3",
+      "top10": "4–10",
+      "top20": "11–20",
+      "top50": "21–50",
+      "top100": "51–100",
+      "none": "Not ranking"
+    },
+    "table": {
+      "caption": "Tracked keywords",
+      "views": "Keyword views",
+      "viewTabs": {
+        "all": "All {count}",
+        "improved": "Improved {count}",
+        "declined": "Declined {count}",
+        "close": "Close to page one {count}"
+      },
+      "keyword": "Keyword",
+      "position": "Position",
+      "change": "Change",
+      "trend": "30 days",
+      "volume": "Volume",
+      "difficulty": "Difficulty",
+      "url": "Ranking URL",
+      "noUrl": "None yet",
+      "ai": "In AI answers",
+      "aiEngines": "{count} of 5 engines",
+      "aiNone": "Not mentioned",
+      "new": "New",
+      "noneTitle": "No keywords in this view",
+      "noneDescription": "Try another tab."
+    }
+  },
+  "competitors": {
+    "title": "Competitors",
+    "insight": "{leader} leads AI answers by {lead} points. Most of the gap is comparison and gift questions.",
+    "descriptionEmpty": "Compare your visibility with up to 5 competitors.",
+    "add": "Add competitor",
+    "emptyTitle": "No comparison yet",
+    "emptyDescription": "Nothing here yet. Your first scan finishes in about 3 minutes.",
+    "table": {
+      "caption": "Your brand compared with tracked competitors",
+      "brand": "Brand",
+      "you": "{name} (you)",
+      "score": "AI visibility",
+      "share": "Share of voice",
+      "position": "Avg. AI position",
+      "citations": "Citations",
+      "top10": "Google top 10"
+    },
+    "questionGaps": {
+      "title": "Questions they win, you don't",
+      "description": "Competitors mentioned, you absent, in 2 or more engines",
+      "winner": "{name} in {engines} engines",
+      "write": "Write answer page",
+      "draftReady": "Draft in Content",
+      "drafted": "Orbit is drafting the answer page. It will wait in Content for your review."
+    },
+    "keywordGaps": {
+      "title": "Keywords they rank for, you don't",
+      "description": "Google top 10 for a competitor, outside the top 50 for you",
+      "who": "{name} #{position}",
+      "volume": "{volume}/mo",
+      "addToPlan": "Add to plan",
+      "inPlan": "In plan",
+      "added": "Added \"{keyword}\" to your action plan."
+    },
+    "sites": {
+      "title": "Where competitors get cited and linked",
+      "description": "Orbit can't earn these links for you, but it drafts the pitch for each one.",
+      "draftAll": "Draft all outreach emails",
+      "draftedShort": "Emails drafted",
+      "drafted": "Orbit drafted {count} outreach emails. They're in your action plan under You need to do.",
+      "authority": "Authority {score}",
+      "kinds": {
+        "roundup": "Roundup",
+        "review": "Review",
+        "submission": "Submission",
+        "community": "Community"
+      }
+    },
+    "addDialog": {
+      "title": "Add competitor",
+      "description": "Orbit adds them to every scan and comparison.",
+      "label": "Competitor website",
+      "helper": "You can track up to 5 competitors.",
+      "placeholder": "competitor.com",
+      "invalid": "Enter a domain like competitor.com.",
+      "added": "Added {domain}. They'll appear after the next scan.",
+      "submit": "Add competitor"
+    }
+  },
+  "audit": {
+    "title": "Site audit",
+    "description": "SEO and AI readiness for {domain}. {pages} pages checked {when}.",
+    "descriptionEmpty": "SEO and AI readiness for {domain}.",
+    "run": "Run audit",
+    "auditRunning": "Auditing every page",
+    "fixRunning": "Orbit is fixing the approved issues",
+    "fixAll": "Let Orbit fix {count} issues",
+    "fixAllTitle": "Fix {count} issues on your site",
+    "fixItem": "{title} ({pages} pages)",
+    "approveTitle": "Approve these changes",
+    "approveDescription": "These change your live site. Orbit only starts after you approve, here or on Telegram.",
+    "emptyTitle": "No audit yet",
+    "emptyDescription": "Run your first audit to see SEO health and AI readiness. It takes about a minute.",
+    "seoHealth": "SEO health",
+    "aiReadiness": "AI readiness",
+    "categoriesTitle": "Scores by category",
+    "categories": {
+      "technical": "Technical",
+      "vitals": "Core Web Vitals",
+      "answerFirst": "Answer-first content",
+      "citation": "Citation signals",
+      "freshness": "Freshness",
+      "structured": "Structured data"
+    },
+    "severityLabel": "Filter by severity",
+    "tabs": {
+      "all": "All {count}",
+      "critical": "Critical {count}",
+      "warning": "Warnings {count}",
+      "notice": "Notices {count}"
+    },
+    "orbitCan": "Orbit can fix {count} of these with your WordPress access.",
+    "severity": {
+      "critical": "Critical",
+      "warning": "Warning",
+      "notice": "Notice"
+    },
+    "siteWide": "Site-wide",
+    "pages": "{count, plural, one {# page} other {# pages}}",
+    "letOrbitFix": "Let Orbit fix",
+    "howToFix": "How to fix",
+    "fixing": "Fixing",
+    "fixed": "Fixed",
+    "issue": {
+      "metaTitle": "Audit issue",
+      "breadcrumb": "Breadcrumb",
+      "crumb": "Issue",
+      "stepsTitle": "How to fix it",
+      "affectedTitle": "Affected pages",
+      "andMore": "And {count} more",
+      "fixApproved": "Approved. Orbit is making this change and will recheck it tomorrow.",
+      "markDone": "Mark as done",
+      "doneLabel": "Marked as done",
+      "markedDone": "Marked as done. Orbit will confirm it in the next audit.",
+      "askHelp": "Ask Orbit for help",
+      "helpPrompt": "Help me fix this audit issue: \"{title}\". Give me the exact steps for my setup."
+    }
+  },
+  "actions": {
+    "title": "Action plan",
+    "description": "What to do next, ranked by impact. Orbit handles its part; the rest is yours.",
+    "approveAll": "Approve all {count} from Orbit",
+    "approvedAll": "Approved {count, plural, one {# change} other {# changes}}. Orbit is on it.",
+    "confirmTitle": "Approve {count, plural, one {# change} other {# changes}} from Orbit?",
+    "confirmDescription": "These change your live site. Orbit starts right away and tells you when each one is live.",
+    "cancel": "Cancel",
+    "emptyTitle": "No actions yet",
+    "emptyDescription": "Nothing here yet. Your first scan finishes in about 3 minutes, then Orbit builds your plan.",
+    "projected": "Projected AI visibility: <strong>{current}</strong> → <strong>{projected}</strong> when this plan is done",
+    "projectedAria": "Visibility score {current} now, {projected} projected",
+    "gain": "+{points} pts",
+    "columns": {
+      "approval": "Needs your approval",
+      "working": "Orbit is working on",
+      "yours": "You need to do",
+      "done": "Done this week"
+    },
+    "emptyColumn": {
+      "approval": "Nothing waiting for you.",
+      "working": "Orbit is idle. Approve something to get it started.",
+      "yours": "Nothing on your list.",
+      "done": "Finished work shows up here."
+    },
+    "areas": {
+      "content": "Content",
+      "technical": "Technical",
+      "schema": "Schema",
+      "outreach": "Outreach"
+    },
+    "impact": {
+      "high": "High impact",
+      "medium": "Medium impact",
+      "low": "Low impact"
+    },
+    "effort": {
+      "low": "Low effort",
+      "medium": "Medium effort",
+      "high": "High effort"
+    },
+    "points": "+{points} pts",
+    "progress": "{percent} done",
+    "markDone": "Mark done",
+    "markedDone": "Nice. Orbit will check the result in the next scan.",
+    "open": "Open"
+  },
+  "content": {
+    "title": "Content",
+    "description": "Your plan for {month}: {count, plural, one {# article} other {# articles}}, {published} published, {waiting} waiting for you.",
+    "descriptionEmpty": "Nothing planned for {month} yet.",
+    "viewLabel": "View",
+    "calendar": "Calendar",
+    "list": "List",
+    "plan": "Plan {month}",
+    "planned": "Orbit is planning {month}. Drafts show up here as they're ready.",
+    "prevMonth": "Previous month",
+    "nextMonth": "Next month",
+    "legend": "Status legend",
+    "status": {
+      "published": "Published",
+      "scheduled": "Scheduled",
+      "needsApproval": "Needs approval",
+      "draft": "Draft"
+    },
+    "emptyTitle": "Nothing planned for {month}",
+    "emptyDescription": "Ask Orbit to plan the month. It picks topics from questions you miss and keywords close to page one.",
+    "thisMonth": "This month",
+    "articlesPlanned": "Articles planned",
+    "avgScore": "Avg. content score",
+    "why": "Orbit picked these from 9 questions you miss in AI answers and 14 keywords close to page one.",
+    "waitingTitle": "Waiting for you",
+    "waitingDescription": "Approve to keep the schedule",
+    "waitingEmpty": "Nothing to review.",
+    "waitingMeta": "Score {score} · publishes {date} once approved",
+    "table": {
+      "caption": "Planned articles",
+      "title": "Title",
+      "status": "Status",
+      "date": "Publish date",
+      "score": "Score",
+      "keyword": "Target keyword"
+    }
+  },
+  "editor": {
+    "metaTitlePage": "Article",
+    "breadcrumb": "Breadcrumb",
+    "writtenIn": "Written in {language}",
+    "byline": "Written by Orbit · {words} words · saved {when}",
+    "reject": "Reject",
+    "revise": "Ask Orbit to revise",
+    "approve": "Approve and schedule",
+    "scheduledToast": "Scheduled for {date}. Orbit publishes it and tells you when it's live.",
+    "placeholders": "Replace {count, plural, one {the placeholder} other {# placeholders}} before publishing: <code>{list}</code>. Orbit leaves these where it needs a fact from you.",
+    "shortAnswer": "Short answer",
+    "shortAnswerHelp": "AI engines quote this first. Keep it to 2–3 sentences.",
+    "bodyLabel": "Article body",
+    "score": "Content score",
+    "checksPassed": "{passed} of {total} checks passed",
+    "passed": "passed",
+    "toImprove": "to improve",
+    "checklist": {
+      "shortAnswer": "Answers the question in the first 3 sentences",
+      "keyword": "Target keyword in the title and first heading",
+      "headings": "Clear H2 sections",
+      "length": "Long enough to cover the topic",
+      "sources": "Cites at least 2 outside sources",
+      "faq": "Has an FAQ block",
+      "links": "Links to 3 related pages"
+    },
+    "publishTitle": "Publishing",
+    "metaTitle": "Meta title",
+    "metaTooLong": "Keep it under {max} characters so Google doesn't cut it off.",
+    "counter": "{count}/{max}",
+    "url": "URL",
+    "urlHelper": "Published at {domain}/",
+    "target": "Publish to",
+    "targetWordpress": "WordPress · {domain}",
+    "date": "Date",
+    "time": "Time",
+    "notify": "Tell me on Telegram when it's live",
+    "rejectTitle": "Reject this article?",
+    "rejectDescription": "Orbit removes it from the plan and won't publish it. You can ask for a new draft later.",
+    "keep": "Keep it",
+    "rejectedToast": "Article rejected. Orbit took it off the plan.",
+    "reviseTitle": "Ask Orbit to revise",
+    "reviseDescription": "Say what to change. Orbit sends a new draft in a few minutes.",
+    "reviseLabel": "What should change?",
+    "revisePlaceholder": "Make the price section shorter and add our free-shipping threshold.",
+    "reviseRequired": "Tell Orbit what to change.",
+    "reviseSubmit": "Send to Orbit",
+    "revisingToast": "Orbit is revising. The new draft will be here in about 2 minutes.",
+    "toolbar": {
+      "label": "Formatting",
+      "h2": "Heading",
+      "h3": "Subheading",
+      "bold": "Bold",
+      "italic": "Italic",
+      "bullet": "Bulleted list",
+      "ordered": "Numbered list",
+      "quote": "Quote",
+      "undo": "Undo",
+      "redo": "Redo"
+    }
+  },
+  "agentPage": {
+    "title": "Ask Orbit",
+    "description": "Ask about rankings, competitors or content. Same conversation as Telegram.",
+    "suggestions": {
+      "week": "How did we do this week?",
+      "gained": "Who gained on us?",
+      "plan": "Plan next month's articles"
+    },
+    "canTitle": "Orbit can",
+    "can": {
+      "rankings": "Check rankings in Google and 5 AI engines",
+      "compare": "Compare you with competitors",
+      "write": "Write, optimize and publish articles",
+      "fix": "Fix meta tags and schema on your site",
+      "outreach": "Draft outreach for backlinks you send"
+    },
+    "telegramTitle": "Telegram",
+    "connected": "Connected",
+    "notConnected": "Not connected",
+    "telegramOn": "Message {bot} from your phone. Approvals work in both places.",
+    "telegramOff": "Connect Telegram to approve work and ask questions from your phone.",
+    "connect": "Connect Telegram",
+    "tasksTitle": "Open tasks",
+    "tasksEmpty": "No open tasks.",
+    "taskStatus": {
+      "waiting": "Waiting",
+      "working": "Working"
+    },
+    "openPlan": "Open action plan"
+  }
+}

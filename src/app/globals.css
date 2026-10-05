@@ -1,0 +1,436 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ───────────────────────── Ink and Signal: theme bridge ───────────────────────── */
+@theme inline {
+  --font-sans: var(--font-geist-sans), var(--font-locale, ui-sans-serif), system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, monospace;
+  --font-heading: var(--font-sans);
+
+  /* Orbit tokens */
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-fg: var(--text);
+  --color-fg-2: var(--text-2);
+  --color-fg-3: var(--text-3);
+  --color-ink: var(--ink);
+  --color-ink-fg: var(--ink-fg);
+  --color-signal: var(--signal);
+  --color-signal-ink: var(--signal-ink);
+  --color-blue: var(--blue);
+  --color-blue-bg: var(--blue-bg);
+  --color-blue-ink: var(--blue-ink);
+  --color-success: var(--success);
+  --color-success-bg: var(--success-bg);
+  --color-warning: var(--warning);
+  --color-warning-bg: var(--warning-bg);
+  --color-danger: var(--danger);
+  --color-danger-bg: var(--danger-bg);
+  --color-chart-you: var(--chart-you);
+  --color-chart-a: var(--chart-a);
+  --color-chart-b: var(--chart-b);
+  --color-chart-c: var(--chart-c);
+  --color-chart-other: var(--chart-other);
+  --color-chart-grid: var(--border);
+  --color-qr-bg: var(--qr-bg);
+  --color-qr-fg: var(--qr-fg);
+
+  /* shadcn semantic names mapped onto Orbit tokens, so primitives inherit the palette */
+  --color-background: var(--surface);
+  --color-foreground: var(--text);
+  --color-card: var(--surface);
+  --color-card-foreground: var(--text);
+  --color-popover: var(--surface);
+  --color-popover-foreground: var(--text);
+  --color-primary: var(--ink);
+  --color-primary-foreground: var(--ink-fg);
+  --color-secondary: var(--surface-2);
+  --color-secondary-foreground: var(--text);
+  --color-muted: var(--surface-2);
+  --color-muted-foreground: var(--text-3);
+  --color-accent: var(--surface-2);
+  --color-accent-foreground: var(--text);
+  --color-destructive: var(--danger);
+  --color-input: var(--border-strong);
+  --color-ring: var(--blue);
+  --color-chart-1: var(--chart-you);
+  --color-chart-2: var(--chart-a);
+  --color-chart-3: var(--chart-b);
+  --color-chart-4: var(--chart-c);
+  --color-chart-5: var(--chart-other);
+  --color-sidebar: var(--bg);
+  --color-sidebar-foreground: var(--text-2);
+  --color-sidebar-primary: var(--ink);
+  --color-sidebar-primary-foreground: var(--ink-fg);
+  --color-sidebar-accent: var(--surface);
+  --color-sidebar-accent-foreground: var(--text);
+  --color-sidebar-border: var(--border);
+  --color-sidebar-ring: var(--blue);
+
+  /* Shape */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 16px;
+
+  /* Depth */
+  --shadow-card: var(--elev-card);
+  --shadow-pop: var(--elev-pop);
+  --shadow-raised: var(--elev-raised);
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+}
+
+/* ───────────────────────── Palettes ───────────────────────── */
+:root {
+  color-scheme: light;
+  --bg: #f6f7f9;
+  --surface: #ffffff;
+  --surface-2: #f0f2f5;
+  --border: #e3e6eb;
+  --border-strong: #cdd2da;
+  --text: #0f1218;
+  --text-2: #4a5260;
+  --text-3: #6b7380;
+  --ink: #0f1218;
+  --ink-fg: #ffffff;
+  --signal: #c5f04a;
+  --signal-ink: #0f1218;
+  --blue: #2d4fe0;
+  --blue-bg: #dde3fb;
+  --blue-ink: #1e3bb8;
+  --success: #0e7a55;
+  --success-bg: #e6f4ee;
+  --warning: #a35a00;
+  --warning-bg: #fdf1e1;
+  --danger: #c42b2b;
+  --danger-bg: #fcebeb;
+  --chart-you: #2d4fe0;
+  --chart-a: #f08a24;
+  --chart-b: #13a38b;
+  --chart-c: #b54ac7;
+  --chart-other: #8a94a6;
+
+  --hover-mix: black;
+  --elev-card: 0 1px 2px rgb(15 18 24 / 0.04);
+  --elev-pop: 0 8px 24px -4px rgb(15 18 24 / 0.12), 0 0 0 1px var(--border);
+  --elev-raised: 0 1px 2px rgb(15 18 24 / 0.06), 0 0 0 1px var(--border);
+  --overlay: rgb(15 18 24 / 0.32);
+
+  /* QR codes stay dark on light in both themes so phones can scan them */
+  --qr-bg: #ffffff;
+  --qr-fg: #0f1218;
+}
+
+.dark {
+  color-scheme: dark;
+  --bg: #0b0d11;
+  --surface: #12151b;
+  --surface-2: #1a1e26;
+  --border: #262b35;
+  --border-strong: #353b47;
+  --text: #f2f4f7;
+  --text-2: #a9b0bc;
+  --text-3: #7e8794;
+  --ink: #f2f4f7;
+  --ink-fg: #0f1218;
+  --signal: #c5f04a;
+  --signal-ink: #0f1218;
+  --blue: #7c93ff;
+  --blue-bg: #1a2140;
+  --blue-ink: #a9b8ff;
+  --success: #3dd39a;
+  --success-bg: #0f2a20;
+  --warning: #f5b54a;
+  --warning-bg: #2e2210;
+  --danger: #ff7a7a;
+  --danger-bg: #2f1414;
+  --chart-you: #7c93ff;
+  --chart-a: #f5a04a;
+  --chart-b: #2ec4a8;
+  --chart-c: #cf6fe0;
+  --chart-other: #7e8794;
+
+  --hover-mix: white;
+  --elev-card: none;
+  --elev-pop: 0 0 0 1px var(--border-strong), 0 12px 32px -8px rgb(0 0 0 / 0.6);
+  --elev-raised: 0 0 0 1px var(--border-strong);
+  --overlay: rgb(0 0 0 / 0.6);
+}
+
+/* ───────────────────────── Typography scale ───────────────────────── */
+@utility text-display {
+  font-size: 44px;
+  line-height: 48px;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+@utility text-h1 {
+  font-size: 28px;
+  line-height: 34px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+@utility text-h2 {
+  font-size: 20px;
+  line-height: 28px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+@utility text-h3 {
+  font-size: 15px;
+  line-height: 22px;
+  font-weight: 600;
+}
+@utility text-body {
+  font-size: 14px;
+  line-height: 20px;
+}
+@utility text-body-lg {
+  font-size: 16px;
+  line-height: 24px;
+}
+@utility text-small {
+  font-size: 13px;
+  line-height: 18px;
+}
+@utility text-caption {
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 500;
+}
+@utility text-overline {
+  font-size: 11px;
+  line-height: 16px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+@utility text-metric-xl {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 40px;
+  line-height: 44px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+@utility text-metric {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 22px;
+  line-height: 28px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+@utility text-mono {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 13px;
+  line-height: 20px;
+}
+/* Any compared number: mono + tabular figures, size inherited */
+@utility num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Interactive fills. Hover darkens 6% (lightens in dark); ink mixes toward its own text for a visible shift. */
+@utility bg-ink-hover {
+  background-color: color-mix(in oklab, var(--ink), var(--ink-fg) 14%);
+}
+@utility bg-surface-hover {
+  background-color: color-mix(in oklab, var(--surface), var(--hover-mix) 6%);
+}
+@utility bg-signal-hover {
+  background-color: color-mix(in oklab, var(--signal), black 6%);
+}
+@utility bg-danger-hover {
+  background-color: color-mix(in oklab, var(--danger), var(--hover-mix) 6%);
+}
+
+/* ───────────────────────── Base ───────────────────────── */
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html {
+    @apply font-sans;
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+  }
+  body {
+    @apply bg-bg text-body text-fg antialiased;
+  }
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+  ::selection {
+    background-color: var(--signal);
+    color: var(--signal-ink);
+  }
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-strong) transparent;
+  }
+  input,
+  textarea {
+    caret-color: var(--blue);
+  }
+  a {
+    text-underline-offset: 3px;
+  }
+}
+
+/*
+ * Unlayered on purpose: these must beat utility classes such as `outline-none`
+ * that shadcn primitives ship with.
+ */
+:where(
+    a,
+    button,
+    input,
+    select,
+    textarea,
+    summary,
+    [tabindex],
+    [role="button"],
+    [role="tab"],
+    [role="menuitem"],
+    [role="option"],
+    [role="radio"],
+    [role="checkbox"],
+    [role="switch"]
+  ):focus-visible:not([cmdk-input]) {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+}
+:where(input, textarea, [data-slot="select-trigger"]):focus-visible:not([cmdk-input]) {
+  outline-offset: 1px;
+}
+:where([role="menuitem"], [role="option"], [cmdk-item]):focus-visible {
+  outline-offset: -2px;
+}
+
+/* Overline never uppercases or tracks non-Latin scripts */
+:lang(ar) .text-overline,
+:lang(zh) .text-overline,
+:lang(ja) .text-overline {
+  text-transform: none;
+  letter-spacing: 0;
+}
+:lang(ar) .text-h1,
+:lang(ar) .text-h2,
+:lang(ar) .text-display {
+  letter-spacing: 0;
+}
+
+/* Skeleton shimmer, token-driven so it follows the theme */
+@keyframes orbit-shimmer {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: -100% 0;
+  }
+}
+.skeleton-shimmer {
+  background-color: var(--surface-2);
+  background-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    color-mix(in oklab, var(--surface-2), var(--hover-mix) 4%) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: orbit-shimmer 1.4s var(--ease-in-out) infinite;
+}
+:dir(rtl) .skeleton-shimmer {
+  animation-direction: reverse;
+}
+
+/* Press feedback shared by buttons */
+.press {
+  transition-property: transform, background-color, border-color, color, box-shadow, opacity;
+  transition-duration: 120ms;
+  transition-timing-function: var(--ease-out);
+}
+.press:active:not(:disabled):not([aria-disabled="true"]) {
+  transform: scale(0.97);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .press:active:not(:disabled) {
+    transform: none;
+  }
+}
+
+/* Article editor (Tiptap). Token-driven so it follows the theme. */
+.orbit-editor {
+  color: var(--text);
+  font-size: 16px;
+  line-height: 26px;
+}
+.orbit-editor > * + * {
+  margin-top: 14px;
+}
+.orbit-editor h2 {
+  font-size: 22px;
+  line-height: 30px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin-top: 28px;
+}
+.orbit-editor h3 {
+  font-size: 17px;
+  line-height: 26px;
+  font-weight: 600;
+  margin-top: 22px;
+}
+.orbit-editor ul,
+.orbit-editor ol {
+  padding-inline-start: 22px;
+}
+.orbit-editor ul {
+  list-style: disc;
+}
+.orbit-editor ol {
+  list-style: decimal;
+}
+.orbit-editor li + li {
+  margin-top: 4px;
+}
+.orbit-editor blockquote {
+  border-inline-start: 2px solid var(--border-strong);
+  padding-inline-start: 14px;
+  color: var(--text-2);
+}
+.orbit-editor strong {
+  font-weight: 600;
+}
+.orbit-editor ::selection {
+  background-color: var(--signal);
+  color: var(--signal-ink);
+}
+.orbit-editor .placeholder-token {
+  background: var(--warning-bg);
+  color: var(--warning);
+  border-radius: 3px;
+}
