@@ -122,8 +122,18 @@ export const handlers = [
     await delay(600);
     const { decision } = (await request.json()) as { decision: "approve" | "reject" };
     const message = agentThread.messages.find((m) => m.approval?.id === params.approvalId);
-    if (!message?.approval) return problem(404, "approval_not_found", "Approval not found");
-    message.approval = { ...message.approval, status: decision === "approve" ? "approved" : "rejected" };
+    const status = decision === "approve" ? ("approved" as const) : ("rejected" as const);
+    // Approvals raised outside the agent thread (audit fixes, action plan) are UI-stage only.
+    if (!message?.approval) {
+      return HttpResponse.json({
+        id: String(params.approvalId),
+        title: "",
+        status,
+        items: [],
+        channels: ["web" as const],
+      });
+    }
+    message.approval = { ...message.approval, status };
     return HttpResponse.json(message.approval);
   }),
 ];

@@ -22,6 +22,19 @@ export function getMockJob(id: string): Job {
   if (!started.has(id)) started.set(id, Date.now());
   const elapsed = (Date.now() - (started.get(id) ?? Date.now())) / 1000;
 
+  if (id.startsWith("job_audit") || id.startsWith("job_fix")) {
+    const total = id.startsWith("job_audit") ? 30 : 15;
+    const progress = Math.min(1, elapsed / total);
+    return {
+      id,
+      type: id.startsWith("job_audit") ? "audit" : "fix",
+      status: progress >= 1 ? "done" : "running",
+      progress,
+      etaSeconds: Math.max(0, Math.round(total - elapsed)),
+      steps: [{ key: "pages", status: progress >= 1 ? "done" : "running", progress }],
+    };
+  }
+
   if (id.startsWith("job_article")) {
     const total = 90;
     const progress = Math.min(1, elapsed / total);

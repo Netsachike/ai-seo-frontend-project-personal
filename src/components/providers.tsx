@@ -6,8 +6,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { Direction } from "radix-ui";
 
-import { dirFor } from "@/i18n/config";
-import { setClientCookie } from "@/lib/cookies";
+import { TIMEZONE_COOKIE, dirFor } from "@/i18n/config";
+import { readClientCookie, setClientCookie } from "@/lib/cookies";
 import { THEME_COOKIE, type ThemePreference } from "@/lib/theme";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
@@ -44,6 +44,15 @@ function ThemeCookieSync() {
   return null;
 }
 
+/** Mirrors the browser time zone so server-rendered times and greetings match the user's clock. */
+function TimeZoneCookieSync() {
+  React.useEffect(() => {
+    const zone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    if (zone && readClientCookie(TIMEZONE_COOKIE) !== zone) setClientCookie(TIMEZONE_COOKIE, zone);
+  }, []);
+  return null;
+}
+
 export function Providers({
   children,
   locale,
@@ -65,6 +74,7 @@ export function Providers({
       storageKey={THEME_COOKIE}
     >
       <ThemeCookieSync />
+      <TimeZoneCookieSync />
       <QueryClientProvider client={queryClient}>
         <NuqsAdapter>
           <Direction.Provider dir={dir}>

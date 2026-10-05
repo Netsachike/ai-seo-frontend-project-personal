@@ -41,7 +41,9 @@ export function ApprovalCard({
           body: { decision },
         }),
       ),
-    onSuccess: (next) => {
+    onSuccess: (result) => {
+      // Only the status comes back; the card keeps its own title and items.
+      const next = { ...approval, status: result.status };
       setDecided(next);
       onDecided?.(next);
       toast.success(next.status === "approved" ? t("approvedToast") : t("rejectedToast"));
