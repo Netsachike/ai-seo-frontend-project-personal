@@ -47,7 +47,7 @@ export function ContextSwitcher() {
     return (
       <div className="flex items-center gap-2">
         <Skeleton className="size-6 rounded-[6px]" />
-        <Skeleton className="h-4 w-36" />
+        <Skeleton className="h-4 w-20 sm:w-36" />
       </div>
     );
   }

@@ -94,7 +94,12 @@ export const handlers = [
   }),
 
   http.post(url("/agent/messages"), async ({ request }) => {
-    const { text } = (await request.json()) as { text: string; locale: string };
+    const { text, locale } = (await request.json()) as { text: string; locale: string };
+    // Orbit answers in the user's UI language (UI-stage: en and ar only).
+    const reply =
+      locale === "ar"
+        ? "أتحقق من ذلك الآن. سأنشر الأرقام هنا وعلى تيليجرام عند انتهاء إعادة الفحص."
+        : "I'm checking that now. I'll post the numbers here and on Telegram when the recheck finishes.";
     const now = Date.now();
     const userMessage = {
       id: `msg_${now}`,
@@ -110,7 +115,7 @@ export const handlers = [
       role: "agent",
       createdAt: new Date(now + 1500).toISOString(),
       source: "web",
-      body: "I'm checking that now. I'll post the numbers here and on Telegram when the recheck finishes.",
+      body: reply,
       approval: null,
       task: null,
     });

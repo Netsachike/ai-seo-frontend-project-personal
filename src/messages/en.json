@@ -111,7 +111,8 @@
     "loadError": "We couldn't load the conversation. Try again in a moment.",
     "composerLabel": "Message Orbit",
     "composerPlaceholder": "Ask about rankings, competitors or content",
-    "send": "Send"
+    "send": "Send",
+    "typing": "Orbit is writing a reply"
   },
   "forms": {
     "readOnly": "Read only",
@@ -1161,5 +1162,180 @@
       "askHelp": "Ask Orbit for help",
       "helpPrompt": "Help me fix this audit issue: \"{title}\". Give me the exact steps for my setup."
     }
+  },
+  "actions": {
+    "title": "Action plan",
+    "description": "What to do next, ranked by impact. Orbit handles its part; the rest is yours.",
+    "approveAll": "Approve all {count} from Orbit",
+    "approvedAll": "Approved {count, plural, one {# change} other {# changes}}. Orbit is on it.",
+    "confirmTitle": "Approve {count, plural, one {# change} other {# changes}} from Orbit?",
+    "confirmDescription": "These change your live site. Orbit starts right away and tells you when each one is live.",
+    "cancel": "Cancel",
+    "emptyTitle": "No actions yet",
+    "emptyDescription": "Nothing here yet. Your first scan finishes in about 3 minutes, then Orbit builds your plan.",
+    "projected": "Projected AI visibility: <strong>{current}</strong> → <strong>{projected}</strong> when this plan is done",
+    "projectedAria": "Visibility score {current} now, {projected} projected",
+    "gain": "+{points} pts",
+    "columns": {
+      "approval": "Needs your approval",
+      "working": "Orbit is working on",
+      "yours": "You need to do",
+      "done": "Done this week"
+    },
+    "emptyColumn": {
+      "approval": "Nothing waiting for you.",
+      "working": "Orbit is idle. Approve something to get it started.",
+      "yours": "Nothing on your list.",
+      "done": "Finished work shows up here."
+    },
+    "areas": {
+      "content": "Content",
+      "technical": "Technical",
+      "schema": "Schema",
+      "outreach": "Outreach"
+    },
+    "impact": {
+      "high": "High impact",
+      "medium": "Medium impact",
+      "low": "Low impact"
+    },
+    "effort": {
+      "low": "Low effort",
+      "medium": "Medium effort",
+      "high": "High effort"
+    },
+    "points": "+{points} pts",
+    "progress": "{percent} done",
+    "markDone": "Mark done",
+    "markedDone": "Nice. Orbit will check the result in the next scan.",
+    "open": "Open"
+  },
+  "content": {
+    "title": "Content",
+    "description": "Your plan for {month}: {count, plural, one {# article} other {# articles}}, {published} published, {waiting} waiting for you.",
+    "descriptionEmpty": "Nothing planned for {month} yet.",
+    "viewLabel": "View",
+    "calendar": "Calendar",
+    "list": "List",
+    "plan": "Plan {month}",
+    "planned": "Orbit is planning {month}. Drafts show up here as they're ready.",
+    "prevMonth": "Previous month",
+    "nextMonth": "Next month",
+    "legend": "Status legend",
+    "status": {
+      "published": "Published",
+      "scheduled": "Scheduled",
+      "needsApproval": "Needs approval",
+      "draft": "Draft"
+    },
+    "emptyTitle": "Nothing planned for {month}",
+    "emptyDescription": "Ask Orbit to plan the month. It picks topics from questions you miss and keywords close to page one.",
+    "thisMonth": "This month",
+    "articlesPlanned": "Articles planned",
+    "avgScore": "Avg. content score",
+    "why": "Orbit picked these from 9 questions you miss in AI answers and 14 keywords close to page one.",
+    "waitingTitle": "Waiting for you",
+    "waitingDescription": "Approve to keep the schedule",
+    "waitingEmpty": "Nothing to review.",
+    "waitingMeta": "Score {score} · publishes {date} once approved",
+    "table": {
+      "caption": "Planned articles",
+      "title": "Title",
+      "status": "Status",
+      "date": "Publish date",
+      "score": "Score",
+      "keyword": "Target keyword"
+    }
+  },
+  "editor": {
+    "metaTitlePage": "Article",
+    "breadcrumb": "Breadcrumb",
+    "writtenIn": "Written in {language}",
+    "byline": "Written by Orbit · {words} words · saved {when}",
+    "reject": "Reject",
+    "revise": "Ask Orbit to revise",
+    "approve": "Approve and schedule",
+    "scheduledToast": "Scheduled for {date}. Orbit publishes it and tells you when it's live.",
+    "placeholders": "Replace {count, plural, one {the placeholder} other {# placeholders}} before publishing: <code>{list}</code>. Orbit leaves these where it needs a fact from you.",
+    "shortAnswer": "Short answer",
+    "shortAnswerHelp": "AI engines quote this first. Keep it to 2–3 sentences.",
+    "bodyLabel": "Article body",
+    "score": "Content score",
+    "checksPassed": "{passed} of {total} checks passed",
+    "passed": "passed",
+    "toImprove": "to improve",
+    "checklist": {
+      "shortAnswer": "Answers the question in the first 3 sentences",
+      "keyword": "Target keyword in the title and first heading",
+      "headings": "Clear H2 sections",
+      "length": "Long enough to cover the topic",
+      "sources": "Cites at least 2 outside sources",
+      "faq": "Has an FAQ block",
+      "links": "Links to 3 related pages"
+    },
+    "publishTitle": "Publishing",
+    "metaTitle": "Meta title",
+    "metaTooLong": "Keep it under {max} characters so Google doesn't cut it off.",
+    "counter": "{count}/{max}",
+    "url": "URL",
+    "urlHelper": "Published at {domain}/",
+    "target": "Publish to",
+    "targetWordpress": "WordPress · {domain}",
+    "date": "Date",
+    "time": "Time",
+    "notify": "Tell me on Telegram when it's live",
+    "rejectTitle": "Reject this article?",
+    "rejectDescription": "Orbit removes it from the plan and won't publish it. You can ask for a new draft later.",
+    "keep": "Keep it",
+    "rejectedToast": "Article rejected. Orbit took it off the plan.",
+    "reviseTitle": "Ask Orbit to revise",
+    "reviseDescription": "Say what to change. Orbit sends a new draft in a few minutes.",
+    "reviseLabel": "What should change?",
+    "revisePlaceholder": "Make the price section shorter and add our free-shipping threshold.",
+    "reviseRequired": "Tell Orbit what to change.",
+    "reviseSubmit": "Send to Orbit",
+    "revisingToast": "Orbit is revising. The new draft will be here in about 2 minutes.",
+    "toolbar": {
+      "label": "Formatting",
+      "h2": "Heading",
+      "h3": "Subheading",
+      "bold": "Bold",
+      "italic": "Italic",
+      "bullet": "Bulleted list",
+      "ordered": "Numbered list",
+      "quote": "Quote",
+      "undo": "Undo",
+      "redo": "Redo"
+    }
+  },
+  "agentPage": {
+    "title": "Ask Orbit",
+    "description": "Ask about rankings, competitors or content. Same conversation as Telegram.",
+    "suggestions": {
+      "week": "How did we do this week?",
+      "gained": "Who gained on us?",
+      "plan": "Plan next month's articles"
+    },
+    "canTitle": "Orbit can",
+    "can": {
+      "rankings": "Check rankings in Google and 5 AI engines",
+      "compare": "Compare you with competitors",
+      "write": "Write, optimize and publish articles",
+      "fix": "Fix meta tags and schema on your site",
+      "outreach": "Draft outreach for backlinks you send"
+    },
+    "telegramTitle": "Telegram",
+    "connected": "Connected",
+    "notConnected": "Not connected",
+    "telegramOn": "Message {bot} from your phone. Approvals work in both places.",
+    "telegramOff": "Connect Telegram to approve work and ask questions from your phone.",
+    "connect": "Connect Telegram",
+    "tasksTitle": "Open tasks",
+    "tasksEmpty": "No open tasks.",
+    "taskStatus": {
+      "waiting": "Waiting",
+      "working": "Working"
+    },
+    "openPlan": "Open action plan"
   }
 }

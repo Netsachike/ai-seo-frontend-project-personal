@@ -381,3 +381,56 @@
     transform: none;
   }
 }
+
+/* Article editor (Tiptap). Token-driven so it follows the theme. */
+.orbit-editor {
+  color: var(--text);
+  font-size: 16px;
+  line-height: 26px;
+}
+.orbit-editor > * + * {
+  margin-top: 14px;
+}
+.orbit-editor h2 {
+  font-size: 22px;
+  line-height: 30px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin-top: 28px;
+}
+.orbit-editor h3 {
+  font-size: 17px;
+  line-height: 26px;
+  font-weight: 600;
+  margin-top: 22px;
+}
+.orbit-editor ul,
+.orbit-editor ol {
+  padding-inline-start: 22px;
+}
+.orbit-editor ul {
+  list-style: disc;
+}
+.orbit-editor ol {
+  list-style: decimal;
+}
+.orbit-editor li + li {
+  margin-top: 4px;
+}
+.orbit-editor blockquote {
+  border-inline-start: 2px solid var(--border-strong);
+  padding-inline-start: 14px;
+  color: var(--text-2);
+}
+.orbit-editor strong {
+  font-weight: 600;
+}
+.orbit-editor ::selection {
+  background-color: var(--signal);
+  color: var(--signal-ink);
+}
+.orbit-editor .placeholder-token {
+  background: var(--warning-bg);
+  color: var(--warning);
+  border-radius: 3px;
+}
