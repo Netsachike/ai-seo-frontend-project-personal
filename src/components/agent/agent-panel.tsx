@@ -165,7 +165,7 @@ export function AgentThreadView({ workspaceId, dense = false }: { workspaceId: s
               if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) submit(e);
             }}
             placeholder={t("composerPlaceholder")}
-            className="min-h-11 flex-1 resize-none bg-transparent py-1 text-body text-fg outline-hidden placeholder:text-fg-3 focus-visible:outline-none"
+            className="min-h-11 flex-1 resize-none bg-transparent py-1 text-body text-fg outline-hidden placeholder:text-fg-3 focus-visible:outline-none!"
           />
           <Button
             type="submit"

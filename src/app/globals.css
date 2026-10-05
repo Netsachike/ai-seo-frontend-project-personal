@@ -38,6 +38,8 @@
   --color-chart-c: var(--chart-c);
   --color-chart-other: var(--chart-other);
   --color-chart-grid: var(--border);
+  --color-qr-bg: var(--qr-bg);
+  --color-qr-fg: var(--qr-fg);
 
   /* shadcn semantic names mapped onto Orbit tokens, so primitives inherit the palette */
   --color-background: var(--surface);
@@ -123,6 +125,10 @@
   --elev-pop: 0 8px 24px -4px rgb(15 18 24 / 0.12), 0 0 0 1px var(--border);
   --elev-raised: 0 1px 2px rgb(15 18 24 / 0.06), 0 0 0 1px var(--border);
   --overlay: rgb(15 18 24 / 0.32);
+
+  /* QR codes stay dark on light in both themes so phones can scan them */
+  --qr-bg: #ffffff;
+  --qr-fg: #0f1218;
 }
 
 .dark {

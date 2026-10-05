@@ -649,5 +649,163 @@
       "codeIncomplete": "Enter all 6 digits.",
       "codeInvalid": "That code doesn't match. Check the latest email or send a new code."
     }
+  },
+  "autopilot": {
+    "label": "Autopilot mode",
+    "recommended": "Default",
+    "ask": {
+      "title": "Ask me first",
+      "description": "Orbit drafts articles and fixes. Nothing goes live until you approve it."
+    },
+    "content": {
+      "title": "Auto-publish content",
+      "description": "Articles publish on schedule. Changes to your site still need your approval."
+    },
+    "full": {
+      "title": "Full autopilot",
+      "description": "Orbit publishes and fixes on its own and sends you a summary after each change."
+    }
+  },
+  "integrationStatus": {
+    "connected": "Connected",
+    "notConnected": "Not connected",
+    "comingSoon": "Coming soon",
+    "connecting": "Connecting"
+  },
+  "onboarding": {
+    "progressLabel": "Setup progress",
+    "stepOf": "Step {step} of {total}",
+    "stepDone": "(done)",
+    "saveExit": "Save and exit",
+    "back": "Back",
+    "continue": "Continue",
+    "steps": {
+      "brand": "Brand",
+      "competitors": "Competitors",
+      "keywords": "Keywords",
+      "connect": "Connect",
+      "scan": "First scan"
+    },
+    "brand": {
+      "title": "What are we growing?",
+      "description": "Add your website and Orbit will learn your brand, products and audience.",
+      "hint": "About 4 minutes to finish setup",
+      "website": "Website",
+      "domainInvalid": "Enter a domain like yourbrand.com.",
+      "reading": "Reading your site",
+      "readingLong": "Reading your homepage, product pages and blog. This takes a few seconds.",
+      "read": "Read {pages, plural, one {# page} other {# pages}}",
+      "learned": "Here's what Orbit learned. Fix anything that's off.",
+      "name": "Brand name",
+      "nameRequired": "Enter your brand name.",
+      "industry": "Industry",
+      "market": "Main market",
+      "contentLanguage": "Content language",
+      "contentLanguageHelper": "What Orbit writes in and which answers it tracks. Your interface language is separate.",
+      "descriptionLabel": "What you sell, in one line",
+      "descriptionHelper": "Orbit uses this to pick the questions your customers ask AI engines.",
+      "descriptionPlaceholder": "Small-batch coffee roasted to order and sold by subscription.",
+      "industries": {
+        "foodDrink": "Food and drink",
+        "retail": "Retail and e-commerce",
+        "saas": "Software",
+        "health": "Health and wellness",
+        "travel": "Travel and hospitality",
+        "finance": "Finance",
+        "education": "Education",
+        "other": "Something else"
+      }
+    },
+    "competitors": {
+      "title": "Who are you up against?",
+      "description": "We found these from your search results. Keep up to {max}.",
+      "selected": "{count} of {max} selected",
+      "shared": "{count, plural, one {Shares # keyword} other {Shares # keywords}}",
+      "addedByYou": "Added by you",
+      "limitNote": "You've picked {max}. Turn one off to add another.",
+      "limitReached": "You can track up to {max}. Turn one off first.",
+      "addLabel": "Add a competitor",
+      "addHelper": "Paste their website. We'll find their name.",
+      "addPlaceholder": "competitor.com",
+      "add": "Add",
+      "domainInvalid": "Enter a domain like competitor.com.",
+      "duplicate": "That competitor is already on the list."
+    },
+    "keywords": {
+      "title": "What should people find you for?",
+      "description": "Pick the keywords and questions your customers ask. We suggested {count}.",
+      "meter": "{total} of {limit} selected",
+      "meterLabel": "Keywords and questions selected",
+      "planNote": "Left on your {plan} plan this month",
+      "planNoteGeneric": "Left on your plan this month",
+      "overLimit": "Remove {count, plural, one {# item} other {# items}} to stay within your plan.",
+      "keywordsTitle": "Google keywords",
+      "keywordsCaption": "Tracked daily in Google results",
+      "questionsTitle": "AI questions",
+      "questionsCaption": "Asked to 5 AI engines in every scan",
+      "selectAll": "Select all",
+      "clear": "Clear",
+      "custom": "Yours",
+      "volume": "{volume}/mo",
+      "volumeTitle": "Monthly Google searches",
+      "addKeyword": "Add a keyword",
+      "addKeywordPlaceholder": "Add a keyword",
+      "addQuestion": "Add a question",
+      "addQuestionPlaceholder": "Add a question",
+      "add": "Add"
+    },
+    "connect": {
+      "title": "Where should Orbit work?",
+      "description": "Connect Telegram to talk to Orbit, and your site so it can publish.",
+      "startScan": "Start first scan",
+      "skipHint": "You can connect these later in Integrations.",
+      "connect": "Connect",
+      "talkTitle": "Talk to Orbit",
+      "publishTitle": "Publish and measure",
+      "telegram": {
+        "name": "Telegram",
+        "description": "Get updates, approve changes and ask questions from your phone.",
+        "connectedAs": "Connected as @{handle}",
+        "qrLabel": "QR code that opens Orbit in Telegram",
+        "step1": "Scan the code or press Connect Telegram.",
+        "step2": "Press Start in the chat with Orbit.",
+        "step3": "Come back here. We'll confirm the connection.",
+        "connect": "Connect Telegram",
+        "orCode": "or send the code",
+        "copyAria": "Copy code {code}",
+        "copied": "Code copied",
+        "copyFailed": "We couldn't copy the code. Select it and copy it instead.",
+        "waiting": "Waiting for you to press Start in Telegram."
+      },
+      "wordpress": {
+        "name": "WordPress",
+        "description": "Orbit publishes approved articles and on-page fixes to your site."
+      },
+      "searchConsole": {
+        "name": "Google Search Console",
+        "description": "Real clicks and impressions, so rankings come from Google's own data."
+      },
+      "autopilotTitle": "How much should Orbit do on its own?",
+      "autopilotDescription": "You can change this anytime in Settings."
+    },
+    "scan": {
+      "title": "Running your first scan",
+      "doneTitle": "Your first scan is ready",
+      "description": "Asking {engines} AI engines {questions} questions about your market. This takes about 3 minutes.",
+      "dashboard": "Go to dashboard",
+      "telegramHint": "Orbit will also message you on Telegram when it's done.",
+      "leaveHint": "You can leave this page. The scan keeps running.",
+      "running": "Scanning",
+      "complete": "Scan complete",
+      "progress": "{percent} · about {minutes, plural, one {# minute} other {# minutes}} left",
+      "progressLabel": "Scan progress",
+      "summary": "Mentioned in {mentioned} of {answers} answers",
+      "queued": "Waiting",
+      "failed": "Didn't answer",
+      "mentioned": "Mentioned in {mentioned} of {questions}",
+      "engineDown": "We couldn't reach {engine} this time. We'll retry at {time}; other engines are up to date.",
+      "orbitPartial": "{engines, plural, one {One engine has} other {# engines have}} answered. Your dashboard fills in as the rest finish.",
+      "orbitDone": "You showed up in {mentioned} answers. I've already found a few quick wins; they're waiting in your action plan."
+    }
   }
 }

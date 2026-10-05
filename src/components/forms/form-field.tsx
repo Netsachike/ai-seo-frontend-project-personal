@@ -138,7 +138,7 @@ export function DomainInput({
         value={value}
         onChange={(e) => onChange(normalizeDomain(e.target.value))}
         placeholder={props.placeholder ?? t("domainPlaceholder")}
-        className="min-w-0 flex-1 bg-transparent px-3 font-mono text-[14px] text-fg outline-hidden placeholder:text-fg-3 focus-visible:outline-none"
+        className="min-w-0 flex-1 bg-transparent px-3 font-mono text-[14px] text-fg outline-hidden placeholder:text-fg-3 focus-visible:outline-none!"
       />
       {status && <span className="flex shrink-0 items-center gap-1.5 pe-3 text-small font-medium">{status}</span>}
     </div>

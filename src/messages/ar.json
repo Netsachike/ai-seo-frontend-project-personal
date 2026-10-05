@@ -640,5 +640,161 @@
       "codeIncomplete": "أدخل الأرقام الستة كلها.",
       "codeInvalid": "الرمز غير مطابق. تحقق من أحدث رسالة أو اطلب رمزًا جديدًا."
     }
+  },
+  "autopilot": {
+    "label": "وضع التشغيل التلقائي",
+    "recommended": "افتراضي",
+    "ask": {
+      "title": "اسألني أولًا",
+      "description": "يُعدّ Orbit المقالات والإصلاحات. لا يُنشر شيء قبل موافقتك."
+    },
+    "content": {
+      "title": "نشر المحتوى تلقائيًا",
+      "description": "تُنشر المقالات حسب الجدول. التغييرات على موقعك ما زالت تحتاج موافقتك."
+    },
+    "full": {
+      "title": "تشغيل تلقائي كامل",
+      "description": "ينشر Orbit ويصلح بنفسه ويرسل لك ملخصًا بعد كل تغيير."
+    }
+  },
+  "integrationStatus": {
+    "connected": "متصل",
+    "notConnected": "غير متصل",
+    "comingSoon": "قريبًا",
+    "connecting": "جارٍ الاتصال"
+  },
+  "onboarding": {
+    "progressLabel": "تقدم الإعداد",
+    "stepOf": "الخطوة {step} من {total}",
+    "stepDone": "(مكتملة)",
+    "saveExit": "حفظ وخروج",
+    "back": "رجوع",
+    "continue": "متابعة",
+    "steps": {
+      "brand": "العلامة التجارية",
+      "competitors": "المنافسون",
+      "keywords": "الكلمات المفتاحية",
+      "connect": "الربط",
+      "scan": "الفحص الأول"
+    },
+    "brand": {
+      "title": "ما الذي سننمّيه؟",
+      "description": "أضف موقعك وسيتعرف Orbit على علامتك ومنتجاتك وجمهورك.",
+      "hint": "حوالي 4 دقائق لإنهاء الإعداد",
+      "website": "الموقع الإلكتروني",
+      "domainInvalid": "أدخل نطاقًا مثل yourbrand.com.",
+      "reading": "جارٍ قراءة موقعك",
+      "readingLong": "نقرأ صفحتك الرئيسية وصفحات المنتجات والمدونة. يستغرق ذلك بضع ثوانٍ.",
+      "read": "تمت قراءة {pages, plural, one {صفحة واحدة} other {# صفحة}}",
+      "learned": "هذا ما تعلّمه Orbit. صحّح أي شيء غير دقيق.",
+      "name": "اسم العلامة التجارية",
+      "nameRequired": "أدخل اسم علامتك التجارية.",
+      "industry": "القطاع",
+      "market": "السوق الرئيسي",
+      "contentLanguage": "لغة المحتوى",
+      "contentLanguageHelper": "اللغة التي يكتب بها Orbit والإجابات التي يتتبعها. لغة الواجهة إعداد منفصل.",
+      "descriptionLabel": "ما تبيعه، في سطر واحد",
+      "descriptionHelper": "يستخدم Orbit هذا لاختيار الأسئلة التي يطرحها عملاؤك على محركات الذكاء الاصطناعي.",
+      "industries": {
+        "foodDrink": "الأطعمة والمشروبات",
+        "retail": "التجزئة والتجارة الإلكترونية",
+        "saas": "البرمجيات",
+        "health": "الصحة والعافية",
+        "travel": "السفر والضيافة",
+        "finance": "المالية",
+        "education": "التعليم",
+        "other": "شيء آخر"
+      }
+    },
+    "competitors": {
+      "title": "من تنافس؟",
+      "description": "وجدنا هؤلاء من نتائج البحث الخاصة بك. احتفظ بما يصل إلى {max}.",
+      "selected": "تم اختيار {count} من {max}",
+      "shared": "{count, plural, one {يشترك في كلمة واحدة} other {يشترك في # كلمة}}",
+      "addedByYou": "أضفته أنت",
+      "limitNote": "اخترت {max}. ألغِ أحدهم لإضافة آخر.",
+      "limitReached": "يمكنك تتبّع {max} كحد أقصى. ألغِ أحدهم أولًا.",
+      "addLabel": "إضافة منافس",
+      "addHelper": "الصق موقعه. سنعرف اسمه.",
+      "add": "إضافة",
+      "domainInvalid": "أدخل نطاقًا مثل competitor.com.",
+      "duplicate": "هذا المنافس موجود بالفعل في القائمة."
+    },
+    "keywords": {
+      "title": "بماذا يجب أن يجدك الناس؟",
+      "description": "اختر الكلمات المفتاحية والأسئلة التي يطرحها عملاؤك. اقترحنا {count}.",
+      "meter": "تم اختيار {total} من {limit}",
+      "meterLabel": "الكلمات المفتاحية والأسئلة المختارة",
+      "planNote": "المتبقي في خطة {plan} هذا الشهر",
+      "planNoteGeneric": "المتبقي في خطتك هذا الشهر",
+      "overLimit": "أزل {count, plural, one {عنصرًا واحدًا} other {# عناصر}} لتبقى ضمن خطتك.",
+      "keywordsTitle": "كلمات Google المفتاحية",
+      "keywordsCaption": "تُتتبع يوميًا في نتائج Google",
+      "questionsTitle": "أسئلة الذكاء الاصطناعي",
+      "questionsCaption": "تُطرح على 5 محركات في كل فحص",
+      "selectAll": "تحديد الكل",
+      "clear": "مسح",
+      "custom": "من إضافتك",
+      "volume": "{volume}/شهر",
+      "volumeTitle": "عمليات البحث الشهرية في Google",
+      "addKeyword": "إضافة كلمة مفتاحية",
+      "addKeywordPlaceholder": "إضافة كلمة مفتاحية",
+      "addQuestion": "إضافة سؤال",
+      "addQuestionPlaceholder": "إضافة سؤال",
+      "add": "إضافة"
+    },
+    "connect": {
+      "title": "أين يجب أن يعمل Orbit؟",
+      "description": "اربط تيليجرام للتحدث مع Orbit، واربط موقعك ليتمكن من النشر.",
+      "startScan": "بدء الفحص الأول",
+      "skipHint": "يمكنك ربط هذه لاحقًا من صفحة التكاملات.",
+      "connect": "ربط",
+      "talkTitle": "تحدث مع Orbit",
+      "publishTitle": "النشر والقياس",
+      "telegram": {
+        "name": "تيليجرام",
+        "description": "احصل على التحديثات ووافق على التغييرات واطرح الأسئلة من هاتفك.",
+        "connectedAs": "متصل باسم ‎@{handle}",
+        "qrLabel": "رمز QR يفتح Orbit في تيليجرام",
+        "step1": "امسح الرمز أو اضغط «ربط تيليجرام».",
+        "step2": "اضغط «ابدأ» في المحادثة مع Orbit.",
+        "step3": "عُد إلى هنا. سنؤكد الاتصال.",
+        "connect": "ربط تيليجرام",
+        "orCode": "أو أرسل الرمز",
+        "copyAria": "نسخ الرمز {code}",
+        "copied": "تم نسخ الرمز",
+        "copyFailed": "تعذّر نسخ الرمز. حدده وانسخه يدويًا.",
+        "waiting": "بانتظار ضغطك على «ابدأ» في تيليجرام."
+      },
+      "wordpress": {
+        "name": "WordPress",
+        "description": "ينشر Orbit المقالات المعتمدة والإصلاحات على موقعك."
+      },
+      "searchConsole": {
+        "name": "Google Search Console",
+        "description": "نقرات ومرات ظهور حقيقية، ليأتي الترتيب من بيانات Google نفسها."
+      },
+      "autopilotTitle": "ما مقدار ما يجب أن يفعله Orbit بنفسه؟",
+      "autopilotDescription": "يمكنك تغيير هذا في أي وقت من الإعدادات."
+    },
+    "scan": {
+      "title": "جارٍ تشغيل فحصك الأول",
+      "doneTitle": "فحصك الأول جاهز",
+      "description": "نطرح {questions} سؤالًا عن سوقك على {engines} محركات ذكاء اصطناعي. يستغرق ذلك حوالي 3 دقائق.",
+      "dashboard": "الانتقال إلى لوحة التحكم",
+      "telegramHint": "سيراسلك Orbit أيضًا على تيليجرام عند الانتهاء.",
+      "leaveHint": "يمكنك مغادرة هذه الصفحة. يستمر الفحص.",
+      "running": "جارٍ الفحص",
+      "complete": "اكتمل الفحص",
+      "progress": "{percent} · تبقّى حوالي {minutes, plural, one {دقيقة} other {# دقائق}}",
+      "progressLabel": "تقدم الفحص",
+      "summary": "مذكور في {mentioned} من {answers} إجابة",
+      "queued": "في الانتظار",
+      "failed": "لم يُجب",
+      "mentioned": "مذكور في {mentioned} من {questions}",
+      "engineDown": "تعذّر الوصول إلى {engine} هذه المرة. سنعيد المحاولة في {time}؛ المحركات الأخرى محدّثة.",
+      "orbitPartial": "{engines, plural, one {أجاب محرك واحد} other {أجابت # محركات}}. تمتلئ لوحة التحكم مع انتهاء البقية.",
+      "orbitDone": "ظهرت في {mentioned} إجابة. وجدت بالفعل بعض المكاسب السريعة؛ إنها بانتظارك في خطة العمل."
+    }
   }
 }
