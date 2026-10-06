@@ -6,7 +6,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 
 import type { Brand } from "@/lib/api/types";
-import { api, unwrap } from "@/lib/api/client";
+import { listBrands } from "@/lib/mocks/store";
 import { workspaceKeys } from "@/lib/api/query-keys";
 import { useUiStore } from "@/lib/store/ui";
 import { useWorkspaces } from "@/features/workspace/hooks";
@@ -32,10 +32,7 @@ export function RootRedirect() {
       if (!slug) {
         const brands = await queryClient.fetchQuery<Brand[]>({
           queryKey: workspaceKeys.brands(workspace.id),
-          queryFn: async () =>
-            unwrap(
-              await api.GET("/workspaces/{workspaceId}/brands", { params: { path: { workspaceId: workspace.id } } }),
-            ),
+          queryFn: () => listBrands(workspace.id),
         });
         slug = brands[0]?.slug ?? null;
       }

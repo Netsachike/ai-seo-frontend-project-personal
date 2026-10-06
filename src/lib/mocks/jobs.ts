@@ -1,17 +1,18 @@
 import type { Engine, Job } from "@/lib/api/types";
 
 /**
- * Jobs advance with wall-clock time from their first poll, so progress is
- * real and identical across the server and browser mock instances.
+ * UI mock jobs. They advance with wall-clock time from their first poll, so
+ * progress bars move for real. A scan takes about 45 s so the onboarding demo
+ * stays watchable.
  */
 const started = new Map<string, number>();
 
 const scanEngines: { engine: Engine; seconds: number; fails?: boolean }[] = [
-  { engine: "gemini", seconds: 40 },
-  { engine: "chatgpt", seconds: 70 },
-  { engine: "perplexity", seconds: 95 },
-  { engine: "claude", seconds: 130 },
-  { engine: "aio", seconds: 160, fails: true },
+  { engine: "gemini", seconds: 14 },
+  { engine: "chatgpt", seconds: 22 },
+  { engine: "perplexity", seconds: 30 },
+  { engine: "claude", seconds: 38 },
+  { engine: "aio", seconds: 45, fails: true },
 ];
 
 export function resetJob(id: string) {

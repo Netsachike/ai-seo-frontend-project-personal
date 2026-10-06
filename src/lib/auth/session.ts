@@ -3,6 +3,9 @@ import { setClientCookie } from "@/lib/cookies";
 /** proxy.ts only checks that this cookie exists. The real API will set it (httpOnly) on sign-in. */
 export const SESSION_COOKIE = "orbit_session";
 
+/** Where every login lands: the full onboarding flow, then the dashboard. */
+export const ONBOARDING_START = "/onboarding/brand";
+
 /** Routes that never need a session. */
 export const PUBLIC_PATHS = ["/sign-in", "/sign-up", "/forgot-password", "/verify"] as const;
 /** Signed-in users who open these are sent into the app instead. */

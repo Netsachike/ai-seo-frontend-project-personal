@@ -8,8 +8,8 @@ export async function generateMetadata() {
   return { title: t("title") };
 }
 
-/** Internal component gallery. Available while mocks are on (local and preview builds). */
+/** Internal component gallery. Development builds only. */
 export default function ComponentsPage() {
-  if (process.env.NEXT_PUBLIC_API_MOCKING !== "enabled") notFound();
+  if (process.env.NODE_ENV === "production") notFound();
   return <Gallery />;
 }

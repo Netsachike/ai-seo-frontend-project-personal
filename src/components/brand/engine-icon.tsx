@@ -4,8 +4,9 @@ import { useTranslations } from "next-intl";
 
 import type { Engine } from "@/lib/api/types";
 import { cn } from "@/lib/utils";
+import { PlatformLogo, platformLogos } from "./platform-logo";
 
-/** Neutral monograms until official marks are licensed. Not translated. */
+/** Monograms for engines without a logo file. Not translated. */
 export const engineMonogram: Record<Engine, string> = {
   chatgpt: "GPT",
   gemini: "GEM",
@@ -27,6 +28,7 @@ export function EngineIcon({
   decorative?: boolean;
 }) {
   const t = useTranslations("engines");
+  const logo = Boolean(platformLogos[engine]);
   return (
     <span
       role={decorative ? undefined : "img"}
@@ -34,13 +36,14 @@ export function EngineIcon({
       aria-label={decorative ? undefined : t(engine)}
       translate="no"
       className={cn(
-        "grid shrink-0 place-items-center rounded-[6px] border border-border bg-surface-2 font-mono leading-none font-medium text-fg-2",
+        "grid shrink-0 place-items-center rounded-[6px] border border-border font-mono leading-none font-medium text-fg-2",
+        logo ? "bg-surface" : "bg-surface-2",
         size <= 24 ? "text-[9px]" : "text-[10px]",
         className,
       )}
       style={{ width: size, height: size }}
     >
-      {engineMonogram[engine]}
+      {logo ? <PlatformLogo platform={engine} size={Math.round(size * 0.66)} /> : engineMonogram[engine]}
     </span>
   );
 }

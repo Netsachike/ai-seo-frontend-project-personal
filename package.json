@@ -9,8 +9,7 @@
         "lint": "eslint && node scripts/check-i18n.mjs",
         "lint:i18n": "node scripts/check-i18n.mjs",
         "typecheck": "tsc --noEmit",
-        "format": "prettier --write .",
-        "api:types": "openapi-typescript src/lib/api/openapi.yaml -o src/lib/api/schema.d.ts"
+        "format": "prettier --write ."
     },
     "dependencies": {
         "@hookform/resolvers": "^5.9.1",
@@ -30,7 +29,6 @@
         "next-intl": "^4.14.9",
         "next-themes": "^0.4.6",
         "nuqs": "^2.10.1",
-        "openapi-fetch": "^0.17.0",
         "qrcode.react": "^4.2.0",
         "radix-ui": "^1.6.7",
         "react": "19.2.8",
@@ -56,16 +54,9 @@
         "@types/react-dom": "^19",
         "eslint": "^9",
         "eslint-config-next": "16.3.8",
-        "msw": "^3.0.2",
-        "openapi-typescript": "^7.13.0",
         "prettier": "^3.9.9",
         "prettier-plugin-tailwindcss": "^0.8.1",
         "tailwindcss": "^4",
         "typescript": "^5"
-    },
-    "msw": {
-        "workerDirectory": [
-            "public"
-        ]
     }
 }

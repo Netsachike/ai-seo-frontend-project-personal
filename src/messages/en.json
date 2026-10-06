@@ -25,7 +25,9 @@
     "claude": "Claude",
     "aio": "AI Overviews",
     "all": "All engines",
-    "allMonogram": "ALL"
+    "allMonogram": "ALL",
+    "google": "Google Search",
+    "maps": "Google Maps"
   },
   "delta": {
     "points": "{value} pts",
@@ -425,7 +427,12 @@
       "upgrade": "Upgrade plan",
       "userLine": "{role} · {plan}",
       "manage": "Manage",
-      "manageAria": "{name}: manage plan and billing"
+      "manageAria": "{name}: manage plan and billing",
+      "tagline": "Be the answer.",
+      "upgradeTitle": "Upgrade to {plan}",
+      "upgradeBody": "Get more insights, higher limits and advanced AI features.",
+      "viewPlans": "View plans",
+      "telegramOn": "Telegram connected"
     },
     "topbar": {
       "openNav": "Open navigation",
@@ -880,6 +887,121 @@
       "title": "Your first scan is running",
       "progress": "{percent} done",
       "retrying": "Retrying"
+    },
+    "welcome": "Welcome back, {name}",
+    "descriptionV2": "Here's how {brand} is performing across search and AI platforms.",
+    "rail": "Shortcuts and activity",
+    "promo": {
+      "title": "Get the most out of Orbit",
+      "body": "Add your other websites and start finding chances to rank in Google Search, Google Maps, ChatGPT and more.",
+      "cta": "Add website"
+    },
+    "setup": {
+      "title": "Getting started",
+      "description": "Follow these steps to set up your website and start seeing insights.",
+      "done": "(done)",
+      "scanning": "Analyzing your website across 5 AI engines",
+      "steps": {
+        "connect": "Connect website",
+        "analyze": "Analyze website",
+        "discover": "Discover opportunities",
+        "optimize": "Optimize",
+        "publish": "Publish",
+        "measure": "Measure"
+      }
+    },
+    "glance": {
+      "title": "Your visibility at a glance",
+      "description": "See how your business appears across search and AI platforms.",
+      "report": "View detailed report",
+      "versus": "vs. the previous {days} days",
+      "waiting": "Waiting for your first scan",
+      "noData": "No data yet",
+      "measures": {
+        "google": "Organic rankings and visibility",
+        "chatgpt": "AI recommendations",
+        "claude": "AI recommendations",
+        "gemini": "AI recommendations",
+        "perplexity": "AI search visibility",
+        "maps": "Local visibility and reviews"
+      }
+    },
+    "add": {
+      "title": "Add another website",
+      "description": "Tell us about the business and website. Orbit analyzes it and shows where it can grow across search and AI platforms.",
+      "url": "Website URL",
+      "urlHelper": "Orbit starts its analysis from this URL.",
+      "urlPlaceholder": "yourwebsite.com",
+      "name": "Business name",
+      "nameHelper": "This helps Orbit understand the brand.",
+      "namePlaceholder": "Your business name",
+      "type": "Business type",
+      "country": "Country",
+      "city": "City",
+      "cityHelper": "Helps with local and regional visibility.",
+      "cityPlaceholder": "New York",
+      "platform": "Website platform",
+      "platformHelper": "Used to set up publishing. You can connect it later.",
+      "platforms": {
+        "wordpress": "WordPress",
+        "shopify": "Shopify",
+        "wix": "Wix",
+        "webflow": "Webflow",
+        "nextjs": "Next.js",
+        "ghost": "Ghost",
+        "other": "Other"
+      },
+      "later": "You can connect publishing later.",
+      "submit": "Add website",
+      "errors": {
+        "domain": "Enter a domain like yourbrand.com.",
+        "name": "Enter the business name.",
+        "type": "Choose a business type.",
+        "country": "Choose a country."
+      },
+      "typePlaceholder": "Select business type",
+      "countryPlaceholder": "Select country"
+    },
+    "growth": {
+      "title": "From setup to growth in 6 steps",
+      "tagline": "More visibility. More customers.",
+      "lines": {
+        "connect": "Add your URL and business details",
+        "analyze": "Orbit reads your site and asks 5 AI engines about your market",
+        "discover": "Find SEO and AI-answer opportunities",
+        "optimize": "Get ranked, actionable fixes",
+        "publish": "Orbit writes and publishes after you approve",
+        "measure": "Track rankings, mentions and growth"
+      }
+    },
+    "quick": {
+      "title": "Quick actions",
+      "add": {
+        "title": "Add website",
+        "body": "Connect another site to get started"
+      },
+      "opportunities": {
+        "title": "View opportunities",
+        "body": "SEO and AI-answer actions, ranked by impact"
+      },
+      "content": {
+        "title": "Check content plan",
+        "body": "Articles Orbit is writing for you"
+      },
+      "audit": {
+        "title": "Run site audit",
+        "body": "Find technical and AI-readiness issues"
+      }
+    },
+    "help": {
+      "title": "Need help?",
+      "body": "Our support team can help you get the most out of Orbit.",
+      "cta": "Contact support"
+    },
+    "activity": {
+      "title": "Recent activity",
+      "empty": "Nothing yet. Activity shows up after your first scan.",
+      "all": "View all activity"
     }
   },
   "visibility": {

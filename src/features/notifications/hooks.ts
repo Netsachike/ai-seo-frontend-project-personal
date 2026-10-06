@@ -3,14 +3,14 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import type { Notification } from "@/lib/api/types";
-import { api, unwrap } from "@/lib/api/client";
+import { listNotifications, markAllNotificationsRead } from "@/lib/mocks/store";
 import { notificationKeys } from "@/lib/api/query-keys";
 
 export function useNotifications(workspaceId: string | undefined) {
   return useQuery({
     queryKey: notificationKeys.all(workspaceId ?? "none"),
     enabled: Boolean(workspaceId),
-    queryFn: async () => unwrap(await api.GET("/notifications")),
+    queryFn: listNotifications,
     refetchInterval: 60_000,
   });
 }
@@ -19,9 +19,7 @@ export function useMarkAllRead(workspaceId: string) {
   const queryClient = useQueryClient();
   const key = notificationKeys.all(workspaceId);
   return useMutation({
-    mutationFn: async () => {
-      await api.POST("/notifications/read-all");
-    },
+    mutationFn: markAllNotificationsRead,
     onMutate: () => {
       const previous = queryClient.getQueryData<Notification[]>(key);
       queryClient.setQueryData<Notification[]>(key, (list) => list?.map((n) => ({ ...n, read: true })));

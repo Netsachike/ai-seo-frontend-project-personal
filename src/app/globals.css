@@ -40,6 +40,20 @@
   --color-chart-grid: var(--border);
   --color-qr-bg: var(--qr-bg);
   --color-qr-fg: var(--qr-fg);
+  --color-engine-google: var(--engine-google);
+  --color-engine-maps: var(--engine-maps);
+  --color-engine-chatgpt: var(--engine-chatgpt);
+  --color-engine-claude: var(--engine-claude);
+  --color-engine-gemini: var(--engine-gemini);
+  --color-engine-perplexity: var(--engine-perplexity);
+  --color-nav: var(--nav-bg);
+  --color-nav-fg: var(--nav-fg);
+  --color-nav-muted: var(--nav-muted);
+  --color-nav-hover: var(--nav-hover);
+  --color-nav-active: var(--nav-active);
+  --color-nav-border: var(--nav-border);
+  --color-nav-card: var(--nav-card);
+  --color-nav-star: var(--nav-star);
 
   /* shadcn semantic names mapped onto Orbit tokens, so primitives inherit the palette */
   --color-background: var(--surface);
@@ -64,8 +78,8 @@
   --color-chart-3: var(--chart-b);
   --color-chart-4: var(--chart-c);
   --color-chart-5: var(--chart-other);
-  --color-sidebar: var(--bg);
-  --color-sidebar-foreground: var(--text-2);
+  --color-sidebar: var(--nav-bg);
+  --color-sidebar-foreground: var(--nav-fg);
   --color-sidebar-primary: var(--ink);
   --color-sidebar-primary-foreground: var(--ink-fg);
   --color-sidebar-accent: var(--surface);
@@ -93,38 +107,56 @@
 /* ───────────────────────── Palettes ───────────────────────── */
 :root {
   color-scheme: light;
-  --bg: #f6f7f9;
+  --bg: #f5f8fd;
   --surface: #ffffff;
-  --surface-2: #f0f2f5;
-  --border: #e3e6eb;
-  --border-strong: #cdd2da;
-  --text: #0f1218;
-  --text-2: #4a5260;
-  --text-3: #6b7380;
-  --ink: #0f1218;
+  --surface-2: #eff3f9;
+  --border: #e3e9f2;
+  --border-strong: #cbd5e3;
+  --text: #0e1a33;
+  --text-2: #4b5a74;
+  --text-3: #64748b;
+  --ink: #2563eb;
   --ink-fg: #ffffff;
-  --signal: #c5f04a;
-  --signal-ink: #0f1218;
-  --blue: #2d4fe0;
-  --blue-bg: #dde3fb;
-  --blue-ink: #1e3bb8;
-  --success: #0e7a55;
-  --success-bg: #e6f4ee;
-  --warning: #a35a00;
-  --warning-bg: #fdf1e1;
+  --signal: #5b47f5;
+  --signal-ink: #ffffff;
+  --blue: #2563eb;
+  --blue-bg: #e6eeff;
+  --blue-ink: #1d4ed8;
+  --success: #15803d;
+  --success-bg: #e8f7ee;
+  --warning: #b45309;
+  --warning-bg: #fdf3e3;
   --danger: #c42b2b;
-  --danger-bg: #fcebeb;
-  --chart-you: #2d4fe0;
+  --danger-bg: #fdecec;
+  --chart-you: #2563eb;
   --chart-a: #f08a24;
   --chart-b: #13a38b;
   --chart-c: #b54ac7;
   --chart-other: #8a94a6;
 
+  /* Platform accents: tile tint, sparkline stroke and fill */
+  --engine-google: #16a34a;
+  --engine-maps: #1a73e8;
+  --engine-chatgpt: #8b5cf6;
+  --engine-claude: #ea580c;
+  --engine-gemini: #3b82f6;
+  --engine-perplexity: #0d9488;
+
+  /* Navy sidebar, same in both themes */
+  --nav-bg: #0f1b33;
+  --nav-fg: #c9d2e3;
+  --nav-muted: #8a97ae;
+  --nav-hover: rgb(255 255 255 / 0.06);
+  --nav-active: #2563eb;
+  --nav-border: #1f2c48;
+  --nav-card: #16233f;
+  --nav-star: #fbbf24;
+
   --hover-mix: black;
-  --elev-card: 0 1px 2px rgb(15 18 24 / 0.04);
-  --elev-pop: 0 8px 24px -4px rgb(15 18 24 / 0.12), 0 0 0 1px var(--border);
-  --elev-raised: 0 1px 2px rgb(15 18 24 / 0.06), 0 0 0 1px var(--border);
-  --overlay: rgb(15 18 24 / 0.32);
+  --elev-card: 0 1px 2px rgb(14 26 51 / 0.04), 0 1px 1px rgb(14 26 51 / 0.02);
+  --elev-pop: 0 8px 24px -4px rgb(14 26 51 / 0.14), 0 0 0 1px var(--border);
+  --elev-raised: 0 1px 2px rgb(14 26 51 / 0.06), 0 0 0 1px var(--border);
+  --overlay: rgb(14 26 51 / 0.36);
 
   /* QR codes stay dark on light in both themes so phones can scan them */
   --qr-bg: #ffffff;
@@ -133,32 +165,39 @@
 
 .dark {
   color-scheme: dark;
-  --bg: #0b0d11;
-  --surface: #12151b;
-  --surface-2: #1a1e26;
-  --border: #262b35;
-  --border-strong: #353b47;
-  --text: #f2f4f7;
-  --text-2: #a9b0bc;
-  --text-3: #7e8794;
-  --ink: #f2f4f7;
-  --ink-fg: #0f1218;
-  --signal: #c5f04a;
-  --signal-ink: #0f1218;
-  --blue: #7c93ff;
-  --blue-bg: #1a2140;
-  --blue-ink: #a9b8ff;
-  --success: #3dd39a;
-  --success-bg: #0f2a20;
-  --warning: #f5b54a;
+  --bg: #0b1220;
+  --surface: #111a2e;
+  --surface-2: #18233a;
+  --border: #22304a;
+  --border-strong: #30405e;
+  --text: #eef2f8;
+  --text-2: #a8b3c7;
+  --text-3: #8492a8;
+  --ink: #3b82f6;
+  --ink-fg: #ffffff;
+  --signal: #7c6cff;
+  --signal-ink: #ffffff;
+  --blue: #7aa2ff;
+  --blue-bg: #17264a;
+  --blue-ink: #a9c1ff;
+  --success: #4ade80;
+  --success-bg: #0f2a1c;
+  --warning: #fbbf24;
   --warning-bg: #2e2210;
   --danger: #ff7a7a;
   --danger-bg: #2f1414;
-  --chart-you: #7c93ff;
+  --chart-you: #7aa2ff;
   --chart-a: #f5a04a;
   --chart-b: #2ec4a8;
   --chart-c: #cf6fe0;
-  --chart-other: #7e8794;
+  --chart-other: #8492a8;
+
+  --engine-google: #4ade80;
+  --engine-maps: #6ea8fe;
+  --engine-chatgpt: #a78bfa;
+  --engine-claude: #fb923c;
+  --engine-gemini: #60a5fa;
+  --engine-perplexity: #2dd4bf;
 
   --hover-mix: white;
   --elev-card: none;

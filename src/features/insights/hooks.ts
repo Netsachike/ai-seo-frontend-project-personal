@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import type { Range } from "@/lib/api/types";
-import { api, unwrap } from "@/lib/api/client";
+import { getBrandSummary } from "@/lib/mocks/store";
 import { overviewKeys } from "@/lib/api/query-keys";
 import { useJob } from "@/lib/api/use-job";
 
@@ -14,12 +14,7 @@ export function useBrandSummary(workspaceId: string | undefined, brandId: string
   return useQuery({
     queryKey: overviewKeys.summary(workspaceId ?? "none", brandId ?? "none", range),
     enabled: Boolean(workspaceId && brandId),
-    queryFn: async () =>
-      unwrap(
-        await api.GET("/brands/{brandId}/summary", {
-          params: { path: { brandId: brandId as string }, query: { range } },
-        }),
-      ),
+    queryFn: () => getBrandSummary(brandId as string, range),
     placeholderData: (previous) => previous,
   });
 }

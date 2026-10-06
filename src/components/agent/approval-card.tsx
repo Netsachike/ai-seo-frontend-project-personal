@@ -7,7 +7,7 @@ import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import type { Approval } from "@/lib/api/types";
-import { api, unwrap } from "@/lib/api/client";
+import { decideApproval } from "@/lib/mocks/store";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/brand/status-badge";
@@ -34,13 +34,7 @@ export function ApprovalCard({
   const current = decided?.id === approval.id ? decided : approval;
 
   const decide = useMutation({
-    mutationFn: async (decision: "approve" | "reject") =>
-      unwrap(
-        await api.POST("/approvals/{approvalId}/decision", {
-          params: { path: { approvalId: approval.id } },
-          body: { decision },
-        }),
-      ),
+    mutationFn: (decision: "approve" | "reject") => decideApproval(approval.id, decision),
     onSuccess: (result) => {
       // Only the status comes back; the card keeps its own title and items.
       const next = { ...approval, status: result.status };

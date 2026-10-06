@@ -7,7 +7,7 @@ import { ArrowUpIcon, ExternalLinkIcon } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 
 import type { AgentMessage, AgentThread } from "@/lib/api/types";
-import { api, unwrap } from "@/lib/api/client";
+import { getAgentThread, sendAgentMessage } from "@/lib/mocks/store";
 import { agentKeys } from "@/lib/api/query-keys";
 import { useUiStore } from "@/lib/store/ui";
 import { Button } from "@/components/ui/button";
@@ -21,7 +21,7 @@ export const MAIN_THREAD_ID = "thr_main";
 export function useAgentThread(workspaceId: string, threadId = MAIN_THREAD_ID) {
   return useQuery({
     queryKey: agentKeys.thread(workspaceId, threadId),
-    queryFn: async () => unwrap(await api.GET("/agent/threads/{threadId}", { params: { path: { threadId } } })),
+    queryFn: getAgentThread,
   });
 }
 
@@ -30,7 +30,7 @@ export function useSendAgentMessage(workspaceId: string, threadId = MAIN_THREAD_
   const queryClient = useQueryClient();
   const key = agentKeys.thread(workspaceId, threadId);
   return useMutation({
-    mutationFn: async (text: string) => unwrap(await api.POST("/agent/messages", { body: { threadId, text, locale } })),
+    mutationFn: (text: string) => sendAgentMessage(text, locale),
     onMutate: async (text) => {
       await queryClient.cancelQueries({ queryKey: key });
       const previous = queryClient.getQueryData<AgentThread>(key);

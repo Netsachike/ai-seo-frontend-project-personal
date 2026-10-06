@@ -8,6 +8,8 @@ import { FormField } from "./form-field";
 export function SelectField({
   label,
   helper,
+  placeholder,
+  error,
   value,
   onChange,
   options,
@@ -15,17 +17,19 @@ export function SelectField({
 }: {
   label: string;
   helper?: string;
+  placeholder?: string;
+  error?: string;
   value: string;
   onChange: (value: string) => void;
   options: { value: string; label: string }[];
   className?: string;
 }) {
   return (
-    <FormField label={label} helper={helper} className={cn(className)}>
+    <FormField label={label} helper={helper} error={error} className={cn(className)}>
       {(props) => (
         <Select value={value} onValueChange={onChange}>
           <SelectTrigger {...props} className="w-full">
-            <SelectValue />
+            <SelectValue placeholder={placeholder} />
           </SelectTrigger>
           <SelectContent>
             {options.map((o) => (
