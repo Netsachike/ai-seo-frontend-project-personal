@@ -14,7 +14,7 @@ import {
 import { useFormatter, useLocale, useNow, useTranslations } from "next-intl";
 import { toast } from "sonner";
 
-import { api } from "@/lib/api/client";
+import { decideApproval } from "@/lib/mocks/store";
 import { fakeRequest } from "@/lib/auth/session";
 import { useFakeQuery } from "@/lib/fake-query";
 import { articleDetail, type ArticleDetail } from "@/lib/mocks/ui-data-work";
@@ -110,10 +110,7 @@ function Editor({ article }: { article: ArticleDetail }) {
 
   const approve = async () => {
     setApproving(true);
-    await api.POST("/approvals/{approvalId}/decision", {
-      params: { path: { approvalId: `apr_${article.id}` } },
-      body: { decision: "approve" },
-    });
+    await decideApproval(`apr_${article.id}`, "approve");
     setApproving(false);
     setStatus("scheduled");
     toast.success(

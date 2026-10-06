@@ -7,7 +7,7 @@ import { ArrowLeftIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
-import { fakeRequest, startSession } from "@/lib/auth/session";
+import { ONBOARDING_START, fakeRequest, startSession } from "@/lib/auth/session";
 import { Button } from "@/components/ui/button";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { Label } from "@/components/ui/label";
@@ -51,7 +51,7 @@ export function VerifyForm({ email, purpose }: { email: string; purpose: "signup
       return setCodeError(tErr("codeInvalid"));
     }
     startSession();
-    window.location.assign(reset ? "/" : "/onboarding/brand");
+    window.location.assign(ONBOARDING_START);
   };
 
   const resend = async () => {

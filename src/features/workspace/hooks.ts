@@ -6,14 +6,14 @@ import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import type { Brand, Workspace } from "@/lib/api/types";
-import { api, unwrap } from "@/lib/api/client";
+import { createWorkspace, getMe, getUsage, listBrands, listWorkspaces } from "@/lib/mocks/store";
 import { meKeys, workspaceKeys } from "@/lib/api/query-keys";
 import { useUiStore } from "@/lib/store/ui";
 
 export function useMe() {
   return useQuery({
     queryKey: meKeys.all,
-    queryFn: async () => unwrap(await api.GET("/me")),
+    queryFn: getMe,
     staleTime: 5 * 60_000,
   });
 }
@@ -21,13 +21,13 @@ export function useMe() {
 export function useWorkspaces() {
   return useQuery({
     queryKey: workspaceKeys.list(),
-    queryFn: async () => unwrap(await api.GET("/workspaces")),
+    queryFn: listWorkspaces,
   });
 }
 
 const brandsQuery = (workspaceId: string) => ({
   queryKey: workspaceKeys.brands(workspaceId),
-  queryFn: async () => unwrap(await api.GET("/workspaces/{workspaceId}/brands", { params: { path: { workspaceId } } })),
+  queryFn: () => listBrands(workspaceId),
 });
 
 export function useBrands(workspaceId: string | undefined) {
@@ -38,10 +38,7 @@ export function useUsage(workspaceId: string | undefined) {
   return useQuery({
     queryKey: workspaceKeys.usage(workspaceId ?? "none"),
     enabled: Boolean(workspaceId),
-    queryFn: async () =>
-      unwrap(
-        await api.GET("/workspaces/{workspaceId}/usage", { params: { path: { workspaceId: workspaceId as string } } }),
-      ),
+    queryFn: () => getUsage(workspaceId as string),
   });
 }
 
@@ -127,7 +124,7 @@ export function useSwitchWorkspace() {
 export function useCreateWorkspace() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (name: string) => unwrap(await api.POST("/workspaces", { body: { name } })),
+    mutationFn: createWorkspace,
     onSuccess: (created) => {
       queryClient.setQueryData<Workspace[]>(workspaceKeys.list(), (list) => [...(list ?? []), created]);
     },

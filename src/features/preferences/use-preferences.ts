@@ -6,7 +6,7 @@ import { useTheme } from "next-themes";
 
 import type { Me } from "@/lib/api/types";
 import { LOCALE_COOKIE, type Locale } from "@/i18n/config";
-import { api } from "@/lib/api/client";
+import { updateMe } from "@/lib/mocks/store";
 import { meKeys } from "@/lib/api/query-keys";
 import { setClientCookie } from "@/lib/cookies";
 import type { ThemePreference } from "@/lib/theme";
@@ -24,7 +24,7 @@ export function usePreferences({ persist = true }: { persist?: boolean } = {}) {
   const saveToProfile = (patch: Partial<Pick<Me, "locale" | "theme">>) => {
     if (!persist) return;
     queryClient.setQueryData<Me>(meKeys.all, (me) => (me ? { ...me, ...patch } : me));
-    void api.PATCH("/me", { body: patch }).catch(() => undefined);
+    void updateMe(patch).catch(() => undefined);
   };
 
   return {

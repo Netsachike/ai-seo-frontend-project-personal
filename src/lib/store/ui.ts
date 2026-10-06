@@ -55,9 +55,3 @@ export const useUiStore = create<UiState>()((set) => ({
     set({ brandSlug });
   },
 }));
-
-/** Read outside React (API client middleware). */
-export function getActiveWorkspaceId(): string | null {
-  if (typeof window === "undefined") return null;
-  return useUiStore.getState().workspaceId ?? readClientCookie(WORKSPACE_COOKIE) ?? null;
-}

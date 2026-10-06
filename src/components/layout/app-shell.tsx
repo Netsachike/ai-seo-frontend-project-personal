@@ -7,9 +7,8 @@ import { useTranslations } from "next-intl";
 import { useUiStore } from "@/lib/store/ui";
 import { useBrandLookup, useMe } from "@/features/workspace/hooks";
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";
-import { Logo } from "@/components/brand/logo";
 import { AgentPanel } from "@/components/agent/agent-panel";
-import { AppSidebar, SidebarFooter, SidebarNav } from "./app-sidebar";
+import { AppSidebar, SidebarBrand, SidebarFooter, SidebarNav } from "./app-sidebar";
 import { CommandMenu } from "./command-menu";
 import { WorkspaceSwitcher } from "./context-switcher";
 import { FeedbackDialog, HelpSheet } from "./help-sheet";
@@ -38,7 +37,7 @@ export function AppShell({
   if (lookup.notFound) notFound();
 
   const workspaceId = lookup.workspace?.id;
-  // Runs before children's passive effects, so their first requests carry the right X-Workspace-Id.
+  // Runs before children's passive effects, so their first queries see the active workspace.
   React.useLayoutEffect(() => {
     const store = useUiStore.getState();
     if (workspaceId && store.workspaceId !== workspaceId) store.setWorkspace(workspaceId);
@@ -81,16 +80,16 @@ export function AppShell({
       </div>
 
       <Sheet open={mobileNav} onOpenChange={setMobileNav}>
-        <SheetContent side="start" className="gap-0">
+        <SheetContent side="start" className="dark gap-0 border-nav-border bg-nav text-nav-fg">
           <SheetTitle className="sr-only">{t("nav.label")}</SheetTitle>
           <SheetDescription className="sr-only">{t("mobileNavDescription")}</SheetDescription>
-          <div className="flex h-14 items-center px-4">
-            <Logo />
+          <div className="flex items-center px-4 pt-5 pb-4">
+            <SidebarBrand />
           </div>
           <div className="px-3 pb-3">
             <WorkspaceSwitcher full />
           </div>
-          <SidebarNav className="flex-1 overflow-y-auto px-2 pb-4" onNavigate={() => setMobileNav(false)} />
+          <SidebarNav className="flex-1 overflow-y-auto px-3 pb-4" onNavigate={() => setMobileNav(false)} />
           <SidebarFooter onNavigate={() => setMobileNav(false)} />
         </SheetContent>
       </Sheet>

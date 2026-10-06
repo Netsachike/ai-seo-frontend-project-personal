@@ -2,44 +2,72 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { ArrowRightIcon, DownloadIcon, RadarIcon, ScanSearchIcon } from "lucide-react";
-import { useFormatter, useNow, useTranslations } from "next-intl";
-import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import {
+  ArrowRightIcon,
+  CheckIcon,
+  FileTextIcon,
+  GlobeIcon,
+  HeadsetIcon,
+  LightbulbIcon,
+  PlusIcon,
+  RadarIcon,
+  RocketIcon,
+  ScanSearchIcon,
+  SearchIcon,
+  ShieldCheckIcon,
+  XIcon,
+  type LucideIcon,
+} from "lucide-react";
+import { useFormatter, useLocale, useNow, useTranslations } from "next-intl";
 
-import type { BrandSummary, Engine, Kpi } from "@/lib/api/types";
 import { useJob } from "@/lib/api/use-job";
 import { useFakeQuery } from "@/lib/fake-query";
-import { nextActions, orbitActivity } from "@/lib/mocks/ui-data";
+import { orbitActivity } from "@/lib/mocks/ui-data";
+import {
+  platformGlance,
+  setupProgress,
+  setupSteps,
+  type Platform,
+  type PlatformGlance,
+} from "@/lib/mocks/ui-data-overview";
 import { cn } from "@/lib/utils";
+import { DOMAIN_PATTERN, industries, markets } from "@/features/onboarding/data";
+import { useOnboarding } from "@/features/onboarding/store";
 import { useBrandSummary, useJobRunner } from "@/features/insights/hooks";
 import { useRange } from "@/features/insights/url-state";
 import { Button } from "@/components/ui/button";
 import { Card, CardAction, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DeltaChip } from "@/components/brand/delta-chip";
-import { EmptyState } from "@/components/brand/empty-state";
-import { EngineIcon } from "@/components/brand/engine-icon";
 import { ErrorState } from "@/components/brand/error-state";
 import { JobBanner } from "@/components/brand/job-banner";
-import { KpiCard } from "@/components/brand/kpi-card";
-import { OrbitAvatar } from "@/components/brand/logo";
-import { OwnerChip } from "@/components/brand/owner-chip";
-import { ScoreRing } from "@/components/brand/score-ring";
+import { PlatformLogo, platformLogos } from "@/components/brand/platform-logo";
+import { AreaSpark } from "@/components/charts/area-spark";
 import { ShareOfVoice } from "@/components/charts/share-of-voice";
 import { VisibilityTrend } from "@/components/charts/visibility-trend";
-import { PageHeader } from "@/components/layout/page-header";
+import { DomainInput, FormField } from "@/components/forms/form-field";
+import { SelectField } from "@/components/forms/select-field";
+import { brandHref } from "@/components/layout/nav";
 import { PageSkeleton } from "@/components/layout/page-skeleton";
 import { RangePicker } from "@/components/layout/range-picker";
-import { brandHref } from "@/components/layout/nav";
 import { useShell } from "@/components/layout/shell-context";
 
-function useGreetingPart(): "morning" | "afternoon" | "evening" {
-  const format = useFormatter();
-  const now = useNow({ updateInterval: 10 * 60_000 });
-  const hour = Number(format.dateTime(now, { hour: "numeric", hourCycle: "h23", numberingSystem: "latn" }));
-  return hour >= 5 && hour < 12 ? "morning" : hour >= 12 && hour < 18 ? "afternoon" : "evening";
-}
+/** Accent per platform. Static class strings so Tailwind can see them. */
+const accent: Record<Platform, { tile: string; color: string; monogram: string }> = {
+  google: { tile: "bg-engine-google/12 text-engine-google", color: "var(--engine-google)", monogram: "G" },
+  maps: { tile: "bg-engine-maps/12 text-engine-maps", color: "var(--engine-maps)", monogram: "MAP" },
+  chatgpt: { tile: "bg-engine-chatgpt/12 text-engine-chatgpt", color: "var(--engine-chatgpt)", monogram: "GPT" },
+  claude: { tile: "bg-engine-claude/12 text-engine-claude", color: "var(--engine-claude)", monogram: "CLD" },
+  gemini: { tile: "bg-engine-gemini/12 text-engine-gemini", color: "var(--engine-gemini)", monogram: "GEM" },
+  perplexity: {
+    tile: "bg-engine-perplexity/12 text-engine-perplexity",
+    color: "var(--engine-perplexity)",
+    monogram: "PPX",
+  },
+};
 
 export function OverviewView() {
   const t = useTranslations("overview");
@@ -47,347 +75,582 @@ export function OverviewView() {
   const { range } = useRange();
   const summary = useBrandSummary(workspace?.id, brand?.id, range);
   const scan = useJobRunner("job_scan");
-  const part = useGreetingPart();
   const firstName = me?.name.split(" ")[0] ?? "";
 
   if (!brand || summary.isPending) return <PageSkeleton />;
-
   const data = summary.data;
   const firstScan = data?.status === "first_scan_running" || data?.status === "no_data";
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader
-        title={t("greeting", { part, name: firstName })}
-        description={t("description", { brand: brand.name })}
-        actions={
-          <>
-            <RangePicker />
-            {!firstScan && (
-              <Button variant="secondary" onClick={() => toast(t("exportStarted"))}>
-                <DownloadIcon />
-                {t("export")}
-              </Button>
-            )}
-            <Button variant="primary" onClick={scan.start} disabled={scan.running || firstScan}>
-              <ScanSearchIcon />
-              {t("runScan")}
-            </Button>
-          </>
-        }
-      />
+      <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(0,560px)]">
+        <header className="flex min-w-0 flex-col gap-1 pt-1">
+          <h1 className="text-[28px] leading-[34px] font-semibold tracking-[-0.02em] text-fg sm:text-[32px] sm:leading-[38px]">
+            {t("welcome", { name: firstName })}
+          </h1>
+          <p className="text-body-lg text-fg-2">{t("descriptionV2", { brand: brand.name })}</p>
+        </header>
+        <PromoBanner />
+      </div>
 
       {scan.job && <JobBanner job={scan.job} title={t("scanRunning")} onDismiss={scan.dismiss} />}
-
       {summary.isError && <ErrorState onRetry={() => summary.refetch()} />}
-      {data && firstScan && <FirstScanState summary={data} />}
-      {data && !firstScan && (
-        <>
-          <div className="grid gap-4 xl:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
-            <HeroCard summary={data} />
-            <div className="grid gap-4 sm:grid-cols-2">
-              {data.kpis.map((kpi) => (
-                <OverviewKpi key={kpi.key} kpi={kpi} questions={data.visibility.questionCount ?? 50} />
-              ))}
-            </div>
+
+      <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_280px]">
+        <div className="@container flex min-w-0 flex-col gap-6">
+          <GettingStarted brandId={brand.id} firstScanJobId={firstScan ? (data?.firstScanJobId ?? null) : null} />
+
+          <Card className="@container gap-5">
+            <CardHeader>
+              <div className="flex flex-col gap-0.5">
+                <CardTitle className="text-h2">{t("glance.title")}</CardTitle>
+                <CardDescription className="text-small">{t("glance.description")}</CardDescription>
+              </div>
+              <CardAction className="flex-wrap">
+                <RangePicker />
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  className="h-8"
+                  onClick={scan.start}
+                  disabled={scan.running || firstScan}
+                >
+                  <ScanSearchIcon />
+                  {t("runScan")}
+                </Button>
+              </CardAction>
+            </CardHeader>
+            <PlatformGrid brandId={brand.id} />
+            <Link
+              href={brandHref(brandSlug, "visibility")}
+              className="inline-flex items-center gap-1.5 self-end text-small font-medium text-blue hover:underline"
+            >
+              {t("glance.report")}
+              <ArrowRightIcon aria-hidden className="size-4 rtl:-scale-x-100" />
+            </Link>
+          </Card>
+
+          <div className="grid gap-6 @min-[760px]:grid-cols-[minmax(0,1fr)_280px]">
+            <AddWebsiteCard />
+            <GrowthSteps />
           </div>
 
-          <div className="grid gap-4 xl:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]">
-            <Card>
-              <CardHeader>
+          {data && !firstScan && (
+            <div className="grid gap-6 @min-[760px]:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]">
+              <Card>
                 <div className="flex flex-col gap-0.5">
                   <CardTitle>{t("trendTitle")}</CardTitle>
                   <CardDescription>{t("trendDescription")}</CardDescription>
                 </div>
-              </CardHeader>
-              <VisibilityTrend series={data.trend} domain={[20, 80]} ariaLabel={trendSummary(data, t)} />
-            </Card>
-            <Card>
-              <div className="flex flex-col gap-0.5">
-                <CardTitle>{t("sovTitle")}</CardTitle>
-                <CardDescription>{t("sovDescription")}</CardDescription>
-              </div>
-              <ShareOfVoice items={data.shareOfVoice} />
-            </Card>
-          </div>
+                <VisibilityTrend
+                  series={data.trend}
+                  domain={[20, 80]}
+                  ariaLabel={t("trendAria", {
+                    from: data.trend.find((s) => s.isYou)?.points[0]?.value ?? 0,
+                    to: data.trend.find((s) => s.isYou)?.points.at(-1)?.value ?? 0,
+                  })}
+                />
+              </Card>
+              <Card>
+                <div className="flex flex-col gap-0.5">
+                  <CardTitle>{t("sovTitle")}</CardTitle>
+                  <CardDescription>{t("sovDescription")}</CardDescription>
+                </div>
+                <ShareOfVoice items={data.shareOfVoice} />
+              </Card>
+            </div>
+          )}
+        </div>
 
-          <div className="grid gap-4 xl:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]">
-            <NextActions brandId={brand.id} slug={brandSlug} />
-            <OrbitFeed brandId={brand.id} />
-          </div>
-        </>
-      )}
+        <aside className="flex flex-col gap-6" aria-label={t("rail")}>
+          <QuickActions />
+          <NeedHelp />
+          <RecentActivity brandId={brand.id} />
+        </aside>
+      </div>
     </div>
   );
 }
 
-function trendSummary(data: BrandSummary, t: ReturnType<typeof useTranslations<"overview">>) {
-  const you = data.trend.find((s) => s.isYou);
-  const first = you?.points[0]?.value ?? 0;
-  const last = you?.points.at(-1)?.value ?? 0;
-  return t("trendAria", { from: first, to: last });
+function PromoBanner() {
+  const t = useTranslations("overview.promo");
+  return (
+    <section className="flex flex-col gap-4 rounded-lg border border-blue/15 bg-blue-bg p-5 sm:flex-row sm:items-center">
+      <span aria-hidden className="grid size-11 shrink-0 place-items-center rounded-lg bg-ink text-ink-fg">
+        <RocketIcon className="size-5" />
+      </span>
+      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+        <h2 className="text-h3 text-fg">{t("title")}</h2>
+        <p className="text-small text-fg-2">{t("body")}</p>
+      </div>
+      <Button asChild variant="primary" className="shrink-0">
+        <a href="#add-website">
+          <PlusIcon />
+          {t("cta")}
+        </a>
+      </Button>
+    </section>
+  );
 }
 
-function HeroCard({ summary }: { summary: BrandSummary }) {
-  const t = useTranslations("overview");
-  const tEngine = useTranslations("engines");
+function GettingStarted({ brandId, firstScanJobId }: { brandId: string; firstScanJobId: string | null }) {
+  const t = useTranslations("overview.setup");
+  const tCommon = useTranslations("common");
   const format = useFormatter();
-  const { brandSlug } = useShell();
-  const { visibility } = summary;
-  const leader = summary.trend
-    .filter((s) => !s.isYou)
-    .map((s) => ({ name: s.name, value: s.points.at(-1)?.value ?? 0 }))
-    .sort((a, b) => b.value - a.value)[0];
+  const [hidden, setHidden] = React.useState(false);
+  const job = useJob(firstScanJobId);
+  const current = setupProgress(brandId);
+  if (hidden) return null;
 
   return (
     <Card className="gap-5">
-      <CardHeader>
-        <CardTitle>{t("heroTitle")}</CardTitle>
-        <CardAction>
-          <Button asChild variant="link" size="sm">
-            <Link href={brandHref(brandSlug, "visibility")}>
-              {t("details")}
-              <ArrowRightIcon className="rtl:-scale-x-100" />
-            </Link>
-          </Button>
-        </CardAction>
-      </CardHeader>
-      <div className="flex flex-wrap items-center gap-5">
-        <ScoreRing score={visibility.score} label={t("heroTitle")} />
-        <div className="flex min-w-0 flex-1 basis-48 flex-col gap-2">
-          <DeltaChip value={visibility.delta.value} unit={visibility.delta.unit} className="self-start" />
-          <p className="text-body text-fg-2">
-            {visibility.rank && leader
-              ? t("heroRank", {
-                  rank: visibility.rank,
-                  count: visibility.brandCount,
-                  leader: leader.name,
-                  score: Math.round(leader.value),
-                })
-              : t("heroLeading")}
-          </p>
+      <div className="flex flex-col gap-5">
+        <div className="flex min-w-0 flex-col gap-1">
+          <div className="flex items-center justify-between gap-2">
+            <CardTitle className="text-h2">{t("title")}</CardTitle>
+            <Button variant="ghost" size="icon-sm" aria-label={tCommon("close")} onClick={() => setHidden(true)}>
+              <XIcon />
+            </Button>
+          </div>
+          <CardDescription className="text-small">{t("description")}</CardDescription>
         </div>
+        <ol className="-mx-1 flex flex-1 items-start gap-1 overflow-x-auto px-1 pb-1" aria-label={t("title")}>
+          {setupSteps.map((step, i) => {
+            const done = i < current;
+            const now = i === current;
+            return (
+              <li key={step} className="flex min-w-[96px] flex-1 items-start gap-1">
+                <div
+                  className="flex flex-1 flex-col items-center gap-2 text-center"
+                  aria-current={now ? "step" : undefined}
+                >
+                  <span
+                    className={cn(
+                      "grid size-9 place-items-center rounded-full num text-small font-semibold transition-colors",
+                      done && "bg-success-bg text-success",
+                      now && "bg-ink text-ink-fg shadow-[0_0_0_4px_var(--blue-bg)]",
+                      !done && !now && "bg-surface-2 text-fg-2",
+                    )}
+                  >
+                    {done ? (
+                      <CheckIcon aria-hidden className="size-4" strokeWidth={2.5} />
+                    ) : (
+                      format.number(i + 1, "integer")
+                    )}
+                  </span>
+                  <span className={cn("text-caption", now ? "font-semibold text-fg" : "font-normal text-fg-2")}>
+                    {t(`steps.${step}`)}
+                    {done && <span className="sr-only">{t("done")}</span>}
+                  </span>
+                </div>
+                {i < setupSteps.length - 1 && (
+                  <ArrowRightIcon aria-hidden className="mt-2.5 size-4 shrink-0 text-blue/50 rtl:-scale-x-100" />
+                )}
+              </li>
+            );
+          })}
+        </ol>
       </div>
-      <ul className="flex flex-col gap-2.5">
-        {summary.engines.map(({ engine, mentionRate }) => (
-          <li key={engine} className="grid grid-cols-[minmax(0,9rem)_1fr_3rem] items-center gap-3">
-            <span className="flex min-w-0 items-center gap-2 text-small text-fg">
-              <EngineIcon engine={engine as Engine} />
-              <span className="truncate">{tEngine(engine as Engine)}</span>
+      {job.data && job.data.status !== "done" && (
+        <div className="flex flex-col gap-2 rounded-md bg-surface-2 p-3">
+          <div className="flex items-center justify-between gap-2 text-small">
+            <span className="flex items-center gap-2 font-medium text-fg">
+              <RadarIcon aria-hidden className="size-4 text-blue" />
+              {t("scanning")}
             </span>
-            {mentionRate === null ? (
-              <span className="col-span-2 text-caption font-normal text-fg-3">{t("engineUnreachable")}</span>
-            ) : (
-              <>
-                <Progress value={mentionRate * 100} tone="blue" aria-label={tEngine(engine as Engine)} />
-                <span className="text-end num text-small text-fg">{format.number(mentionRate, "percent")}</span>
-              </>
+            <span className="num text-caption text-fg-2">{format.number(job.data.progress, "percent")}</span>
+          </div>
+          <Progress value={job.data.progress * 100} tone="blue" aria-label={t("scanning")} />
+        </div>
+      )}
+    </Card>
+  );
+}
+
+function PlatformGrid({ brandId }: { brandId: string }) {
+  const query = useFakeQuery(["glance", brandId], () => platformGlance(brandId));
+  if (query.isPending)
+    return (
+      <div className="grid gap-3 @md:grid-cols-2 @2xl:grid-cols-3 @3xl:grid-cols-6">
+        {Array.from({ length: 6 }, (_, i) => (
+          <Skeleton key={i} className="h-[214px] rounded-lg" />
+        ))}
+      </div>
+    );
+  if (query.isError) return <ErrorState compact onRetry={() => query.refetch()} />;
+  return (
+    <ul className="grid gap-3 @md:grid-cols-2 @2xl:grid-cols-3 @3xl:grid-cols-6">
+      {query.data.map((p) => (
+        <li key={p.platform}>
+          <PlatformCard item={p} />
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function PlatformCard({ item }: { item: PlatformGlance }) {
+  const t = useTranslations("overview.glance");
+  const tEngine = useTranslations("engines");
+  const format = useFormatter();
+  const { brandSlug } = useShell();
+  const { days } = useRange();
+  const a = accent[item.platform];
+  const name = tEngine(item.platform);
+  const href =
+    item.platform === "google" || item.platform === "maps"
+      ? brandHref(brandSlug, "rankings")
+      : brandHref(brandSlug, `visibility?engine=${item.platform}`);
+
+  return (
+    <Link
+      href={href}
+      className="group flex h-full flex-col gap-2.5 rounded-lg border border-border bg-surface p-3.5 transition-colors duration-120 hover:border-border-strong hover:shadow-raised"
+    >
+      {platformLogos[item.platform] ? (
+        <span aria-hidden className="grid size-10 place-items-center rounded-lg border border-border bg-surface">
+          <PlatformLogo platform={item.platform} size={24} />
+        </span>
+      ) : (
+        <span
+          aria-hidden
+          translate="no"
+          className={cn("grid size-10 place-items-center rounded-lg font-mono text-[11px] font-semibold", a.tile)}
+        >
+          {a.monogram}
+        </span>
+      )}
+      <span className="flex min-w-0 flex-col">
+        <span className="truncate text-small font-semibold text-fg" title={name}>
+          {name}
+        </span>
+        <span className="line-clamp-2 min-h-8 text-caption font-normal break-words hyphens-auto text-fg-3">
+          {t(`measures.${item.platform}`)}
+        </span>
+      </span>
+      <span className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+        {item.value === null ? (
+          <>
+            <span aria-hidden className="num text-[30px] leading-9 font-medium text-fg-3">
+              —
+            </span>
+            <span className="sr-only">{t("noData")}</span>
+          </>
+        ) : (
+          <>
+            <span className="num text-[30px] leading-9 font-medium tracking-[-0.02em] text-fg">
+              {format.number(item.value, "percent")}
+            </span>
+            <DeltaChip value={item.delta} unit="points" variant="text" />
+          </>
+        )}
+      </span>
+      <span className="line-clamp-2 min-h-8 text-caption font-normal text-fg-3">
+        {item.value === null ? t("waiting") : t("versus", { days })}
+      </span>
+      <AreaSpark values={item.spark} color={a.color} className="mt-auto" />
+    </Link>
+  );
+}
+
+const platforms = ["wordpress", "shopify", "wix", "webflow", "nextjs", "ghost", "other"] as const;
+const platformMono: Record<(typeof platforms)[number], string> = {
+  wordpress: "WP",
+  shopify: "SH",
+  wix: "WX",
+  webflow: "WF",
+  nextjs: "N",
+  ghost: "GH",
+  other: "…",
+};
+
+/** Adds another brand: prefills onboarding and continues there. */
+function AddWebsiteCard() {
+  const t = useTranslations("overview.add");
+  const tIndustry = useTranslations("onboarding.brand.industries");
+  const locale = useLocale();
+  const router = useRouter();
+  const [domain, setDomain] = React.useState("");
+  const [name, setName] = React.useState("");
+  const [type, setType] = React.useState("");
+  const [country, setCountry] = React.useState("");
+  const [city, setCity] = React.useState("");
+  const [platform, setPlatform] = React.useState<(typeof platforms)[number] | null>(null);
+  const [errors, setErrors] = React.useState<Record<string, string>>({});
+  const regions = React.useMemo(() => new Intl.DisplayNames([locale], { type: "region" }), [locale]);
+
+  const submit = (event: React.FormEvent) => {
+    event.preventDefault();
+    const next: Record<string, string> = {};
+    if (!DOMAIN_PATTERN.test(domain)) next.domain = t("errors.domain");
+    if (!name.trim()) next.name = t("errors.name");
+    if (!type) next.type = t("errors.type");
+    if (!country) next.country = t("errors.country");
+    setErrors(next);
+    if (Object.keys(next).length) return;
+    const store = useOnboarding.getState();
+    store.set({
+      domain,
+      crawl: "done",
+      pages: 37,
+      completed: [],
+      profile: { ...store.profile, name: name.trim(), industry: type as (typeof industries)[number], market: country },
+    });
+    router.push("/onboarding/brand");
+  };
+
+  return (
+    <Card id="add-website" className="@container scroll-mt-20 gap-5">
+      <div className="flex flex-col gap-1">
+        <CardTitle className="text-h2">{t("title")}</CardTitle>
+        <CardDescription className="text-small">{t("description")}</CardDescription>
+      </div>
+      <form onSubmit={submit} noValidate className="flex flex-col gap-5">
+        <div className="grid gap-4 @lg:grid-cols-2">
+          <FormField label={t("url")} helper={t("urlHelper")} error={errors.domain}>
+            {(props) => (
+              <DomainInput {...props} value={domain} onChange={setDomain} placeholder={t("urlPlaceholder")} />
             )}
+          </FormField>
+          <FormField label={t("name")} helper={t("nameHelper")} error={errors.name}>
+            {(props) => (
+              <Input
+                {...props}
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder={t("namePlaceholder")}
+              />
+            )}
+          </FormField>
+        </div>
+        <div className="grid gap-4 @lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,0.8fr)]">
+          <SelectField
+            label={t("type")}
+            placeholder={t("typePlaceholder")}
+            error={errors.type}
+            value={type}
+            onChange={setType}
+            options={industries.map((i) => ({ value: i, label: tIndustry(i) }))}
+          />
+          <SelectField
+            label={t("country")}
+            placeholder={t("countryPlaceholder")}
+            error={errors.country}
+            value={country}
+            onChange={setCountry}
+            options={markets.map((m) => ({ value: m, label: regions.of(m) ?? m }))}
+          />
+          <FormField label={t("city")} helper={t("cityHelper")}>
+            {(props) => (
+              <Input
+                {...props}
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+                placeholder={t("cityPlaceholder")}
+              />
+            )}
+          </FormField>
+        </div>
+        <fieldset className="flex flex-col gap-3 rounded-lg border border-blue/25 bg-blue-bg/50 p-4">
+          <legend className="sr-only">{t("platform")}</legend>
+          <div className="flex items-start gap-2.5">
+            <GlobeIcon aria-hidden className="mt-0.5 size-4 shrink-0 text-blue" />
+            <div className="flex flex-col">
+              <span className="text-small font-medium text-fg">{t("platform")}</span>
+              <span className="text-caption font-normal text-fg-2">{t("platformHelper")}</span>
+            </div>
+          </div>
+          <div role="radiogroup" aria-label={t("platform")} className="flex flex-wrap gap-2">
+            {platforms.map((p) => (
+              <button
+                key={p}
+                type="button"
+                role="radio"
+                aria-checked={platform === p}
+                onClick={() => setPlatform(platform === p ? null : p)}
+                className={cn(
+                  "flex h-9 items-center gap-2 rounded-md border bg-surface px-2.5 text-small text-fg transition-colors duration-120",
+                  platform === p
+                    ? "border-ink shadow-[inset_0_0_0_1px_var(--ink)]"
+                    : "border-border-strong hover:border-fg-3",
+                )}
+              >
+                <span
+                  aria-hidden
+                  translate="no"
+                  className="grid size-5 place-items-center rounded-sm bg-surface-2 font-mono text-[9px] font-semibold text-fg-2"
+                >
+                  {platformMono[p]}
+                </span>
+                {t(`platforms.${p}`)}
+              </button>
+            ))}
+          </div>
+        </fieldset>
+        <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-caption font-normal text-fg-3">{t("later")}</p>
+          <Button type="submit" variant="primary">
+            {t("submit")}
+            <ArrowRightIcon className="rtl:-scale-x-100" />
+          </Button>
+        </div>
+      </form>
+    </Card>
+  );
+}
+
+const stepTone = [
+  "bg-engine-maps text-ink-fg",
+  "bg-engine-gemini text-ink-fg",
+  "bg-engine-perplexity text-ink-fg",
+  "bg-engine-claude text-ink-fg",
+  "bg-engine-chatgpt text-ink-fg",
+  "bg-engine-google text-ink-fg",
+] as const;
+
+function GrowthSteps() {
+  const t = useTranslations("overview.growth");
+  const tSetup = useTranslations("overview.setup");
+  const format = useFormatter();
+  return (
+    <Card className="gap-5">
+      <div className="flex items-center gap-3">
+        <span aria-hidden className="grid size-11 shrink-0 place-items-center rounded-lg bg-blue-bg text-blue">
+          <RocketIcon className="size-5" />
+        </span>
+        <CardTitle className="text-h3 text-blue-ink">{t("title")}</CardTitle>
+      </div>
+      <ol className="flex flex-col gap-4">
+        {setupSteps.map((step, i) => (
+          <li key={step} className="flex items-start gap-3">
+            <span
+              className={cn(
+                "grid size-6 shrink-0 place-items-center rounded-full num text-caption font-semibold",
+                stepTone[i],
+              )}
+            >
+              {format.number(i + 1, "integer")}
+            </span>
+            <span className="flex flex-col">
+              <span className="text-small font-medium text-fg">{tSetup(`steps.${step}`)}</span>
+              <span className="text-caption font-normal text-fg-3">{t(`lines.${step}`)}</span>
+            </span>
+          </li>
+        ))}
+      </ol>
+      <p className="text-small text-fg-2 italic">{t("tagline")}</p>
+    </Card>
+  );
+}
+
+function QuickActions() {
+  const t = useTranslations("overview.quick");
+  const { brandSlug } = useShell();
+  const items: { key: "add" | "opportunities" | "content" | "audit"; icon: LucideIcon; tile: string; href: string }[] =
+    [
+      { key: "add", icon: PlusIcon, tile: "bg-ink text-ink-fg", href: "#add-website" },
+      {
+        key: "opportunities",
+        icon: LightbulbIcon,
+        tile: "bg-warning-bg text-warning",
+        href: brandHref(brandSlug, "actions"),
+      },
+      {
+        key: "content",
+        icon: FileTextIcon,
+        tile: "bg-engine-chatgpt/12 text-engine-chatgpt",
+        href: brandHref(brandSlug, "content"),
+      },
+      { key: "audit", icon: ShieldCheckIcon, tile: "bg-success-bg text-success", href: brandHref(brandSlug, "audit") },
+    ];
+  return (
+    <Card className="gap-3">
+      <CardTitle className="text-h2">{t("title")}</CardTitle>
+      <ul className="flex flex-col gap-2">
+        {items.map(({ key, icon: Icon, tile, href }) => (
+          <li key={key}>
+            <Link
+              href={href}
+              className="flex items-center gap-3 rounded-lg border border-border p-3 transition-colors duration-120 hover:border-border-strong hover:bg-surface-2/60"
+            >
+              <span aria-hidden className={cn("grid size-9 shrink-0 place-items-center rounded-md", tile)}>
+                <Icon className="size-4" />
+              </span>
+              <span className="flex min-w-0 flex-col">
+                <span className="text-small font-medium text-fg">{t(`${key}.title`)}</span>
+                <span className="text-caption font-normal text-fg-3">{t(`${key}.body`)}</span>
+              </span>
+            </Link>
           </li>
         ))}
       </ul>
-      <p className="text-caption font-normal text-fg-3">{t("engineNote", { count: visibility.questionCount ?? 50 })}</p>
     </Card>
   );
 }
 
-function OverviewKpi({ kpi, questions }: { kpi: Kpi; questions: number }) {
-  const t = useTranslations("kpi");
-  const format = useFormatter();
-  const { brandSlug } = useShell();
-  const answers = questions * 5;
-  switch (kpi.key) {
-    case "mentionRate":
-      return (
-        <KpiCard
-          label={t("mentionRate.label")}
-          value={kpi.value}
-          format={(v) => format.number(v, "percent")}
-          delta={kpi.delta}
-          spark={kpi.spark}
-          note={t("mentionRate.note", { mentioned: Math.round(kpi.value * answers), answers })}
-          href={brandHref(brandSlug, "visibility")}
-        />
-      );
-    case "avgAiPosition":
-      return (
-        <KpiCard
-          label={t("avgAiPosition.label")}
-          value={kpi.value}
-          format={(v) => t("avgAiPosition.value", { value: format.number(v, "decimal") })}
-          delta={kpi.delta}
-          spark={kpi.spark}
-          note={t("avgAiPosition.note")}
-          href={brandHref(brandSlug, "visibility")}
-        />
-      );
-    case "googleTop10":
-      return (
-        <KpiCard
-          label={t("googleTop10.label")}
-          value={kpi.value}
-          format={(v) => format.number(v, "integer")}
-          suffix={kpi.total ? t("ofTotal", { total: kpi.total }) : undefined}
-          delta={kpi.delta}
-          spark={kpi.spark}
-          note={t("googleTop10.note")}
-          href={brandHref(brandSlug, "rankings")}
-        />
-      );
-    case "aiCitations":
-      return (
-        <KpiCard
-          label={t("aiCitations.label")}
-          value={kpi.value}
-          format={(v) => format.number(v, "integer")}
-          delta={kpi.delta}
-          spark={kpi.spark}
-          note={t("aiCitations.note")}
-          href={brandHref(brandSlug, "visibility")}
-        />
-      );
-  }
-}
-
-function NextActions({ brandId, slug }: { brandId: string; slug: string }) {
-  const t = useTranslations("overview.actions");
-  const actions = useFakeQuery(["nextActions", brandId], () => nextActions(brandId, slug));
+function NeedHelp() {
+  const t = useTranslations("overview.help");
+  const { openHelp } = useShell();
   return (
-    <Card>
-      <CardHeader>
+    <Card className="gap-4">
+      <div className="flex items-start gap-3">
+        <span aria-hidden className="grid size-10 shrink-0 place-items-center rounded-full bg-surface-2 text-fg-2">
+          <HeadsetIcon className="size-5" />
+        </span>
         <div className="flex flex-col gap-0.5">
-          <CardTitle>{t("title")}</CardTitle>
-          <CardDescription>{t("description")}</CardDescription>
+          <CardTitle as="h2">{t("title")}</CardTitle>
+          <p className="text-small text-fg-2">{t("body")}</p>
         </div>
-        <CardAction>
-          <Button asChild variant="link" size="sm">
-            <Link href={brandHref(slug, "actions")}>
-              {t("openPlan")}
-              <ArrowRightIcon className="rtl:-scale-x-100" />
-            </Link>
-          </Button>
-        </CardAction>
-      </CardHeader>
-      {actions.isPending && <ListSkeleton rows={4} />}
-      {actions.isError && <ErrorState compact onRetry={() => actions.refetch()} />}
-      <ol className="-mx-2 flex flex-col">
-        {actions.data?.map((a, i) => (
-          <li key={a.id} className="flex flex-wrap items-center gap-3 rounded-md px-2 py-3 hover:bg-surface-2">
-            <span className="w-5 num text-caption text-fg-3">{i + 1}</span>
-            <OwnerChip owner={a.owner} />
-            <div className="flex min-w-0 flex-1 basis-56 flex-col">
-              <span className="text-small font-medium text-fg">{a.title}</span>
-              <span className="text-caption font-normal text-fg-3">
-                {t("meta", { impact: t(`impact.${a.impact}`), note: a.note })}
-              </span>
-            </div>
-            <Button asChild size="sm" variant={i === 0 ? "primary" : "secondary"} className="ms-8 sm:ms-0">
-              <Link href={a.href}>{t(`cta.${a.cta}`)}</Link>
-            </Button>
-          </li>
-        ))}
-      </ol>
+      </div>
+      <Button variant="secondary" onClick={openHelp}>
+        {t("cta")}
+      </Button>
     </Card>
   );
 }
 
-function OrbitFeed({ brandId }: { brandId: string }) {
-  const t = useTranslations("overview.feed");
+function RecentActivity({ brandId }: { brandId: string }) {
+  const t = useTranslations("overview.activity");
   const format = useFormatter();
   const now = useNow({ updateInterval: 60_000 });
+  const { brandSlug } = useShell();
   const feed = useFakeQuery(["activity", brandId], () => orbitActivity(brandId));
+  const icons: LucideIcon[] = [GlobeIcon, SearchIcon, LightbulbIcon, FileTextIcon];
   return (
-    <Card>
-      <div className="flex flex-col gap-0.5">
-        <CardTitle>{t("title")}</CardTitle>
-        <CardDescription>{t("description")}</CardDescription>
-      </div>
-      {feed.isPending && <ListSkeleton rows={4} />}
+    <Card className="gap-3">
+      <CardTitle className="text-h2">{t("title")}</CardTitle>
+      {feed.isPending && <Skeleton className="h-40" />}
       {feed.isError && <ErrorState compact onRetry={() => feed.refetch()} />}
-      <ol className="flex flex-col">
-        {feed.data?.map((item, i) => (
-          <li key={item.id} className="relative flex gap-3 pb-5 last:pb-0">
-            {i < (feed.data?.length ?? 0) - 1 && (
-              <span aria-hidden className="absolute start-3 top-7 bottom-0 w-px bg-border" />
-            )}
-            <OrbitAvatar size={24} />
-            <div className="flex min-w-0 flex-col gap-0.5">
-              <span className="text-small text-fg">{item.text}</span>
-              <span className="text-caption font-normal text-fg-3">
-                <time dateTime={item.at}>{format.relativeTime(new Date(item.at), now)}</time>
-                {" · "}
-                {item.sub}
+      {feed.data?.length === 0 && <p className="text-small text-fg-3">{t("empty")}</p>}
+      <ul className="flex flex-col gap-4">
+        {feed.data?.map((item, i) => {
+          const Icon = icons[i % icons.length];
+          return (
+            <li key={item.id} className="flex items-start gap-3">
+              <span
+                aria-hidden
+                className="grid size-8 shrink-0 place-items-center rounded-md bg-success-bg text-success"
+              >
+                <Icon className="size-4" />
               </span>
-            </div>
-          </li>
-        ))}
-      </ol>
-    </Card>
-  );
-}
-
-function ListSkeleton({ rows }: { rows: number }) {
-  return (
-    <div className="flex flex-col gap-4">
-      {Array.from({ length: rows }, (_, i) => (
-        <div key={i} className="flex items-center gap-3">
-          <Skeleton className="size-6 rounded-full" />
-          <div className="flex flex-1 flex-col gap-2">
-            <Skeleton className="h-3.5 w-10/12" />
-            <Skeleton className="h-3 w-1/2" />
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-/** Zero-data: never a broken "0.0" chart. Points at the running (or next) scan instead. */
-function FirstScanState({ summary }: { summary: BrandSummary }) {
-  const t = useTranslations("overview.firstScan");
-  const tShared = useTranslations("shared");
-  const tEngine = useTranslations("engines");
-  const format = useFormatter();
-  const job = useJob(summary.firstScanJobId);
-  const minutes = Math.max(1, Math.ceil((job.data?.etaSeconds ?? 180) / 60));
-
-  return (
-    <div className="flex flex-col gap-4">
-      <EmptyState
-        icon={RadarIcon}
-        tone="agent"
-        title={t("title")}
-        description={tShared("noData", { minutes })}
-        action={
-          job.data && (
-            <div className="flex w-full max-w-md flex-col gap-2">
-              <Progress value={job.data.progress * 100} tone="ink" aria-label={t("title")} />
-              <span className="num text-caption text-fg-2">
-                {t("progress", { percent: format.number(job.data.progress, "percent") })}
+              <span className="flex min-w-0 flex-1 flex-col">
+                <span className="text-small font-medium text-fg">{item.text}</span>
+                <span className="text-caption font-normal text-fg-3">{item.sub}</span>
               </span>
-            </div>
-          )
-        }
-      />
-      {job.data && (
-        <ul className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
-          {job.data.steps.map((s) => (
-            <li
-              key={s.key}
-              className={cn(
-                "flex items-center gap-2 rounded-lg border border-border bg-surface p-3 text-small",
-                s.status === "failed" && "border-danger-bg",
-              )}
-            >
-              <EngineIcon engine={s.key as Engine} />
-              <span className="min-w-0 flex-1 truncate">{tEngine(s.key as Engine)}</span>
-              <span className={cn("num text-caption", s.status === "failed" ? "text-danger" : "text-fg-2")}>
-                {s.status === "failed" ? t("retrying") : format.number(s.progress, "percent")}
-              </span>
+              <time dateTime={item.at} className="shrink-0 text-caption font-normal text-fg-3">
+                {format.relativeTime(new Date(item.at), now)}
+              </time>
             </li>
-          ))}
-        </ul>
-      )}
-    </div>
+          );
+        })}
+      </ul>
+      <Link
+        href={brandHref(brandSlug, "agent")}
+        className="inline-flex items-center gap-1.5 text-small font-medium text-blue hover:underline"
+      >
+        {t("all")}
+        <ArrowRightIcon aria-hidden className="size-4 rtl:-scale-x-100" />
+      </Link>
+    </Card>
   );
 }
