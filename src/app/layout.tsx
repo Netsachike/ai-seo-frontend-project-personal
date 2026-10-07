@@ -1,9 +1,10 @@
 import type { Metadata, Viewport } from "next";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getTranslations } from "next-intl/server";
 
 import { dirFor } from "@/i18n/config";
+import { isDefaultAppHost } from "@/config/brand";
 import { DEFAULT_THEME, THEME_COOKIE, isThemePreference } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 import { Providers } from "@/components/providers";
@@ -26,7 +27,8 @@ export const viewport: Viewport = {
 };
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
-  const [locale, cookieStore] = await Promise.all([getLocale(), cookies()]);
+  const [locale, cookieStore, headerStore] = await Promise.all([getLocale(), cookies(), headers()]);
+  const vendorHost = isDefaultAppHost(headerStore.get("x-forwarded-host") ?? headerStore.get("host"));
   const script = localeFont(locale);
   const savedTheme = cookieStore.get(THEME_COOKIE)?.value;
   // Light is the default for everyone; an explicit dark choice is rendered on the server.
@@ -42,7 +44,11 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-dvh">
         <NextIntlClientProvider>
-          <Providers locale={locale} initialTheme={isThemePreference(savedTheme) ? savedTheme : DEFAULT_THEME}>
+          <Providers
+            locale={locale}
+            initialTheme={isThemePreference(savedTheme) ? savedTheme : DEFAULT_THEME}
+            vendorHost={vendorHost}
+          >
             {children}
           </Providers>
         </NextIntlClientProvider>

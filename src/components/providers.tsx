@@ -11,6 +11,8 @@ import { readClientCookie, setClientCookie } from "@/lib/cookies";
 import { THEME_COOKIE, type ThemePreference } from "@/lib/theme";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
+import { BrandGate } from "@/components/providers/brand-gate";
+import { BrandProvider } from "@/components/providers/brand-provider";
 
 function makeQueryClient() {
   return new QueryClient({
@@ -57,10 +59,13 @@ export function Providers({
   children,
   locale,
   initialTheme,
+  vendorHost,
 }: {
   children: React.ReactNode;
   locale: string;
   initialTheme: ThemePreference;
+  /** False on a White Label tenant domain: the brand is resolved before the app shows. */
+  vendorHost: boolean;
 }) {
   const queryClient = getQueryClient();
   const dir = dirFor(locale);
@@ -76,14 +81,16 @@ export function Providers({
       <ThemeCookieSync />
       <TimeZoneCookieSync />
       <QueryClientProvider client={queryClient}>
-        <NuqsAdapter>
-          <Direction.Provider dir={dir}>
-            <TooltipProvider>
-              {children}
-              <Toaster />
-            </TooltipProvider>
-          </Direction.Provider>
-        </NuqsAdapter>
+        <BrandProvider>
+          <NuqsAdapter>
+            <Direction.Provider dir={dir}>
+              <TooltipProvider>
+                <BrandGate vendorHost={vendorHost}>{children}</BrandGate>
+                <Toaster />
+              </TooltipProvider>
+            </Direction.Provider>
+          </NuqsAdapter>
+        </BrandProvider>
       </QueryClientProvider>
     </ThemeProvider>
   );

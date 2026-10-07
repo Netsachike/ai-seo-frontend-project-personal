@@ -21,7 +21,8 @@ import {
   Command,
 } from "@/components/ui/command";
 import { EntityAvatar } from "./avatars";
-import { brandHref, navGroups } from "./nav";
+import { useSessionUser } from "@/features/account/use-session-user";
+import { navGroups, navItemHref } from "./nav";
 import { useShell } from "./shell-context";
 
 /** ⌘K / Ctrl+K from anywhere in the app. */
@@ -53,6 +54,7 @@ export function CommandMenu() {
   const setOpen = useUiStore((s) => s.setCommandOpen);
   const [query, setQuery] = React.useState("");
   const { brandSlug, brand, workspace, workspaces } = useShell();
+  const session = useSessionUser();
   const brands = useBrands(workspace?.id);
   const switchBrand = useSwitchBrand();
   const switchWorkspace = useSwitchWorkspace();
@@ -96,13 +98,13 @@ export function CommandMenu() {
           )}
           {navGroups.map((group) => (
             <CommandGroup key={group.key} heading={tNav(`groups.${group.key}`)}>
-              {group.items.map((item) => {
+              {group.items.filter((item) => !item.visible || item.visible(session)).map((item) => {
                 const Icon = item.icon;
                 return (
                   <CommandItem
                     key={item.key}
                     value={`nav ${tNav(`items.${item.key}`)}`}
-                    onSelect={() => run(() => router.push(brandHref(brandSlug, item.key)))}
+                    onSelect={() => run(() => router.push(navItemHref(item, brandSlug)))}
                   >
                     <Icon />
                     {tNav(`items.${item.key}`)}

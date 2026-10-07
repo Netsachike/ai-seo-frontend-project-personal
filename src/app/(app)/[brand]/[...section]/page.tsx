@@ -1,17 +1,20 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 
+import { accountHref, legacySettingsTab } from "@/features/account/routes";
 import { isNavKey } from "@/components/layout/nav";
 import { PageHeader } from "@/components/layout/page-header";
 import { EmptyState } from "@/components/brand/empty-state";
 
 /**
  * Temporary stand-in for screens built in later phases. Real routes take
- * precedence over this catch-all as they land.
+ * precedence over this catch-all as they land. Settings moved to the
+ * account-level /settings page; old brand links are forwarded there.
  */
 export default async function SectionPlaceholder({ params }: PageProps<"/[brand]/[...section]">) {
   const { section } = await params;
   const key = section[0];
+  if (key === "settings") redirect(accountHref.settings(legacySettingsTab[section[1] ?? "profile"] ?? "profile"));
   if (!key || !isNavKey(key)) notFound();
   const t = await getTranslations("shell");
   return (
