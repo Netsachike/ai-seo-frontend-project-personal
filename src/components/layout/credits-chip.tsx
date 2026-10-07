@@ -6,9 +6,9 @@ import { useFormatter, useTranslations } from "next-intl";
 import type { Usage } from "@/lib/api/types";
 import { cn } from "@/lib/utils";
 import { useUsage } from "@/features/workspace/hooks";
+import { accountHref } from "@/features/account/routes";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { brandHref } from "./nav";
 import { useShell } from "./shell-context";
 
 export type CreditsTone = "normal" | "warning" | "danger";
@@ -26,7 +26,7 @@ const meterTone: Record<CreditsTone, string> = { normal: "bg-ink", warning: "bg-
 export function CreditsChip({ className }: { className?: string }) {
   const t = useTranslations("shell.credits");
   const format = useFormatter();
-  const { workspace, brandSlug } = useShell();
+  const { workspace } = useShell();
   const usage = useUsage(workspace?.id);
 
   if (!usage.data) return <Skeleton className={cn("h-9 w-32", className)} />;
@@ -41,7 +41,7 @@ export function CreditsChip({ className }: { className?: string }) {
     <Tooltip>
       <TooltipTrigger asChild>
         <Link
-          href={brandHref(brandSlug, "settings/billing")}
+          href={accountHref.settings("subscriptions")}
           aria-label={t("aria", { remaining: amount, total: totalText })}
           className={cn(
             "flex h-9 items-center gap-2 rounded-md border border-border bg-surface px-2.5 text-small hover:border-border-strong",

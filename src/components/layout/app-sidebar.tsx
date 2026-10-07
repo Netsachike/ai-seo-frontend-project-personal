@@ -6,15 +6,18 @@ import { usePathname } from "next/navigation";
 import { PanelLeftCloseIcon, PanelLeftOpenIcon, StarIcon } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 
-import type { PlanTier } from "@/lib/api/types";
 import { dirFor } from "@/i18n/config";
+import { getActivePlan, type PlanName } from "@/lib/plan-core";
+import { accountHref } from "@/features/account/routes";
+import { useSessionUser } from "@/features/account/use-session-user";
+import { useBrandConfig } from "@/components/providers/brand-provider";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { OrbitMark, WORDMARK } from "@/components/brand/logo";
 import { UserAvatar } from "./avatars";
-import { activeNavKey, brandHref, navGroups, type NavItem } from "./nav";
+import { activeNavKey, navGroups, navItemHref, type NavItem } from "./nav";
 import { useShell } from "./shell-context";
 
 /** Tooltips sit on the inline-end side, which is physical left in RTL. */
@@ -22,7 +25,13 @@ function useEndSide(): "left" | "right" {
   return dirFor(useLocale()) === "rtl" ? "left" : "right";
 }
 
-const nextTier: Record<PlanTier, string> = { free: "Growth", growth: "Agency", agency: "Agency" };
+/** The plan the sidebar card sells; Enterprise (`reseller`) is the top tier. */
+const nextPlan: Record<PlanName, PlanName | null> = {
+  free: "professional",
+  professional: "agency",
+  agency: "reseller",
+  reseller: null,
+};
 
 /**
  * Navy panel in both themes. The `dark` class scopes dark-surface tokens to
@@ -61,9 +70,27 @@ export function AppSidebar() {
   );
 }
 
-/** Ring mark, wordmark and tagline, white on navy. */
+/** Ring mark, wordmark and tagline, white on navy. On a White Label domain, the tenant's logo or name. */
 export function SidebarBrand({ className }: { className?: string }) {
   const t = useTranslations("shell.sidebar");
+  const { brandConfig, isCustomDomain } = useBrandConfig();
+
+  if (isCustomDomain) {
+    const mark = brandConfig.logo_url || brandConfig.logo_icon_url;
+    return (
+      <span className={cn("flex min-w-0 items-center gap-3", className)}>
+        {mark ? (
+          // eslint-disable-next-line @next/next/no-img-element -- tenant logos come from any origin
+          <img src={mark} alt={brandConfig.brand_name} className="h-8 max-w-[180px] object-contain" />
+        ) : (
+          <span className="truncate text-[18px] leading-6 font-semibold tracking-[-0.02em] text-white">
+            {brandConfig.brand_name}
+          </span>
+        )}
+      </span>
+    );
+  }
+
   return (
     <span className={cn("flex min-w-0 items-center gap-3", className)}>
       <OrbitMark size={30} className="text-white" />
@@ -89,17 +116,24 @@ export function SidebarNav({
 }) {
   const t = useTranslations("shell.nav");
   const { brandSlug } = useShell();
+  const session = useSessionUser();
   const active = activeNavKey(usePathname());
-  const items = navGroups.flatMap((g) => g.items);
+  const items = navGroups.flatMap((g) => g.items).filter((item) => !item.visible || item.visible(session));
+  const navRef = React.useRef<HTMLElement>(null);
+
+  // Keep the active item visible when the list scrolls (short screens, upgrade card shown).
+  React.useEffect(() => {
+    navRef.current?.querySelector('[aria-current="page"]')?.scrollIntoView({ block: "nearest" });
+  }, [active, items.length]);
 
   return (
-    <nav aria-label={t("label")} className={className}>
+    <nav ref={navRef} aria-label={t("label")} className={className}>
       <ul className="flex flex-col gap-1">
         {items.map((item) => (
           <li key={item.key}>
             <NavLink
               item={item}
-              href={brandHref(brandSlug, item.key)}
+              href={navItemHref(item, brandSlug)}
               active={item.key === active}
               collapsed={collapsed}
               onNavigate={onNavigate}
@@ -164,9 +198,13 @@ function NavLink({
 export function SidebarFooter({ collapsed = false, onNavigate }: { collapsed?: boolean; onNavigate?: () => void }) {
   const t = useTranslations("shell.sidebar");
   const tRole = useTranslations("roles");
+  const tPlan = useTranslations("account.plans");
   const side = useEndSide();
-  const { me, workspace, brandSlug } = useShell();
-  const billing = brandHref(brandSlug, "settings/billing");
+  const { me, workspace } = useShell();
+  const session = useSessionUser();
+  const plan = getActivePlan(session?.subscriptions);
+  const upsell = nextPlan[plan];
+  const profileHref = accountHref.settings("profile");
 
   if (!me || !workspace) {
     return (
@@ -177,14 +215,14 @@ export function SidebarFooter({ collapsed = false, onNavigate }: { collapsed?: b
   }
 
   const telegramOn = Boolean(me.telegram?.connected);
-  const userLine = t("userLine", { role: tRole(workspace.role), plan: workspace.plan.name });
+  const userLine = t("userLine", { role: tRole(workspace.role), plan: tPlan(`${plan}.label`) });
 
   if (collapsed) {
     return (
       <div className="flex flex-col items-center gap-3 border-t border-nav-border py-3">
         <Tooltip>
           <TooltipTrigger asChild>
-            <Link href={billing} aria-label={t("manageAria", { name: me.name })} className="relative rounded-full">
+            <Link href={profileHref} aria-label={t("manageAria", { name: me.name })} className="relative rounded-full">
               <UserAvatar name={me.name} src={me.avatarUrl} />
               <TelegramDot on={telegramOn} className="absolute -end-0.5 -bottom-0.5" />
             </Link>
@@ -197,15 +235,15 @@ export function SidebarFooter({ collapsed = false, onNavigate }: { collapsed?: b
 
   return (
     <div className="flex flex-col gap-3 p-3">
-      {!workspace.plan.isTopTier && (
+      {session !== undefined && upsell && (
         <section className="flex flex-col gap-3 rounded-lg border border-nav-border bg-nav-card p-4">
           <div className="flex items-center gap-2">
             <StarIcon aria-hidden className="size-4 fill-nav-star text-nav-star" />
-            <h2 className="text-h3 text-white">{t("upgradeTitle", { plan: nextTier[workspace.plan.tier] })}</h2>
+            <h2 className="text-h3 text-white">{t("upgradeTitle", { plan: tPlan(`${upsell}.label`) })}</h2>
           </div>
           <p className="text-small text-nav-fg">{t("upgradeBody")}</p>
           <Button asChild variant="agent" size="sm" className="w-full">
-            <Link href={billing} onClick={onNavigate}>
+            <Link href={accountHref.upgrade()} onClick={onNavigate}>
               {t("viewPlans")}
             </Link>
           </Button>
@@ -213,7 +251,7 @@ export function SidebarFooter({ collapsed = false, onNavigate }: { collapsed?: b
       )}
 
       <Link
-        href={billing}
+        href={profileHref}
         onClick={onNavigate}
         className="flex items-center gap-2.5 rounded-md px-1.5 py-1.5 hover:bg-nav-hover"
       >

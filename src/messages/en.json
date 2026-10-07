@@ -414,7 +414,9 @@
         "agent": "Ask Orbit",
         "integrations": "Integrations",
         "reports": "Reports",
-        "settings": "Settings"
+        "settings": "Settings",
+        "resellers": "Resellers",
+        "agency": "Agency resources"
       }
     },
     "sidebar": {
@@ -518,7 +520,10 @@
       "language": "Language",
       "help": "Help and support",
       "feedback": "Send feedback",
-      "signOut": "Sign out"
+      "signOut": "Sign out",
+      "workspaces": "Workspaces",
+      "upgrade": "Upgrade plan",
+      "admin": "Admin console"
     },
     "command": {
       "title": "Command menu",
@@ -586,9 +591,10 @@
     "layout": {
       "home": "Orbit home",
       "copyright": "© {year} {company}",
-      "company": "[COMPANY NAME]",
+      "company": "NETSACH TECH LTD",
       "terms": "Terms",
-      "privacy": "Privacy"
+      "privacy": "Privacy",
+      "refunds": "Refunds"
     },
     "panel": {
       "label": "About Orbit",
@@ -598,7 +604,8 @@
       "question": "best coffee subscription in the US",
       "answer": "Top picks right now: <mark>Your brand</mark> for small-batch single origins, then two larger roasters for blends.",
       "mentioned": "▲ Mentioned in 4 of 5 engines",
-      "rankBadge": "#1 on Gemini"
+      "rankBadge": "#1 on Gemini",
+      "slide": "Show slide {number} of {total}"
     },
     "signIn": {
       "metaTitle": "Sign in",
@@ -1459,5 +1466,1103 @@
       "working": "Working"
     },
     "openPlan": "Open action plan"
+  },
+  "account": {
+    "plans": {
+      "free": {
+        "label": "Free",
+        "short": "Free"
+      },
+      "professional": {
+        "label": "Growth",
+        "short": "Growth"
+      },
+      "agency": {
+        "label": "Agency",
+        "short": "Agency"
+      },
+      "reseller": {
+        "label": "Enterprise",
+        "short": "Ent"
+      }
+    },
+    "billingTypes": {
+      "monthly": "Monthly",
+      "yearly": "Yearly",
+      "lifetime": "Lifetime",
+      "subscription": "Subscription",
+      "add-on": "Add-on"
+    },
+    "addons": {
+      "reseller_seats": {
+        "name": "White Label",
+        "description": "Your own domain, logo and colours for client workspaces."
+      },
+      "remove_branding": {
+        "name": "Remove branding",
+        "description": "Hides \"Powered by Orbit\" from reports and shared pages."
+      }
+    },
+    "password": {
+      "rules": {
+        "length": "At least 8 characters",
+        "uppercase": "An uppercase letter",
+        "number": "A number",
+        "symbol": "A symbol"
+      },
+      "met": "(done)",
+      "notMet": "(not yet)"
+    },
+    "settings": {
+      "title": "Settings",
+      "description": "Your profile, workspaces, plan and team.",
+      "tabsLabel": "Settings sections",
+      "tabs": {
+        "profile": "Profile",
+        "workspaces": "Workspaces",
+        "subscriptions": "Plan and billing",
+        "team-members": "Team members"
+      }
+    },
+    "profile": {
+      "photo": {
+        "change": "Change photo",
+        "remove": "Remove photo",
+        "helper": "JPG, PNG, WEBP or GIF up to {size} MB. Saved on this device only.",
+        "updated": "Profile photo updated.",
+        "removed": "Profile photo removed.",
+        "failed": "Couldn't upload the photo. Try another file.",
+        "noUrl": "The upload finished but no image address came back."
+      },
+      "details": {
+        "title": "Personal information",
+        "fullName": "Full name",
+        "email": "Email address",
+        "save": "Save changes",
+        "saved": "Profile updated."
+      },
+      "password": {
+        "title": "Change password",
+        "description": "Use at least 8 characters with an uppercase letter, a number and a symbol.",
+        "new": "New password",
+        "confirm": "Confirm new password",
+        "mismatch": "Passwords don't match.",
+        "submit": "Update password",
+        "tooWeak": "Use a stronger password and make sure both fields match.",
+        "updated": "Password updated."
+      }
+    },
+    "demo": {
+      "title": "Demo account",
+      "description": "No API is connected, so you're signed in to a demo account. Switch its role and plan to check each screen and permission.",
+      "role": "Role",
+      "roles": {
+        "user": "Account owner",
+        "admin": "Platform admin"
+      },
+      "plan": "Plan",
+      "billing": "Billing",
+      "toggles": {
+        "whiteLabel": {
+          "label": "White Label add-on",
+          "helper": "Custom domains and branding for workspaces."
+        },
+        "removeBranding": {
+          "label": "Remove branding add-on",
+          "helper": "Hides \"Powered by Orbit\"."
+        },
+        "cancelled": {
+          "label": "Renewal cancelled",
+          "helper": "The plan expires at the end of the period."
+        }
+      },
+      "apply": "Apply to this session",
+      "applied": "Demo account updated."
+    },
+    "workspaces": {
+      "title": "Workspaces",
+      "description": "Each workspace has its own brands, team and billing.",
+      "add": "Add workspace",
+      "members": "{count, plural, one {# member} other {# members}}",
+      "active": "Active",
+      "viewDetails": "View details",
+      "configureWhiteLabel": "Configure White Label",
+      "editAria": "Edit {name}",
+      "deleteAria": "Delete {name}",
+      "emptyTitle": "No workspaces yet",
+      "emptyBody": "Create a workspace to start tracking a brand.",
+      "toasts": {
+        "created": "Workspace created.",
+        "updated": "Workspace updated.",
+        "deleted": "Workspace deleted.",
+        "saveFailed": "Couldn't save the workspace. Try again.",
+        "deleteFailed": "Couldn't delete the workspace. Try again."
+      },
+      "deleteDialog": {
+        "title": "Delete workspace",
+        "body": "{name} and its brands, domains and history will be removed for everyone. This can't be undone.",
+        "confirm": "Delete workspace"
+      },
+      "dialog": {
+        "addTitle": "Add workspace",
+        "addBody": "A new workspace for another team or client.",
+        "editTitle": "Edit workspace",
+        "editBody": "Rename the workspace or make it your active one.",
+        "name": "Workspace name",
+        "namePlaceholder": "Marketing team",
+        "nameRequired": "Enter a workspace name.",
+        "logo": "Workspace logo",
+        "logoHelper": "PNG, JPG or GIF. Optional.",
+        "active": "Active workspace",
+        "activeHelper": "Open this workspace by default.",
+        "create": "Create workspace"
+      }
+    },
+    "subscriptions": {
+      "title": "Plan and billing",
+      "description": "Your active plan and add-ons.",
+      "activeTab": "Plan ({count})",
+      "addonsTab": "Add-ons ({count})",
+      "active": "Active",
+      "renewalCancelled": "Renewal cancelled",
+      "status": "Status",
+      "cancelsAtPeriodEnd": "Ends with this period",
+      "type": "Type",
+      "renews": "Renews",
+      "expires": "Expires",
+      "cancelPlan": "Cancel plan",
+      "expireNotice": "This plan ends{hasDate, select, yes { on {date}} other {}}. <pay>Pay now</pay> to restart your billing cycle.",
+      "noPlanTitle": "You're on the Free plan",
+      "noPlanBody": "Upgrade for more tracked questions, brands and agent work.",
+      "viewPlans": "View plans",
+      "noAddonsTitle": "No add-ons",
+      "noAddonsBody": "White Label adds your own domain and branding to client workspaces.",
+      "browseAddons": "See add-ons",
+      "cancelled": "Your plan won't renew. You keep access until the current period ends.",
+      "cancelFailed": "Couldn't cancel the renewal. Try again.",
+      "cancelDialog": {
+        "title": "Cancel your {plan} plan?",
+        "body": "Your {plan} plan stops renewing{hasDate, select, yes { after {date}} other { at the end of this billing cycle}}. You keep every {plan} feature until then.",
+        "switch": "Want a different plan instead? Cancel here first, then pick a new plan on the <upgrade>upgrade page</upgrade>.",
+        "keep": "Keep my plan"
+      }
+    },
+    "team": {
+      "title": "Team members",
+      "description": "People who can work in your workspaces.",
+      "add": "Add member",
+      "loadFailed": "Couldn't load your team. Try again.",
+      "emptyTitle": "No team members yet",
+      "emptyBody": "Invite a colleague or client and choose which workspaces they can open.",
+      "noWorkspace": "No workspace",
+      "editAria": "Edit {name}",
+      "deleteAria": "Remove {name}",
+      "columns": {
+        "name": "Name",
+        "email": "Email",
+        "role": "Role",
+        "workspaces": "Workspaces",
+        "actions": "Actions"
+      },
+      "roles": {
+        "team_member": "Team member",
+        "client": "Client",
+        "editor": "Editor",
+        "admin": "Admin"
+      },
+      "validation": {
+        "required": "First name, last name and email are required.",
+        "passwordRequired": "Enter a password and confirm it.",
+        "mismatch": "Passwords don't match.",
+        "workspace": "Assign at least one workspace."
+      },
+      "toasts": {
+        "added": "Team member added.",
+        "updated": "Team member updated.",
+        "deleted": "Team member removed.",
+        "saveFailed": "Couldn't save the team member. Try again.",
+        "deleteFailed": "Couldn't remove the team member. Try again."
+      },
+      "deleteDialog": {
+        "title": "Remove team member",
+        "body": "{name} will lose access to every workspace. This can't be undone.",
+        "confirm": "Remove member"
+      },
+      "dialog": {
+        "addTitle": "Add team member",
+        "addBody": "Create their sign-in and choose the workspaces they can open.",
+        "editTitle": "Edit team member",
+        "editBody": "Update their details and workspace access.",
+        "firstName": "First name",
+        "lastName": "Last name",
+        "email": "Email",
+        "role": "Role",
+        "password": "Password",
+        "confirmPassword": "Confirm password",
+        "required": "Required",
+        "optional": "Leave blank to keep the current password",
+        "mismatch": "Passwords don't match.",
+        "workspaces": "Workspace access",
+        "workspacesHelper": "Pick at least one.",
+        "noWorkspaces": "No workspaces available.",
+        "addSubmit": "Add member"
+      }
+    },
+    "whiteLabel": {
+      "upgrade": {
+        "title": "Upgrade to White Label",
+        "body": "Put your own domain, logo and colours on client workspaces, and remove Orbit branding, so the app looks like yours.",
+        "cta": "See White Label plans"
+      },
+      "configure": {
+        "title": "Configure White Label",
+        "subtitle": "Branding and domain for {workspace}",
+        "sections": {
+          "domain": "Brand name and domain",
+          "identity": "Brand identity",
+          "carousel": "Sign-in carousel",
+          "email": "Custom email"
+        },
+        "brandName": "Brand name",
+        "brandNamePlaceholder": "Northwind Insights",
+        "domain": "Custom domain",
+        "domainPlaceholder": "app.yourbrand.com",
+        "domainHelper": "The host only, without https://.",
+        "domainLocked": "The domain can't be changed. Add a new domain instead.",
+        "domainRequired": "Enter a domain.",
+        "domainAddFailed": "Couldn't add the domain. Check that it's a valid domain managed in Cloudflare.",
+        "cloudflareTitle": "Cloudflare domains only",
+        "cloudflareBody": "The domain must be registered and managed in Cloudflare. Point its nameservers to Cloudflare before saving; other DNS providers won't verify.",
+        "images": {
+          "logoUrl": {
+            "label": "Logo (optional)",
+            "helper": "Up to 612 × 408 px works best.",
+            "name": "logo"
+          },
+          "logoIconUrl": {
+            "label": "Logo icon (optional)",
+            "helper": "Square mark for the collapsed sidebar.",
+            "name": "logo icon"
+          },
+          "faviconUrl": {
+            "label": "Favicon (optional)",
+            "helper": "ICO, PNG or JPG.",
+            "name": "favicon"
+          }
+        },
+        "removeImage": "Remove {field}",
+        "uploadFailed": "Couldn't upload the {field}.",
+        "carouselUploadFailed": "Couldn't upload the carousel image.",
+        "theme": {
+          "label": "Default appearance",
+          "helper": "Applies to first-time visitors only. Anyone who picks a theme keeps it.",
+          "options": {
+            "user": "Let users choose",
+            "light": "Light",
+            "dark": "Dark"
+          }
+        },
+        "colors": {
+          "primaryColor": {
+            "label": "Primary",
+            "helper": "Links and active items"
+          },
+          "secondaryColor": {
+            "label": "Sidebar",
+            "helper": "Navigation panel"
+          },
+          "buttonColor": {
+            "label": "Button",
+            "helper": "Main actions"
+          },
+          "buttonTextColor": {
+            "label": "Button text",
+            "helper": "Text on buttons"
+          },
+          "backgroundColor": {
+            "label": "Sign-in panel",
+            "helper": "Panel background"
+          },
+          "textColor": {
+            "label": "Sign-in text",
+            "helper": "Text on the panel"
+          }
+        },
+        "preview": {
+          "label": "Preview",
+          "link": "View report",
+          "button": "Approve",
+          "signIn": "Sign in"
+        },
+        "carouselBody": "These slides rotate on your sign-in page. Replace any image, reorder them, or edit the copy. Blank fields keep the stock wording.",
+        "slideAlt": "Carousel slide {number}",
+        "moveEarlier": "Move slide {number} earlier",
+        "moveLater": "Move slide {number} later",
+        "replace": "Replace",
+        "slideCopy": {
+          "kicker": "Kicker",
+          "title": "Headline",
+          "description": "Description"
+        },
+        "slideCopyAria": "{field} for slide {number}",
+        "supportEmail": "Support email (optional)",
+        "supportEmailPlaceholder": "support@yourbrand.com",
+        "replyToEmail": "Reply-to email (optional)",
+        "replyToEmailPlaceholder": "reply@yourbrand.com",
+        "emailBody": "Used on system emails your White Label customers receive. Leave blank to use the workspace default.",
+        "submit": "Save White Label",
+        "saved": "White Label settings saved.",
+        "saveFailed": "Couldn't save the White Label settings. Try again."
+      }
+    },
+    "site": {
+      "metaTitle": "Workspace details",
+      "subtitle": "Workspace details and White Label domains",
+      "backToWorkspaces": "Back to workspaces",
+      "notFoundTitle": "Workspace not found",
+      "notFoundBody": "It may have been deleted, or you no longer have access to it.",
+      "domainsTitle": "White Label domains",
+      "domainsBody": "Domains that serve this workspace under your own brand.",
+      "addDomain": "Add domain",
+      "addCustomDomain": "Add custom domain",
+      "emptyTitle": "No custom domains",
+      "emptyBody": "Add a domain to serve this workspace under your own brand.",
+      "ssl": {
+        "active": "SSL active",
+        "pending": "SSL pending"
+      },
+      "status": {
+        "verified": "Verified",
+        "syncing": "Finishing setup",
+        "pending": "Pending"
+      },
+      "live": {
+        "live": "Domain is live. Ownership is verified and traffic is routing here.",
+        "routing": "Ownership verified. Routing is still propagating; give it a few more minutes.",
+        "txt": "Waiting for the TXT record. Open DNS records to copy it. DNS changes take 30 to 60 minutes to propagate.",
+        "waiting": "Not verified yet. DNS changes take 30 to 60 minutes to propagate; check again after that.",
+        "network": "Couldn't reach the domain provider. Try again."
+      },
+      "swatches": {
+        "primary_color": "Primary",
+        "secondary_color": "Sidebar",
+        "button_color": "Button",
+        "background_color": "Sign-in"
+      },
+      "carouselSlides": "Sign-in slides",
+      "checkVerification": "Check verification",
+      "checking": "Checking…",
+      "dnsRecords": "DNS records",
+      "editAria": "Edit {domain}",
+      "removeAria": "Remove {domain}",
+      "info": {
+        "title": "Workspace info",
+        "id": "Workspace ID",
+        "status": "Status",
+        "active": "Active",
+        "inactive": "Inactive",
+        "members": "Members",
+        "membersValue": "{count, plural, one {# member} other {# members}}",
+        "domains": "Custom domains"
+      },
+      "toasts": {
+        "removed": "{domain} removed.",
+        "removeFailed": "Couldn't remove the domain. Try again.",
+        "vercelRemoveFailed": "Couldn't detach the domain from hosting. Try again."
+      },
+      "deleteDialog": {
+        "title": "Remove custom domain",
+        "body": "{domain} will be detached and its branding deleted.",
+        "warning": "The domain stops serving this workspace right away. You can add it again later, but it will need to be verified from scratch.",
+        "confirm": "Remove domain"
+      },
+      "dns": {
+        "title": "DNS records",
+        "subtitle": "DNS settings for {domain}",
+        "intro": "Add these records at your DNS provider (for example Cloudflare) to prove ownership and route traffic. Set both to <strong>DNS only</strong>; proxying them breaks verification.",
+        "refresh": "Refresh",
+        "loading": "Loading DNS records",
+        "verifyTitle": "1. Verify domain ownership",
+        "verifyBody": "Add this TXT record to prove you own the domain.",
+        "routingTitle": "Configure routing (required)",
+        "routingTitleStep": "2. Configure routing",
+        "routingBody": "Add this record to point your domain at Orbit.",
+        "noRouting": "No routing records available yet.",
+        "doneTitle": "Domain is fully configured",
+        "doneBody": "Your DNS records are correct and traffic is routing here.",
+        "propagation": "DNS changes usually take 30 to 60 minutes to propagate. Add the record, then check the status after that window.",
+        "dnsOnly": "DNS only",
+        "auto": "Auto",
+        "columns": {
+          "type": "Type",
+          "name": "Name",
+          "content": "Content",
+          "proxy": "Proxy status",
+          "ttl": "TTL"
+        },
+        "copied": "Copied.",
+        "copyFailed": "Couldn't copy. Select the value and copy it manually.",
+        "copyAria": "Copy {value}",
+        "fetchFailed": "Couldn't load the DNS records. Try again."
+      }
+    },
+    "upgrade": {
+      "metaTitle": "Plans",
+      "title": "Choose the plan that fits your work",
+      "description": "Track more brands, bring in your team, or resell Orbit under your own name.",
+      "tabs": {
+        "app": "Plans",
+        "whitelabel": "White Label"
+      },
+      "period": {
+        "label": "Billing period",
+        "monthly": "Monthly",
+        "annually": "Annual"
+      },
+      "checkoutOff": "Checkout isn't connected in this environment yet, so plans can be compared but not bought.",
+      "expireNotice": "Your {plan} plan ends{hasDate, select, yes { on {date}} other {}}. Pay now to restart your billing cycle.",
+      "cancelled": "Your plan won't renew. You keep access until the current period ends.",
+      "planCopy": {
+        "professional": "For one brand that wants to show up in AI answers.",
+        "agency": "For teams running several brands and clients.",
+        "reseller": "For partners who resell Orbit under their own brand."
+      },
+      "whiteLabelPlans": {
+        "whitelabel_starter": {
+          "name": "Starter"
+        },
+        "whitelabel_pro": {
+          "name": "Pro"
+        },
+        "whitelabel_unlimited": {
+          "name": "Unlimited"
+        },
+        "seats": "{count, plural, one {# client licence} other {# client licences}}",
+        "unlimitedSeats": "Unlimited client licences"
+      },
+      "features": {
+        "aiVisibility": "AI visibility in ChatGPT, Claude, Gemini, Perplexity and AI Overviews",
+        "rankings": "Google rankings by keyword and device",
+        "competitors": "Competitor share of voice",
+        "audit": "Site audit with approved fixes",
+        "agentArticles": "Articles drafted by Orbit, published after you approve",
+        "telegram": "Approvals on Telegram",
+        "team": "Team collaboration",
+        "workspaces": "Multiple workspaces",
+        "agencyKit": "Agency resource kit",
+        "resellerConsole": "Reseller console",
+        "everythingGrowth": "Everything in Growth",
+        "everythingAgency": "Everything in Agency",
+        "multiBrand": "Several brands per workspace",
+        "clientReports": "Client-ready reports",
+        "autopilot": "Autopilot modes",
+        "unlimitedWorkspaces": "Unlimited workspaces",
+        "unlimitedTeam": "Unlimited team members",
+        "resellerAccounts": "Create and manage reseller accounts",
+        "partnerSupport": "Dedicated partner support",
+        "wlSeats": "Sell to your own customers under your brand",
+        "wlPricing": "Set your own monthly, yearly or one-time pricing",
+        "wlBrand": "Your domain, logo and colours",
+        "wlDashboard": "Partner dashboard",
+        "wlKit": "Sales kit included",
+        "wlSupport": "Support handled behind your brand"
+      },
+      "card": {
+        "popular": "Most popular",
+        "active": "Your plan",
+        "current": "Current plan",
+        "cancel": "Cancel plan",
+        "checkoutOff": "Checkout not connected",
+        "loading": "Loading checkout…",
+        "upgrade": "Upgrade to {plan}",
+        "downgrade": "Switch to {plan}",
+        "choose": "Choose {plan}",
+        "perMonth": "/month",
+        "oneTime": "one-time",
+        "oneTimeLicence": "One-time licence",
+        "billedAnnually": "Billed annually",
+        "pricePending": "Price coming soon",
+        "included": "(included)",
+        "notIncluded": "(not included)"
+      },
+      "kit": {
+        "title": "Agency and White Label kit",
+        "body": "Proposal and report templates, sales scripts and brand assets, ready to send to clients.",
+        "open": "Open the kit",
+        "view": "See what's in the kit"
+      },
+      "errors": {
+        "noPrice": "This plan has no price set up yet.",
+        "noPriceContact": "This licence has no price set up yet. Contact support to buy it.",
+        "notReady": "Checkout isn't ready yet. Try again in a moment.",
+        "checkout": "Couldn't open checkout.",
+        "update": "Couldn't update your plan. Try again."
+      },
+      "confirm": {
+        "cancelTitle": "Cancel your {plan} plan?",
+        "downgradeTitle": "Switch to {plan}?",
+        "upgradeTitle": "Upgrade to {plan}?",
+        "cancelBody": "Your {plan} plan stops renewing{hasDate, select, yes { after {date}} other { at the end of this billing cycle}}. You keep every {plan} feature until then, then the account moves to Free.",
+        "downgradeBody": "To switch, we first <strong>cancel your {plan} plan</strong>, then open checkout for {next}. This takes effect <strong>right away</strong>, not on {hasDate, select, yes {{date}} other {your renewal date}}, and {plan}-only features drop to the {next} level immediately.",
+        "upgradeBody": "To upgrade, we first <strong>cancel your {plan} plan</strong>, then open checkout for {next}. Higher limits unlock once payment goes through, and your billing cycle starts today.",
+        "keep": "Keep my plan",
+        "cancel": "Cancel plan",
+        "cancelDowngrade": "Cancel and switch",
+        "cancelUpgrade": "Cancel and upgrade"
+      }
+    },
+    "locked": {
+      "upgrade": "See plans",
+      "back": "Back to dashboard"
+    },
+    "resellers": {
+      "title": "Resellers",
+      "description": "Reseller accounts and how fast they're growing.",
+      "lockedTitle": "Reseller access required",
+      "lockedBody": "The reseller console comes with the Enterprise plan.",
+      "add": "Add reseller",
+      "fallbackName": "Reseller",
+      "active": "Active",
+      "inactive": "Inactive",
+      "editAria": "Edit {name}",
+      "deleteAria": "Delete {name}",
+      "emptyTitle": "No resellers yet",
+      "emptyBody": "Add a reseller account to start selling Orbit under your brand.",
+      "stats": {
+        "total": "Total users",
+        "totalHint": "Across all resellers",
+        "today": "New today",
+        "todayHint": "Accounts added today",
+        "week": "New this week",
+        "weekHint": "Includes today",
+        "plus": "+{count}"
+      },
+      "columns": {
+        "name": "Name",
+        "email": "Email",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "toasts": {
+        "loadFailed": "Couldn't load resellers. Try again.",
+        "added": "Reseller added.",
+        "updated": "Reseller updated.",
+        "deleted": "Reseller deleted.",
+        "saveFailed": "Couldn't save the reseller. Try again.",
+        "deleteFailed": "Couldn't delete the reseller. Try again."
+      },
+      "deleteDialog": {
+        "title": "Delete reseller?",
+        "body": "{name} will lose access right away. This can't be undone.",
+        "confirm": "Delete reseller"
+      },
+      "dialog": {
+        "addTitle": "Add reseller",
+        "addBody": "Create a reseller account with its own sign-in.",
+        "editTitle": "Edit reseller",
+        "editBody": "Update the reseller's details and status.",
+        "firstName": "First name",
+        "lastName": "Last name",
+        "email": "Email",
+        "password": "Password",
+        "passwordOptional": "Leave blank to keep the current password",
+        "confirmPassword": "Confirm password",
+        "required": "Required",
+        "mismatch": "Passwords don't match.",
+        "active": "Active",
+        "activeOn": "This reseller can sign in.",
+        "activeOff": "This reseller can't sign in.",
+        "addSubmit": "Add reseller"
+      }
+    },
+    "agency": {
+      "title": "Agency resources",
+      "description": "Templates, decks and scripts for selling and delivering SEO and AI visibility work to clients.",
+      "lockedTitle": "Agency access required",
+      "lockedBody": "The agency kit comes with the Agency and Enterprise plans.",
+      "filterLabel": "Filter by category",
+      "new": "New",
+      "preview": "Preview",
+      "download": "Download",
+      "open": "Open",
+      "comingSoon": "Coming soon",
+      "summary": {
+        "resources": "Resources",
+        "categories": "{count, plural, one {# category} other {# categories}}",
+        "new": "New this month",
+        "newHint": "Recently added to the kit",
+        "ready": "Ready to download",
+        "readyValue": "{ready} of {total}",
+        "readyHint": "The rest are being finished"
+      },
+      "categories": {
+        "all": "All",
+        "reports": "Client reports",
+        "sales": "Sales",
+        "delivery": "Delivery",
+        "legal": "Legal"
+      },
+      "resources": {
+        "reportTemplate": {
+          "title": "Monthly client report",
+          "description": "A report layout for AI visibility, rankings and work done, ready to fill from Orbit's exports."
+        },
+        "auditDeck": {
+          "title": "AI visibility audit deck",
+          "description": "A pitch deck that shows a prospect where they appear in ChatGPT, Gemini and Google today."
+        },
+        "proposal": {
+          "title": "Proposal template",
+          "description": "Scope, timeline, deliverables and pricing for an SEO and AI visibility retainer."
+        },
+        "pricingSheet": {
+          "title": "Service pricing sheet",
+          "description": "A one-page menu of packages you can adapt to your own rates."
+        },
+        "outreach": {
+          "title": "Cold outreach emails",
+          "description": "Short email sequences that open with the prospect's own AI visibility gap."
+        },
+        "discoveryScript": {
+          "title": "Discovery call script",
+          "description": "Questions that qualify a prospect and set up the audit."
+        },
+        "onboarding": {
+          "title": "Client onboarding checklist",
+          "description": "Access, goals, competitors and approvals to collect in week one."
+        },
+        "contentBrief": {
+          "title": "Content brief template",
+          "description": "The brief format Orbit's articles follow, for writers and client sign-off."
+        },
+        "contract": {
+          "title": "Service agreement",
+          "description": "Contract language for responsibilities, payment terms and approvals. Review with your lawyer."
+        }
+      },
+      "custom": {
+        "title": "Need something tailored?",
+        "body": "Tell us your niche and we'll help shape the kit around it.",
+        "managePlan": "Manage plan",
+        "contact": "Contact agency support"
+      }
+    }
+  },
+  "admin": {
+    "nav": {
+      "title": "Admin console",
+      "subtitle": "Admin console",
+      "label": "Admin navigation",
+      "open": "Open admin navigation",
+      "users": "User management",
+      "statistics": "Statistics",
+      "marketing": "Email marketing",
+      "backToApp": "Back to the app"
+    },
+    "users": {
+      "title": "User management",
+      "description": "Every account on the platform, with plans, add-ons and credits.",
+      "addAccount": "Add account",
+      "searchLabel": "Search users",
+      "searchPlaceholder": "Search by name, email or role",
+      "searchNote": "Showing every matching user. Pagination is off while searching.",
+      "emptyTitle": "No users found",
+      "emptyBody": "Try a different name, email or role.",
+      "joined": "Joined {date}",
+      "none": "—",
+      "activeCount": "{count} active",
+      "viewLicenseAria": "View licence for {name}",
+      "accessAsAria": "Sign in as {name}",
+      "editAria": "Edit {name}",
+      "deleteAria": "Delete {name}",
+      "moreAria": "More actions for {name}",
+      "stats": {
+        "total": "Total users",
+        "week": "New this week",
+        "today": "New today"
+      },
+      "columns": {
+        "name": "Name",
+        "email": "Email",
+        "role": "Role",
+        "credits": "Credits",
+        "subscriptions": "Subscriptions",
+        "license": "Licence",
+        "actions": "Actions"
+      },
+      "actions": {
+        "activate": "Activate",
+        "deactivate": "Deactivate",
+        "addCredits": "Add credits",
+        "updateCredits": "Set credit balance",
+        "viewSubscriptions": "View subscriptions"
+      },
+      "pagination": {
+        "label": "User pages",
+        "total": "{count} total",
+        "previous": "Previous",
+        "next": "Next",
+        "page": "Page {page} of {last}"
+      },
+      "subscriptions": {
+        "title": "Subscriptions",
+        "planLabel": "{plan} plan",
+        "columns": {
+          "plan": "Plan",
+          "details": "Billing",
+          "status": "Status"
+        }
+      },
+      "status": {
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "roles": {
+        "member": "Member",
+        "reviewer": "Reviewer",
+        "support": "Support",
+        "admin": "Admin"
+      },
+      "tabs": {
+        "details": "Details",
+        "subscription": "Plan",
+        "addons": "Add-ons",
+        "password": "Password"
+      },
+      "fields": {
+        "firstName": "First name",
+        "lastName": "Last name",
+        "email": "Email",
+        "role": "Role",
+        "status": "Status",
+        "password": "Password",
+        "plan": "Plan",
+        "billing": "Billing type",
+        "newPassword": "New password",
+        "confirmPassword": "Confirm password"
+      },
+      "addons": {
+        "title": "Add-ons",
+        "removeBranding": "Remove branding",
+        "removeBrandingHelper": "Hide platform branding for this account",
+        "type": "Type",
+        "resellerSeats": "White Label (reseller seats)",
+        "resellerSeatsHelper": "Custom domains and client accounts",
+        "seatLimit": "Seat limit"
+      },
+      "add": {
+        "title": "Add account",
+        "body": "Create an account and choose its plan.",
+        "submit": "Create account"
+      },
+      "edit": {
+        "title": "Edit account",
+        "saveDetails": "Save details",
+        "saveSubscription": "Save plan",
+        "saveAddons": "Save add-ons",
+        "savePassword": "Update password"
+      },
+      "credits": {
+        "add": {
+          "title": "Add credits",
+          "label": "Credits to add",
+          "submit": "Add credits"
+        },
+        "update": {
+          "title": "Set credit balance",
+          "label": "New credit balance",
+          "submit": "Update balance"
+        }
+      },
+      "license": {
+        "title": "AppSumo licence",
+        "empty": "No AppSumo licence is attached to this account.",
+        "key": "Licence key",
+        "tierValue": "Tier {tier}",
+        "yes": "Yes",
+        "no": "No",
+        "none": "—",
+        "rows": {
+          "ticket": "Ticket ID",
+          "tier": "Tier",
+          "event": "Event",
+          "lastEvent": "Last event",
+          "activated": "Activated",
+          "test": "Test licence",
+          "prevKey": "Previous key",
+          "activatedAt": "Activated at",
+          "deactivatedAt": "Deactivated at",
+          "upgradedAt": "Upgraded at",
+          "downgradedAt": "Downgraded at"
+        }
+      },
+      "deleteDialog": {
+        "title": "Delete user",
+        "body": "{name} and their data will be removed. This can't be undone.",
+        "confirm": "Delete user"
+      },
+      "toasts": {
+        "loadFailed": "Couldn't load users. Try again.",
+        "detailsRequired": "Fill in every required detail.",
+        "created": "Account created.",
+        "createFailed": "Couldn't create the account.",
+        "detailsUpdated": "Details updated.",
+        "subscriptionUpdated": "Plan updated.",
+        "updateFailed": "Couldn't update the account.",
+        "addonsUpdated": "Add-ons updated.",
+        "addonsFailed": "Couldn't update the add-ons.",
+        "passwordRequired": "Enter the password and confirm it.",
+        "passwordMismatch": "Passwords don't match.",
+        "passwordUpdated": "Password updated.",
+        "passwordFailed": "Couldn't update the password.",
+        "activated": "Account activated.",
+        "deactivated": "Account deactivated.",
+        "activationFailed": "Couldn't change the account status.",
+        "deleted": "Account deleted.",
+        "deleteFailed": "Couldn't delete the account.",
+        "creditsAdded": "Credits added.",
+        "creditsAddFailed": "Couldn't add credits.",
+        "creditsUpdated": "Credit balance updated.",
+        "creditsUpdateFailed": "Couldn't update the credit balance.",
+        "accessAsSoon": "Signing in as {name} is coming soon."
+      }
+    },
+    "statistics": {
+      "title": "Statistics",
+      "description": "Sign-ups across the platform.",
+      "loadFailed": "Couldn't load statistics. Try again.",
+      "cards": {
+        "total": {
+          "label": "Total users",
+          "hint": "Every registered account"
+        },
+        "week": {
+          "label": "New this week",
+          "hint": "Includes today"
+        },
+        "today": {
+          "label": "New today",
+          "hint": "Since midnight"
+        }
+      }
+    },
+    "marketing": {
+      "title": "Email marketing",
+      "description": "Send campaigns to users and track delivery.",
+      "tabs": {
+        "all": "Campaigns",
+        "create": "New campaign"
+      },
+      "types": {
+        "individual": "One person",
+        "bulk": "All users",
+        "bulk_import": "Import a list"
+      },
+      "history": {
+        "title": "Campaign history",
+        "description": "Past and in-progress campaigns.",
+        "refresh": "Refresh",
+        "loadFailed": "Couldn't load campaigns.",
+        "emptyTitle": "No campaigns yet",
+        "emptyBody": "Campaigns you send show up here with their delivery counts.",
+        "sentValue": "{sent} / {total}",
+        "columns": {
+          "name": "Campaign",
+          "subject": "Subject",
+          "type": "Audience",
+          "sent": "Sent",
+          "status": "Status",
+          "created": "Created"
+        }
+      },
+      "create": {
+        "title": "New campaign",
+        "description": "Write the email, choose who gets it, then send.",
+        "name": "Campaign name",
+        "namePlaceholder": "October product update",
+        "subject": "Email subject",
+        "subjectPlaceholder": "AI Overviews tracking is live",
+        "audience": "Audience",
+        "recipient": "Recipient",
+        "recipientPlaceholder": "Search by name or email",
+        "results": "{count} results",
+        "page": "Page {page} of {last}",
+        "prev": "Previous",
+        "next": "Next",
+        "searching": "Searching users…",
+        "noUsers": "No users found.",
+        "upload": "Recipient list",
+        "uploadHelper": "CSV or TXT with one email per line.",
+        "bulkCalculating": "Counting recipients…",
+        "bulkCount": "This campaign goes to <strong>{formatted} {count, plural, one {user} other {users}}</strong>.",
+        "content": "Email content",
+        "edit": "Write",
+        "preview": "Preview",
+        "nothingToPreview": "Nothing to preview yet.",
+        "discard": "Discard",
+        "send": "Send campaign",
+        "sent": "Campaign sent.",
+        "errors": {
+          "name": "Give the campaign a name.",
+          "subject": "The subject needs at least 5 characters.",
+          "content": "The email is too short.",
+          "recipient": "Choose a recipient.",
+          "file": "Upload a CSV or TXT file.",
+          "send": "Couldn't send the campaign.",
+          "usersLoad": "Couldn't load users.",
+          "subscribersLoad": "Couldn't load recipients."
+        }
+      }
+    }
+  },
+  "integrations": {
+    "title": "Integrations",
+    "description": "Connect the tools Orbit talks through, publishes to and measures with.",
+    "groups": {
+      "talk": "Talk to Orbit",
+      "publish": "Publish",
+      "measure": "Measure"
+    },
+    "connect": "Connect",
+    "addAnother": "Connect another",
+    "manage": "Manage",
+    "cancel": "Cancel",
+    "back": "Back to integrations",
+    "soonDetail": "We'll let you know when this is ready.",
+    "viewerNote": "Viewers can't change integrations. Ask a workspace admin.",
+    "connectedAccounts": "{count, plural, one {{first}} other {{first} and # more}}",
+    "connectTitle": "Connect {name}",
+    "continueWith": "Continue to {name}",
+    "oauthNote": "You'll sign in with Google in a new window. Orbit asks for read-only access and never posts on your behalf.",
+    "waiting": "Finish signing in in the other window…",
+    "facts": {
+      "access": "Access",
+      "data": "What Orbit uses",
+      "control": "Control"
+    },
+    "errors": {
+      "popupBlocked": "The sign-in window was blocked. Allow pop-ups for this site and try again.",
+      "wordpressRequired": "Site address, username and application password are all required.",
+      "passwordRequired": "Enter the new application password."
+    },
+    "toasts": {
+      "connected": "{name} connected.",
+      "disconnected": "{name} disconnected.",
+      "credentialsUpdated": "Application password updated."
+    },
+    "wordpress": {
+      "siteUrl": "Site address",
+      "siteUrlPlaceholder": "northwindroasters.com",
+      "username": "WordPress username",
+      "appPassword": "Application password",
+      "appPasswordHelper": "Create one in WordPress under Users → Profile → Application passwords."
+    },
+    "telegram": {
+      "qrLabel": "QR code that opens Orbit in Telegram",
+      "step1": "Scan the code or open the chat.",
+      "step2": "Press Start in the chat with Orbit, then come back here.",
+      "open": "Open Telegram",
+      "copyAria": "Copy code {code}",
+      "copied": "Code copied.",
+      "copyFailed": "Couldn't copy the code. Select it and copy it instead.",
+      "pressedStart": "I pressed Start"
+    },
+    "details": {
+      "emptyTitle": "{name} isn't connected",
+      "emptyBody": "Connect it to let Orbit use it for this brand.",
+      "allBrands": "All brands",
+      "connectedOn": "Connected {date}",
+      "updatePassword": "Update password",
+      "updatePasswordTitle": "Update application password",
+      "disconnect": "Disconnect",
+      "disconnectTitle": "Disconnect {name}?"
+    },
+    "providers": {
+      "telegram": {
+        "name": "Telegram",
+        "description": "Get updates, approve changes and ask questions from your phone.",
+        "chat": "Orbit agent chat",
+        "facts": {
+          "access": "A chat with the Orbit bot",
+          "data": "Messages you send Orbit",
+          "control": "Stop the bot any time"
+        },
+        "disconnectBody": "Orbit stops messaging {account}. Approvals will only be possible in the web app."
+      },
+      "wordpress": {
+        "name": "WordPress",
+        "description": "Orbit publishes approved articles and on-page fixes to your site.",
+        "facts": {
+          "access": "An application password",
+          "data": "Posts, pages and SEO fields",
+          "control": "Every change needs approval"
+        },
+        "disconnectBody": "Orbit can no longer publish to {account}. Scheduled articles stay as drafts."
+      },
+      "searchConsole": {
+        "name": "Google Search Console",
+        "description": "Real clicks and impressions, so rankings come from Google's own data.",
+        "facts": {
+          "access": "Read-only Google sign-in",
+          "data": "Queries, clicks, impressions",
+          "control": "Revoke in your Google account"
+        },
+        "disconnectBody": "Rankings for {account} go back to Orbit's own checks until you reconnect."
+      },
+      "analytics": {
+        "name": "Google Analytics",
+        "description": "Traffic and conversions from AI answers and search, by page.",
+        "facts": {
+          "access": "Read-only Google sign-in",
+          "data": "Sessions and conversions",
+          "control": "Revoke in your Google account"
+        },
+        "disconnectBody": "Traffic reports for {account} stop updating until you reconnect."
+      },
+      "shopify": {
+        "name": "Shopify",
+        "description": "Publish product content and fixes to your store.",
+        "facts": {
+          "access": "—",
+          "data": "—",
+          "control": "—"
+        },
+        "disconnectBody": "{account}"
+      },
+      "webflow": {
+        "name": "Webflow",
+        "description": "Publish articles to your Webflow CMS.",
+        "facts": {
+          "access": "—",
+          "data": "—",
+          "control": "—"
+        },
+        "disconnectBody": "{account}"
+      }
+    },
+    "select": {
+      "chooseTitle": "Choose a property",
+      "chooseBody": "Pick the {name} property that belongs to this brand.",
+      "connect": "Connect property",
+      "successTitle": "{name} connected",
+      "successBody": "{account} is connected. Close this window to go back to Orbit.",
+      "errorTitle": "Couldn't connect {name}",
+      "errorBody": "Something went wrong while connecting {name}.",
+      "close": "Close window",
+      "manualClose": "If this window doesn't close, close it yourself or <back>go back to Orbit</back>."
+    }
+  },
+  "legal": {
+    "home": "Orbit legal pages",
+    "nav": "Legal documents",
+    "overline": "Legal",
+    "lastUpdated": "Last updated: {date}",
+    "backHome": "Back to home",
+    "links": {
+      "terms": "Terms",
+      "privacy": "Privacy",
+      "refunds": "Refunds",
+      "signIn": "Sign in"
+    }
   }
 }

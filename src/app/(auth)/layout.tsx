@@ -6,6 +6,7 @@ import { Logo } from "@/components/brand/logo";
 import { EngineIcon } from "@/components/brand/engine-icon";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
+import { TenantBrandPanel, VendorOnly } from "./tenant-brand-panel";
 
 /** Form on the start side, the ink brand panel on the end side (desktop only). */
 export default async function AuthLayout({ children }: LayoutProps<"/">) {
@@ -27,17 +28,25 @@ export default async function AuthLayout({ children }: LayoutProps<"/">) {
         </div>
         <footer className="flex flex-wrap items-center gap-x-2 gap-y-1 text-caption font-normal text-fg-3">
           <span>{t("copyright", { year: new Date().getFullYear(), company: t("company") })}</span>
-          <span aria-hidden>·</span>
-          <a href="#" className="text-fg-2 hover:text-fg hover:underline">
-            {t("terms")}
-          </a>
-          <span aria-hidden>·</span>
-          <a href="#" className="text-fg-2 hover:text-fg hover:underline">
-            {t("privacy")}
-          </a>
+          <VendorOnly>
+            <span aria-hidden>·</span>
+            <Link href="/terms-of-service" className="text-fg-2 hover:text-fg hover:underline">
+              {t("terms")}
+            </Link>
+            <span aria-hidden>·</span>
+            <Link href="/privacy-policy" className="text-fg-2 hover:text-fg hover:underline">
+              {t("privacy")}
+            </Link>
+            <span aria-hidden>·</span>
+            <Link href="/refund-policy" className="text-fg-2 hover:text-fg hover:underline">
+              {t("refunds")}
+            </Link>
+          </VendorOnly>
         </footer>
       </section>
-      <BrandPanel />
+      <TenantBrandPanel>
+        <BrandPanel />
+      </TenantBrandPanel>
     </div>
   );
 }
