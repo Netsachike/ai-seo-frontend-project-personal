@@ -1,12 +1,13 @@
 "use client";
 
-import { MenuIcon, MessageCircleIcon, SearchIcon } from "lucide-react";
+import Link from "next/link";
+import { MenuIcon, MessageCircleIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { useUiStore } from "@/lib/store/ui";
 import { Button } from "@/components/ui/button";
-import { ContextSwitcher } from "./context-switcher";
-import { CreditsChip } from "./credits-chip";
+import { Logo } from "@/components/brand/logo";
+import { WorkspaceSwitcher } from "./context-switcher";
 import { Shortcut } from "./kbd";
 import { LanguageSwitcher } from "./language-switcher";
 import { NotificationsPopover } from "./notifications-popover";
@@ -14,42 +15,38 @@ import { ProfileMenu } from "./profile-menu";
 import { useShell } from "./shell-context";
 import { ThemeToggle } from "./theme-toggle";
 
-/** 56px, sticky. Under md, credits, language and theme move into the profile menu. */
-export function Topbar() {
+/**
+ * 56px, sticky. Workspace on the start side; language, theme, notifications,
+ * Ask Orbit and the profile on the end side. Sites are chosen on the sites
+ * page, not here. Under md, language and theme move into the profile menu.
+ *
+ * `sites`: the sites page has no sidebar, so the logo takes the menu button's place.
+ */
+export function Topbar({ variant = "app" }: { variant?: "app" | "sites" }) {
   const t = useTranslations("shell.topbar");
   const { openMobileNav } = useShell();
-  const setCommandOpen = useUiStore((s) => s.setCommandOpen);
   const agentOpen = useUiStore((s) => s.agentPanelOpen);
   const setAgentOpen = useUiStore((s) => s.setAgentPanelOpen);
 
   return (
     <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center gap-1 border-b border-border bg-surface/95 px-2 backdrop-blur-sm sm:gap-2 md:px-6">
-      <Button variant="ghost" size="icon" className="lg:hidden" aria-label={t("openNav")} onClick={openMobileNav}>
-        <MenuIcon />
-      </Button>
-      <ContextSwitcher />
+      {variant === "app" ? (
+        <Button variant="ghost" size="icon" className="lg:hidden" aria-label={t("openNav")} onClick={openMobileNav}>
+          <MenuIcon />
+        </Button>
+      ) : (
+        <>
+          <Link href="/sites" aria-label={t("home")} className="rounded-md px-2">
+            <Logo />
+          </Link>
+          <span aria-hidden className="text-fg-3">
+            /
+          </span>
+        </>
+      )}
+      <WorkspaceSwitcher />
       <div className="flex-1" />
 
-      <button
-        type="button"
-        onClick={() => setCommandOpen(true)}
-        className="hidden h-9 w-60 items-center gap-2 rounded-md border border-border bg-bg px-2.5 text-small text-fg-3 hover:border-border-strong lg:flex"
-      >
-        <SearchIcon aria-hidden className="size-4" />
-        <span className="flex-1 truncate text-start">{t("search")}</span>
-        <Shortcut letter="K" className="rounded-sm border border-border-strong bg-surface px-1 text-fg-2" />
-      </button>
-      <Button
-        variant="ghost"
-        size="icon"
-        className="lg:hidden"
-        aria-label={t("search")}
-        onClick={() => setCommandOpen(true)}
-      >
-        <SearchIcon />
-      </Button>
-
-      <CreditsChip className="hidden md:flex" />
       <LanguageSwitcher compact className="hidden md:flex" />
       <ThemeToggle className="hidden md:inline-flex" />
       <NotificationsPopover />

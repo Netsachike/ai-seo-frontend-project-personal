@@ -105,6 +105,8 @@ export const brandsByWorkspace: Record<string, Brand[]> = {
       domain: "freshstart.example",
       contentLanguage: "de",
       market: "DE",
+      // Shows the "setup incomplete" state on the sites page.
+      setupStep: "core-topics",
     },
   ],
   ws_test: [],

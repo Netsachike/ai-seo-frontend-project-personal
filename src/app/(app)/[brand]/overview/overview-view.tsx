@@ -19,7 +19,7 @@ import {
   XIcon,
   type LucideIcon,
 } from "lucide-react";
-import { useFormatter, useLocale, useNow, useTranslations } from "next-intl";
+import { useFormatter, useNow, useTranslations } from "next-intl";
 
 import { useJob } from "@/lib/api/use-job";
 import { useFakeQuery } from "@/lib/fake-query";
@@ -32,13 +32,11 @@ import {
   type PlatformGlance,
 } from "@/lib/mocks/ui-data-overview";
 import { cn } from "@/lib/utils";
-import { DOMAIN_PATTERN, industries, markets } from "@/features/onboarding/data";
-import { useOnboarding } from "@/features/onboarding/store";
+import { DOMAIN_PATTERN, NEW_SITE_PATH } from "@/features/site-setup/steps";
 import { useBrandSummary, useJobRunner } from "@/features/insights/hooks";
 import { useRange } from "@/features/insights/url-state";
 import { Button } from "@/components/ui/button";
 import { Card, CardAction, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DeltaChip } from "@/components/brand/delta-chip";
@@ -49,7 +47,6 @@ import { AreaSpark } from "@/components/charts/area-spark";
 import { ShareOfVoice } from "@/components/charts/share-of-voice";
 import { VisibilityTrend } from "@/components/charts/visibility-trend";
 import { DomainInput, FormField } from "@/components/forms/form-field";
-import { SelectField } from "@/components/forms/select-field";
 import { brandHref } from "@/components/layout/nav";
 import { PageSkeleton } from "@/components/layout/page-skeleton";
 import { RangePicker } from "@/components/layout/range-picker";
@@ -353,50 +350,23 @@ function PlatformCard({ item }: { item: PlatformGlance }) {
   );
 }
 
-const platforms = ["wordpress", "shopify", "wix", "webflow", "nextjs", "ghost", "other"] as const;
-const platformMono: Record<(typeof platforms)[number], string> = {
-  wordpress: "WP",
-  shopify: "SH",
-  wix: "WX",
-  webflow: "WF",
-  nextjs: "N",
-  ghost: "GH",
-  other: "…",
-};
-
-/** Adds another brand: prefills onboarding and continues there. */
+/**
+ * Adds another site: takes the domain and hands over to site setup, which
+ * asks everything else (and drafts most of it from the site itself).
+ */
 function AddWebsiteCard() {
   const t = useTranslations("overview.add");
-  const tIndustry = useTranslations("onboarding.brand.industries");
-  const locale = useLocale();
   const router = useRouter();
+  const { workspace } = useShell();
   const [domain, setDomain] = React.useState("");
-  const [name, setName] = React.useState("");
-  const [type, setType] = React.useState("");
-  const [country, setCountry] = React.useState("");
-  const [city, setCity] = React.useState("");
-  const [platform, setPlatform] = React.useState<(typeof platforms)[number] | null>(null);
-  const [errors, setErrors] = React.useState<Record<string, string>>({});
-  const regions = React.useMemo(() => new Intl.DisplayNames([locale], { type: "region" }), [locale]);
+  const [error, setError] = React.useState<string>();
 
   const submit = (event: React.FormEvent) => {
     event.preventDefault();
-    const next: Record<string, string> = {};
-    if (!DOMAIN_PATTERN.test(domain)) next.domain = t("errors.domain");
-    if (!name.trim()) next.name = t("errors.name");
-    if (!type) next.type = t("errors.type");
-    if (!country) next.country = t("errors.country");
-    setErrors(next);
-    if (Object.keys(next).length) return;
-    const store = useOnboarding.getState();
-    store.set({
-      domain,
-      crawl: "done",
-      pages: 37,
-      completed: [],
-      profile: { ...store.profile, name: name.trim(), industry: type as (typeof industries)[number], market: country },
-    });
-    router.push("/onboarding/brand");
+    if (!DOMAIN_PATTERN.test(domain)) return setError(t("errors.domain"));
+    const params = new URLSearchParams({ domain });
+    if (workspace) params.set("workspace", workspace.id);
+    router.push(`${NEW_SITE_PATH}?${params.toString()}`);
   };
 
   return (
@@ -406,87 +376,19 @@ function AddWebsiteCard() {
         <CardDescription className="text-small">{t("description")}</CardDescription>
       </div>
       <form onSubmit={submit} noValidate className="flex flex-col gap-5">
-        <div className="grid gap-4 @lg:grid-cols-2">
-          <FormField label={t("url")} helper={t("urlHelper")} error={errors.domain}>
-            {(props) => (
-              <DomainInput {...props} value={domain} onChange={setDomain} placeholder={t("urlPlaceholder")} />
-            )}
-          </FormField>
-          <FormField label={t("name")} helper={t("nameHelper")} error={errors.name}>
-            {(props) => (
-              <Input
-                {...props}
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder={t("namePlaceholder")}
-              />
-            )}
-          </FormField>
-        </div>
-        <div className="grid gap-4 @lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,0.8fr)]">
-          <SelectField
-            label={t("type")}
-            placeholder={t("typePlaceholder")}
-            error={errors.type}
-            value={type}
-            onChange={setType}
-            options={industries.map((i) => ({ value: i, label: tIndustry(i) }))}
-          />
-          <SelectField
-            label={t("country")}
-            placeholder={t("countryPlaceholder")}
-            error={errors.country}
-            value={country}
-            onChange={setCountry}
-            options={markets.map((m) => ({ value: m, label: regions.of(m) ?? m }))}
-          />
-          <FormField label={t("city")} helper={t("cityHelper")}>
-            {(props) => (
-              <Input
-                {...props}
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-                placeholder={t("cityPlaceholder")}
-              />
-            )}
-          </FormField>
-        </div>
-        <fieldset className="flex flex-col gap-3 rounded-lg border border-blue/25 bg-blue-bg/50 p-4">
-          <legend className="sr-only">{t("platform")}</legend>
-          <div className="flex items-start gap-2.5">
-            <GlobeIcon aria-hidden className="mt-0.5 size-4 shrink-0 text-blue" />
-            <div className="flex flex-col">
-              <span className="text-small font-medium text-fg">{t("platform")}</span>
-              <span className="text-caption font-normal text-fg-2">{t("platformHelper")}</span>
-            </div>
-          </div>
-          <div role="radiogroup" aria-label={t("platform")} className="flex flex-wrap gap-2">
-            {platforms.map((p) => (
-              <button
-                key={p}
-                type="button"
-                role="radio"
-                aria-checked={platform === p}
-                onClick={() => setPlatform(platform === p ? null : p)}
-                className={cn(
-                  "flex h-9 items-center gap-2 rounded-md border bg-surface px-2.5 text-small text-fg transition-colors duration-120",
-                  platform === p
-                    ? "border-ink shadow-[inset_0_0_0_1px_var(--ink)]"
-                    : "border-border-strong hover:border-fg-3",
-                )}
-              >
-                <span
-                  aria-hidden
-                  translate="no"
-                  className="grid size-5 place-items-center rounded-sm bg-surface-2 font-mono text-[9px] font-semibold text-fg-2"
-                >
-                  {platformMono[p]}
-                </span>
-                {t(`platforms.${p}`)}
-              </button>
-            ))}
-          </div>
-        </fieldset>
+        <FormField label={t("url")} helper={t("urlHelper")} error={error}>
+          {(props) => (
+            <DomainInput
+              {...props}
+              value={domain}
+              onChange={(value) => {
+                setDomain(value);
+                setError(undefined);
+              }}
+              placeholder={t("urlPlaceholder")}
+            />
+          )}
+        </FormField>
         <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-caption font-normal text-fg-3">{t("later")}</p>
           <Button type="submit" variant="primary">

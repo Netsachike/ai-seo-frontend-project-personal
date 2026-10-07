@@ -81,7 +81,8 @@ export function useAgentHotkey() {
  * 400px end-side sheet. Same thread as /agent and Telegram. Opens from the
  * left in RTL because the sheet side is logical.
  */
-export function AgentPanel({ workspaceId, agentHref }: { workspaceId: string; agentHref: string }) {
+/** `agentHref` links to the full agent page; left out where there is no site yet (the sites page). */
+export function AgentPanel({ workspaceId, agentHref }: { workspaceId: string; agentHref?: string }) {
   const t = useTranslations("agent");
   const open = useUiStore((s) => s.agentPanelOpen);
   const setOpen = useUiStore((s) => s.setAgentPanelOpen);
@@ -98,14 +99,16 @@ export function AgentPanel({ workspaceId, agentHref }: { workspaceId: string; ag
           </div>
         </SheetHeader>
         <AgentThreadView workspaceId={workspaceId} dense />
-        <div className="border-t border-border px-4 pt-2 pb-1">
-          <Button asChild variant="link" size="sm" className="text-caption">
-            <Link href={agentHref} onClick={() => setOpen(false)}>
-              {t("openFull")}
-              <ExternalLinkIcon aria-hidden className="size-3.5 rtl:-scale-x-100" />
-            </Link>
-          </Button>
-        </div>
+        {agentHref && (
+          <div className="border-t border-border px-4 pt-2 pb-1">
+            <Button asChild variant="link" size="sm" className="text-caption">
+              <Link href={agentHref} onClick={() => setOpen(false)}>
+                {t("openFull")}
+                <ExternalLinkIcon aria-hidden className="size-3.5 rtl:-scale-x-100" />
+              </Link>
+            </Button>
+          </div>
+        )}
       </SheetContent>
     </Sheet>
   );

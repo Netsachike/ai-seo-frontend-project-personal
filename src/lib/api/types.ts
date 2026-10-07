@@ -51,6 +51,36 @@ export type Brand = {
   contentLanguage: string;
   /** ISO 3166-1 alpha-2 country */
   market: string;
+  faviconUrl?: string | null;
+  /** The setup step to resume at; null or absent once setup is finished. */
+  setupStep?: SiteSetupStep | null;
+};
+
+/**
+ * Site setup steps after the account step, in order. Mirrors RankYak's
+ * project setup, which the backend models.
+ */
+export const SITE_SETUP_STEPS = [
+  "details",
+  "google-search-console",
+  "core-topics",
+  "billing",
+  "integration",
+  "preferences",
+  "done",
+] as const;
+export type SiteSetupStep = (typeof SITE_SETUP_STEPS)[number];
+
+/** One row on the sites page. */
+export type SiteListItem = Brand & {
+  stats: {
+    clustersCovered: number;
+    clustersTotal: number;
+    /** 0–100, null before the first scan */
+    visibility: number | null;
+    /** Weekly visibility, oldest first */
+    trend: number[];
+  };
 };
 
 export type UsageMeter = { used: number; limit: number };

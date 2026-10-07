@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import type { Brand, Workspace } from "@/lib/api/types";
-import { createWorkspace, getMe, getUsage, listBrands, listWorkspaces } from "@/lib/mocks/store";
+import { createWorkspace, getMe, getUsage, listBrands, listSites, listWorkspaces } from "@/lib/mocks/store";
 import { meKeys, workspaceKeys } from "@/lib/api/query-keys";
 import { useUiStore } from "@/lib/store/ui";
 
@@ -32,6 +32,15 @@ const brandsQuery = (workspaceId: string) => ({
 
 export function useBrands(workspaceId: string | undefined) {
   return useQuery({ ...brandsQuery(workspaceId ?? "none"), enabled: Boolean(workspaceId) });
+}
+
+/** The sites page rows for one workspace. */
+export function useSites(workspaceId: string | undefined) {
+  return useQuery({
+    queryKey: workspaceKeys.sites(workspaceId ?? "none"),
+    enabled: Boolean(workspaceId),
+    queryFn: () => listSites(workspaceId as string),
+  });
 }
 
 export function useUsage(workspaceId: string | undefined) {
@@ -93,30 +102,18 @@ export function useSwitchBrand() {
 
 /**
  * Clears every cached query (data is workspace-scoped), then opens the
- * workspace's last-used brand, or onboarding when it has none.
+ * workspace's sites page, where the user picks which site to work on.
  */
 export function useSwitchWorkspace() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const t = useTranslations("shell.switcher");
   return async (workspace: Workspace) => {
-    const store = useUiStore.getState();
-    store.setWorkspace(workspace.id);
+    useUiStore.getState().setWorkspace(workspace.id);
     const workspaces = queryClient.getQueryData<Workspace[]>(workspaceKeys.list());
     queryClient.clear();
     if (workspaces) queryClient.setQueryData(workspaceKeys.list(), workspaces);
-
-    let slug = workspace.lastBrandSlug ?? null;
-    if (!slug) {
-      const brands = await queryClient.fetchQuery(brandsQuery(workspace.id)).catch(() => []);
-      slug = brands[0]?.slug ?? null;
-    }
-    if (slug) {
-      store.setBrand(slug);
-      router.push(`/${slug}/overview`);
-    } else {
-      router.push("/onboarding/brand");
-    }
+    router.push("/sites");
     toast(t("switchedWorkspace", { name: workspace.name }));
   };
 }

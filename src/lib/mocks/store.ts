@@ -12,6 +12,7 @@ import type {
   Me,
   Notification,
   Range,
+  SiteListItem,
   Usage,
   Workspace,
 } from "@/lib/api/types";
@@ -45,6 +46,40 @@ const state = {
   notifications: clone(notificationFixtures),
   thread: clone(agentThread),
 };
+
+// ── Sites added in this browser ──────────────────────────────────────────
+// Unlike the rest of the mock data, sites created through site setup are kept
+// in localStorage, so a refresh halfway through setup resumes where it was.
+
+type StoredSite = { workspaceId: string; brand: Brand };
+const SITES_STORAGE_KEY = "orbit:mock-sites";
+
+function readStoredSites(): StoredSite[] {
+  if (typeof window === "undefined") return [];
+  try {
+    return JSON.parse(window.localStorage.getItem(SITES_STORAGE_KEY) ?? "[]") as StoredSite[];
+  } catch {
+    return [];
+  }
+}
+
+function writeStoredSites() {
+  if (typeof window === "undefined") return;
+  const fixtureIds = new Set(Object.values(brandsByWorkspace).flat().map((b) => b.id));
+  const added = Object.entries(state.brands).flatMap(([workspaceId, list]) =>
+    list.filter((b) => !fixtureIds.has(b.id)).map((brand) => ({ workspaceId, brand })),
+  );
+  try {
+    window.localStorage.setItem(SITES_STORAGE_KEY, JSON.stringify(added));
+  } catch {
+    // Storage blocked: the site still lives in memory until reload.
+  }
+}
+
+for (const { workspaceId, brand } of readStoredSites()) {
+  const list = (state.brands[workspaceId] ??= []);
+  if (!list.some((b) => b.id === brand.id)) list.push(brand);
+}
 
 export async function getMe(): Promise<Me> {
   await wait();
@@ -83,6 +118,94 @@ export async function listBrands(workspaceId: string): Promise<Brand[]> {
   const list = state.brands[workspaceId];
   if (!list) throw new MockError(404, "workspace_not_found");
   return clone(list);
+}
+
+/** Top-level paths a site slug must not shadow. */
+const RESERVED_SLUGS = new Set([
+  "sites", "settings", "workspaces", "upgrade", "resellers", "agency", "admin", "integrations",
+  "onboarding", "sign-in", "sign-up", "verify", "forgot-password", "api", "dev",
+  "privacy-policy", "terms-of-service", "refund-policy",
+]);
+
+function uniqueSlug(base: string) {
+  const taken = new Set(Object.values(state.brands).flat().map((b) => b.slug));
+  const root = base || "site";
+  let slug = RESERVED_SLUGS.has(root) ? `${root}-site` : root;
+  for (let n = 2; taken.has(slug); n++) slug = `${root}-${n}`;
+  return slug;
+}
+
+/** "netsach-tech.co" → "Netsach Tech". The crawl replaces it with the site's own name. */
+export function nameFromDomain(domain: string) {
+  return (domain.split(".")[0] ?? domain)
+    .split(/[-_]/)
+    .filter(Boolean)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
+}
+
+export const faviconFor = (domain: string) => `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
+
+/** Sites page rows: every brand in the workspace with its headline numbers. */
+export async function listSites(workspaceId: string): Promise<SiteListItem[]> {
+  const brands = await listBrands(workspaceId);
+  return brands.map((brand) => ({ ...brand, stats: siteStats[brand.id] ?? emptyStats }));
+}
+
+const emptyStats: SiteListItem["stats"] = { clustersCovered: 0, clustersTotal: 0, visibility: null, trend: [] };
+const siteStats: Record<string, SiteListItem["stats"]> = {
+  br_northwind: {
+    clustersCovered: 18,
+    clustersTotal: 42,
+    visibility: 47,
+    trend: [31, 33, 32, 36, 38, 37, 41, 43, 42, 45, 46, 47],
+  },
+  br_harbor: { clustersCovered: 6, clustersTotal: 30, visibility: 22, trend: [14, 15, 15, 17, 16, 18, 19, 20, 22] },
+};
+
+export async function getSite(siteId: string): Promise<{ site: Brand; workspaceId: string }> {
+  await wait(200);
+  for (const [workspaceId, list] of Object.entries(state.brands)) {
+    const site = list.find((b) => b.id === siteId);
+    if (site) return { site: clone(site), workspaceId };
+  }
+  throw new MockError(404, "site_not_found");
+}
+
+/** Step 2a: the domain becomes a site that setup then fills in. */
+export async function createSite(workspaceId: string, domain: string): Promise<Brand> {
+  await wait(700);
+  const list = state.brands[workspaceId];
+  if (!list) throw new MockError(404, "workspace_not_found");
+  if (Object.values(state.brands).flat().some((b) => b.domain === domain)) throw new MockError(409, "site_exists");
+  const site: Brand = {
+    id: `br_${Date.now().toString(36)}`,
+    slug: uniqueSlug((domain.split(".")[0] ?? "").replace(/[^a-z0-9-]/g, "")),
+    name: nameFromDomain(domain),
+    domain,
+    contentLanguage: "en",
+    market: "US",
+    faviconUrl: faviconFor(domain),
+    setupStep: "details",
+  };
+  list.push(site);
+  const workspace = state.workspaces.find((w) => w.id === workspaceId);
+  if (workspace) workspace.brandCount += 1;
+  writeStoredSites();
+  return clone(site);
+}
+
+export async function updateSite(siteId: string, patch: Partial<Omit<Brand, "id" | "slug">>): Promise<Brand> {
+  await wait(150);
+  for (const list of Object.values(state.brands)) {
+    const site = list.find((b) => b.id === siteId);
+    if (site) {
+      Object.assign(site, patch);
+      writeStoredSites();
+      return clone(site);
+    }
+  }
+  throw new MockError(404, "site_not_found");
 }
 
 export async function getUsage(workspaceId: string): Promise<Usage> {

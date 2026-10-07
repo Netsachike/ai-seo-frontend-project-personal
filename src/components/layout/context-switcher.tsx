@@ -6,9 +6,9 @@ import { CheckIcon, ChevronsUpDownIcon, LayersIcon, PlusIcon } from "lucide-reac
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
-import type { Brand, Workspace } from "@/lib/api/types";
+import type { Workspace } from "@/lib/api/types";
 import { cn } from "@/lib/utils";
-import { useBrands, useCreateWorkspace, useSwitchBrand, useSwitchWorkspace } from "@/features/workspace/hooks";
+import { useCreateWorkspace, useSwitchWorkspace } from "@/features/workspace/hooks";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -29,7 +29,6 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Skeleton } from "@/components/ui/skeleton";
 import { FormField } from "@/components/forms/form-field";
 import { EntityAvatar } from "./avatars";
 import { useShell } from "./shell-context";
@@ -37,34 +36,13 @@ import { useShell } from "./shell-context";
 /** Lists longer than this get a search field. */
 const SEARCH_THRESHOLD = 6;
 
-/**
- * `[workspace] Greek / Northwind Roasters ▾`. Under md only the brand
- * shows; the workspace switcher also lives in the mobile nav sheet.
- */
-export function ContextSwitcher() {
-  const { workspace, brand } = useShell();
-  if (!workspace || !brand) {
-    return (
-      <div className="flex items-center gap-2">
-        <Skeleton className="size-6 rounded-[6px]" />
-        <Skeleton className="h-4 w-20 sm:w-36" />
-      </div>
-    );
-  }
-  return (
-    <div className="flex min-w-0 items-center gap-1">
-      <WorkspaceSwitcher className="hidden md:flex" />
-      <span aria-hidden className="hidden text-fg-3 md:inline">
-        /
-      </span>
-      <BrandSwitcher />
-    </div>
-  );
-}
-
 const triggerClass =
   "flex h-9 min-w-0 items-center gap-2 rounded-md px-2 text-small font-medium text-fg hover:bg-surface-2 aria-expanded:bg-surface-2";
 
+/**
+ * The workspace in the top bar (and the mobile nav). Sites are picked on the
+ * sites page, so there is no brand dropdown beside it.
+ */
 export function WorkspaceSwitcher({ className, full = false }: { className?: string; full?: boolean }) {
   const t = useTranslations("shell.switcher");
   const tRole = useTranslations("roles");
@@ -110,7 +88,7 @@ export function WorkspaceSwitcher({ className, full = false }: { className?: str
                 label: t("viewAllWorkspaces"),
                 onSelect: () => {
                   setOpen(false);
-                  router.push(`/workspaces?from=${brandSlug}`);
+                  router.push(brandSlug ? `/workspaces?from=${brandSlug}` : "/workspaces");
                 },
               },
               {
@@ -128,55 +106,6 @@ export function WorkspaceSwitcher({ className, full = false }: { className?: str
       </Popover>
       <CreateWorkspaceDialog open={creating} onOpenChange={setCreating} />
     </>
-  );
-}
-
-export function BrandSwitcher() {
-  const t = useTranslations("shell.switcher");
-  const { workspace, brand } = useShell();
-  const brands = useBrands(workspace?.id);
-  const switchBrand = useSwitchBrand();
-  const router = useRouter();
-  const [open, setOpen] = React.useState(false);
-  if (!brand) return null;
-
-  return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger aria-label={t("brandTrigger", { name: brand.name })} className={triggerClass}>
-        <span className="max-w-48 truncate font-semibold" title={brand.name}>
-          {brand.name}
-        </span>
-        <ChevronsUpDownIcon aria-hidden className="size-4 shrink-0 text-fg-3" />
-      </PopoverTrigger>
-      <PopoverContent align="start" className="w-72 p-0">
-        <SwitcherList<Brand>
-          heading={t("switchBrand")}
-          searchPlaceholder={t("searchBrands")}
-          empty={t("noMatches")}
-          items={brands.data ?? [brand]}
-          activeId={brand.id}
-          getId={(b) => b.id}
-          getName={(b) => b.name}
-          getMeta={(b) => b.domain}
-          metaMono
-          onSelect={(b) => {
-            setOpen(false);
-            if (b.id !== brand.id) switchBrand(b);
-          }}
-          footer={[
-            {
-              key: "add",
-              icon: PlusIcon,
-              label: t("addBrand"),
-              onSelect: () => {
-                setOpen(false);
-                router.push("/onboarding/brand");
-              },
-            },
-          ]}
-        />
-      </PopoverContent>
-    </Popover>
   );
 }
 

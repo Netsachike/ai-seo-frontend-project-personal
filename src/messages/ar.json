@@ -431,24 +431,21 @@
       "upgradeTitle": "الترقية إلى {plan}",
       "upgradeBody": "رؤى أكثر وحدود أعلى وميزات ذكاء اصطناعي متقدمة.",
       "viewPlans": "عرض الخطط",
-      "telegramOn": "تيليجرام متصل"
+      "telegramOn": "تيليجرام متصل",
+      "changeSite": "تغيير الموقع. الموقع الحالي: {name}"
     },
     "topbar": {
       "openNav": "فتح التنقل",
-      "search": "ابحث أو اسأل Orbit",
-      "askOrbit": "اسأل Orbit"
+      "askOrbit": "اسأل Orbit",
+      "home": "كل المواقع"
     },
     "switcher": {
       "workspaceTrigger": "مساحة العمل: {name}. تبديل مساحة العمل",
-      "brandTrigger": "العلامة التجارية: {name}. تبديل العلامة",
       "switchWorkspace": "تبديل مساحة العمل",
-      "switchBrand": "تبديل العلامة التجارية",
       "searchWorkspaces": "ابحث في مساحات العمل",
-      "searchBrands": "ابحث في العلامات التجارية",
       "noMatches": "لا توجد نتائج.",
       "viewAllWorkspaces": "عرض كل مساحات العمل",
       "createWorkspace": "إنشاء مساحة عمل",
-      "addBrand": "إضافة علامة تجارية",
       "switchedWorkspace": "تم التبديل إلى {name}",
       "switchedBrand": "يتم الآن عرض {name}"
     },
@@ -461,17 +458,6 @@
       "tooLong": "اجعله أقل من 80 حرفًا.",
       "failed": "تعذّر إنشاء مساحة العمل. حاول مرة أخرى.",
       "submit": "إنشاء مساحة عمل"
-    },
-    "credits": {
-      "label": "الأرصدة",
-      "aria": "الأرصدة: تبقّى {remaining} من {total}. فتح الفوترة",
-      "summary": "تبقّى {remaining} من {total} رصيد",
-      "breakdown": {
-        "scans": "عمليات الفحص",
-        "articles": "المقالات",
-        "prompts": "الأسئلة المتتبَّعة"
-      },
-      "renews": "يتجدد في {date}"
     },
     "language": {
       "trigger": "اللغة: {language}. تغيير اللغة",
@@ -670,140 +656,6 @@
     "comingSoon": "قريبًا",
     "connecting": "جارٍ الاتصال"
   },
-  "onboarding": {
-    "progressLabel": "تقدم الإعداد",
-    "stepOf": "الخطوة {step} من {total}",
-    "stepDone": "(مكتملة)",
-    "saveExit": "حفظ وخروج",
-    "back": "رجوع",
-    "continue": "متابعة",
-    "steps": {
-      "brand": "العلامة التجارية",
-      "competitors": "المنافسون",
-      "keywords": "الكلمات المفتاحية",
-      "connect": "الربط",
-      "scan": "الفحص الأول"
-    },
-    "brand": {
-      "title": "ما الذي سننمّيه؟",
-      "description": "أضف موقعك وسيتعرف Orbit على علامتك ومنتجاتك وجمهورك.",
-      "hint": "حوالي 4 دقائق لإنهاء الإعداد",
-      "website": "الموقع الإلكتروني",
-      "domainInvalid": "أدخل نطاقًا مثل yourbrand.com.",
-      "reading": "جارٍ قراءة موقعك",
-      "readingLong": "نقرأ صفحتك الرئيسية وصفحات المنتجات والمدونة. يستغرق ذلك بضع ثوانٍ.",
-      "read": "تمت قراءة {pages, plural, one {صفحة واحدة} other {# صفحة}}",
-      "learned": "هذا ما تعلّمه Orbit. صحّح أي شيء غير دقيق.",
-      "name": "اسم العلامة التجارية",
-      "nameRequired": "أدخل اسم علامتك التجارية.",
-      "industry": "القطاع",
-      "market": "السوق الرئيسي",
-      "contentLanguage": "لغة المحتوى",
-      "contentLanguageHelper": "اللغة التي يكتب بها Orbit والإجابات التي يتتبعها. لغة الواجهة إعداد منفصل.",
-      "descriptionLabel": "ما تبيعه، في سطر واحد",
-      "descriptionHelper": "يستخدم Orbit هذا لاختيار الأسئلة التي يطرحها عملاؤك على محركات الذكاء الاصطناعي.",
-      "industries": {
-        "foodDrink": "الأطعمة والمشروبات",
-        "retail": "التجزئة والتجارة الإلكترونية",
-        "saas": "البرمجيات",
-        "health": "الصحة والعافية",
-        "travel": "السفر والضيافة",
-        "finance": "المالية",
-        "education": "التعليم",
-        "other": "شيء آخر"
-      }
-    },
-    "competitors": {
-      "title": "من تنافس؟",
-      "description": "وجدنا هؤلاء من نتائج البحث الخاصة بك. احتفظ بما يصل إلى {max}.",
-      "selected": "تم اختيار {count} من {max}",
-      "shared": "{count, plural, one {يشترك في كلمة واحدة} other {يشترك في # كلمة}}",
-      "addedByYou": "أضفته أنت",
-      "limitNote": "اخترت {max}. ألغِ أحدهم لإضافة آخر.",
-      "limitReached": "يمكنك تتبّع {max} كحد أقصى. ألغِ أحدهم أولًا.",
-      "addLabel": "إضافة منافس",
-      "addHelper": "الصق موقعه. سنعرف اسمه.",
-      "add": "إضافة",
-      "domainInvalid": "أدخل نطاقًا مثل competitor.com.",
-      "duplicate": "هذا المنافس موجود بالفعل في القائمة."
-    },
-    "keywords": {
-      "title": "بماذا يجب أن يجدك الناس؟",
-      "description": "اختر الكلمات المفتاحية والأسئلة التي يطرحها عملاؤك. اقترحنا {count}.",
-      "meter": "تم اختيار {total} من {limit}",
-      "meterLabel": "الكلمات المفتاحية والأسئلة المختارة",
-      "planNote": "المتبقي في خطة {plan} هذا الشهر",
-      "planNoteGeneric": "المتبقي في خطتك هذا الشهر",
-      "overLimit": "أزل {count, plural, one {عنصرًا واحدًا} other {# عناصر}} لتبقى ضمن خطتك.",
-      "keywordsTitle": "كلمات Google المفتاحية",
-      "keywordsCaption": "تُتتبع يوميًا في نتائج Google",
-      "questionsTitle": "أسئلة الذكاء الاصطناعي",
-      "questionsCaption": "تُطرح على 5 محركات في كل فحص",
-      "selectAll": "تحديد الكل",
-      "clear": "مسح",
-      "custom": "من إضافتك",
-      "volume": "{volume}/شهر",
-      "volumeTitle": "عمليات البحث الشهرية في Google",
-      "addKeyword": "إضافة كلمة مفتاحية",
-      "addKeywordPlaceholder": "إضافة كلمة مفتاحية",
-      "addQuestion": "إضافة سؤال",
-      "addQuestionPlaceholder": "إضافة سؤال",
-      "add": "إضافة"
-    },
-    "connect": {
-      "title": "أين يجب أن يعمل Orbit؟",
-      "description": "اربط تيليجرام للتحدث مع Orbit، واربط موقعك ليتمكن من النشر.",
-      "startScan": "بدء الفحص الأول",
-      "skipHint": "يمكنك ربط هذه لاحقًا من صفحة التكاملات.",
-      "connect": "ربط",
-      "talkTitle": "تحدث مع Orbit",
-      "publishTitle": "النشر والقياس",
-      "telegram": {
-        "name": "تيليجرام",
-        "description": "احصل على التحديثات ووافق على التغييرات واطرح الأسئلة من هاتفك.",
-        "connectedAs": "متصل باسم ‎@{handle}",
-        "qrLabel": "رمز QR يفتح Orbit في تيليجرام",
-        "step1": "امسح الرمز أو اضغط «ربط تيليجرام».",
-        "step2": "اضغط «ابدأ» في المحادثة مع Orbit.",
-        "step3": "عُد إلى هنا. سنؤكد الاتصال.",
-        "connect": "ربط تيليجرام",
-        "orCode": "أو أرسل الرمز",
-        "copyAria": "نسخ الرمز {code}",
-        "copied": "تم نسخ الرمز",
-        "copyFailed": "تعذّر نسخ الرمز. حدده وانسخه يدويًا.",
-        "waiting": "بانتظار ضغطك على «ابدأ» في تيليجرام."
-      },
-      "wordpress": {
-        "name": "WordPress",
-        "description": "ينشر Orbit المقالات المعتمدة والإصلاحات على موقعك."
-      },
-      "searchConsole": {
-        "name": "Google Search Console",
-        "description": "نقرات ومرات ظهور حقيقية، ليأتي الترتيب من بيانات Google نفسها."
-      },
-      "autopilotTitle": "ما مقدار ما يجب أن يفعله Orbit بنفسه؟",
-      "autopilotDescription": "يمكنك تغيير هذا في أي وقت من الإعدادات."
-    },
-    "scan": {
-      "title": "جارٍ تشغيل فحصك الأول",
-      "doneTitle": "فحصك الأول جاهز",
-      "description": "نطرح {questions} سؤالًا عن سوقك على {engines} محركات ذكاء اصطناعي. يستغرق ذلك حوالي 3 دقائق.",
-      "dashboard": "الانتقال إلى لوحة التحكم",
-      "telegramHint": "سيراسلك Orbit أيضًا على تيليجرام عند الانتهاء.",
-      "leaveHint": "يمكنك مغادرة هذه الصفحة. يستمر الفحص.",
-      "running": "جارٍ الفحص",
-      "complete": "اكتمل الفحص",
-      "progress": "{percent} · تبقّى حوالي {minutes, plural, one {دقيقة} other {# دقائق}}",
-      "progressLabel": "تقدم الفحص",
-      "summary": "مذكور في {mentioned} من {answers} إجابة",
-      "queued": "في الانتظار",
-      "failed": "لم يُجب",
-      "mentioned": "مذكور في {mentioned} من {questions}",
-      "engineDown": "تعذّر الوصول إلى {engine} هذه المرة. سنعيد المحاولة في {time}؛ المحركات الأخرى محدّثة.",
-      "orbitPartial": "{engines, plural, one {أجاب محرك واحد} other {أجابت # محركات}}. تمتلئ لوحة التحكم مع انتهاء البقية.",
-      "orbitDone": "ظهرت في {mentioned} إجابة. وجدت بالفعل بعض المكاسب السريعة؛ إنها بانتظارك في خطة العمل."
-    }
-  },
   "overview": {
     "welcome": "مرحبًا بعودتك، {name}",
     "descriptionV2": "هذا أداء {brand} عبر البحث ومنصات الذكاء الاصطناعي.",
@@ -848,29 +700,11 @@
       "description": "أخبرنا عن النشاط والموقع. يحلّله Orbit ويعرض فرص النمو عبر البحث ومنصات الذكاء الاصطناعي.",
       "url": "رابط الموقع",
       "urlHelper": "يبدأ Orbit التحليل من هذا الرابط.",
-      "name": "اسم النشاط",
-      "nameHelper": "يساعد Orbit على فهم العلامة التجارية.",
-      "namePlaceholder": "اسم نشاطك",
-      "type": "نوع النشاط",
-      "country": "الدولة",
-      "city": "المدينة",
-      "cityHelper": "يساعد في الظهور المحلي والإقليمي.",
-      "cityPlaceholder": "دبي",
-      "platform": "منصة الموقع",
-      "platformHelper": "تُستخدم لإعداد النشر. يمكنك ربطها لاحقًا.",
-      "platforms": {
-        "other": "أخرى"
-      },
       "later": "يمكنك ربط النشر لاحقًا.",
       "submit": "إضافة موقع",
       "errors": {
-        "domain": "أدخل نطاقًا مثل yourbrand.com.",
-        "name": "أدخل اسم النشاط.",
-        "type": "اختر نوع النشاط.",
-        "country": "اختر الدولة."
-      },
-      "typePlaceholder": "اختر نوع النشاط",
-      "countryPlaceholder": "اختر الدولة"
+        "domain": "أدخل نطاقًا مثل yourbrand.com."
+      }
     },
     "growth": {
       "title": "من الإعداد إلى النمو في 6 خطوات",
@@ -912,6 +746,351 @@
       "title": "النشاط الأخير",
       "empty": "لا شيء بعد. يظهر النشاط بعد فحصك الأول.",
       "all": "عرض كل النشاط"
+    }
+  },
+  "sites": {
+    "metaTitle": "المواقع",
+    "welcome": "مرحبًا بعودتك",
+    "welcomeName": "مرحبًا بعودتك، {name}",
+    "subtitle": "اختر موقعًا للمتابعة",
+    "workspaceMenu": "خيارات مساحة العمل",
+    "addSite": "إضافة موقع",
+    "addSiteBody": "يقرأ Orbit موقعك ويجهّزه معك خلال دقائق",
+    "emptyBody": "لا توجد مواقع في مساحة العمل هذه بعد. ابدأ بموقعك الرئيسي.",
+    "workspaceSettings": "إعدادات مساحة العمل",
+    "teamMembers": "أعضاء الفريق",
+    "error": "تعذّر تحميل مواقعك.",
+    "retry": "إعادة المحاولة",
+    "clusters": "مجموعات كلمات مفتاحية مغطّاة",
+    "visibility": "الظهور في الذكاء الاصطناعي",
+    "setupIncomplete": "الإعداد غير مكتمل · الخطوة {step} من {total}",
+    "active": "نشط"
+  },
+  "siteSetup": {
+    "shell": {
+      "home": "Orbit، العودة إلى مواقعك",
+      "backToSites": "العودة إلى المواقع",
+      "stepOf": "الخطوة {step} من {total}",
+      "progressLabel": "تقدّم إعداد الموقع",
+      "loggedInAs": "تم تسجيل الدخول باسم {name}،",
+      "signOut": "تسجيل الخروج",
+      "visual": {
+        "label": "عن Orbit",
+        "overline": "Orbit",
+        "headline": "اجعل موقعك يظهر في Google وفي إجابات الذكاء الاصطناعي",
+        "body": "يتتبّع Orbit مكان ظهور موقعك في ChatGPT وGemini وClaude وPerplexity وGoogle، ثم يكتب المحتوى الذي يسدّ الفجوات."
+      }
+    },
+    "interstitial": {
+      "title": "جارٍ إعداد موقعك",
+      "body": "نجهّز كل شيء لك…"
+    },
+    "flow": {
+      "notFound": {
+        "title": "هذا الموقع غير متاح",
+        "body": "ربما حُذف، أو أنه ينتمي إلى مساحة عمل لست عضوًا فيها.",
+        "cta": "العودة إلى المواقع"
+      },
+      "titles": {
+        "details": "تفاصيل الموقع",
+        "google-search-console": "ربط Search Console",
+        "core-topics": "المواضيع الأساسية",
+        "billing": "خطة النمو",
+        "integration": "النشر",
+        "preferences": "التفضيلات",
+        "done": "الموقع جاهز"
+      }
+    },
+    "domain": {
+      "metaTitle": "إضافة موقع",
+      "title": "لنبدأ",
+      "description": "أخبرنا عن موقعك",
+      "workspace": "مساحة العمل",
+      "label": "النطاق",
+      "placeholder": "yourdomain.com",
+      "exists": "هذا الموقع موجود في Orbit بالفعل. افتحه من قائمة مواقعك.",
+      "failed": "تعذّر على Orbit إضافة هذا النطاق. تحقّق منه وحاول مرة أخرى.",
+      "continue": "متابعة"
+    },
+    "details": {
+      "title": "لنبدأ",
+      "description": "أخبرنا عن موقعك",
+      "domainLabel": "النطاق",
+      "editDomain": "تغيير النطاق",
+      "saveDomain": "حفظ وإعادة التحليل",
+      "cancel": "إلغاء",
+      "sections": {
+        "description": "الوصف",
+        "audience": "الجمهور المستهدف",
+        "language": "اللغة"
+      },
+      "loader": {
+        "subline": "قد يستغرق ذلك بضع ثوانٍ",
+        "stuck": "ما زال العمل جاريًا. المواقع الكبيرة تستغرق وقتًا أطول.",
+        "description": {
+          "title": "جارٍ تحليل موقعك",
+          "slow": "نقرأ صفحاتك…"
+        },
+        "audience": {
+          "title": "نتعرّف على جمهورك",
+          "slow": "نربط خدماتك بالمشترين…"
+        }
+      },
+      "review": {
+        "description": "حلّل Orbit موقعك ويرى أن هذا هو موضوعه. هل يبدو صحيحًا؟",
+        "audience": "يرى Orbit أن هؤلاء هم جمهور موقعك. هل يبدو صحيحًا؟"
+      },
+      "yes": "نعم، هذا صحيح",
+      "no": "لا، سأعدّله",
+      "save": "حفظ ومتابعة",
+      "editLabel": "تعديل {section}",
+      "error": "تعذّر على Orbit قراءة موقعك. تأكّد أنه متاح على الإنترنت ثم حاول مرة أخرى.",
+      "retry": "إعادة المحاولة",
+      "country": "الدولة",
+      "language": "اللغة",
+      "localeHint": "اختر الدولة واللغة الأقرب إلى جمهورك المستهدف",
+      "continue": "متابعة"
+    },
+    "gsc": {
+      "title": "ربط Search Console",
+      "recommended": "موصى به",
+      "description": "اربط Google Search Console ليستفيد Orbit من عمليات البحث التي يظهر فيها موقعك بالفعل. يصبح البحث عن الكلمات المفتاحية أدق وترى النقرات ومرات الظهور الفعلية.",
+      "name": "Google Search Console",
+      "domainProperty": "موقع على مستوى النطاق",
+      "connecting": "جارٍ ربط Search Console…",
+      "connected": "متصل · {property}",
+      "notConnected": "غير متصل",
+      "connect": "ربط",
+      "continue": "متابعة",
+      "skip": "تخطٍّ الآن"
+    },
+    "topics": {
+      "title": "المواضيع الأساسية",
+      "description": "يفضّل Google وإجابات الذكاء الاصطناعي المواقع التي تغطي الموضوع بالكامل. مواضيعك الأساسية هي هذه الموضوعات: يصبح كل منها محورًا في خريطتك الموضوعية، ويبحث Orbit عن الكلمات المفتاحية التي يمكنك الفوز بها حوله.",
+      "mapLabel": "خريطة موضوعية {count, plural, =0 {بلا مواضيع أساسية بعد} one {بموضوع أساسي واحد} two {بموضوعين أساسيين} few {بـ # مواضيع أساسية} many {بـ # موضوعًا أساسيًا} other {بـ # موضوع أساسي}}",
+      "error": "تعذّر على Orbit إنشاء مواضيع لموقعك.",
+      "retry": "إعادة المحاولة",
+      "generating": {
+        "title": "ينشئ Orbit المواضيع الأساسية لموقعك",
+        "body": "يعتمد كل موضوع على بيانات بحث حقيقية، منها حجم البحث والمنافسة.",
+        "slow": "نتحقق من حجم البحث والمنافسة…",
+        "stuck": "ما زال العمل جاريًا. يستغرق هذا وقتًا أطول من المعتاد."
+      },
+      "selected": "{count} / {total} محدد",
+      "ready": "جاهز للمتابعة",
+      "useRecommended": "استخدام الموصى به",
+      "recommended": "موصى به",
+      "volume": "{volume} عملية بحث شهريًا",
+      "footnote": "يمكنك تغيير مواضيعك وكلماتها المفتاحية لاحقًا.",
+      "continue": "متابعة"
+    },
+    "billing": {
+      "title": "خطة نموك جاهزة",
+      "descriptionPaid": "تشمل خطة {plan} هذا الموقع. إليك ما سيفعله Orbit من أجله.",
+      "descriptionFree": "اختر خطة لتشغيل هذا الموقع تلقائيًا، أو ابدأ بالخطة المجانية وقم بالترقية لاحقًا.",
+      "autopilot": {
+        "title": "اجعل تحسين محركات البحث يعمل تلقائيًا",
+        "body": "يبحث Orbit ويخطط ويكتب كل أسبوع، ولا يُنشر شيء دون موافقتك ما لم تفعّل النشر التلقائي."
+      },
+      "plan": {
+        "active": "نشطة",
+        "free": "الخطة الحالية",
+        "features": {
+          "topics": "بحث الكلمات المفتاحية عبر مواضيعك الأساسية الخمسة",
+          "plan": "خطة محتوى شهرية تتجدّد مع تقدّم ترتيبك",
+          "writing": "مقالات يُجرى بحثها وتُكتب لك",
+          "tracking": "تتبّع الظهور في الذكاء الاصطناعي وترتيب Google"
+        },
+        "locked": {
+          "topics": "بحث الكلمات المفتاحية في خطة مدفوعة",
+          "plan": "خطة المحتوى في خطة مدفوعة",
+          "writing": "كتابة المقالات في خطة مدفوعة",
+          "tracking": "تتبّع الظهور في الذكاء الاصطناعي وترتيب Google"
+        }
+      },
+      "continuePaid": "متابعة",
+      "continueFree": "المتابعة بالخطة المجانية",
+      "seePlans": "عرض الخطط",
+      "secure": "تتم معالجة المدفوعات بأمان عبر Paddle",
+      "growth": {
+        "title": "إمكانات نموك",
+        "estimate": "تقدير",
+        "caption": "الزيارات الأسبوعية من البحث خلال الأشهر الاثني عشر المقبلة",
+        "atYearEnd": "~{visits} أسبوعيًا",
+        "chartLabel": "مخطط أعمدة للزيارات الأسبوعية المقدّرة من البحث، يرتفع على مدى 52 أسبوعًا",
+        "disclaimer": "تقدير يعتمد على حجم البحث في مواضيعك الأساسية. تعتمد النتائج الفعلية على موقعك والمنافسة ووتيرة النشر."
+      },
+      "phases": {
+        "first": {
+          "when": "الأشهر 1–3",
+          "what": "ينشر Orbit مقالاتك الأولى وتبدأ محركات البحث في فهرستها."
+        },
+        "second": {
+          "when": "الأشهر 3–6",
+          "what": "تبدأ المقالات في الترتيب لعمليات البحث الطويلة وتبدأ إجابات الذكاء الاصطناعي في ذكرك."
+        },
+        "third": {
+          "when": "الأشهر 6–12",
+          "what": "تبني مجموعات المواضيع سلطة موقعك، فتصبح الكلمات الأصعب في المتناول."
+        }
+      },
+      "how": {
+        "title": "كيف ينمّي Orbit زياراتك",
+        "subtitle": "أعدّه مرة واحدة",
+        "eyebrow": "الخطوة {n}",
+        "research": {
+          "title": "بحث الكلمات المفتاحية",
+          "body": "يجد Orbit عمليات البحث وأسئلة الذكاء الاصطناعي التي يمكن لموقعك الفوز بها."
+        },
+        "plan": {
+          "title": "خطة المحتوى",
+          "body": "تتحول الكلمات المعتمدة إلى تقويم شهري بالوتيرة التي تختارها."
+        },
+        "write": {
+          "title": "مقالات تُكتب لك",
+          "body": "يُبحث كل مقال وفق ما يتصدّر اليوم، وبأسلوبك."
+        },
+        "publish": {
+          "title": "نشر بموافقتك",
+          "body": "وافق في Orbit أو على Telegram، وينشر Orbit على موقعك."
+        }
+      },
+      "included": {
+        "title": "ما المشمول",
+        "items": {
+          "aiVisibility": "الظهور في ChatGPT وGemini وClaude وPerplexity",
+          "rankings": "تتبّع ترتيب Google",
+          "keywords": "بحث الكلمات المفتاحية وتجميعها",
+          "topicalMap": "خريطة موضوعية لمواضيعك الأساسية",
+          "contentPlan": "خطة محتوى وتقويم شهريان",
+          "articles": "مقالات محسّنة لمحركات البحث بأسلوب علامتك",
+          "images": "صور رئيسية لكل مقال",
+          "internalLinks": "روابط داخلية بين المقالات ذات الصلة",
+          "siteAudit": "تدقيق الموقع للعناوين والأوصاف التعريفية",
+          "competitors": "مقارنة بالمنافسين",
+          "searchConsole": "رؤى Search Console",
+          "approvals": "الموافقات في التطبيق وعلى Telegram"
+        }
+      }
+    },
+    "integration": {
+      "title": "اربط موقعك",
+      "description": "اختر أين ينشر Orbit المقالات الجاهزة. يمكنك التخطي ونسخ المقالات يدويًا.",
+      "platforms": "منصة النشر",
+      "connected": "متصل",
+      "soon": "قريبًا",
+      "platform": {
+        "wordpress": {
+          "name": "WordPress",
+          "detail": "استضافة ذاتية أو WordPress.com",
+          "help": "أنشئ كلمة مرور تطبيق في WordPress من المستخدمون ← الملف الشخصي، ثم الصقها هنا."
+        },
+        "webhook": {
+          "name": "Webhook أو API",
+          "detail": "للمواقع المخصصة وNext.js",
+          "help": "يرسل Orbit كل مقال معتمد بصيغة JSON إلى نقطة HTTPS هذه."
+        },
+        "shopify": {
+          "name": "Shopify",
+          "detail": "مقالات مدونة متجرك",
+          "help": ""
+        },
+        "webflow": {
+          "name": "Webflow",
+          "detail": "عناصر مجموعة CMS",
+          "help": ""
+        },
+        "wix": {
+          "name": "Wix",
+          "detail": "مدونة Wix",
+          "help": ""
+        },
+        "ghost": {
+          "name": "Ghost",
+          "detail": "منشورات Ghost",
+          "help": ""
+        }
+      },
+      "fields": {
+        "siteUrl": "رابط الموقع",
+        "endpoint": "رابط نقطة الاستقبال",
+        "username": "اسم المستخدم",
+        "appPassword": "كلمة مرور التطبيق",
+        "appPasswordHelper": "ليست كلمة مرور تسجيل الدخول"
+      },
+      "connect": "ربط",
+      "continue": "متابعة",
+      "skip": "تخطٍّ الآن"
+    },
+    "preferences": {
+      "title": "كيف تريد أن يعمل Orbit؟",
+      "description": "حدّد عدد المقالات التي يكتبها Orbit وكيف تُنشر. يمكنك تغيير ذلك في أي وقت.",
+      "mode": {
+        "label": "النشر",
+        "review": {
+          "title": "اسألني أولًا",
+          "body": "يكتب Orbit مسودة كل مقال وينتظر موافقتك."
+        },
+        "auto": {
+          "title": "النشر تلقائيًا",
+          "body": "تُنشر المقالات حسب الجدول. ويمكنك تعديلها بعد ذلك."
+        }
+      },
+      "cadence": {
+        "label": "مقالات في الأسبوع",
+        "helper": "نحو {count} مقالًا شهريًا"
+      },
+      "voice": {
+        "label": "أسلوب العلامة",
+        "options": {
+          "friendly": "ودود وواضح",
+          "professional": "مهني",
+          "expert": "متخصص ومفصّل",
+          "playful": "مرح"
+        },
+        "notesLabel": "هل هناك ما يجب أن يعرفه Orbit عن أسلوبك؟",
+        "notesHelper": "اختياري. كلمات تستخدمها أو تتجنبها، وطريقة مخاطبة القرّاء.",
+        "notesPlaceholder": "مثال: نقول \"العملاء\" لا \"الزبائن\"، ونكتب بالعربية الفصحى."
+      },
+      "continue": "متابعة"
+    },
+    "done": {
+      "building": {
+        "title": "جارٍ بناء خطة المحتوى الأولى",
+        "stage0": "نقرأ مواضيعك الأساسية…",
+        "stage1": "نبحث عن الكلمات المفتاحية عبر {count, plural, one {موضوع واحد} two {موضوعين} few {# مواضيع} many {# موضوعًا} other {# موضوع}}…",
+        "stage2": "نجدول مقالاتك الأولى…"
+      },
+      "title": "موقعك جاهز",
+      "description": "لدى Orbit كل ما يحتاجه للبدء على {name}. أول فحص وخطة محتوى بانتظارك في لوحة التحكم.",
+      "rows": {
+        "profile": "الوصف والجمهور",
+        "profileValue": "تم التأكيد",
+        "market": "الدولة واللغة",
+        "searchConsole": "Search Console",
+        "topics": "المواضيع الأساسية",
+        "publishing": "النشر",
+        "schedule": "الجدول",
+        "skipped": "تم التخطي. اربطه لاحقًا من التكاملات.",
+        "manual": "غير متصل. انسخ المقالات يدويًا.",
+        "platform": {
+          "wordpress": "WordPress",
+          "webhook": "Webhook",
+          "shopify": "Shopify",
+          "webflow": "Webflow",
+          "wix": "Wix",
+          "ghost": "Ghost"
+        },
+        "mode": {
+          "review": "توافق على كل مقال",
+          "auto": "تُنشر تلقائيًا"
+        },
+        "scheduleValue": "{count, plural, one {مقال واحد} two {مقالان} few {# مقالات} many {# مقالًا} other {# مقال}} أسبوعيًا، {mode}",
+        "doneLabel": "تم",
+        "skippedLabel": "تم التخطي"
+      },
+      "later": "يمكنك تغيير أي من ذلك لاحقًا من إعدادات الموقع.",
+      "cta": "الانتقال إلى لوحة التحكم"
     }
   }
 }

@@ -8,7 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useTranslations } from "next-intl";
 
-import { ONBOARDING_START, fakeRequest } from "@/lib/auth/session";
+import { NEW_ACCOUNT_START, fakeRequest } from "@/lib/auth/session";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { FormField } from "@/components/forms/form-field";
@@ -43,7 +43,7 @@ export function SignUpForm() {
   return (
     <div className="flex flex-col gap-6">
       <AuthHeading title={t("title")} description={t("description")} />
-      <GoogleButton next={ONBOARDING_START} />
+      <GoogleButton next={NEW_ACCOUNT_START} />
       <OrDivider />
       <form onSubmit={onSubmit} noValidate className="flex flex-col gap-5">
         <FormField label={t("name")} error={errors.name?.message}>
