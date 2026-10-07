@@ -14,7 +14,7 @@ export interface Workspace {
   name: string;
   slug: string;
   is_default: boolean;
-  logo: null;
+  logo: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -76,12 +76,14 @@ export type SubscriptionDataNew = {
   id: number;
   name: "free" | "professional" | "agency" | "reseller";
   status: boolean;
-  platform: "jvz" | "paddle";
+  // Lifetime and manually granted plans come back with no platform or dates.
+  platform: "jvz" | "paddle" | null;
   type: "monthly" | "yearly" | "lifetime";
-  start_date: string;
-  end_date: string;
-  // Renewal cancelled flag: 0 = renews, 1 = set to expire at end_date.
-  is_cancelled?: number;
+  start_date: string | null;
+  end_date: string | null;
+  next_billed_at?: string | null;
+  // Renewal cancelled flag: 0/false = renews, 1/true = set to expire at end_date.
+  is_cancelled?: number | boolean;
 };
 
 export type AddOns = {
@@ -89,12 +91,18 @@ export type AddOns = {
     id: number;
     status: boolean;
     type: string;
-    start_date: string;
-    end_data: null;
+    start_date: string | null;
+    end_date?: string | null;
+    // Older payloads spell it end_data.
+    end_data?: null;
   };
   reseller_seats?: {
+    id?: number;
     status: boolean;
-    limit: number;
+    type?: string;
+    limit?: number;
+    start_date?: string | null;
+    end_date?: string | null;
   };
   [key: string]: unknown;
 };
@@ -138,6 +146,12 @@ export interface User {
   name: string;
   email: string;
   email_verified_at: string | null;
+  social_provider?: string | null;
+  social_provider_id?: string | null;
+  social_avatar?: string | null;
+  social_access_token?: string | null;
+  social_refresh_token?: string | null;
+  social_token_expires_at?: string | null;
   role: string;
   token: string | null;
   token_balance?: number | string | null;

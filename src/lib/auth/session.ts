@@ -1,11 +1,10 @@
 import {
   AUTH_TOKEN_COOKIE_NAME,
   clearSession,
-  getSessionUserFromCookie,
   setAuthTokenCookie,
   writeSessionUserCookie,
 } from "@/lib/auth-session";
-import { DEMO_TOKEN, buildDemoSessionUser, loadDemoAccount, readDemoAccount } from "@/lib/demo-session";
+import { DEFAULT_DEMO_ACCOUNT, DEMO_TOKEN, buildDemoSessionUser, loadDemoAccount } from "@/lib/demo-session";
 
 /**
  * proxy.ts only checks that this cookie exists. It is the shared Netsach
@@ -32,7 +31,7 @@ export const GUEST_ONLY_PATHS = ["/sign-in", "/sign-up"] as const;
  */
 export function startSession() {
   setAuthTokenCookie(DEMO_TOKEN);
-  writeSessionUserCookie(buildDemoSessionUser(loadDemoAccount() ?? readDemoAccount(getSessionUserFromCookie())));
+  writeSessionUserCookie(buildDemoSessionUser(loadDemoAccount() ?? DEFAULT_DEMO_ACCOUNT));
 }
 
 export function endSession() {

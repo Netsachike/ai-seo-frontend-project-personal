@@ -38,7 +38,7 @@ import { useShell } from "./shell-context";
 const SEARCH_THRESHOLD = 6;
 
 /**
- * `[workspace] Northwind Team / Northwind Roasters ▾`. Under md only the brand
+ * `[workspace] Greek / Northwind Roasters ▾`. Under md only the brand
  * shows; the workspace switcher also lives in the mobile nav sheet.
  */
 export function ContextSwitcher() {

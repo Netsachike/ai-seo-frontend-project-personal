@@ -162,8 +162,8 @@ export function UpgradeView() {
   const nextBillingDate = getNextBillingDate(activeSubscription);
   const formatDate = (date: Date) => format.dateTime(date, { dateStyle: "long" });
 
-  // The plan is already set to expire (renewal cancelled) when is_cancelled is 1.
-  const isCancelled = activeSubscription?.is_cancelled === 1;
+  // The plan is already set to expire (renewal cancelled) when is_cancelled is 1 or true.
+  const isCancelled = Boolean(activeSubscription?.is_cancelled);
   const endDate = activeSubscription?.end_date ? new Date(activeSubscription.end_date) : null;
   const endDateValid = endDate && !Number.isNaN(endDate.getTime()) ? endDate : null;
   const expireNotice =

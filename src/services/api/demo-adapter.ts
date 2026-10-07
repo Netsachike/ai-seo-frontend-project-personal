@@ -2,6 +2,7 @@ import { AxiosError, AxiosHeaders, type AxiosAdapter, type AxiosResponse, type I
 
 import { getSessionUserFromCookie } from "@/lib/auth-session";
 import { getActivePlan } from "@/lib/plan-core";
+import { DEMO_LOGIN_USER } from "@/lib/demo-login";
 import { DEMO_USER_ID } from "@/lib/demo-session";
 import type {
   AllUserSubscriptionsNew,
@@ -64,6 +65,16 @@ const workspaceRecord = (id: number, name: string, isDefault = false): Workspace
 
 type DemoWorkspace = { workspace: Workspace; active: boolean };
 
+// The signed-in account's workspaces, straight from the login response (lib/demo-login.ts).
+const [GREEK, ANOTHERWORK] = DEMO_LOGIN_USER.user_workspaces;
+const seedPivots = DEMO_LOGIN_USER.all_user_workspaces;
+
+function seedWorkspace(id: number): Workspace {
+  const pivot = seedPivots.find((p) => p.work_space_id === id);
+  if (!pivot) throw new Error(`Unknown demo workspace ${id}`);
+  return { ...pivot.workspace };
+}
+
 const freeSubs: AllUserSubscriptionsNew = { plan: "free", addons: [] };
 
 function makeUser(
@@ -72,7 +83,7 @@ function makeUser(
   last: string,
   extra: Partial<User> & { workspaceIds?: number[]; daysOld?: number } = {},
 ): User {
-  const { workspaceIds = [1], daysOld = 30, ...rest } = extra;
+  const { workspaceIds = [GREEK], daysOld = 30, ...rest } = extra;
   return {
     id,
     name: `${first} ${last}`,
@@ -99,15 +110,15 @@ function makeUser(
       id: wsId,
       user_id: id,
       work_space_id: wsId,
-      is_active: wsId === 1 ? 1 : 0,
+      is_active: wsId === GREEK ? 1 : 0,
       role: "member",
       created_at: daysAgo(daysOld),
       updated_at: daysAgo(daysOld),
       user_role: "member",
       user_count: 1,
-      workspace: workspaceRecord(wsId, wsId === 1 ? "Northwind Team" : "Ada's Agency"),
+      workspace: seedWorkspace(wsId),
     })),
-    active_workspace: workspaceRecord(workspaceIds[0] ?? 1, "Northwind Team"),
+    active_workspace: seedWorkspace(workspaceIds[0] ?? GREEK),
     subscriptions: freeSubs,
     account_officer: "",
     ...rest,
@@ -203,15 +214,12 @@ type DomainRecord = {
 };
 
 const db = {
-  workspaces: [
-    { workspace: workspaceRecord(1, "Northwind Team", true), active: true },
-    { workspace: workspaceRecord(2, "Ada's Agency"), active: false },
-  ] as DemoWorkspace[],
+  workspaces: seedPivots.map((p) => ({ workspace: { ...p.workspace }, active: p.is_active === 1 })) as DemoWorkspace[],
   team: [
-    makeUser(11, "Ada", "Okafor", { workspaceIds: [1, 2], daysOld: 120, role: "admin", parsed_role: "Admin" }),
-    makeUser(12, "Tomás", "Reyes", { workspaceIds: [1], daysOld: 60, role: "editor", parsed_role: "Editor" }),
-    makeUser(13, "Priya", "Nair", { workspaceIds: [2], daysOld: 25 }),
-    makeUser(14, "Sam", "Lee", { workspaceIds: [2], daysOld: 9, role: "client", parsed_role: "Client" }),
+    makeUser(11, "Ada", "Okafor", { workspaceIds: [GREEK, ANOTHERWORK], daysOld: 120, role: "admin", parsed_role: "Admin" }),
+    makeUser(12, "Tomás", "Reyes", { workspaceIds: [GREEK], daysOld: 60, role: "editor", parsed_role: "Editor" }),
+    makeUser(13, "Priya", "Nair", { workspaceIds: [ANOTHERWORK], daysOld: 25 }),
+    makeUser(14, "Sam", "Lee", { workspaceIds: [ANOTHERWORK], daysOld: 9, role: "client", parsed_role: "Client" }),
   ],
   resellers: [
     makeUser(21, "Harbor", "Digital", { daysOld: 0, role: "reseller" }),
@@ -222,7 +230,7 @@ const db = {
   domains: [
     {
       id: 1,
-      workspace_id: 2,
+      workspace_id: ANOTHERWORK,
       domain: "seo.adasagency.com",
       status: "active",
       verified: true,
@@ -307,10 +315,10 @@ function userWorkspacesPayload(): AllUserWorkspace[] {
     user_id: DEMO_USER_ID,
     work_space_id: workspace.id,
     is_active: active ? 1 : 0,
-    role: "owner",
+    role: seedPivots.find((p) => p.work_space_id === workspace.id)?.role ?? "owner",
     created_at: workspace.created_at,
     updated_at: workspace.updated_at,
-    user_role: "owner",
+    user_role: seedPivots.find((p) => p.work_space_id === workspace.id)?.user_role ?? "owner",
     user_count: 1 + db.team.filter((m) => m.user_workspaces.includes(workspace.id)).length,
     workspace,
   }));
