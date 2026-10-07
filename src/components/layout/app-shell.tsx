@@ -8,7 +8,7 @@ import { useUiStore } from "@/lib/store/ui";
 import { useBrandLookup, useMe } from "@/features/workspace/hooks";
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";
 import { AgentPanel } from "@/components/agent/agent-panel";
-import { AppSidebar, SidebarBrand, SidebarFooter, SidebarNav } from "./app-sidebar";
+import { AppSidebar, SidebarBrand, SidebarFooter, SidebarNav, SidebarSite } from "./app-sidebar";
 import { CommandMenu } from "./command-menu";
 import { WorkspaceSwitcher } from "./context-switcher";
 import { FeedbackDialog, HelpSheet } from "./help-sheet";
@@ -89,6 +89,7 @@ export function AppShell({
           <div className="px-3 pb-3">
             <WorkspaceSwitcher full />
           </div>
+          <SidebarSite className="px-3 pb-3" onNavigate={() => setMobileNav(false)} />
           <SidebarNav className="flex-1 overflow-y-auto px-3 pb-4" onNavigate={() => setMobileNav(false)} />
           <SidebarFooter onNavigate={() => setMobileNav(false)} />
         </SheetContent>

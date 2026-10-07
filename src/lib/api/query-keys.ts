@@ -12,6 +12,8 @@ export const workspaceKeys = {
   all: ["workspaces"] as const,
   list: () => [...workspaceKeys.all, "list"] as const,
   brands: (workspaceId: string) => [...workspaceKeys.all, workspaceId, "brands"] as const,
+  /** Under brands, so anything that invalidates a workspace's brands refreshes the sites page too. */
+  sites: (workspaceId: string) => [...workspaceKeys.brands(workspaceId), "sites"] as const,
   usage: (workspaceId: string) => [...workspaceKeys.all, workspaceId, "usage"] as const,
 };
 

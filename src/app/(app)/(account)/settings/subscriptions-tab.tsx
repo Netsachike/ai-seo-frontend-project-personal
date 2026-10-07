@@ -138,8 +138,8 @@ export function SubscriptionsTab() {
           ) : (
             <ul className="grid gap-4 xl:grid-cols-2">
               {activePlans.map((plan) => {
-                // Cancelled per backend (is_cancelled === 1) or this session (optimistic).
-                const isCancelled = plan.subscription.is_cancelled === 1 || cancelledSubscriptionIds.has(plan.id);
+                // Cancelled per backend (is_cancelled 1 or true) or this session (optimistic).
+                const isCancelled = Boolean(plan.subscription.is_cancelled) || cancelledSubscriptionIds.has(plan.id);
                 const isLifetime = plan.type === "lifetime";
                 const renewalDate = getNextBillingDate(plan.subscription);
                 const endDate = validDate(plan.subscription.end_date);

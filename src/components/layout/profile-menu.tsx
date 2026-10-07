@@ -16,7 +16,7 @@ import {
   UserIcon,
   UsersIcon,
 } from "lucide-react";
-import { useFormatter, useLocale, useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 import { enabledLocales, localeMeta, type Locale } from "@/i18n/config";
 import { endSession } from "@/lib/auth/session";
@@ -26,7 +26,6 @@ import { accountHref } from "@/features/account/routes";
 import { useSessionUser } from "@/features/account/use-session-user";
 import { useMounted } from "@/lib/hooks/use-mounted";
 import { usePreferences } from "@/features/preferences/use-preferences";
-import { useUsage } from "@/features/workspace/hooks";
 import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
@@ -36,7 +35,6 @@ import {
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
   DropdownMenuSeparator,
-  DropdownMenuShortcut,
   DropdownMenuSub,
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
@@ -61,7 +59,6 @@ export function ProfileMenu() {
   const t = useTranslations("shell.profile");
   const tRole = useTranslations("roles");
   const tPlan = useTranslations("account.plans");
-  const format = useFormatter();
   const router = useRouter();
   const locale = useLocale() as Locale;
   const mounted = useMounted();
@@ -69,7 +66,6 @@ export function ProfileMenu() {
   const session = useSessionUser();
   const profileImage = useProfileImage();
   const plan = getActivePlan(session?.subscriptions);
-  const usage = useUsage(workspace?.id);
   const { resolvedTheme, setTheme, setLocale } = usePreferences();
   const signOut = useSignOut();
   const darkSwitchId = React.useId();
@@ -111,11 +107,6 @@ export function ProfileMenu() {
           <DropdownMenuItem onSelect={() => go(accountHref.settings("subscriptions"))}>
             <CreditCardIcon />
             {t("billing")}
-            {usage.data && (
-              <DropdownMenuShortcut className="num text-[12px]">
-                {format.number(usage.data.credits.remaining, "integer")}
-              </DropdownMenuShortcut>
-            )}
           </DropdownMenuItem>
           <DropdownMenuItem onSelect={() => go(accountHref.settings("workspaces"))}>
             <BuildingIcon />

@@ -31,42 +31,55 @@ export const me: Me = {
   telegram: { handle: "fvo_northwind", connected: true },
 };
 
-const growth = {
-  id: "plan_growth",
-  name: "Growth",
-  tier: "growth",
-  isTopTier: false,
-} as const;
-const agency = {
-  id: "plan_agency",
-  name: "Agency",
+/**
+ * The account's Enterprise (`reseller`) lifetime subscription, from the login
+ * response in lib/demo-login.ts. It covers every workspace, so each one shows
+ * the top tier.
+ */
+const enterprise = {
+  id: "plan_reseller",
+  name: "Enterprise",
   tier: "agency",
   isTopTier: true,
 } as const;
 
+/**
+ * The login response's three workspaces (Greek is the default and active one).
+ * Super Admin on the shared backend is `owner` in Orbit's role set. The
+ * brands are Orbit-only data the backend doesn't send yet.
+ */
 export const workspaces: Workspace[] = [
   {
-    id: "ws_northwind",
-    name: "Northwind Team",
+    id: "ws_greek",
+    name: "Greek",
     role: "owner",
-    plan: growth,
-    memberCount: 4,
+    plan: enterprise,
+    memberCount: 1,
     brandCount: 1,
     lastBrandSlug: "northwind-roasters",
   },
   {
-    id: "ws_agency",
-    name: "Ada's Agency",
-    role: "admin",
-    plan: agency,
-    memberCount: 9,
+    id: "ws_anotherwork",
+    name: "anotherwork",
+    role: "owner",
+    plan: enterprise,
+    memberCount: 1,
     brandCount: 2,
     lastBrandSlug: "harbor-tea",
+  },
+  {
+    id: "ws_test",
+    name: "test",
+    role: "owner",
+    plan: enterprise,
+    memberCount: 1,
+    brandCount: 0,
+    lastBrandSlug: null,
   },
 ];
 
 export const brandsByWorkspace: Record<string, Brand[]> = {
-  ws_northwind: [
+  ws_greek: [
     {
       id: "br_northwind",
       slug: "northwind-roasters",
@@ -76,7 +89,7 @@ export const brandsByWorkspace: Record<string, Brand[]> = {
       market: "US",
     },
   ],
-  ws_agency: [
+  ws_anotherwork: [
     {
       id: "br_harbor",
       slug: "harbor-tea",
@@ -92,13 +105,16 @@ export const brandsByWorkspace: Record<string, Brand[]> = {
       domain: "freshstart.example",
       contentLanguage: "de",
       market: "DE",
+      // Shows the "setup incomplete" state on the sites page.
+      setupStep: "core-topics",
     },
   ],
+  ws_test: [],
 };
 
 export const usageByWorkspace: Record<string, Usage> = {
-  ws_northwind: {
-    plan: growth,
+  ws_greek: {
+    plan: enterprise,
     credits: { remaining: 1380, total: 2000 },
     breakdown: {
       scans: { used: 22, limit: 30 },
@@ -107,13 +123,23 @@ export const usageByWorkspace: Record<string, Usage> = {
     },
     renewsAt: iso(26 * DAY),
   },
-  ws_agency: {
-    plan: agency,
+  ws_anotherwork: {
+    plan: enterprise,
     credits: { remaining: 240, total: 10000 },
     breakdown: {
       scans: { used: 140, limit: 150 },
       articles: { used: 58, limit: 60 },
       prompts: { used: 480, limit: 500 },
+    },
+    renewsAt: iso(9 * DAY),
+  },
+  ws_test: {
+    plan: enterprise,
+    credits: { remaining: 10000, total: 10000 },
+    breakdown: {
+      scans: { used: 0, limit: 150 },
+      articles: { used: 0, limit: 60 },
+      prompts: { used: 0, limit: 500 },
     },
     renewsAt: iso(9 * DAY),
   },

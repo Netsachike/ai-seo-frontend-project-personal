@@ -434,12 +434,13 @@
       "upgradeTitle": "Upgrade to {plan}",
       "upgradeBody": "Get more insights, higher limits and advanced AI features.",
       "viewPlans": "View plans",
-      "telegramOn": "Telegram connected"
+      "telegramOn": "Telegram connected",
+      "changeSite": "Change site. Current site: {name}"
     },
     "topbar": {
       "openNav": "Open navigation",
-      "search": "Search or ask Orbit",
-      "askOrbit": "Ask Orbit"
+      "askOrbit": "Ask Orbit",
+      "home": "All sites"
     },
     "shortcut": {
       "mac": "⌘{key}",
@@ -447,15 +448,11 @@
     },
     "switcher": {
       "workspaceTrigger": "Workspace: {name}. Switch workspace",
-      "brandTrigger": "Brand: {name}. Switch brand",
       "switchWorkspace": "Switch workspace",
-      "switchBrand": "Switch brand",
       "searchWorkspaces": "Search workspaces",
-      "searchBrands": "Search brands",
       "noMatches": "No matches.",
       "viewAllWorkspaces": "View all workspaces",
       "createWorkspace": "Create workspace",
-      "addBrand": "Add brand",
       "switchedWorkspace": "Switched to {name}",
       "switchedBrand": "Now showing {name}"
     },
@@ -469,18 +466,6 @@
       "tooLong": "Keep it under 80 characters.",
       "failed": "We couldn't create the workspace. Try again.",
       "submit": "Create workspace"
-    },
-    "credits": {
-      "label": "Credits",
-      "aria": "Credits: {remaining} of {total} left. Open billing",
-      "summary": "{remaining} of {total} credits left",
-      "breakdown": {
-        "scans": "Scans",
-        "articles": "Articles",
-        "prompts": "Tracked questions"
-      },
-      "meter": "{used} / {limit}",
-      "renews": "Renews {date}"
     },
     "language": {
       "trigger": "Language: {language}. Change language",
@@ -688,142 +673,6 @@
     "comingSoon": "Coming soon",
     "connecting": "Connecting"
   },
-  "onboarding": {
-    "progressLabel": "Setup progress",
-    "stepOf": "Step {step} of {total}",
-    "stepDone": "(done)",
-    "saveExit": "Save and exit",
-    "back": "Back",
-    "continue": "Continue",
-    "steps": {
-      "brand": "Brand",
-      "competitors": "Competitors",
-      "keywords": "Keywords",
-      "connect": "Connect",
-      "scan": "First scan"
-    },
-    "brand": {
-      "title": "What are we growing?",
-      "description": "Add your website and Orbit will learn your brand, products and audience.",
-      "hint": "About 4 minutes to finish setup",
-      "website": "Website",
-      "domainInvalid": "Enter a domain like yourbrand.com.",
-      "reading": "Reading your site",
-      "readingLong": "Reading your homepage, product pages and blog. This takes a few seconds.",
-      "read": "Read {pages, plural, one {# page} other {# pages}}",
-      "learned": "Here's what Orbit learned. Fix anything that's off.",
-      "name": "Brand name",
-      "nameRequired": "Enter your brand name.",
-      "industry": "Industry",
-      "market": "Main market",
-      "contentLanguage": "Content language",
-      "contentLanguageHelper": "What Orbit writes in and which answers it tracks. Your interface language is separate.",
-      "descriptionLabel": "What you sell, in one line",
-      "descriptionHelper": "Orbit uses this to pick the questions your customers ask AI engines.",
-      "descriptionPlaceholder": "Small-batch coffee roasted to order and sold by subscription.",
-      "industries": {
-        "foodDrink": "Food and drink",
-        "retail": "Retail and e-commerce",
-        "saas": "Software",
-        "health": "Health and wellness",
-        "travel": "Travel and hospitality",
-        "finance": "Finance",
-        "education": "Education",
-        "other": "Something else"
-      }
-    },
-    "competitors": {
-      "title": "Who are you up against?",
-      "description": "We found these from your search results. Keep up to {max}.",
-      "selected": "{count} of {max} selected",
-      "shared": "{count, plural, one {Shares # keyword} other {Shares # keywords}}",
-      "addedByYou": "Added by you",
-      "limitNote": "You've picked {max}. Turn one off to add another.",
-      "limitReached": "You can track up to {max}. Turn one off first.",
-      "addLabel": "Add a competitor",
-      "addHelper": "Paste their website. We'll find their name.",
-      "addPlaceholder": "competitor.com",
-      "add": "Add",
-      "domainInvalid": "Enter a domain like competitor.com.",
-      "duplicate": "That competitor is already on the list."
-    },
-    "keywords": {
-      "title": "What should people find you for?",
-      "description": "Pick the keywords and questions your customers ask. We suggested {count}.",
-      "meter": "{total} of {limit} selected",
-      "meterLabel": "Keywords and questions selected",
-      "planNote": "Left on your {plan} plan this month",
-      "planNoteGeneric": "Left on your plan this month",
-      "overLimit": "Remove {count, plural, one {# item} other {# items}} to stay within your plan.",
-      "keywordsTitle": "Google keywords",
-      "keywordsCaption": "Tracked daily in Google results",
-      "questionsTitle": "AI questions",
-      "questionsCaption": "Asked to 5 AI engines in every scan",
-      "selectAll": "Select all",
-      "clear": "Clear",
-      "custom": "Yours",
-      "volume": "{volume}/mo",
-      "volumeTitle": "Monthly Google searches",
-      "addKeyword": "Add a keyword",
-      "addKeywordPlaceholder": "Add a keyword",
-      "addQuestion": "Add a question",
-      "addQuestionPlaceholder": "Add a question",
-      "add": "Add"
-    },
-    "connect": {
-      "title": "Where should Orbit work?",
-      "description": "Connect Telegram to talk to Orbit, and your site so it can publish.",
-      "startScan": "Start first scan",
-      "skipHint": "You can connect these later in Integrations.",
-      "connect": "Connect",
-      "talkTitle": "Talk to Orbit",
-      "publishTitle": "Publish and measure",
-      "telegram": {
-        "name": "Telegram",
-        "description": "Get updates, approve changes and ask questions from your phone.",
-        "connectedAs": "Connected as @{handle}",
-        "qrLabel": "QR code that opens Orbit in Telegram",
-        "step1": "Scan the code or press Connect Telegram.",
-        "step2": "Press Start in the chat with Orbit.",
-        "step3": "Come back here. We'll confirm the connection.",
-        "connect": "Connect Telegram",
-        "orCode": "or send the code",
-        "copyAria": "Copy code {code}",
-        "copied": "Code copied",
-        "copyFailed": "We couldn't copy the code. Select it and copy it instead.",
-        "waiting": "Waiting for you to press Start in Telegram."
-      },
-      "wordpress": {
-        "name": "WordPress",
-        "description": "Orbit publishes approved articles and on-page fixes to your site."
-      },
-      "searchConsole": {
-        "name": "Google Search Console",
-        "description": "Real clicks and impressions, so rankings come from Google's own data."
-      },
-      "autopilotTitle": "How much should Orbit do on its own?",
-      "autopilotDescription": "You can change this anytime in Settings."
-    },
-    "scan": {
-      "title": "Running your first scan",
-      "doneTitle": "Your first scan is ready",
-      "description": "Asking {engines} AI engines {questions} questions about your market. This takes about 3 minutes.",
-      "dashboard": "Go to dashboard",
-      "telegramHint": "Orbit will also message you on Telegram when it's done.",
-      "leaveHint": "You can leave this page. The scan keeps running.",
-      "running": "Scanning",
-      "complete": "Scan complete",
-      "progress": "{percent} · about {minutes, plural, one {# minute} other {# minutes}} left",
-      "progressLabel": "Scan progress",
-      "summary": "Mentioned in {mentioned} of {answers} answers",
-      "queued": "Waiting",
-      "failed": "Didn't answer",
-      "mentioned": "Mentioned in {mentioned} of {questions}",
-      "engineDown": "We couldn't reach {engine} this time. We'll retry at {time}; other engines are up to date.",
-      "orbitPartial": "{engines, plural, one {One engine has} other {# engines have}} answered. Your dashboard fills in as the rest finish.",
-      "orbitDone": "You showed up in {mentioned} answers. I've already found a few quick wins; they're waiting in your action plan."
-    }
-  },
   "insights": {
     "range": {
       "label": "Date range",
@@ -939,35 +788,11 @@
       "url": "Website URL",
       "urlHelper": "Orbit starts its analysis from this URL.",
       "urlPlaceholder": "yourwebsite.com",
-      "name": "Business name",
-      "nameHelper": "This helps Orbit understand the brand.",
-      "namePlaceholder": "Your business name",
-      "type": "Business type",
-      "country": "Country",
-      "city": "City",
-      "cityHelper": "Helps with local and regional visibility.",
-      "cityPlaceholder": "New York",
-      "platform": "Website platform",
-      "platformHelper": "Used to set up publishing. You can connect it later.",
-      "platforms": {
-        "wordpress": "WordPress",
-        "shopify": "Shopify",
-        "wix": "Wix",
-        "webflow": "Webflow",
-        "nextjs": "Next.js",
-        "ghost": "Ghost",
-        "other": "Other"
-      },
       "later": "You can connect publishing later.",
       "submit": "Add website",
       "errors": {
-        "domain": "Enter a domain like yourbrand.com.",
-        "name": "Enter the business name.",
-        "type": "Choose a business type.",
-        "country": "Choose a country."
-      },
-      "typePlaceholder": "Select business type",
-      "countryPlaceholder": "Select country"
+        "domain": "Enter a domain like yourbrand.com."
+      }
     },
     "growth": {
       "title": "From setup to growth in 6 steps",
@@ -2563,6 +2388,351 @@
       "privacy": "Privacy",
       "refunds": "Refunds",
       "signIn": "Sign in"
+    }
+  },
+  "sites": {
+    "metaTitle": "Sites",
+    "welcome": "Welcome back",
+    "welcomeName": "Welcome back, {name}",
+    "subtitle": "Select a site to continue",
+    "workspaceMenu": "Workspace options",
+    "addSite": "Add a site",
+    "addSiteBody": "Orbit reads it and sets it up with you in a few minutes",
+    "emptyBody": "This workspace has no sites yet. Start with your main website.",
+    "workspaceSettings": "Workspace settings",
+    "teamMembers": "Team members",
+    "error": "Your sites didn't load.",
+    "retry": "Try again",
+    "clusters": "keyword clusters covered",
+    "visibility": "AI visibility",
+    "setupIncomplete": "Setup incomplete · step {step} of {total}",
+    "active": "Active"
+  },
+  "siteSetup": {
+    "shell": {
+      "home": "Orbit, back to your sites",
+      "backToSites": "Back to sites",
+      "stepOf": "Step {step} of {total}",
+      "progressLabel": "Site setup progress",
+      "loggedInAs": "Logged in as {name},",
+      "signOut": "sign out",
+      "visual": {
+        "label": "About Orbit",
+        "overline": "Orbit",
+        "headline": "Get found on Google and in AI answers",
+        "body": "Orbit tracks where your site shows up in ChatGPT, Gemini, Claude, Perplexity and Google, then writes the content that closes the gaps."
+      }
+    },
+    "interstitial": {
+      "title": "Setting up your site",
+      "body": "Getting everything ready for you…"
+    },
+    "flow": {
+      "notFound": {
+        "title": "This site isn't available",
+        "body": "It may have been removed, or it belongs to a workspace you're not in.",
+        "cta": "Back to sites"
+      },
+      "titles": {
+        "details": "Website details",
+        "google-search-console": "Connect Search Console",
+        "core-topics": "Core topics",
+        "billing": "Your growth plan",
+        "integration": "Publishing",
+        "preferences": "Preferences",
+        "done": "Site ready"
+      }
+    },
+    "domain": {
+      "metaTitle": "Add a site",
+      "title": "Let's get started",
+      "description": "Tell us about your website",
+      "workspace": "Workspace",
+      "label": "Domain",
+      "placeholder": "yourdomain.com",
+      "exists": "This site is already in Orbit. Open it from your sites.",
+      "failed": "Orbit couldn't add that domain. Check it and try again.",
+      "continue": "Continue"
+    },
+    "details": {
+      "title": "Let's get started",
+      "description": "Tell us about your website",
+      "domainLabel": "Domain",
+      "editDomain": "Change domain",
+      "saveDomain": "Save and analyse again",
+      "cancel": "Cancel",
+      "sections": {
+        "description": "Description",
+        "audience": "Target audience",
+        "language": "Language"
+      },
+      "loader": {
+        "subline": "This may take a couple of seconds",
+        "stuck": "Still working. Large sites take longer.",
+        "description": {
+          "title": "Analysing your website",
+          "slow": "Reading your pages…"
+        },
+        "audience": {
+          "title": "Understanding your audience",
+          "slow": "Matching your services to buyers…"
+        }
+      },
+      "review": {
+        "description": "Orbit has analysed your website and thinks this is what it is about. Does it look right?",
+        "audience": "Orbit thinks these are the people your website is for. Does it look right?"
+      },
+      "yes": "Yes, that's right",
+      "no": "No, let me edit it",
+      "save": "Save and continue",
+      "editLabel": "Edit {section}",
+      "error": "Orbit couldn't read your website. Check that it's online, then try again.",
+      "retry": "Try again",
+      "country": "Country",
+      "language": "Language",
+      "localeHint": "Select the country and language that best represent your target audience",
+      "continue": "Continue"
+    },
+    "gsc": {
+      "title": "Connect Search Console",
+      "recommended": "Recommended",
+      "description": "Connect Google Search Console so Orbit can use the searches you already appear for. Keyword research gets sharper and you see real clicks and impressions.",
+      "name": "Google Search Console",
+      "domainProperty": "Domain property",
+      "connecting": "Connecting Search Console…",
+      "connected": "Connected · {property}",
+      "notConnected": "Not connected",
+      "connect": "Connect",
+      "continue": "Continue",
+      "skip": "Skip for now"
+    },
+    "topics": {
+      "title": "Core topics",
+      "description": "Google and AI answers favour sites that cover a subject completely. Your core topics are those subjects: each one becomes a hub on your topical map, and Orbit researches the keywords you can win around it.",
+      "mapLabel": "Topical map with {count, plural, =0 {no core topics yet} one {# core topic} other {# core topics}}",
+      "error": "Orbit couldn't generate topics for your site.",
+      "retry": "Try again",
+      "generating": {
+        "title": "Orbit is generating core topics for your website",
+        "body": "Each topic is based on real search data, including search volume and competition.",
+        "slow": "Checking search volume and competition…",
+        "stuck": "Still working. This is taking longer than usual."
+      },
+      "selected": "{count} / {total} selected",
+      "ready": "Ready to continue",
+      "useRecommended": "Use recommended",
+      "recommended": "Recommended",
+      "volume": "{volume} searches a month",
+      "footnote": "You can change your topics and their keywords later.",
+      "continue": "Continue"
+    },
+    "billing": {
+      "title": "Your growth plan is ready",
+      "descriptionPaid": "Your {plan} plan covers this site. Here is what Orbit will do for it.",
+      "descriptionFree": "Choose a plan to put this site on autopilot, or start on Free and upgrade later.",
+      "autopilot": {
+        "title": "Put your SEO on autopilot",
+        "body": "Orbit researches, plans and writes every week, and nothing goes live without your approval unless you turn on auto-publish."
+      },
+      "plan": {
+        "active": "Active",
+        "free": "Current plan",
+        "features": {
+          "topics": "Keyword research across your 5 core topics",
+          "plan": "A monthly content plan, refreshed as you rank",
+          "writing": "Articles researched and written for you",
+          "tracking": "AI visibility and Google rankings tracking"
+        },
+        "locked": {
+          "topics": "Keyword research on a paid plan",
+          "plan": "Content plan on a paid plan",
+          "writing": "Article writing on a paid plan",
+          "tracking": "AI visibility and Google rankings tracking"
+        }
+      },
+      "continuePaid": "Continue",
+      "continueFree": "Continue on Free",
+      "seePlans": "See plans",
+      "secure": "Payments are handled securely by Paddle",
+      "growth": {
+        "title": "Your growth potential",
+        "estimate": "Estimate",
+        "caption": "Weekly visits from search over the next 12 months",
+        "atYearEnd": "~{visits} a week",
+        "chartLabel": "Bar chart of estimated weekly visits from search, rising over 52 weeks",
+        "disclaimer": "An estimate based on the search volume of your core topics. Real results depend on your site, competition and how often you publish."
+      },
+      "phases": {
+        "first": {
+          "when": "Months 1–3",
+          "what": "Orbit publishes your first articles and search engines start indexing them."
+        },
+        "second": {
+          "when": "Months 3–6",
+          "what": "Articles start ranking for long-tail searches and AI answers begin to mention you."
+        },
+        "third": {
+          "when": "Months 6–12",
+          "what": "Topic clusters build authority, so harder keywords come within reach."
+        }
+      },
+      "how": {
+        "title": "How Orbit grows your traffic",
+        "subtitle": "Set it up once",
+        "eyebrow": "Step {n}",
+        "research": {
+          "title": "Keyword research",
+          "body": "Orbit finds the searches and AI questions your site can win."
+        },
+        "plan": {
+          "title": "Your content plan",
+          "body": "Approved keywords become a monthly calendar at your pace."
+        },
+        "write": {
+          "title": "Articles written for you",
+          "body": "Each article is researched against what ranks today, in your voice."
+        },
+        "publish": {
+          "title": "Published with your approval",
+          "body": "Approve in Orbit or on Telegram, and Orbit publishes to your site."
+        }
+      },
+      "included": {
+        "title": "What's included",
+        "items": {
+          "aiVisibility": "AI visibility across ChatGPT, Gemini, Claude and Perplexity",
+          "rankings": "Google rankings tracking",
+          "keywords": "Keyword research and clustering",
+          "topicalMap": "Topical map of your core topics",
+          "contentPlan": "Monthly content plan and calendar",
+          "articles": "SEO articles in your brand voice",
+          "images": "Header images for every article",
+          "internalLinks": "Internal links between related articles",
+          "siteAudit": "Site audit for titles and meta descriptions",
+          "competitors": "Competitor comparison",
+          "searchConsole": "Search Console insights",
+          "approvals": "Approvals in the app and on Telegram"
+        }
+      }
+    },
+    "integration": {
+      "title": "Connect your website",
+      "description": "Choose where Orbit publishes finished articles. You can skip this and copy articles over by hand.",
+      "platforms": "Publishing platform",
+      "connected": "Connected",
+      "soon": "Soon",
+      "platform": {
+        "wordpress": {
+          "name": "WordPress",
+          "detail": "Self-hosted or WordPress.com",
+          "help": "Create an application password in WordPress under Users → Profile, then paste it here."
+        },
+        "webhook": {
+          "name": "Webhook or API",
+          "detail": "For custom sites and Next.js",
+          "help": "Orbit sends each approved article as JSON to this HTTPS endpoint."
+        },
+        "shopify": {
+          "name": "Shopify",
+          "detail": "Blog posts on your store",
+          "help": ""
+        },
+        "webflow": {
+          "name": "Webflow",
+          "detail": "CMS collection items",
+          "help": ""
+        },
+        "wix": {
+          "name": "Wix",
+          "detail": "Wix Blog",
+          "help": ""
+        },
+        "ghost": {
+          "name": "Ghost",
+          "detail": "Ghost posts",
+          "help": ""
+        }
+      },
+      "fields": {
+        "siteUrl": "Site URL",
+        "endpoint": "Endpoint URL",
+        "username": "Username",
+        "appPassword": "Application password",
+        "appPasswordHelper": "Not your login password"
+      },
+      "connect": "Connect",
+      "continue": "Continue",
+      "skip": "Skip for now"
+    },
+    "preferences": {
+      "title": "How should Orbit work?",
+      "description": "Set how often Orbit writes and how articles go live. You can change these any time.",
+      "mode": {
+        "label": "Publishing",
+        "review": {
+          "title": "Ask me first",
+          "body": "Orbit drafts each article and waits for your approval."
+        },
+        "auto": {
+          "title": "Publish automatically",
+          "body": "Articles go live on schedule. You can still edit them after."
+        }
+      },
+      "cadence": {
+        "label": "Articles per week",
+        "helper": "About {count} articles a month"
+      },
+      "voice": {
+        "label": "Brand voice",
+        "options": {
+          "friendly": "Friendly and clear",
+          "professional": "Professional",
+          "expert": "Expert and detailed",
+          "playful": "Playful"
+        },
+        "notesLabel": "Anything Orbit should know about your voice?",
+        "notesHelper": "Optional. Words to use or avoid, how you address readers.",
+        "notesPlaceholder": "For example: we say \"clients\", not \"customers\". Keep it British English."
+      },
+      "continue": "Continue"
+    },
+    "done": {
+      "building": {
+        "title": "Building your first content plan",
+        "stage0": "Reading your core topics…",
+        "stage1": "Researching keywords across {count, plural, one {# topic} other {# topics}}…",
+        "stage2": "Scheduling your first articles…"
+      },
+      "title": "Your site is ready",
+      "description": "Orbit has everything it needs to start on {name}. Your first scan and content plan are on the dashboard.",
+      "rows": {
+        "profile": "Description and audience",
+        "profileValue": "Confirmed",
+        "market": "Country and language",
+        "searchConsole": "Search Console",
+        "topics": "Core topics",
+        "publishing": "Publishing",
+        "schedule": "Schedule",
+        "skipped": "Skipped. Connect it later in Integrations.",
+        "manual": "Not connected. Copy articles over by hand.",
+        "platform": {
+          "wordpress": "WordPress",
+          "webhook": "Webhook",
+          "shopify": "Shopify",
+          "webflow": "Webflow",
+          "wix": "Wix",
+          "ghost": "Ghost"
+        },
+        "mode": {
+          "review": "you approve each one",
+          "auto": "published automatically"
+        },
+        "scheduleValue": "{count, plural, one {# article} other {# articles}} a week, {mode}",
+        "doneLabel": "Done",
+        "skippedLabel": "Skipped"
+      },
+      "later": "You can change any of this later in the site's settings.",
+      "cta": "Go to dashboard"
     }
   }
 }

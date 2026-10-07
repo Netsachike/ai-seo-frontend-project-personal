@@ -740,7 +740,7 @@ export function AgentSection() {
           </Button>
         </div>
       </div>
-      <AgentPanel workspaceId="ws_northwind" agentHref="#agent" />
+      <AgentPanel workspaceId="ws_greek" agentHref="#agent" />
     </Section>
   );
 }

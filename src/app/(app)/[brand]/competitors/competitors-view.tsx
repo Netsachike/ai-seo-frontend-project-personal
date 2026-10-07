@@ -7,7 +7,7 @@ import { toast } from "sonner";
 
 import { fakeRequest } from "@/lib/auth/session";
 import { useFakeQuery } from "@/lib/fake-query";
-import { DOMAIN_PATTERN } from "@/features/onboarding/data";
+import { DOMAIN_PATTERN } from "@/features/site-setup/steps";
 import { competitorsData, type CompetitorRow } from "@/lib/mocks/ui-data";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";

@@ -1,11 +1,10 @@
 import {
   AUTH_TOKEN_COOKIE_NAME,
   clearSession,
-  getSessionUserFromCookie,
   setAuthTokenCookie,
   writeSessionUserCookie,
 } from "@/lib/auth-session";
-import { DEMO_TOKEN, buildDemoSessionUser, loadDemoAccount, readDemoAccount } from "@/lib/demo-session";
+import { DEFAULT_DEMO_ACCOUNT, DEMO_TOKEN, buildDemoSessionUser, loadDemoAccount } from "@/lib/demo-session";
 
 /**
  * proxy.ts only checks that this cookie exists. It is the shared Netsach
@@ -13,8 +12,10 @@ import { DEMO_TOKEN, buildDemoSessionUser, loadDemoAccount, readDemoAccount } fr
  */
 export const SESSION_COOKIE = AUTH_TOKEN_COOKIE_NAME;
 
-/** Where every login lands: the full onboarding flow, then the dashboard. */
-export const ONBOARDING_START = "/onboarding/brand";
+/** Where a sign-in lands: the sites page, to pick a site. */
+export const SIGNED_IN_HOME = "/sites";
+/** Where a new account lands: adding its first site. */
+export const NEW_ACCOUNT_START = "/sites/new";
 
 /** Public legal pages: OAuth providers and Paddle review these signed out. */
 export const LEGAL_PATHS = ["/privacy-policy", "/terms-of-service", "/refund-policy"] as const;
@@ -32,7 +33,7 @@ export const GUEST_ONLY_PATHS = ["/sign-in", "/sign-up"] as const;
  */
 export function startSession() {
   setAuthTokenCookie(DEMO_TOKEN);
-  writeSessionUserCookie(buildDemoSessionUser(loadDemoAccount() ?? readDemoAccount(getSessionUserFromCookie())));
+  writeSessionUserCookie(buildDemoSessionUser(loadDemoAccount() ?? DEFAULT_DEMO_ACCOUNT));
 }
 
 export function endSession() {

@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { PanelLeftCloseIcon, PanelLeftOpenIcon, StarIcon } from "lucide-react";
+import { ArrowLeftRightIcon, PanelLeftCloseIcon, PanelLeftOpenIcon, StarIcon } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 
 import { dirFor } from "@/i18n/config";
@@ -17,6 +17,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { OrbitMark, WORDMARK } from "@/components/brand/logo";
 import { UserAvatar } from "./avatars";
+import { SiteFavicon } from "./site-favicon";
 import { activeNavKey, navGroups, navItemHref, type NavItem } from "./nav";
 import { useShell } from "./shell-context";
 
@@ -64,6 +65,7 @@ export function AppSidebar() {
           <ToggleIcon className="rtl:-scale-x-100" />
         </Button>
       </div>
+      <SidebarSite collapsed={collapsed} className={cn("px-3 pb-3", collapsed && "px-0")} />
       <SidebarNav collapsed={collapsed} className="flex-1 overflow-y-auto px-3 pb-4" />
       <SidebarFooter collapsed={collapsed} />
     </aside>
@@ -101,6 +103,70 @@ export function SidebarBrand({ className }: { className?: string }) {
         <span className="truncate text-caption font-normal text-nav-muted">{t("tagline")}</span>
       </span>
     </span>
+  );
+}
+
+/**
+ * The site every screen below is about. Sites are picked on the sites page,
+ * so this links back there rather than opening a dropdown.
+ */
+export function SidebarSite({
+  collapsed = false,
+  className,
+  onNavigate,
+}: {
+  collapsed?: boolean;
+  className?: string;
+  onNavigate?: () => void;
+}) {
+  const t = useTranslations("shell.sidebar");
+  const side = useEndSide();
+  const { brand } = useShell();
+
+  if (!brand) {
+    return (
+      <div className={className}>
+        <Skeleton className={cn("h-14 bg-nav-card", collapsed ? "mx-auto w-10" : "w-full")} />
+      </div>
+    );
+  }
+
+  const link = (
+    <Link
+      href="/sites"
+      onClick={onNavigate}
+      aria-label={t("changeSite", { name: brand.name })}
+      className={cn(
+        "group flex items-center gap-2.5 rounded-lg border border-nav-border bg-nav-card p-2.5 transition-colors duration-120 hover:bg-nav-hover",
+        collapsed && "mx-auto size-11 justify-center border-0 bg-transparent p-0",
+      )}
+    >
+      <SiteFavicon src={brand.faviconUrl} name={brand.name} size={collapsed ? 32 : 34} />
+      {!collapsed && (
+        <>
+          <span className="flex min-w-0 flex-1 flex-col">
+            <span className="truncate text-small font-semibold text-white">{brand.name}</span>
+            <span dir="ltr" className="truncate text-start text-caption font-normal text-nav-muted">
+              {brand.domain}
+            </span>
+          </span>
+          <ArrowLeftRightIcon aria-hidden className="size-4 shrink-0 text-nav-muted group-hover:text-white" />
+        </>
+      )}
+    </Link>
+  );
+
+  return (
+    <div className={className}>
+      {collapsed ? (
+        <Tooltip>
+          <TooltipTrigger asChild>{link}</TooltipTrigger>
+          <TooltipContent side={side}>{t("changeSite", { name: brand.name })}</TooltipContent>
+        </Tooltip>
+      ) : (
+        link
+      )}
+    </div>
   );
 }
 

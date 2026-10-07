@@ -8,7 +8,9 @@ import { Direction } from "radix-ui";
 
 import { TIMEZONE_COOKIE, dirFor } from "@/i18n/config";
 import { readClientCookie, setClientCookie } from "@/lib/cookies";
+import { refreshStaleDemoSession } from "@/lib/demo-session";
 import { THEME_COOKIE, type ThemePreference } from "@/lib/theme";
+import { isDemoApi } from "@/services/api/api";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
 import { BrandGate } from "@/components/providers/brand-gate";
@@ -55,6 +57,14 @@ function TimeZoneCookieSync() {
   return null;
 }
 
+/** Demo mode only: moves a cookie from an older demo account onto the current fixture. */
+function DemoSessionSync() {
+  React.useEffect(() => {
+    if (isDemoApi) refreshStaleDemoSession();
+  }, []);
+  return null;
+}
+
 export function Providers({
   children,
   locale,
@@ -80,6 +90,7 @@ export function Providers({
     >
       <ThemeCookieSync />
       <TimeZoneCookieSync />
+      <DemoSessionSync />
       <QueryClientProvider client={queryClient}>
         <BrandProvider>
           <NuqsAdapter>
