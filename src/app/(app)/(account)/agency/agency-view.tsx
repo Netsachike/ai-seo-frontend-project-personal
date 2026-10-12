@@ -54,12 +54,19 @@ type AgencyResource = {
 };
 
 /**
- * Orbit's agency kit. The files are being produced; until a resource has a
+ * Rankoya's agency kit. The files are being produced; until a resource has a
  * `downloadUrl`, its card says it's coming. Replace the nulls with links to
  * the published assets (under /public/agency or a shared drive).
  */
 const agencyResources: AgencyResource[] = [
-  { id: "reportTemplate", category: "reports", version: "v1.0", icon: FileBarChart2Icon, downloadUrl: null, isNew: true },
+  {
+    id: "reportTemplate",
+    category: "reports",
+    version: "v1.0",
+    icon: FileBarChart2Icon,
+    downloadUrl: null,
+    isNew: true,
+  },
   { id: "auditDeck", category: "reports", version: "v1.0", icon: PresentationIcon, downloadUrl: null, isNew: true },
   { id: "proposal", category: "sales", version: "v1.0", icon: LayoutTemplateIcon, downloadUrl: null },
   { id: "pricingSheet", category: "sales", version: "v1.0", icon: ClipboardListIcon, downloadUrl: null },

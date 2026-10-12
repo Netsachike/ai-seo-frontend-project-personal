@@ -1,4 +1,4 @@
-import type { AllUserSubscriptionsNew } from "@/types/shared";
+import type { AllUserSubscriptionsNew } from "@/types/types";
 
 /**
  * Plan derivation with no UI imports, so proxy.ts can use it without pulling

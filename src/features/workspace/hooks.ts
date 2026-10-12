@@ -1,15 +1,20 @@
 "use client";
 
-import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
-import type { Brand, Workspace } from "@/lib/api/types";
-import { createWorkspace, getMe, getUsage, listBrands, listSites, listWorkspaces } from "@/lib/mocks/store";
-import { meKeys, workspaceKeys } from "@/lib/api/query-keys";
+import type { AllUserWorkspace, Role, Site } from "@/types/types";
+import { getSessionUserFromCookie, writeSessionUserCookie } from "@/lib/auth-session";
+import { getMe, getUsage } from "@/lib/mocks/store";
+import { meKeys, siteKeys, workspaceKeys } from "@/lib/api/query-keys";
 import { useUiStore } from "@/lib/store/ui";
+import siteService from "@/services/sites";
+import workspaceService from "@/services/workspaces";
+import { siteIdFromSlug, siteSlug } from "@/features/sites/site-utils";
 
+/** UI preferences (language, theme, Telegram). No backend endpoint yet, so they stay on mock data. */
 export function useMe() {
   return useQuery({
     queryKey: meKeys.all,
@@ -18,68 +23,63 @@ export function useMe() {
   });
 }
 
+/**
+ * The user's workspaces (`GET /workspace`). The backend decides which one is
+ * active: every site-scoped endpoint resolves it from the token.
+ */
 export function useWorkspaces() {
   return useQuery({
     queryKey: workspaceKeys.list(),
-    queryFn: listWorkspaces,
+    queryFn: workspaceService.getAllWorkspaces,
+    select: (response) => {
+      const list = response.userWorkspaces ?? [];
+      const activeId = response.currentWorkspace?.[0]?.id ?? list.find((w) => Boolean(w.is_active))?.work_space_id;
+      return { list, active: list.find((w) => w.work_space_id === activeId) ?? list[0] };
+    },
   });
 }
 
-const brandsQuery = (workspaceId: string) => ({
-  queryKey: workspaceKeys.brands(workspaceId),
-  queryFn: () => listBrands(workspaceId),
-});
-
-export function useBrands(workspaceId: string | undefined) {
-  return useQuery({ ...brandsQuery(workspaceId ?? "none"), enabled: Boolean(workspaceId) });
-}
-
-/** The sites page rows for one workspace. */
-export function useSites(workspaceId: string | undefined) {
+/** Sites in the active workspace (`GET /sites`). */
+export function useSites(workspaceId: number | undefined) {
   return useQuery({
-    queryKey: workspaceKeys.sites(workspaceId ?? "none"),
+    queryKey: siteKeys.list(workspaceId ?? 0),
     enabled: Boolean(workspaceId),
-    queryFn: () => listSites(workspaceId as string),
+    queryFn: async () => (await siteService.list()).data,
   });
 }
 
-export function useUsage(workspaceId: string | undefined) {
+/** One site with its settings. 404 when it is not in the active workspace. */
+export function useSite(siteId: number | undefined) {
   return useQuery({
-    queryKey: workspaceKeys.usage(workspaceId ?? "none"),
-    enabled: Boolean(workspaceId),
-    queryFn: () => getUsage(workspaceId as string),
+    queryKey: siteKeys.detail(siteId ?? 0),
+    enabled: Boolean(siteId),
+    queryFn: async () => (await siteService.get(siteId as number)).data,
   });
 }
 
-/**
- * Finds which workspace a brand slug belongs to. The active workspace is
- * checked first, so a shared link into another workspace still resolves.
- */
+/** Usage meters have no backend endpoint yet, so they stay on mock data. */
+export function useUsage(workspaceId: number | undefined) {
+  return useQuery({
+    queryKey: workspaceKeys.usage(workspaceId ?? 0),
+    enabled: Boolean(workspaceId),
+    queryFn: () => getUsage(String(workspaceId)),
+  });
+}
+
+/** Resolves the `/[brand]` segment (a site id) to the site and the active workspace. */
 export function useBrandLookup(slug: string) {
-  const preferred = useUiStore((s) => s.workspaceId);
+  const siteId = siteIdFromSlug(slug);
   const workspaces = useWorkspaces();
-  const list = workspaces.data ?? [];
-  const ordered = [...list].sort((a, b) => Number(b.id === preferred) - Number(a.id === preferred));
-  const brandLists = useQueries({ queries: ordered.map((ws) => brandsQuery(ws.id)) });
+  const site = useSite(Number.isNaN(siteId) ? undefined : siteId);
 
-  let workspace: Workspace | undefined;
-  let brand: Brand | undefined;
-  ordered.forEach((ws, i) => {
-    const found = !brand ? brandLists[i]?.data?.find((b) => b.slug === slug) : undefined;
-    if (found) {
-      workspace = ws;
-      brand = found;
-    }
-  });
-
-  const settled = workspaces.isSuccess && brandLists.every((q) => !q.isPending);
+  const status = (site.error as { response?: { status?: number } } | null)?.response?.status;
   return {
-    workspace,
-    brand,
-    workspaces: list,
-    isPending: !brand && !settled,
-    notFound: settled && !brand,
-    isError: workspaces.isError,
+    workspace: workspaces.data?.active,
+    brand: site.data,
+    workspaces: workspaces.data?.list ?? [],
+    isPending: workspaces.isPending || (!Number.isNaN(siteId) && site.isPending && site.fetchStatus !== "idle"),
+    notFound: (slug !== "" && Number.isNaN(siteId)) || status === 404,
+    isError: workspaces.isError || (site.isError && status !== 404),
   };
 }
 
@@ -93,37 +93,71 @@ export function useSwitchBrand() {
   const router = useRouter();
   const pathname = usePathname();
   const t = useTranslations("shell.switcher");
-  return (brand: Brand) => {
-    useUiStore.getState().setBrand(brand.slug);
-    router.push(swapBrandInPath(pathname, brand.slug));
-    toast(t("switchedBrand", { name: brand.name }));
+  return (site: Site) => {
+    const slug = siteSlug(site);
+    useUiStore.getState().setBrand(slug);
+    router.push(swapBrandInPath(pathname, slug));
+    toast(t("switchedBrand", { name: site.name }));
   };
 }
 
+/** The workspace a switch or create targets: its backend id and name. */
+export type WorkspaceTarget = { id: number; name: string };
+
+export const workspaceTarget = (w: AllUserWorkspace): WorkspaceTarget => ({
+  id: w.work_space_id,
+  name: w.workspace.name,
+});
+
+/** The backend sends free-text roles ("owner", "Super Admin", …); anything unknown is treated as a member. */
+export function workspaceRole(w: Pick<AllUserWorkspace, "role"> | undefined): Role {
+  const role = w?.role?.toLowerCase() ?? "";
+  if (role.includes("owner") || role.includes("super")) return "owner";
+  if (role.includes("admin")) return "admin";
+  if (role.includes("viewer")) return "viewer";
+  return "member";
+}
+
+/** Keeps the `authUser` cookie's active workspace in step with the backend after a switch. */
+function recordActiveWorkspace(workspace: WorkspaceTarget) {
+  const session = getSessionUserFromCookie();
+  if (!session) return;
+  writeSessionUserCookie({ ...session, active_workspace_id: workspace.id, active_workspace_name: workspace.name });
+}
+
 /**
- * Clears every cached query (data is workspace-scoped), then opens the
- * workspace's sites page, where the user picks which site to work on.
+ * Activates the workspace on the backend, clears every cached query (data is
+ * workspace-scoped), then opens the sites page to pick a site.
  */
 export function useSwitchWorkspace() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const t = useTranslations("shell.switcher");
-  return async (workspace: Workspace) => {
-    useUiStore.getState().setWorkspace(workspace.id);
-    const workspaces = queryClient.getQueryData<Workspace[]>(workspaceKeys.list());
+  return async (workspace: WorkspaceTarget) => {
+    await workspaceService.activateWorkspace({ id: workspace.id });
+    recordActiveWorkspace(workspace);
+    useUiStore.getState().setWorkspace(String(workspace.id));
     queryClient.clear();
-    if (workspaces) queryClient.setQueryData(workspaceKeys.list(), workspaces);
     router.push("/sites");
     toast(t("switchedWorkspace", { name: workspace.name }));
   };
 }
 
+/** Creates a workspace and refreshes the list. */
 export function useCreateWorkspace() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: createWorkspace,
-    onSuccess: (created) => {
-      queryClient.setQueryData<Workspace[]>(workspaceKeys.list(), (list) => [...(list ?? []), created]);
-    },
+    mutationFn: (name: string) =>
+      workspaceService.createWorkspace({
+        name,
+        slug:
+          name
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, "-")
+            .replace(/^-+|-+$/g, "") || "workspace",
+        is_default: 0,
+        logo: null,
+      }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: workspaceKeys.list() }),
   });
 }

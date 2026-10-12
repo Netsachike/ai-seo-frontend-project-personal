@@ -5,71 +5,76 @@ import { AnimatePresence, motion } from "motion/react";
 import { CheckIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-import type { Brand } from "@/lib/api/types";
+import type { Site } from "@/types/types";
 import { cn } from "@/lib/utils";
-import { useIntegrations } from "@/features/integrations/store";
+import { getErrorMessage } from "@/lib/errors";
+import {
+  PUBLISHING_FIELDS,
+  PUBLISHING_PLATFORMS,
+  connectionPayload,
+  type ApiPublishingPlatform,
+} from "@/features/publishing/forms";
+import { ConnectionTestError, useCreateConnection, usePublishingConnections } from "@/features/publishing/hooks";
 import { FormField } from "@/components/forms/form-field";
-import { Badge } from "@/components/ui/badge";
+import { PasswordInput } from "@/components/forms/password-input";
+import { IntegrationTile } from "@/components/brand/integration-row";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { dur, ease } from "../motion";
-import { patchDraft, useDraft } from "../store";
+import { patchDraft } from "../store";
 import { StepHeading } from "./step-heading";
 
-export const PUBLISH_PLATFORMS = ["wordpress", "webhook", "shopify", "webflow", "wix", "ghost"] as const;
+/** The API platforms, then copy-and-paste (a `manual` connection, active straight away). */
+export const PUBLISH_PLATFORMS = [...PUBLISHING_PLATFORMS, "manual"] as const;
 export type PublishPlatform = (typeof PUBLISH_PLATFORMS)[number];
-const isPublishPlatform = (value: string | undefined): value is PublishPlatform =>
-  (PUBLISH_PLATFORMS as readonly string[]).includes(value ?? "");
 
-type Platform = { id: PublishPlatform; monogram: string; soon?: boolean };
-
-/** Publishing targets, WordPress first (as in the MVP scope); the rest follow. */
-const platforms: Platform[] = [
-  { id: "wordpress", monogram: "WP" },
-  { id: "webhook", monogram: "</>" },
-  { id: "shopify", monogram: "SH", soon: true },
-  { id: "webflow", monogram: "WF", soon: true },
-  { id: "wix", monogram: "WX", soon: true },
-  { id: "ghost", monogram: "GH", soon: true },
-];
-
-const CONNECT_MS = 1200;
+const MONOGRAMS: Record<PublishPlatform, string> = {
+  wordpress: "WP",
+  shopify: "SH",
+  webflow: "WF",
+  wix: "WX",
+  ghost: "GH",
+  manual: "</>",
+};
 
 /**
- * Step 6. Where finished articles go. Connecting is optional: without it,
- * articles wait in Orbit to be copied and pasted.
+ * Step 6. Where finished articles go: a publishing connection created (and,
+ * for API platforms, tested) through the backend. Optional: without one,
+ * articles wait in Rankoya to be copied and pasted.
  */
-export function IntegrationStep({ site, onContinue }: { site: Brand; onContinue: () => void }) {
+export function IntegrationStep({ site, onContinue }: { site: Site; onContinue: () => void }) {
   const t = useTranslations("siteSetup.integration");
-  const draft = useDraft(site.id);
-  const connectIntegration = useIntegrations((s) => s.connect);
-  const saved = draft.integration?.provider;
-  const [choice, setChoice] = React.useState<PublishPlatform | null>(isPublishPlatform(saved) ? saved : null);
-  const [fields, setFields] = React.useState({ url: `https://${site.domain}`, endpoint: "", user: "", secret: "" });
-  const [connecting, setConnecting] = React.useState(false);
-  const connected = draft.integration;
+  const tFields = useTranslations("integrations.fields");
+  const connections = usePublishingConnections(site.id);
+  const create = useCreateConnection(site.id);
+  const existing = connections.data?.find((c) => c.status === "active");
+  const [choice, setChoice] = React.useState<PublishPlatform | null>(null);
+  const [values, setValues] = React.useState<Record<string, string>>({});
+  const [error, setError] = React.useState<string | null>(null);
+  const connected = existing ? (existing.method === "manual" ? "manual" : existing.platform) : null;
 
-  const canConnect =
-    choice === "wordpress"
-      ? fields.url.trim() && fields.user.trim() && fields.secret.trim()
-      : choice === "webhook"
-        ? /^https:\/\/\S+$/.test(fields.endpoint.trim())
-        : false;
+  const fields = choice && choice !== "manual" ? PUBLISHING_FIELDS[choice] : [];
+  const canConnect = choice === "manual" || (fields.length > 0 && fields.every((f) => (values[f.key] ?? "").trim()));
 
-  const connect = async (event: React.FormEvent) => {
+  const connect = (event: React.FormEvent) => {
     event.preventDefault();
     if (!choice || !canConnect) return;
-    setConnecting(true);
-    await new Promise((resolve) => setTimeout(resolve, CONNECT_MS));
-    patchDraft(site.id, { integration: { provider: choice, connectedAt: new Date().toISOString() } });
-    if (choice === "wordpress") {
-      connectIntegration({
-        provider: "wordpress",
-        brandSlug: site.slug,
-        account: { name: fields.url.replace(/^https?:\/\//, ""), detail: fields.user },
-      });
-    }
-    setConnecting(false);
+    setError(null);
+    const name = t(`platform.${choice}.name`);
+    const payload =
+      choice === "manual"
+        ? { name, platform: "custom" as const, method: "manual" as const }
+        : connectionPayload(choice as ApiPublishingPlatform, `${name} · ${site.domain}`, values);
+    create.mutate(payload, {
+      onSuccess: () =>
+        patchDraft(site.id, { integration: { provider: choice, connectedAt: new Date().toISOString() } }),
+      onError: (err) =>
+        setError(
+          err instanceof ConnectionTestError
+            ? t("testFailed", { message: err.message })
+            : getErrorMessage(err, t("failed")),
+        ),
+    });
   };
 
   return (
@@ -77,40 +82,34 @@ export function IntegrationStep({ site, onContinue }: { site: Brand; onContinue:
       <StepHeading title={t("title")} description={t("description")} />
 
       <div role="radiogroup" aria-label={t("platforms")} className="grid gap-3 sm:grid-cols-2">
-        {platforms.map((platform) => {
-          const on = choice === platform.id;
-          const isConnected = connected?.provider === platform.id;
+        {PUBLISH_PLATFORMS.map((platform) => {
+          const on = choice === platform;
+          const isConnected = connected === platform;
           return (
             <button
-              key={platform.id}
+              key={platform}
               type="button"
               role="radio"
               aria-checked={on}
-              disabled={platform.soon || (Boolean(connected) && !isConnected)}
-              onClick={() => setChoice(platform.id)}
+              disabled={Boolean(connected) && !isConnected}
+              onClick={() => {
+                setChoice(platform);
+                setValues(platform === "wordpress" ? { site_url: site.domain } : {});
+                setError(null);
+              }}
               className={cn(
                 "flex items-center gap-3 rounded-xl border bg-surface p-4 text-start transition-[border-color,box-shadow] duration-200",
                 on ? "border-fg shadow-[inset_0_0_0_1px_var(--text)]" : "border-border hover:border-border-strong",
                 "disabled:pointer-events-none disabled:opacity-50",
               )}
             >
-              <span
-                aria-hidden
-                className="grid size-10 shrink-0 place-items-center rounded-lg bg-surface-2 font-mono text-[12px] font-semibold text-fg-2"
-              >
-                {platform.monogram}
-              </span>
+              <IntegrationTile monogram={MONOGRAMS[platform]} logo={platform} className="rounded-lg" />
               <span className="flex min-w-0 flex-1 flex-col">
-                <span className="text-h3 text-fg">{t(`platform.${platform.id}.name`)}</span>
+                <span className="text-h3 text-fg">{t(`platform.${platform}.name`)}</span>
                 <span className="truncate text-small text-fg-3">
-                  {isConnected ? t("connected") : t(`platform.${platform.id}.detail`)}
+                  {isConnected ? t("connected") : t(`platform.${platform}.detail`)}
                 </span>
               </span>
-              {platform.soon && (
-                <Badge variant="neutral" shape="pill">
-                  {t("soon")}
-                </Badge>
-              )}
               {isConnected && <CheckIcon aria-hidden className="size-5 text-success" />}
             </button>
           );
@@ -129,46 +128,50 @@ export function IntegrationStep({ site, onContinue }: { site: Brand; onContinue:
             className="flex flex-col gap-4 rounded-xl border border-border bg-surface p-5 shadow-card"
           >
             <p className="text-small text-fg-2">{t(`platform.${choice}.help`)}</p>
-            <FormField label={t(choice === "webhook" ? "fields.endpoint" : "fields.siteUrl")}>
-              {(props) => (
-                <Input
-                  {...props}
-                  dir="ltr"
-                  inputMode="url"
-                  value={choice === "webhook" ? fields.endpoint : fields.url}
-                  placeholder={choice === "webhook" ? "https://" : undefined}
-                  onChange={(e) =>
-                    setFields((f) => ({ ...f, [choice === "webhook" ? "endpoint" : "url"]: e.target.value }))
-                  }
-                />
-              )}
-            </FormField>
-            {choice === "wordpress" && (
+            {fields.length > 0 && (
               <div className="grid gap-4 sm:grid-cols-2">
-                <FormField label={t("fields.username")}>
-                  {(props) => (
-                    <Input
-                      {...props}
-                      autoComplete="off"
-                      value={fields.user}
-                      onChange={(e) => setFields((f) => ({ ...f, user: e.target.value }))}
-                    />
-                  )}
-                </FormField>
-                <FormField label={t("fields.appPassword")} helper={t("fields.appPasswordHelper")}>
-                  {(props) => (
-                    <Input
-                      {...props}
-                      type="password"
-                      autoComplete="new-password"
-                      value={fields.secret}
-                      onChange={(e) => setFields((f) => ({ ...f, secret: e.target.value }))}
-                    />
-                  )}
-                </FormField>
+                {fields.map((field) => {
+                  const value = values[field.key] ?? "";
+                  const set = (next: string) => setValues((prev) => ({ ...prev, [field.key]: next }));
+                  return (
+                    <FormField key={field.key} label={tFields(field.label)}>
+                      {(props) =>
+                        field.input === "secret" ? (
+                          <PasswordInput
+                            {...props}
+                            dir="ltr"
+                            autoComplete="off"
+                            value={value}
+                            onChange={(e) => set(e.target.value)}
+                          />
+                        ) : (
+                          <Input
+                            {...props}
+                            dir="ltr"
+                            autoComplete="off"
+                            inputMode={field.input === "url" ? "url" : undefined}
+                            value={value}
+                            onChange={(e) => set(e.target.value)}
+                          />
+                        )
+                      }
+                    </FormField>
+                  );
+                })}
               </div>
             )}
-            <Button type="submit" variant="primary" loading={connecting} disabled={!canConnect} className="self-start">
+            {error && (
+              <p role="alert" className="text-small text-danger">
+                {error}
+              </p>
+            )}
+            <Button
+              type="submit"
+              variant="primary"
+              loading={create.isPending}
+              disabled={!canConnect}
+              className="self-start"
+            >
               {t("connect")}
             </Button>
           </motion.form>
@@ -180,7 +183,7 @@ export function IntegrationStep({ site, onContinue }: { site: Brand; onContinue:
           {t("continue")}
         </Button>
         {!connected && (
-          <Button variant="secondary" size="lg" disabled={connecting} onClick={onContinue}>
+          <Button variant="secondary" size="lg" disabled={create.isPending} onClick={onContinue}>
             {t("skip")}
           </Button>
         )}

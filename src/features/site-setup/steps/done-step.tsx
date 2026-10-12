@@ -5,7 +5,7 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { ArrowRightIcon, CheckIcon, MinusIcon } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 
-import type { Brand } from "@/lib/api/types";
+import type { Site } from "@/types/types";
 import { Button } from "@/components/ui/button";
 import { useElapsedStage } from "../hooks/use-min-duration";
 import { dur, ease, STAGGER } from "../motion";
@@ -18,19 +18,11 @@ import { StepHeading } from "./step-heading";
 const BUILD_STAGES = [1100, 2200, 3200] as const;
 
 /**
- * Step 8. Orbit turns the confirmed profile and topics into the first content
+ * Step 8. Rankoya turns the confirmed profile and topics into the first content
  * plan, then the summary lists what was set up and what was skipped, so
  * nothing looks finished that isn't.
  */
-export function DoneStep({
-  site,
-  finishing,
-  onFinish,
-}: {
-  site: Brand;
-  finishing: boolean;
-  onFinish: () => void;
-}) {
+export function DoneStep({ site, finishing, onFinish }: { site: Site; finishing: boolean; onFinish: () => void }) {
   const t = useTranslations("siteSetup.done");
   const locale = useLocale();
   const reduce = useReducedMotion();
@@ -45,7 +37,9 @@ export function DoneStep({
     .map((topic) => topic.label);
 
   const provider = draft.integration?.provider;
-  const platform = (PUBLISH_PLATFORMS as readonly string[]).includes(provider ?? "") ? (provider as PublishPlatform) : null;
+  const platform = (PUBLISH_PLATFORMS as readonly string[]).includes(provider ?? "")
+    ? (provider as PublishPlatform)
+    : null;
   const rows: Array<{
     key: "profile" | "market" | "searchConsole" | "topics" | "publishing" | "schedule";
     done: boolean;
@@ -115,7 +109,11 @@ export function DoneStep({
                       : "mt-0.5 grid size-5 shrink-0 place-items-center rounded-full bg-surface-2 text-fg-3"
                   }
                 >
-                  {row.done ? <CheckIcon aria-hidden className="size-3.5" /> : <MinusIcon aria-hidden className="size-3.5" />}
+                  {row.done ? (
+                    <CheckIcon aria-hidden className="size-3.5" />
+                  ) : (
+                    <MinusIcon aria-hidden className="size-3.5" />
+                  )}
                   <span className="sr-only">{row.done ? t("rows.doneLabel") : t("rows.skippedLabel")}</span>
                 </span>
                 <span className="flex min-w-0 flex-col gap-0.5">

@@ -6,11 +6,12 @@ import { BookOpenIcon, CheckIcon, Loader2Icon, RotateCwIcon, ShieldCheckIcon, Wr
 import { parseAsStringLiteral, useQueryState } from "nuqs";
 import { useFormatter, useNow, useTranslations } from "next-intl";
 
-import type { Approval } from "@/lib/api/types";
-import { useFakeQuery } from "@/lib/fake-query";
-import { auditData, type AuditIssue, type Severity } from "@/lib/mocks/ui-data";
+import type { Approval } from "@/lib/mocks/types";
+import type { AuditIssue, Severity } from "@/lib/mocks/ui-data";
+import { getErrorMessage } from "@/lib/errors";
 import { cn } from "@/lib/utils";
-import { useJobRunner } from "@/features/insights/hooks";
+import { fixStateOf, useAudit, useProposeFixes, useRunAudit } from "@/features/audit/hooks";
+import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
@@ -19,7 +20,6 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ApprovalCard } from "@/components/agent/approval-card";
 import { EmptyState } from "@/components/brand/empty-state";
 import { ErrorState } from "@/components/brand/error-state";
-import { JobBanner } from "@/components/brand/job-banner";
 import { OwnerChip } from "@/components/brand/owner-chip";
 import { ScoreRing, scoreBand } from "@/components/brand/score-ring";
 import { brandHref } from "@/components/layout/nav";
@@ -35,27 +35,32 @@ export const severityBadge: Record<Severity, "danger" | "warning" | "neutral"> =
   notice: "neutral",
 };
 
-/** Fixes in flight or done, shared with the issue detail page for this session. */
-export const fixedIssues = new Set<string>();
-
 export function AuditView() {
   const t = useTranslations("audit");
   const format = useFormatter();
   const now = useNow({ updateInterval: 60_000 });
   const { brand } = useShell();
   const [severity, setSeverity] = useQueryState("severity", parseAsStringLiteral(severities).withDefault("all"));
-  const audit = useJobRunner("job_audit");
-  const fix = useJobRunner("job_fix");
-  const [fixing, setFixing] = React.useState<string[]>(() => [...fixedIssues]);
+  const query = useAudit(brand);
+  const audit = useRunAudit(brand?.id ?? 0);
+  const fix = useProposeFixes(brand?.id ?? 0);
   const [approval, setApproval] = React.useState<{ approval: Approval; issueIds: string[] } | null>(null);
-  const query = useFakeQuery(["audit", brand?.id], () => auditData(brand?.id ?? "", brand?.domain ?? ""), {
-    enabled: Boolean(brand),
-  });
+
+  const runAudit = () =>
+    audit.mutate(undefined, {
+      onSuccess: (result) => toast.success(t("auditDone", { count: result.issues_created })),
+      onError: (error) => toast.error(getErrorMessage(error, t("auditFailed"))),
+    });
 
   if (!brand || query.isPending) return <PageSkeleton kpis={0} panels={2} />;
   const data = query.data;
   const issues = data?.issues ?? [];
-  const orbitOpen = issues.filter((i) => i.owner === "orbit" && !fixing.includes(i.id));
+  const stateOf = (id: string) => {
+    const raw = data?.raw.find((i) => String(i.id) === id);
+    if (fix.isPending && fix.variables?.includes(Number(id))) return "fixing" as const;
+    return raw ? fixStateOf(raw) : ("open" as const);
+  };
+  const rankoyaOpen = issues.filter((i) => i.owner === "rankoya" && stateOf(i.id) === "open");
   const visible = issues.filter((i) => severity === "all" || i.severity === severity);
   const count = (s: (typeof severities)[number]) => issues.filter((i) => s === "all" || i.severity === s).length;
 
@@ -86,22 +91,19 @@ export function AuditView() {
         }
         actions={
           <>
-            <Button variant="secondary" onClick={audit.start} disabled={audit.running}>
+            <Button variant="secondary" onClick={runAudit} loading={audit.isPending}>
               <RotateCwIcon />
               {t("run")}
             </Button>
-            {orbitOpen.length > 0 && (
-              <Button variant="agent" onClick={() => askToFix(orbitOpen)}>
+            {rankoyaOpen.length > 0 && (
+              <Button variant="agent" onClick={() => askToFix(rankoyaOpen)}>
                 <WrenchIcon />
-                {t("fixAll", { count: orbitOpen.length })}
+                {t("fixAll", { count: rankoyaOpen.length })}
               </Button>
             )}
           </>
         }
       />
-
-      {audit.job && <JobBanner job={audit.job} title={t("auditRunning")} onDismiss={audit.dismiss} />}
-      {fix.job && <JobBanner job={fix.job} title={t("fixRunning")} onDismiss={fix.dismiss} />}
 
       {query.isError && <ErrorState onRetry={() => query.refetch()} />}
       {data && data.seoHealth === null && (
@@ -110,7 +112,7 @@ export function AuditView() {
           title={t("emptyTitle")}
           description={t("emptyDescription")}
           action={
-            <Button size="sm" variant="secondary" onClick={audit.start} disabled={audit.running}>
+            <Button size="sm" variant="secondary" onClick={runAudit} loading={audit.isPending}>
               {t("run")}
             </Button>
           }
@@ -130,26 +132,28 @@ export function AuditView() {
                 <span className="text-small font-medium text-fg">{t("aiReadiness")}</span>
               </div>
             </Card>
-            <Card>
-              <CardTitle>{t("categoriesTitle")}</CardTitle>
-              <ul className="grid gap-x-8 gap-y-4 md:grid-cols-2">
-                {data.categories.map((c) => (
-                  <li key={c.key} className="flex flex-col gap-1.5">
-                    <div className="flex items-baseline justify-between gap-2">
-                      <span className="text-small font-medium text-fg">{t(`categories.${c.key}`)}</span>
-                      <span className="num text-small text-fg">{c.score}</span>
-                    </div>
-                    <div className="h-1.5 overflow-hidden rounded-full bg-surface-2">
-                      <div
-                        className={cn("h-full rounded-full", bandBar[scoreBand(c.score)])}
-                        style={{ width: `${c.score}%` }}
-                      />
-                    </div>
-                    <span className="text-caption font-normal text-fg-3">{c.note}</span>
-                  </li>
-                ))}
-              </ul>
-            </Card>
+            {data.categories.length > 0 && (
+              <Card>
+                <CardTitle>{t("categoriesTitle")}</CardTitle>
+                <ul className="grid gap-x-8 gap-y-4 md:grid-cols-2">
+                  {data.categories.map((c) => (
+                    <li key={c.key} className="flex flex-col gap-1.5">
+                      <div className="flex items-baseline justify-between gap-2">
+                        <span className="text-small font-medium text-fg">{t(`categories.${c.key}`)}</span>
+                        <span className="num text-small text-fg">{c.score}</span>
+                      </div>
+                      <div className="h-1.5 overflow-hidden rounded-full bg-surface-2">
+                        <div
+                          className={cn("h-full rounded-full", bandBar[scoreBand(c.score)])}
+                          style={{ width: `${c.score}%` }}
+                        />
+                      </div>
+                      <span className="text-caption font-normal text-fg-3">{c.note}</span>
+                    </li>
+                  ))}
+                </ul>
+              </Card>
+            )}
           </div>
 
           <Card className="gap-0 p-0">
@@ -164,17 +168,12 @@ export function AuditView() {
                 </TabsList>
               </Tabs>
               <p className="text-small text-fg-2">
-                {t("orbitCan", { count: issues.filter((i) => i.owner === "orbit").length })}
+                {t("rankoyaCan", { count: issues.filter((i) => i.owner === "rankoya").length })}
               </p>
             </div>
             <ul className="flex flex-col divide-y divide-border">
               {visible.map((issue) => (
-                <IssueRow
-                  key={issue.id}
-                  issue={issue}
-                  state={fixing.includes(issue.id) ? (fix.running ? "fixing" : "fixed") : "open"}
-                  onFix={() => askToFix([issue])}
-                />
+                <IssueRow key={issue.id} issue={issue} state={stateOf(issue.id)} onFix={() => askToFix([issue])} />
               ))}
             </ul>
           </Card>
@@ -193,9 +192,10 @@ export function AuditView() {
               onEdit={() => setApproval(null)}
               onDecided={(decided) => {
                 if (decided.status === "approved") {
-                  approval.issueIds.forEach((id) => fixedIssues.add(id));
-                  setFixing((f) => [...new Set([...f, ...approval.issueIds])]);
-                  fix.start();
+                  fix.mutate(approval.issueIds.map(Number), {
+                    onSuccess: (proposals) => toast.success(t("proposed", { count: proposals.length })),
+                    onError: (error) => toast.error(getErrorMessage(error, t("fixFailed"))),
+                  });
                 }
                 setApproval(null);
               }}
@@ -213,7 +213,7 @@ function IssueRow({
   onFix,
 }: {
   issue: AuditIssue;
-  state: "open" | "fixing" | "fixed";
+  state: "open" | "fixing" | "proposed" | "fixed";
   onFix: () => void;
 }) {
   const t = useTranslations("audit");
@@ -237,18 +237,18 @@ function IssueRow({
       </div>
       <div className="flex items-center gap-3">
         <OwnerChip owner={issue.owner} />
-        {issue.owner === "orbit" ? (
+        {issue.owner === "rankoya" ? (
           state === "open" ? (
             <Button size="sm" variant="secondary" onClick={onFix}>
               <WrenchIcon />
-              {t("letOrbitFix")}
+              {t("letRankoyaFix")}
             </Button>
           ) : (
             <span
-              className={cn("flex items-center gap-1.5 text-small", state === "fixed" ? "text-success" : "text-fg-2")}
+              className={cn("flex items-center gap-1.5 text-small", state === "fixing" ? "text-fg-2" : "text-success")}
             >
-              {state === "fixed" ? <CheckIcon className="size-4" /> : <Loader2Icon className="size-4 animate-spin" />}
-              {state === "fixed" ? t("fixed") : t("fixing")}
+              {state === "fixing" ? <Loader2Icon className="size-4 animate-spin" /> : <CheckIcon className="size-4" />}
+              {state === "fixed" ? t("fixed") : state === "proposed" ? t("fixReady") : t("fixing")}
             </span>
           )
         ) : (

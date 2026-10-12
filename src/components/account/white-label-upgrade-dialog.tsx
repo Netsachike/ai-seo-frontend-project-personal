@@ -16,7 +16,13 @@ import {
 } from "@/components/ui/dialog";
 
 /** Shown instead of the White Label tools to accounts without the add-on. */
-export function WhiteLabelUpgradeDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
+export function WhiteLabelUpgradeDialog({
+  open,
+  onOpenChange,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
   const t = useTranslations("account.whiteLabel.upgrade");
   const tCommon = useTranslations("common");
   return (

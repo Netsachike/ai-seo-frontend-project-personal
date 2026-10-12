@@ -5,10 +5,10 @@ import { PlusIcon, TrendingUpIcon } from "lucide-react";
 import { parseAsStringLiteral, useQueryState } from "nuqs";
 import { useFormatter, useTranslations } from "next-intl";
 
-import { useFakeQuery } from "@/lib/fake-query";
-import { rankingsData, type KeywordRanking } from "@/lib/mocks/ui-data";
+import type { KeywordRanking } from "@/lib/mocks/ui-data";
 import { cn } from "@/lib/utils";
 import { useRange } from "@/features/insights/url-state";
+import { useRankings } from "@/features/rankings/hooks";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
@@ -19,21 +19,19 @@ import { EmptyState } from "@/components/brand/empty-state";
 import { ErrorState } from "@/components/brand/error-state";
 import { RankCell } from "@/components/brand/rank-cell";
 import { RankDistribution } from "@/components/charts/rank-distribution";
-import { Sparkline } from "@/components/charts/sparkline";
 import { VisibilityTrend } from "@/components/charts/visibility-trend";
 import { PageHeader } from "@/components/layout/page-header";
 import { PageSkeleton } from "@/components/layout/page-skeleton";
 import { RangePicker } from "@/components/layout/range-picker";
 import { useShell } from "@/components/layout/shell-context";
-import { AddQuestionsDialog } from "../visibility/add-questions-dialog";
+import { AddKeywordsDialog } from "./add-keywords-dialog";
 
 const devices = ["desktop", "mobile"] as const;
-const views = ["all", "improved", "declined", "close"] as const;
+// Improved / declined need position history, which the API does not keep yet.
+const views = ["all", "close"] as const;
 type View = (typeof views)[number];
 
 const inView = (row: KeywordRanking, view: View) => {
-  if (view === "improved") return (row.change ?? 0) > 0;
-  if (view === "declined") return (row.change ?? 0) < 0;
   if (view === "close") return row.position !== null && row.position > 10 && row.position <= 20;
   return true;
 };
@@ -46,9 +44,7 @@ export function RankingsView() {
   const [device, setDevice] = useQueryState("device", parseAsStringLiteral(devices).withDefault("desktop"));
   const [view, setView] = useQueryState("view", parseAsStringLiteral(views).withDefault("all"));
   const [adding, setAdding] = React.useState(false);
-  const query = useFakeQuery(["rankings", brand?.id, device, days], () => rankingsData(brand?.id ?? "", device, days), {
-    enabled: Boolean(brand),
-  });
+  const query = useRankings(brand?.id, device, days);
 
   if (!brand || query.isPending) return <PageSkeleton kpis={5} />;
   const data = query.data;
@@ -76,7 +72,7 @@ export function RankingsView() {
           </>
         }
       />
-      <AddQuestionsDialog open={adding} onOpenChange={setAdding} kind="keywords" />
+      <AddKeywordsDialog siteId={brand.id} open={adding} onOpenChange={setAdding} />
 
       {query.isError && <ErrorState onRetry={() => query.refetch()} />}
       {data && data.tracked === 0 && (
@@ -108,7 +104,7 @@ export function RankingsView() {
                 <dt className="text-overline text-fg-3">{t(`stats.${key}`)}</dt>
                 <dd className="flex flex-wrap items-baseline gap-2">
                   <span className="text-metric text-fg">{format.number(value, fmt)}</span>
-                  <DeltaChip value={delta} unit={unit} invert={key === "notRanking"} />
+                  {delta !== 0 && <DeltaChip value={delta} unit={unit} invert={key === "notRanking"} />}
                 </dd>
               </div>
             ))}
@@ -127,7 +123,7 @@ export function RankingsView() {
                   from: data.avgSeries[0]?.value ?? 0,
                   to: data.avgSeries.at(-1)?.value ?? 0,
                 })}
-                series={[{ brandId: brand.id, name: brand.name, isYou: true, points: data.avgSeries }]}
+                series={[{ brandId: String(brand.id), name: brand.name, isYou: true, points: data.avgSeries }]}
               />
             </Card>
             <Card>
@@ -186,34 +182,6 @@ function KeywordTable({
         sortUndefined: "last",
         meta: { label: t("position"), numeric: true },
         cell: ({ row }) => <RankCell position={row.original.position} />,
-      },
-      {
-        accessorKey: "change",
-        header: t("change"),
-        meta: { label: t("change"), numeric: true },
-        cell: ({ row }) =>
-          row.original.isNew ? (
-            <Badge variant="blue">{t("new")}</Badge>
-          ) : (
-            <DeltaChip value={-(row.original.change ?? 0)} unit="rank" variant="text" />
-          ),
-      },
-      {
-        id: "trend",
-        header: t("trend"),
-        enableSorting: false,
-        meta: { label: t("trend"), csv: () => "" },
-        cell: ({ row }) => {
-          const c = row.original.change ?? 0;
-          return (
-            <Sparkline
-              values={row.original.spark.map((v) => 24 - v)}
-              tone={c > 0 ? "success" : c < 0 ? "danger" : "neutral"}
-              height={24}
-              className="w-20"
-            />
-          );
-        },
       },
       {
         accessorKey: "volume",

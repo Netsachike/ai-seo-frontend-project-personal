@@ -5,7 +5,7 @@ import { motion } from "motion/react";
 import { QuoteIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-import type { Brand } from "@/lib/api/types";
+import type { Site } from "@/types/types";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { streamProfileSection, type ProfileSection } from "../../fake-ai";
@@ -25,7 +25,7 @@ const STAGES = [8000, 30000] as const;
 
 /**
  * Body of an AI-written section: a named loader, then text that writes itself
- * in on a Signal rail (Orbit's work), then a yes/no check. "No" swaps the text
+ * in on a Signal rail (Rankoya's work), then a yes/no check. "No" swaps the text
  * for an editable copy of the markdown in place.
  */
 export function AiSection({
@@ -36,7 +36,7 @@ export function AiSection({
   onWritten,
   onConfirm,
 }: {
-  site: Pick<Brand, "name" | "domain">;
+  site: Pick<Site, "name" | "domain">;
   section: ProfileSection;
   /** Text already written for this site, if any; it is shown as is. */
   saved: string | null;
@@ -105,7 +105,9 @@ export function AiSection({
           <div className="flex flex-col items-start gap-3">
             <LoaderLines
               title={t(`loader.${section}.title`)}
-              subline={stage === 0 ? t("loader.subline") : stage === 1 ? t(`loader.${section}.slow`) : t("loader.stuck")}
+              subline={
+                stage === 0 ? t("loader.subline") : stage === 1 ? t(`loader.${section}.slow`) : t("loader.stuck")
+              }
             />
             {stage === 2 && (
               <Button variant="secondary" size="sm" onClick={() => void start()}>
@@ -119,7 +121,7 @@ export function AiSection({
             value={editing}
             onChange={(e) => setEditing(e.target.value)}
             autoFocus
-            className="min-h-60 field-sizing-content font-mono text-small"
+            className="field-sizing-content min-h-60 font-mono text-small"
           />
         ) : (
           <>

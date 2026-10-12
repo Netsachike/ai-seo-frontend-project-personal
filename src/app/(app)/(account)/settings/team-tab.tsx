@@ -9,7 +9,7 @@ import { toast } from "@/lib/toast";
 import { getErrorMessage, mentionsUpgrade } from "@/lib/errors";
 import teamMemberService from "@/services/team-members";
 import { useWorkspaceStore } from "@/stores/workspace-store";
-import type { User } from "@/types/shared";
+import type { User } from "@/types/types";
 import { accountHref } from "@/features/account/routes";
 import { getTeamMemberWorkspaceIds, type TeamMembersState } from "@/features/account/use-team-members";
 import { ConfirmDialog } from "@/components/account/confirm-dialog";

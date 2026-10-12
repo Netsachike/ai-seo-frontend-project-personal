@@ -8,10 +8,16 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
 import { z } from "zod";
 
-import { workspaceKeys } from "@/lib/api/query-keys";
-import { createSite, MockError } from "@/lib/mocks/store";
+import { siteKeys, workspaceKeys } from "@/lib/api/query-keys";
+import { getErrorMessage } from "@/lib/errors";
 import { useUiStore } from "@/lib/store/ui";
+import crawlerService from "@/services/crawler";
+import siteService from "@/services/sites";
+import workspaceService from "@/services/workspaces";
 import { useWorkspaces } from "@/features/workspace/hooks";
+import { nameFromDomain } from "@/features/sites/site-utils";
+import { setSetupStep } from "../progress";
+import { patchDraft } from "../store";
 import { DomainInput, FormField } from "@/components/forms/form-field";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -21,9 +27,11 @@ import { StepHeading } from "./step-heading";
 const schema = z.object({ domain: domainSchema });
 
 /**
- * Step 2a. One input turns into a site. Continue stays disabled until the
- * domain is valid; a pasted URL is accepted and trimmed to its host. Errors
- * show under the field, never as a toast.
+ * Step 2a. One input turns into a site (`POST /sites`) and starts its first
+ * crawl. Continue stays disabled until the domain is valid; a pasted URL is
+ * accepted and trimmed to its host. Errors show under the field, never as a
+ * toast. Sites are created in the backend's active workspace, so picking
+ * another workspace activates it first.
  */
 export function DomainStep() {
   const t = useTranslations("siteSetup.domain");
@@ -31,10 +39,10 @@ export function DomainStep() {
   const params = useSearchParams();
   const queryClient = useQueryClient();
   const workspaces = useWorkspaces();
-  const activeWorkspace = useUiStore((s) => s.workspaceId);
   const [workspaceId, setWorkspaceId] = React.useState<string | null>(params.get("workspace"));
-  const list = workspaces.data ?? [];
-  const target = list.find((w) => w.id === workspaceId) ?? list.find((w) => w.id === activeWorkspace) ?? list[0];
+  const list = workspaces.data?.list ?? [];
+  const active = workspaces.data?.active;
+  const target = list.find((w) => String(w.work_space_id) === workspaceId) ?? active;
 
   const form = useForm<z.input<typeof schema>, unknown, z.output<typeof schema>>({
     resolver: zodResolver(schema),
@@ -47,15 +55,26 @@ export function DomainStep() {
   const submit = form.handleSubmit(async (values) => {
     if (!target) return;
     try {
-      const site = await createSite(target.id, values.domain);
-      await queryClient.invalidateQueries({ queryKey: workspaceKeys.brands(target.id) });
-      useUiStore.getState().setWorkspace(target.id);
+      if (target.work_space_id !== active?.work_space_id) {
+        await workspaceService.activateWorkspace({ id: target.work_space_id });
+        await queryClient.invalidateQueries({ queryKey: workspaceKeys.list() });
+      }
+      const { data: site } = await siteService.create({
+        name: nameFromDomain(values.domain),
+        url: `https://${values.domain}`,
+      });
+      // The crawl feeds keywords, topics and the site audit; it runs while setup continues.
+      void crawlerService
+        .start(site.id)
+        .then(({ data: run }) => patchDraft(site.id, { crawlRunId: run.id }))
+        .catch(() => undefined);
+      setSetupStep(site.id, "details");
+      await queryClient.invalidateQueries({ queryKey: siteKeys.all });
+      useUiStore.getState().setWorkspace(String(target.work_space_id));
       // The only real navigation in setup; the shell stays mounted through it.
       router.replace(setupPath(site.id, "details"));
     } catch (error) {
-      form.setError("domain", {
-        message: error instanceof MockError && error.code === "site_exists" ? t("exists") : t("failed"),
-      });
+      form.setError("domain", { message: getErrorMessage(error, t("failed")) });
     }
   });
 
@@ -66,14 +85,14 @@ export function DomainStep() {
       {list.length > 1 && target && (
         <FormField label={t("workspace")}>
           {(props) => (
-            <Select value={target.id} onValueChange={setWorkspaceId}>
+            <Select value={String(target.work_space_id)} onValueChange={setWorkspaceId}>
               <SelectTrigger {...props} className="h-12 w-full text-body-lg">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 {list.map((w) => (
-                  <SelectItem key={w.id} value={w.id}>
-                    {w.name}
+                  <SelectItem key={w.work_space_id} value={String(w.work_space_id)}>
+                    {w.workspace.name}
                   </SelectItem>
                 ))}
               </SelectContent>

@@ -3,7 +3,6 @@
 import * as React from "react";
 import { useTranslations } from "next-intl";
 
-import { fakeRequest, startSession } from "@/lib/auth/session";
 import { Button } from "@/components/ui/button";
 
 export function AuthHeading({ title, description }: { title: string; description?: React.ReactNode }) {
@@ -15,32 +14,39 @@ export function AuthHeading({ title, description }: { title: string; description
   );
 }
 
-/** Google's mark is not licensed yet, so a neutral "G" tile stands in. */
-export function GoogleButton({ next }: { next: string }) {
+/**
+ * Google's mark is not licensed yet, so a neutral "G" tile stands in. The
+ * backend has no Google sign-in endpoint yet, so pressing it explains that
+ * instead of signing in.
+ */
+export function GoogleButton() {
   const t = useTranslations("auth");
-  const [pending, setPending] = React.useState(false);
+  const noteId = React.useId();
+  const [unavailable, setUnavailable] = React.useState(false);
   return (
-    <Button
-      type="button"
-      variant="secondary"
-      size="lg"
-      className="w-full font-medium"
-      loading={pending}
-      onClick={async () => {
-        setPending(true);
-        await fakeRequest(900);
-        startSession();
-        window.location.assign(next);
-      }}
-    >
-      <span
-        aria-hidden
-        className="grid size-5 place-items-center rounded-sm bg-surface-2 text-[11px] font-bold text-fg"
+    <div className="flex flex-col gap-2">
+      <Button
+        type="button"
+        variant="secondary"
+        size="lg"
+        className="w-full font-medium"
+        aria-describedby={unavailable ? noteId : undefined}
+        onClick={() => setUnavailable(true)}
       >
-        {t("googleMonogram")}
-      </span>
-      {t("google")}
-    </Button>
+        <span
+          aria-hidden
+          className="grid size-5 place-items-center rounded-sm bg-surface-2 text-[11px] font-bold text-fg"
+        >
+          {t("googleMonogram")}
+        </span>
+        {t("google")}
+      </Button>
+      {unavailable && (
+        <p id={noteId} role="status" className="text-caption font-normal text-fg-3">
+          {t("errors.googleUnavailable")}
+        </p>
+      )}
+    </div>
   );
 }
 

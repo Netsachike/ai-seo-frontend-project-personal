@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { SITE_SETUP_STEPS, type SiteSetupStep } from "@/lib/api/types";
+import { SITE_SETUP_STEPS, type SiteSetupStep } from "@/types/types";
 
 /**
  * Every step the progress bar counts. "account" (the workspace) exists before
@@ -20,7 +20,7 @@ export const WIDE_STEPS: readonly ProgressStep[] = ["billing"];
 
 export const NEW_SITE_PATH = "/sites/new";
 export const SITES_PATH = "/sites";
-export const setupPath = (siteId: string, step: SiteSetupStep) => `/sites/${siteId}/setup/${step}`;
+export const setupPath = (siteId: number | string, step: SiteSetupStep) => `/sites/${siteId}/setup/${step}`;
 
 /** Reads the step out of /sites/{id}/setup/{step}; the domain screen is "details" too. */
 export function stepFromPath(pathname: string): ProgressStep {
@@ -32,12 +32,13 @@ export function stepFromPath(pathname: string): ProgressStep {
 export const domainSchema = z
   .string()
   .trim()
-  .transform((v) =>
-    v
-      .toLowerCase()
-      .replace(/^https?:\/\//, "")
-      .replace(/^www\./, "")
-      .split(/[/?#]/)[0],
+  .transform(
+    (v) =>
+      v
+        .toLowerCase()
+        .replace(/^https?:\/\//, "")
+        .replace(/^www\./, "")
+        .split(/[/?#]/)[0],
   )
   .pipe(z.string().regex(/^(?!-)[a-z0-9-]{1,63}(\.[a-z0-9-]{1,63})+$/));
 

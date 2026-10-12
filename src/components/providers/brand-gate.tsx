@@ -10,10 +10,10 @@ const CURTAIN_MS = 420;
 
 /**
  * Covers the app until a tenant host's brand has resolved, then opens like a
- * pair of curtains, so a reseller's customers never see Orbit's identity
+ * pair of curtains, so a reseller's customers never see Rankoya's identity
  * snap to theirs. Children render underneath the whole time.
  *
- * On Orbit's own host the server already knows there is nothing to resolve
+ * On Rankoya's own host the server already knows there is nothing to resolve
  * (`vendorHost`), so no curtain is rendered at all and first paint is never
  * held back.
  */

@@ -3,7 +3,7 @@
 import { CheckIcon, CircleAlertIcon, ClockIcon } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
 
-import type { TaskRef } from "@/lib/api/types";
+import type { TaskRef } from "@/lib/mocks/types";
 import { useJob } from "@/lib/api/use-job";
 import { cn } from "@/lib/utils";
 import { Progress } from "@/components/ui/progress";

@@ -9,7 +9,7 @@ import {
   UpdateResellerPasswordResponse,
   DeleteResellerPayload,
   DeleteResellerResponse,
-} from "@/types/shared";
+} from "@/types/types";
 
 const resellerService = {
   getAllResellers: async (): Promise<GetAllResellersResponse> => {
@@ -21,58 +21,38 @@ const resellerService = {
     }
   },
 
-  addReseller: async (
-    payload: AddResellerPayload,
-  ): Promise<AddResellerResponse> => {
+  addReseller: async (payload: AddResellerPayload): Promise<AddResellerResponse> => {
     try {
-      const response = await api.post<AddResellerResponse>(
-        "/reseller/add",
-        payload,
-      );
+      const response = await api.post<AddResellerResponse>("/reseller/add", payload);
       return response.data;
     } catch (error) {
       throw error;
     }
   },
 
-  updateReseller: async (
-    payload: UpdateResellerPayload,
-  ): Promise<UpdateResellerResponse> => {
+  updateReseller: async (payload: UpdateResellerPayload): Promise<UpdateResellerResponse> => {
     try {
-      const response = await api.post<UpdateResellerResponse>(
-        "/reseller/update/details",
-        payload,
-      );
+      const response = await api.post<UpdateResellerResponse>("/reseller/update/details", payload);
       return response.data;
     } catch (error) {
       throw error;
     }
   },
 
-  updateResellerPassword: async (
-    payload: UpdateResellerPasswordPayload,
-  ): Promise<UpdateResellerPasswordResponse> => {
+  updateResellerPassword: async (payload: UpdateResellerPasswordPayload): Promise<UpdateResellerPasswordResponse> => {
     try {
-      const response = await api.post<UpdateResellerPasswordResponse>(
-        "/reseller/update/password",
-        payload,
-      );
+      const response = await api.post<UpdateResellerPasswordResponse>("/reseller/update/password", payload);
       return response.data;
     } catch (error) {
       throw error;
     }
   },
 
-  deleteReseller: async (
-    payload: DeleteResellerPayload,
-  ): Promise<DeleteResellerResponse> => {
+  deleteReseller: async (payload: DeleteResellerPayload): Promise<DeleteResellerResponse> => {
     try {
-      const response = await api.delete<DeleteResellerResponse>(
-        "/reseller/delete",
-        {
-          data: payload,
-        },
-      );
+      const response = await api.delete<DeleteResellerResponse>("/reseller/delete", {
+        data: payload,
+      });
       return response.data;
     } catch (error) {
       throw error;

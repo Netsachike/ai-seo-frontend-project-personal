@@ -21,7 +21,7 @@ export const accountHref = {
   admin: () => "/admin/user-management",
 } as const;
 
-/** Old Orbit settings sub-routes, mapped onto the shared tabs. */
+/** Old Rankoya settings sub-routes, mapped onto the shared tabs. */
 export const legacySettingsTab: Record<string, SettingsTab> = {
   profile: "profile",
   security: "profile",

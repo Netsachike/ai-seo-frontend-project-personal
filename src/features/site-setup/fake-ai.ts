@@ -1,5 +1,6 @@
-import type { Brand } from "@/lib/api/types";
+import type { Site } from "@/types/types";
 import type { TopicSuggestion } from "./store";
+import { siteLanguage, siteMarket } from "@/features/sites/site-utils";
 
 /**
  * UI-stage stand-in for the backend's site analysis. The real endpoint crawls
@@ -27,9 +28,12 @@ function sleep(ms: number, signal?: AbortSignal) {
 }
 
 /** Yields `text` in 4–40 character bursts 20–200 ms apart, after a "crawl" pause. */
-export async function* fakeTextStream(text: string, { signal, crawlMs = 1400 }: { signal?: AbortSignal; crawlMs?: number }) {
+export async function* fakeTextStream(
+  text: string,
+  { signal, crawlMs = 1400 }: { signal?: AbortSignal; crawlMs?: number },
+) {
   await sleep(crawlMs, signal);
-  for (let i = 0; i < text.length; ) {
+  for (let i = 0; i < text.length;) {
     const size = 4 + Math.floor(Math.random() * 36);
     yield text.slice(i, i + size);
     i += size;
@@ -91,7 +95,7 @@ Search Behaviour
   ],
 };
 
-function genericProfile(site: Pick<Brand, "name" | "domain">): SiteProfile {
+function genericProfile(site: Pick<Site, "name" | "domain">): SiteProfile {
   const { name, domain } = site;
   return {
     description: `Core Business
@@ -143,11 +147,11 @@ Search Behaviour
   };
 }
 
-const profileFor = (site: Pick<Brand, "name" | "domain">) =>
+const profileFor = (site: Pick<Site, "name" | "domain">) =>
   site.domain.includes("northwind") ? northwind : genericProfile(site);
 
 export function streamProfileSection(
-  site: Pick<Brand, "name" | "domain">,
+  site: Pick<Site, "name" | "domain">,
   section: ProfileSection,
   signal?: AbortSignal,
 ) {
@@ -156,26 +160,50 @@ export function streamProfileSection(
 }
 
 /** Ten suggestions, five marked as recommended. */
-export async function generateTopics(site: Pick<Brand, "name" | "domain">, signal?: AbortSignal) {
+export async function generateTopics(site: Pick<Site, "name" | "domain">, signal?: AbortSignal) {
   await sleep(2200 + Math.random() * 800, signal);
   return profileFor(site).topics;
 }
 
 /** Name the crawl reads from <title> or og:site_name. */
-export function crawledName(site: Pick<Brand, "name" | "domain">) {
+export function crawledName(site: Pick<Site, "name" | "domain">) {
   return site.domain.includes("northwind") ? "Northwind Roasters" : site.name;
 }
 
 const COUNTRY_BY_TLD: Record<string, string> = {
-  uk: "GB", de: "DE", fr: "FR", es: "ES", it: "IT", nl: "NL", ae: "AE", sa: "SA", jp: "JP",
-  ng: "NG", ca: "CA", au: "AU", in: "IN", za: "ZA", ie: "IE", br: "BR", mx: "MX",
+  uk: "GB",
+  de: "DE",
+  fr: "FR",
+  es: "ES",
+  it: "IT",
+  nl: "NL",
+  ae: "AE",
+  sa: "SA",
+  jp: "JP",
+  ng: "NG",
+  ca: "CA",
+  au: "AU",
+  in: "IN",
+  za: "ZA",
+  ie: "IE",
+  br: "BR",
+  mx: "MX",
 };
 const LANGUAGE_BY_COUNTRY: Record<string, string> = {
-  DE: "de", FR: "fr", ES: "es", IT: "it", NL: "nl", AE: "ar", SA: "ar", JP: "ja", BR: "pt", MX: "es",
+  DE: "de",
+  FR: "fr",
+  ES: "es",
+  IT: "it",
+  NL: "nl",
+  AE: "ar",
+  SA: "ar",
+  JP: "ja",
+  BR: "pt",
+  MX: "es",
 };
 
 /** Defaults the crawl would read from <html lang>, the TLD and the content language. */
-export function detectLocale(site: Pick<Brand, "domain" | "market" | "contentLanguage">) {
-  const country = COUNTRY_BY_TLD[site.domain.split(".").pop() ?? ""] ?? site.market;
-  return { country, language: LANGUAGE_BY_COUNTRY[country] ?? site.contentLanguage };
+export function detectLocale(site: Pick<Site, "domain" | "location" | "language">) {
+  const country = COUNTRY_BY_TLD[site.domain.split(".").pop() ?? ""] ?? siteMarket(site);
+  return { country, language: LANGUAGE_BY_COUNTRY[country] ?? siteLanguage(site) };
 }

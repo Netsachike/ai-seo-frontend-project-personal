@@ -2,7 +2,7 @@
 
 import { useFormatter, useTranslations } from "next-intl";
 
-import type { DeltaUnit } from "@/lib/api/types";
+import type { DeltaUnit } from "@/lib/mocks/types";
 import { cn } from "@/lib/utils";
 
 type Tone = "good" | "bad" | "flat";

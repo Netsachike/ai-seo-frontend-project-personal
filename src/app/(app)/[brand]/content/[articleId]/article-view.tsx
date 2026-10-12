@@ -4,8 +4,9 @@ import * as React from "react";
 import Link from "next/link";
 import { notFound, useRouter } from "next/navigation";
 import {
-  CalendarCheckIcon,
   CheckIcon,
+  FilePenLineIcon,
+  SendIcon,
   ChevronRightIcon,
   CircleAlertIcon,
   MessageSquareTextIcon,
@@ -14,10 +15,20 @@ import {
 import { useFormatter, useLocale, useNow, useTranslations } from "next-intl";
 import { toast } from "sonner";
 
-import { decideApproval } from "@/lib/mocks/store";
+import type { ArticleWithRelations } from "@/types/types";
 import { fakeRequest } from "@/lib/auth/session";
-import { useFakeQuery } from "@/lib/fake-query";
-import { articleDetail, type ArticleDetail } from "@/lib/mocks/ui-data-work";
+import { getErrorMessage } from "@/lib/errors";
+import {
+  ITEM_PREFIX,
+  isCalendarItemId,
+  toArticleDetail,
+  useArticle,
+  useCalendarItem,
+  useSaveArticle,
+  useWriteArticle,
+} from "@/features/content/hooks";
+import { usePublishArticle, usePublishingConnections } from "@/features/publishing/hooks";
+import { siteLanguage } from "@/features/sites/site-utils";
 import { cn } from "@/lib/utils";
 import {
   AlertDialog,
@@ -45,7 +56,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ErrorState } from "@/components/brand/error-state";
-import { OrbitAvatar } from "@/components/brand/logo";
+import { RankoyaAvatar } from "@/components/brand/logo";
 import { ScoreRing } from "@/components/brand/score-ring";
 import { StatusBadge } from "@/components/brand/status-badge";
 import { ArticleEditor } from "@/components/editor/article-editor";
@@ -56,21 +67,72 @@ import { PageSkeleton } from "@/components/layout/page-skeleton";
 import { useShell } from "@/components/layout/shell-context";
 
 const META_MAX = 60;
-/** `[PRICE]`, `[CUSTOMER NAME]`… left by Orbit where it needs a fact from you. */
+/** `[PRICE]`, `[CUSTOMER NAME]`… left by Rankoya where it needs a fact from you. */
 const PLACEHOLDER = /\[[A-Z][A-Z0-9 _-]{1,30}\]/g;
 
 export function ArticleView({ articleId }: { articleId: string }) {
-  const { brand } = useShell();
-  const query = useFakeQuery(["article", brand?.id, articleId], () => articleDetail(brand?.id ?? "", articleId), {
-    enabled: Boolean(brand),
-  });
-  if (!brand || query.isPending) return <PageSkeleton kpis={0} panels={2} />;
-  if (query.isError) return <ErrorState onRetry={() => query.refetch()} />;
-  if (!query.data) notFound();
-  return <Editor article={query.data} />;
+  if (isCalendarItemId(articleId)) return <WriteFromCalendar itemId={Number(articleId.slice(ITEM_PREFIX.length))} />;
+  return <LoadArticle articleId={Number(articleId)} />;
 }
 
-function Editor({ article }: { article: ArticleDetail }) {
+function LoadArticle({ articleId }: { articleId: number }) {
+  const { brand } = useShell();
+  const query = useArticle(brand?.id, articleId);
+  if (!Number.isInteger(articleId)) notFound();
+  if (!brand || query.isPending) return <PageSkeleton kpis={0} panels={2} />;
+  if (query.isError) {
+    if ((query.error as { response?: { status?: number } }).response?.status === 404) notFound();
+    return <ErrorState onRetry={() => query.refetch()} />;
+  }
+  return <Editor key={query.data.id} raw={query.data} />;
+}
+
+/** A planned entry with no article yet: research its keyword, then write it. */
+function WriteFromCalendar({ itemId }: { itemId: number }) {
+  const t = useTranslations("editor");
+  const router = useRouter();
+  const { brand, brandSlug } = useShell();
+  const item = useCalendarItem(brand?.id, itemId);
+  const write = useWriteArticle(brand?.id ?? 0);
+  if (!brand || item.isPending) return <PageSkeleton kpis={0} panels={1} />;
+  if (item.isError) return <ErrorState onRetry={() => item.refetch()} />;
+  if (!item.data) notFound();
+  const keywordId = item.data.keyword_id;
+
+  return (
+    <Card className="max-w-[720px] gap-4">
+      <span className="text-overline text-fg-3">{t("plannedLabel")}</span>
+      <h1 className="text-h1 text-fg">{item.data.title}</h1>
+      {item.data.keyword && (
+        <p className="text-small text-fg-2">{t("plannedKeyword", { keyword: item.data.keyword })}</p>
+      )}
+      <p className="text-body text-fg-2">{t("writeBody")}</p>
+      {write.isError && (
+        <p role="alert" className="text-small text-danger">
+          {getErrorMessage(write.error, t("writeFailed"))}
+        </p>
+      )}
+      <Button
+        variant="primary"
+        className="self-start"
+        disabled={!keywordId}
+        loading={write.isPending}
+        onClick={() =>
+          keywordId &&
+          write.mutate(keywordId, {
+            onSuccess: (article) => router.replace(brandHref(brandSlug, `content/${article.id}`)),
+          })
+        }
+      >
+        <FilePenLineIcon />
+        {write.isPending ? t("writing") : t("write")}
+      </Button>
+    </Card>
+  );
+}
+
+function Editor({ raw }: { raw: ArticleWithRelations }) {
+  const article = toArticleDetail(raw);
   const t = useTranslations("editor");
   const tContent = useTranslations("content");
   const format = useFormatter();
@@ -78,7 +140,14 @@ function Editor({ article }: { article: ArticleDetail }) {
   const now = useNow({ updateInterval: 30_000 });
   const router = useRouter();
   const { brand, brandSlug, me } = useShell();
-  const contentLanguage = brand?.contentLanguage ?? "en";
+  const contentLanguage = raw.language ?? (brand ? siteLanguage(brand) : "en");
+  const save = useSaveArticle(brand?.id ?? 0, raw.id);
+  const connections = usePublishingConnections(brand?.id);
+  const publish = usePublishArticle(brand?.id ?? 0, raw.id);
+  const targets = (connections.data ?? []).filter((c) => c.status === "active");
+  const [target, setTarget] = React.useState<string>("");
+  const targetId = target || (targets[0] ? String(targets[0].id) : "");
+  const htmlRef = React.useRef(article.html);
   const languages = new Intl.DisplayNames([locale], { type: "language" });
 
   const [status, setStatus] = React.useState(article.status);
@@ -86,20 +155,31 @@ function Editor({ article }: { article: ArticleDetail }) {
   const [shortAnswer, setShortAnswer] = React.useState(article.shortAnswer);
   const [metaTitle, setMetaTitle] = React.useState(article.metaTitle);
   const [slug, setSlug] = React.useState(article.slug);
-  const [date, setDate] = React.useState(article.date);
-  const [time, setTime] = React.useState("09:00");
   const [notify, setNotify] = React.useState(Boolean(me?.telegram?.connected));
   const [savedAt, setSavedAt] = React.useState(article.savedAt);
   const [words, setWords] = React.useState(article.words);
-  const [approving, setApproving] = React.useState(false);
   const [rejecting, setRejecting] = React.useState(false);
   const [revising, setRevising] = React.useState(false);
   const saveTimer = React.useRef<ReturnType<typeof setTimeout>>(undefined);
   React.useEffect(() => () => clearTimeout(saveTimer.current), []);
 
+  /** Debounced draft save: the backend snapshots a revision before each update. */
+  const latest = React.useRef({ shortAnswer, metaTitle, slug });
+  React.useEffect(() => {
+    latest.current = { shortAnswer, metaTitle, slug };
+  });
   const touch = () => {
     clearTimeout(saveTimer.current);
-    saveTimer.current = setTimeout(() => setSavedAt(new Date().toISOString()), 800);
+    saveTimer.current = setTimeout(() => {
+      const { shortAnswer: description, metaTitle: title, slug: path } = latest.current;
+      save.mutate(
+        { meta_description: description, meta_title: title, slug: path || null, content: htmlRef.current },
+        {
+          onSuccess: (saved) => setSavedAt(saved.updated_at),
+          onError: (error) => toast.error(getErrorMessage(error, t("saveFailed"))),
+        },
+      );
+    }, 1200);
   };
 
   const placeholders = [...new Set(`${bodyText} ${shortAnswer} ${metaTitle}`.match(PLACEHOLDER) ?? [])];
@@ -108,15 +188,18 @@ function Editor({ article }: { article: ArticleDetail }) {
   const passed = article.checklist.filter((c) => c.ok).length;
   const score = Math.round(article.score - (blocked ? 4 : 0));
 
-  const approve = async () => {
-    setApproving(true);
-    await decideApproval(`apr_${article.id}`, "approve");
-    setApproving(false);
-    setStatus("scheduled");
-    toast.success(
-      t("scheduledToast", {
-        date: format.dateTime(new Date(`${date}T${time}:00`), { dateStyle: "medium", timeStyle: "short" }),
-      }),
+  /** Publishes now through the chosen connection (a manual connection prepares a copy-and-paste version). */
+  const approve = () => {
+    if (!targetId) return toast.error(t("noTarget"));
+    publish.mutate(
+      { connection_id: Number(targetId), options: { status: "publish" } },
+      {
+        onSuccess: (response) => {
+          setStatus("published");
+          toast.success(response.message ?? t("publishedToast"));
+        },
+        onError: (error) => toast.error(getErrorMessage(error, t("publishFailed"))),
+      },
     );
   };
 
@@ -144,7 +227,7 @@ function Editor({ article }: { article: ArticleDetail }) {
               {article.title}
             </h1>
             <p className="flex flex-wrap items-center gap-1.5 text-small text-fg-2">
-              <OrbitAvatar size={18} />
+              <RankoyaAvatar size={18} />
               {t("byline", {
                 words: format.number(words, "integer"),
                 when: format.relativeTime(new Date(savedAt), now),
@@ -161,9 +244,9 @@ function Editor({ article }: { article: ArticleDetail }) {
                 <MessageSquareTextIcon />
                 {t("revise")}
               </Button>
-              <Button variant="primary" disabled={blocked} loading={approving} onClick={approve}>
-                <CalendarCheckIcon />
-                {t("approve")}
+              <Button variant="primary" disabled={blocked || !targetId} loading={publish.isPending} onClick={approve}>
+                <SendIcon />
+                {t("approvePublish")}
               </Button>
             </div>
           )}
@@ -211,10 +294,13 @@ function Editor({ article }: { article: ArticleDetail }) {
             content={article.html}
             lang={contentLanguage}
             label={t("bodyLabel")}
-            onChange={(text) => {
+            onChange={(text, html) => {
               setBodyText(text);
-              setWords(text.split(/\s+/).filter(Boolean).length + 980);
-              touch();
+              setWords(text.split(/\s+/).filter(Boolean).length);
+              if (html !== htmlRef.current) {
+                htmlRef.current = html;
+                touch();
+              }
             }}
           />
         </div>
@@ -282,37 +368,27 @@ function Editor({ article }: { article: ArticleDetail }) {
                 />
               )}
             </FormField>
-            <SelectField
-              label={t("target")}
-              value="wordpress"
-              onChange={() => undefined}
-              options={[{ value: "wordpress", label: t("targetWordpress", { domain: brand?.domain ?? "" }) }]}
-            />
-            <div className="grid grid-cols-[1fr_auto] gap-3">
-              <FormField label={t("date")}>
-                {(props) => (
-                  <Input
-                    {...props}
-                    type="date"
-                    value={date}
-                    readOnly={!editable}
-                    onChange={(e) => setDate(e.target.value)}
-                  />
-                )}
-              </FormField>
-              <FormField label={t("time")}>
-                {(props) => (
-                  <Input
-                    {...props}
-                    type="time"
-                    value={time}
-                    readOnly={!editable}
-                    onChange={(e) => setTime(e.target.value)}
-                    className="w-28"
-                  />
-                )}
-              </FormField>
-            </div>
+            {targets.length > 0 ? (
+              <SelectField
+                label={t("target")}
+                value={targetId}
+                onChange={setTarget}
+                options={targets.map((c) => ({ value: String(c.id), label: c.name }))}
+              />
+            ) : (
+              <p className="text-small text-fg-2">
+                {t.rich("noTargetHelp", {
+                  link: (chunks) => (
+                    <Link
+                      href={brandHref(brandSlug, "integrations?tab=platforms")}
+                      className="text-blue hover:underline"
+                    >
+                      {chunks}
+                    </Link>
+                  ),
+                })}
+              </p>
+            )}
             <label className="flex cursor-pointer items-center gap-2.5 text-small text-fg">
               <Checkbox checked={notify} onCheckedChange={(v) => setNotify(v === true)} />
               {t("notify")}

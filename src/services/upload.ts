@@ -2,16 +2,10 @@
 // logo, favicon and carousel pickers. Returns a public URL.
 import api from "./api/api";
 import { LOCAL_UPLOAD_MAX_BYTES } from "@/lib/plan";
-import type {
-  LocalUploadResult,
-  uploadGifResponse,
-  uploadLocalImageResponse,
-} from "@/types/shared";
+import type { LocalUploadResult, uploadGifResponse, uploadLocalImageResponse } from "@/types/types";
 
 /** Human-readable form of the multipart (image/audio/gif) ceiling. */
-export const LOCAL_UPLOAD_MAX_LABEL = `${Math.round(
-  LOCAL_UPLOAD_MAX_BYTES / (1024 * 1024),
-)} MB`;
+export const LOCAL_UPLOAD_MAX_LABEL = `${Math.round(LOCAL_UPLOAD_MAX_BYTES / (1024 * 1024))} MB`;
 
 export class LocalUploadTooLargeError extends Error {
   constructor() {
@@ -31,11 +25,7 @@ export function assertWithinLocalUploadLimit(file: File) {
 
 const MULTIPART = { headers: { "Content-Type": "multipart/form-data" } };
 
-async function postFile<T>(
-  endpoint: string,
-  fieldName: string,
-  file: File,
-): Promise<T> {
+async function postFile<T>(endpoint: string, fieldName: string, file: File): Promise<T> {
   assertWithinLocalUploadLimit(file);
 
   const formData = new FormData();
@@ -57,11 +47,7 @@ const UploadService = {
   },
 
   uploadGif: async (file: File): Promise<LocalUploadResult> => {
-    const data = await postFile<uploadGifResponse>(
-      "/upload-gif",
-      "gif_file",
-      file,
-    );
+    const data = await postFile<uploadGifResponse>("/upload-gif", "gif_file", file);
     return { status: data.status, url: data.filePath, message: data.message };
   },
 };

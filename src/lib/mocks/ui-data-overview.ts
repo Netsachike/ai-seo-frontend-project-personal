@@ -2,7 +2,7 @@
  * UI mock data for the overview: per-platform visibility cards and the
  * getting-started progress. `br_new` is the zero-data brand.
  */
-import type { Engine } from "@/lib/api/types";
+import type { Engine } from "@/types/types";
 
 /** Google Maps is tracked for local visibility; AI Overviews stays on the AI visibility screen. */
 export type Platform = "google" | "maps" | Exclude<Engine, "aio">;

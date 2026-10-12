@@ -26,7 +26,7 @@ import {
 import { useFormatter, useLocale, useTranslations } from "next-intl";
 import { Bar, BarChart, ResponsiveContainer, XAxis } from "recharts";
 
-import type { Brand } from "@/lib/api/types";
+import type { Site } from "@/types/types";
 import { getActivePlan } from "@/lib/plan-core";
 import { accountHref } from "@/features/account/routes";
 import { useSessionUser } from "@/features/account/use-session-user";
@@ -36,6 +36,7 @@ import { dur, ease } from "../motion";
 import { useDraft } from "../store";
 import { SiteFavicon } from "@/components/layout/site-favicon";
 import { StepHeading } from "./step-heading";
+import { faviconFor } from "@/features/sites/site-utils";
 
 const phases: Array<{ key: "first" | "second" | "third"; icon: LucideIcon }> = [
   { key: "first", icon: SproutIcon },
@@ -125,7 +126,7 @@ function Reveal({ children, className }: { children: React.ReactNode; className?
  * paid account sees this site covered by its plan; a free one is sent to
  * the plans page (checkout runs through Paddle there) or carries on on Free.
  */
-export function BillingStep({ site, onContinue }: { site: Brand; onContinue: () => void }) {
+export function BillingStep({ site, onContinue }: { site: Site; onContinue: () => void }) {
   const t = useTranslations("siteSetup.billing");
   const tPlan = useTranslations("account.plans");
   const format = useFormatter();
@@ -137,7 +138,7 @@ export function BillingStep({ site, onContinue }: { site: Brand; onContinue: () 
   const topicVolume = (draft.topicSuggestions ?? [])
     .filter((topic) => draft.coreTopics.includes(topic.id))
     .reduce((sum, topic) => sum + topic.volume, 0);
-  const series = React.useMemo(() => growthSeries(site.id, topicVolume), [site.id, topicVolume]);
+  const series = React.useMemo(() => growthSeries(String(site.id), topicVolume), [site.id, topicVolume]);
   const chartRef = React.useRef<HTMLDivElement>(null);
   const chartInView = useInView(chartRef, { once: true, amount: 0.4 });
   const monthFormat = React.useMemo(() => new Intl.DateTimeFormat(locale, { month: "short" }), [locale]);
@@ -150,7 +151,7 @@ export function BillingStep({ site, onContinue }: { site: Brand; onContinue: () 
           description={paid ? t("descriptionPaid", { plan: tPlan(`${plan}.label`) }) : t("descriptionFree")}
         />
         <div className="flex items-center gap-4 self-start rounded-xl bg-surface-2 px-5 py-4">
-          <SiteFavicon src={site.faviconUrl} name={site.name} size={44} />
+          <SiteFavicon src={faviconFor(site.domain)} name={site.name} size={44} />
           <span className="flex min-w-0 flex-col">
             <span className="truncate text-h3 text-fg">{site.name}</span>
             <span dir="ltr" className="truncate text-start text-small text-fg-3">
@@ -271,7 +272,9 @@ export function BillingStep({ site, onContinue }: { site: Brand; onContinue: () 
                 <Icon aria-hidden className="size-5" />
               </span>
               <span className="flex flex-col gap-1">
-                <span className="num text-overline text-fg-3">{t("how.eyebrow", { n: String(i + 1).padStart(2, "0") })}</span>
+                <span className="num text-overline text-fg-3">
+                  {t("how.eyebrow", { n: String(i + 1).padStart(2, "0") })}
+                </span>
                 <span className="text-h3 text-fg">{t(`how.${key}.title`)}</span>
                 <span className="text-body text-fg-2">{t(`how.${key}.body`)}</span>
               </span>

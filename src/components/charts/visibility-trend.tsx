@@ -4,7 +4,7 @@ import * as React from "react";
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { useFormatter, useLocale, useTranslations } from "next-intl";
 
-import type { BrandSeries } from "@/lib/api/types";
+import type { BrandSeries } from "@/lib/mocks/types";
 import { isRtl } from "@/i18n/config";
 import { cn } from "@/lib/utils";
 import { DeltaChip } from "@/components/brand/delta-chip";

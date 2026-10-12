@@ -2,8 +2,8 @@
 
 import { parseAsIsoDate, parseAsStringLiteral, useQueryState, useQueryStates } from "nuqs";
 
-import type { Engine } from "@/lib/api/types";
-import { engines } from "@/lib/api/types";
+import type { Engine } from "@/types/types";
+import { engines } from "@/types/types";
 
 export const rangeOptions = ["7d", "30d", "90d", "custom"] as const;
 export type RangeOption = (typeof rangeOptions)[number];

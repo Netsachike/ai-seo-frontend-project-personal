@@ -9,7 +9,7 @@ import { toast } from "@/lib/toast";
 import { getErrorMessage } from "@/lib/errors";
 import adminService from "@/services/admin";
 import EmailMarketingService from "@/services/email-marketing";
-import type { createEmailCampaignPayload, User as UserType } from "@/types/shared";
+import type { createEmailCampaignPayload, User as UserType } from "@/types/types";
 import { accountKeys } from "@/features/account/query-keys";
 import { ArticleEditor } from "@/components/editor/article-editor";
 import { FormField } from "@/components/forms/form-field";
@@ -30,7 +30,14 @@ type FormState = {
   content: string;
 };
 
-const initialFormState: FormState = { name: "", subject: "", type: "individual", recipient: "", file: null, content: "" };
+const initialFormState: FormState = {
+  name: "",
+  subject: "",
+  type: "individual",
+  recipient: "",
+  file: null,
+  content: "",
+};
 
 function userDisplayName(user: UserType) {
   const fallback = `${user.first_name ?? ""} ${user.last_name ?? ""}`.trim();
@@ -39,7 +46,7 @@ function userDisplayName(user: UserType) {
 
 /**
  * Compose and send an email campaign: one recipient (searchable), every user
- * (bulk), or a CSV/TXT list. The body is written in Orbit's rich-text editor.
+ * (bulk), or a CSV/TXT list. The body is written in Rankoya's rich-text editor.
  */
 export function CreateCampaignForm({ onSent }: { onSent?: () => void }) {
   const t = useTranslations("admin.marketing.create");
@@ -264,13 +271,14 @@ export function CreateCampaignForm({ onSent }: { onSent?: () => void }) {
                     <div className="absolute inset-x-0 z-50 mt-1 max-h-[280px] overflow-y-auto rounded-lg bg-surface shadow-pop">
                       <div className="sticky top-0 flex items-center justify-between gap-2 border-b border-border bg-surface px-3 py-2 text-caption text-fg-3">
                         {isRecipientSearchMode ? (
-                          <span>
-                            {t("results", { count: format.number(recipients.data?.total ?? 0, "integer") })}
-                          </span>
+                          <span>{t("results", { count: format.number(recipients.data?.total ?? 0, "integer") })}</span>
                         ) : (
                           <>
                             <span className="num">
-                              {t("page", { page: recipients.data?.page ?? recipientPage, last: recipients.data?.lastPage ?? 1 })}
+                              {t("page", {
+                                page: recipients.data?.page ?? recipientPage,
+                                last: recipients.data?.lastPage ?? 1,
+                              })}
                             </span>
                             <span className="flex items-center gap-1">
                               <Button

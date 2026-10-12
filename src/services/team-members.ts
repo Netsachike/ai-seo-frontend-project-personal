@@ -9,17 +9,12 @@ import {
   UpdateTeamMemberPasswordResponse,
   UpdateTeamMemberPayload,
   UpdateTeamMemberResponse,
-} from "@/types/shared";
+} from "@/types/types";
 
 const teamMemberService = {
-  addTeamMember: async (
-    payload: AddTeamMemberPayload,
-  ): Promise<AddTeamMemberResponse> => {
+  addTeamMember: async (payload: AddTeamMemberPayload): Promise<AddTeamMemberResponse> => {
     try {
-      const response = await api.post<AddTeamMemberResponse>(
-        "/team/add",
-        payload,
-      );
+      const response = await api.post<AddTeamMemberResponse>("/team/add", payload);
       return response.data;
     } catch (error) {
       throw error;
@@ -35,14 +30,9 @@ const teamMemberService = {
     }
   },
 
-  updateTeamMember: async (
-    payload: UpdateTeamMemberPayload,
-  ): Promise<UpdateTeamMemberResponse> => {
+  updateTeamMember: async (payload: UpdateTeamMemberPayload): Promise<UpdateTeamMemberResponse> => {
     try {
-      const response = await api.post<UpdateTeamMemberResponse>(
-        "/team/update",
-        payload,
-      );
+      const response = await api.post<UpdateTeamMemberResponse>("/team/update", payload);
       return response.data;
     } catch (error) {
       throw error;
@@ -53,26 +43,18 @@ const teamMemberService = {
     payload: UpdateTeamMemberPasswordPayload,
   ): Promise<UpdateTeamMemberPasswordResponse> => {
     try {
-      const response = await api.post<UpdateTeamMemberPasswordResponse>(
-        "/team/update/password",
-        payload,
-      );
+      const response = await api.post<UpdateTeamMemberPasswordResponse>("/team/update/password", payload);
       return response.data;
     } catch (error) {
       throw error;
     }
   },
 
-  deleteTeamMember: async (
-    payload: DeleteTeamMemberPayload,
-  ): Promise<DeleteTeamMemberResponse> => {
+  deleteTeamMember: async (payload: DeleteTeamMemberPayload): Promise<DeleteTeamMemberResponse> => {
     try {
-      const response = await api.delete<DeleteTeamMemberResponse>(
-        "/team/delete",
-        {
-          data: payload,
-        },
-      );
+      const response = await api.delete<DeleteTeamMemberResponse>("/team/delete", {
+        data: payload,
+      });
       return response.data;
     } catch (error) {
       throw error;

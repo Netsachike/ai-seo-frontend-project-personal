@@ -3,7 +3,7 @@
 import { TicketIcon } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
 
-import type { User } from "@/types/shared";
+import type { User } from "@/types/types";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 

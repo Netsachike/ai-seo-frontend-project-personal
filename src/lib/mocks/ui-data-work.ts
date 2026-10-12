@@ -38,7 +38,7 @@ export function actionPlan(brandId: string, slug: string): { current: number; ca
       {
         id: "ac1",
         column: "approval",
-        owner: "orbit",
+        owner: "rankoya",
         area: "schema",
         impact: "high",
         effort: "low",
@@ -53,7 +53,7 @@ export function actionPlan(brandId: string, slug: string): { current: number; ca
       {
         id: "ac2",
         column: "approval",
-        owner: "orbit",
+        owner: "rankoya",
         area: "content",
         impact: "high",
         effort: "medium",
@@ -65,7 +65,7 @@ export function actionPlan(brandId: string, slug: string): { current: number; ca
       {
         id: "ac3",
         column: "approval",
-        owner: "orbit",
+        owner: "rankoya",
         area: "content",
         impact: "medium",
         effort: "low",
@@ -77,7 +77,7 @@ export function actionPlan(brandId: string, slug: string): { current: number; ca
       {
         id: "ac4",
         column: "approval",
-        owner: "orbit",
+        owner: "rankoya",
         area: "technical",
         impact: "medium",
         effort: "low",
@@ -88,7 +88,7 @@ export function actionPlan(brandId: string, slug: string): { current: number; ca
       {
         id: "ac5",
         column: "working",
-        owner: "orbit",
+        owner: "rankoya",
         area: "content",
         impact: "high",
         effort: "medium",
@@ -100,7 +100,7 @@ export function actionPlan(brandId: string, slug: string): { current: number; ca
       {
         id: "ac6",
         column: "working",
-        owner: "orbit",
+        owner: "rankoya",
         area: "technical",
         impact: "low",
         effort: "low",
@@ -148,7 +148,7 @@ export function actionPlan(brandId: string, slug: string): { current: number; ca
       {
         id: "ac10",
         column: "done",
-        owner: "orbit",
+        owner: "rankoya",
         area: "content",
         impact: "medium",
         effort: "medium",

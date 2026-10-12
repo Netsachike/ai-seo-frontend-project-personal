@@ -7,7 +7,7 @@ import { useFormatter, useTranslations } from "next-intl";
 import { toast } from "@/lib/toast";
 import adminService from "@/services/admin";
 import creditService from "@/services/credits";
-import type { User } from "@/types/shared";
+import type { User } from "@/types/types";
 import { ConfirmDialog } from "@/components/account/confirm-dialog";
 import { EmptyState } from "@/components/brand/empty-state";
 import { UserAvatar } from "@/components/layout/avatars";
@@ -127,7 +127,9 @@ export function UsersTable({
   const billingLabel = (value: string | null) =>
     value ? (tBilling.has(value as "monthly") ? tBilling(value as "monthly") : value) : t("none");
   const subscriptionLabel = (item: SubscriptionDisplay) =>
-    item.key === "plan" ? t("subscriptions.planLabel", { plan: tPlan(`${item.plan}.label`) }) : tAddon(`${item.key}.name`);
+    item.key === "plan"
+      ? t("subscriptions.planLabel", { plan: tPlan(`${item.plan}.label`) })
+      : tAddon(`${item.key}.name`);
 
   return (
     <>
@@ -190,7 +192,7 @@ export function UsersTable({
                     <TableCell>
                       <Badge variant="neutral">{user.role}</Badge>
                     </TableCell>
-                    <TableCell className="num text-end text-fg">
+                    <TableCell className="text-end num text-fg">
                       {format.number(getUserCreditBalance(user), "integer")}
                     </TableCell>
                     <TableCell>
@@ -284,7 +286,7 @@ export function UsersTable({
             aria-label={t("pagination.label")}
             className="flex flex-wrap items-center justify-end gap-3 border-t border-border px-5 py-3"
           >
-            <p className="num me-auto text-caption font-normal text-fg-3">
+            <p className="me-auto num text-caption font-normal text-fg-3">
               {t("pagination.total", { count: format.number(total, "integer") })}
             </p>
             <Button size="sm" disabled={currentPage <= 1 || isMutating} onClick={() => onPageChange(currentPage - 1)}>

@@ -7,18 +7,17 @@ import { CheckIcon, ChevronRightIcon, ListPlusIcon, RotateCwIcon, SparkleIcon } 
 import { useFormatter, useLocale, useNow, useTranslations } from "next-intl";
 import { toast } from "sonner";
 
-import type { Engine } from "@/lib/api/types";
-import { useFakeQuery } from "@/lib/fake-query";
-import { UI_NOW, questionDetail, type EngineAnswer } from "@/lib/mocks/ui-data";
+import type { Engine } from "@/types/types";
+import type { EngineAnswer } from "@/lib/mocks/ui-data";
 import { useUiStore } from "@/lib/store/ui";
 import { cn } from "@/lib/utils";
-import { useJobRunner } from "@/features/insights/hooks";
+import { useRunAiScan } from "@/features/insights/hooks";
+import { useQuestion } from "@/features/visibility/hooks";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { EngineIcon } from "@/components/brand/engine-icon";
 import { ErrorState } from "@/components/brand/error-state";
-import { JobBanner } from "@/components/brand/job-banner";
 import { OwnerChip } from "@/components/brand/owner-chip";
 import { brandHref } from "@/components/layout/nav";
 import { PageSkeleton } from "@/components/layout/page-skeleton";
@@ -30,11 +29,9 @@ export function PromptView({ promptId }: { promptId: string }) {
   const locale = useLocale();
   const now = useNow({ updateInterval: 60_000 });
   const { brand, brandSlug } = useShell();
-  const recheck = useJobRunner("job_scan");
+  const recheck = useRunAiScan(brand?.id ?? 0, [Number(promptId)]);
   const [planned, setPlanned] = React.useState(false);
-  const query = useFakeQuery(["prompt", brand?.id, promptId], () => questionDetail(brand?.id ?? "", promptId), {
-    enabled: Boolean(brand),
-  });
+  const query = useQuestion(brand, Number(promptId));
 
   if (!brand || query.isPending) return <PageSkeleton kpis={5} />;
   if (query.isError) return <ErrorState onRetry={() => query.refetch()} />;
@@ -74,13 +71,13 @@ export function PromptView({ promptId }: { promptId: string }) {
             </div>
           </div>
           <div className="flex flex-wrap gap-2">
-            <Button variant="secondary" onClick={recheck.start} disabled={recheck.running}>
+            <Button variant="secondary" onClick={() => recheck.mutate()} loading={recheck.isPending}>
               <RotateCwIcon />
               {t("recheck")}
             </Button>
             <Button
               variant="agent"
-              onClick={() => useUiStore.getState().askOrbit(t("closeGapPrompt", { question: q.text }))}
+              onClick={() => useUiStore.getState().askRankoya(t("closeGapPrompt", { question: q.text }))}
             >
               <SparkleIcon />
               {t("closeGap")}
@@ -88,8 +85,6 @@ export function PromptView({ promptId }: { promptId: string }) {
           </div>
         </div>
       </header>
-
-      {recheck.job && <JobBanner job={recheck.job} title={t("rechecking")} onDismiss={recheck.dismiss} />}
 
       <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-5">
         {data.answers.map((a) => (
@@ -110,35 +105,38 @@ export function PromptView({ promptId }: { promptId: string }) {
           ))}
         </div>
         <div className="flex flex-col gap-4">
-          <Card>
-            <div className="flex flex-col gap-0.5">
-              <CardTitle>{t("planTitle")}</CardTitle>
-              <CardDescription>{t("planDescription")}</CardDescription>
-            </div>
-            <ol className="flex flex-col gap-3">
-              {data.plan.map((step, i) => (
-                <li key={step.id} className="flex gap-3">
-                  <span className="mt-0.5 w-4 num text-caption text-fg-3">{i + 1}</span>
-                  <div className="flex min-w-0 flex-col gap-1.5">
-                    <OwnerChip owner={step.owner} className="self-start" />
-                    <p className="text-small text-fg">{step.text}</p>
-                  </div>
-                </li>
-              ))}
-            </ol>
-            <Button
-              variant={planned ? "secondary" : "primary"}
-              disabled={planned}
-              onClick={() => {
-                setPlanned(true);
-                toast.success(t("planned", { count: data.plan.length }));
-              }}
-            >
-              {planned ? <CheckIcon /> : <ListPlusIcon />}
-              {planned ? t("inPlan") : t("addToPlan")}
-            </Button>
-          </Card>
-          <HistoryCard history={data.history} />
+          {/* No improvement plan or weekly history in the API yet: these show once it sends them. */}
+          {data.plan.length > 0 && (
+            <Card>
+              <div className="flex flex-col gap-0.5">
+                <CardTitle>{t("planTitle")}</CardTitle>
+                <CardDescription>{t("planDescription")}</CardDescription>
+              </div>
+              <ol className="flex flex-col gap-3">
+                {data.plan.map((step, i) => (
+                  <li key={step.id} className="flex gap-3">
+                    <span className="mt-0.5 w-4 num text-caption text-fg-3">{i + 1}</span>
+                    <div className="flex min-w-0 flex-col gap-1.5">
+                      <OwnerChip owner={step.owner} className="self-start" />
+                      <p className="text-small text-fg">{step.text}</p>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+              <Button
+                variant={planned ? "secondary" : "primary"}
+                disabled={planned}
+                onClick={() => {
+                  setPlanned(true);
+                  toast.success(t("planned", { count: data.plan.length }));
+                }}
+              >
+                {planned ? <CheckIcon /> : <ListPlusIcon />}
+                {planned ? t("inPlan") : t("addToPlan")}
+              </Button>
+            </Card>
+          )}
+          {data.history.length > 0 && <HistoryCard history={data.history} />}
         </div>
       </div>
     </div>
@@ -180,7 +178,7 @@ function AnswerCard({ answer, brandName }: { answer: EngineAnswer; brandName: st
   const tEngine = useTranslations("engines");
   const format = useFormatter();
   const name = tEngine(answer.engine);
-  const retryAt = new Date(UI_NOW + 30 * 60 * 1000);
+  const retryAt = new Date(Date.now() + 30 * 60 * 1000);
 
   if (answer.status === "unreachable") {
     return (

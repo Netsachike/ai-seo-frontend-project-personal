@@ -1,6 +1,6 @@
 import { isValidAddon, type ValidAddonKey } from "@/lib/subscription";
 import { normalizePlan, type PlanName } from "@/lib/plan-core";
-import type { AddNewUserFromAdminPayload, AddOns, User } from "@/types/shared";
+import type { AddNewUserFromAdminPayload, AddOns, User } from "@/types/types";
 
 export type AdminPlan = AddNewUserFromAdminPayload["plan"];
 export type BillingType = AddNewUserFromAdminPayload["billing_type"];

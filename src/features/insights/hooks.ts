@@ -1,46 +1,88 @@
 "use client";
 
-import * as React from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
-import type { Range } from "@/lib/api/types";
+import type { Range, Site } from "@/types/types";
+import { getErrorMessage } from "@/lib/errors";
 import { getBrandSummary } from "@/lib/mocks/store";
-import { overviewKeys } from "@/lib/api/query-keys";
-import { useJob } from "@/lib/api/use-job";
+import { aiVisibilityKeys, opportunityKeys, overviewKeys, publishingKeys, topicalMapKeys } from "@/lib/api/query-keys";
+import aiVisibilityService from "@/services/ai-visibility";
+import opportunityService from "@/services/opportunities";
+import publishingService from "@/services/publishing";
+import topicalMapService from "@/services/topical-maps";
+import { isGscReady, useGscOverview } from "@/features/search-console/hooks";
+import { usePublishingConnections } from "@/features/publishing/hooks";
 
-export function useBrandSummary(workspaceId: string | undefined, brandId: string | undefined, range: Range) {
+/** Trend lines, sparklines and share of voice over time. No history endpoint yet, so this stays on mock data. */
+export function useBrandSummary(siteId: number | undefined, range: Range) {
   return useQuery({
-    queryKey: overviewKeys.summary(workspaceId ?? "none", brandId ?? "none", range),
-    enabled: Boolean(workspaceId && brandId),
-    queryFn: () => getBrandSummary(brandId as string, range),
+    queryKey: overviewKeys.summary(siteId ?? 0, range),
+    enabled: Boolean(siteId),
+    queryFn: () => getBrandSummary(siteId as number, range),
     placeholderData: (previous) => previous,
   });
 }
 
 /**
- * Starts a scan or audit and polls its job. The job mock advances with real
- * time from the first poll, so a fresh id always starts at zero.
+ * Runs an AI visibility test: the given prompts, or the latest active ones
+ * (generating them from keywords first when there are none). Synchronous on
+ * the backend, so this can take a while.
  */
-export function useJobRunner(prefix: "job_scan" | "job_audit" | "job_fix") {
+export function useRunAiScan(siteId: number, promptIds?: number[]) {
   const t = useTranslations("insights.jobs");
-  const [jobId, setJobId] = React.useState<string | null>(null);
-  const job = useJob(jobId);
-  const status = job.data?.status;
-  const running = Boolean(jobId) && status !== "done" && status !== "failed";
-
-  React.useEffect(() => {
-    if (status === "done" || status === "failed") toast.success(t(`${prefix}.done`));
-  }, [status, prefix, t]);
-
-  return {
-    job: jobId ? job.data : undefined,
-    running,
-    start: () => {
-      setJobId(`${prefix}_${Date.now()}`);
-      toast(t(`${prefix}.started`));
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async () => {
+      if (promptIds?.length) return (await aiVisibilityService.test(siteId, { prompt_ids: promptIds })).data;
+      const { data: prompts } = await aiVisibilityService.prompts(siteId);
+      if (prompts.length === 0) await aiVisibilityService.generatePrompts(siteId);
+      return (await aiVisibilityService.test(siteId)).data;
     },
-    dismiss: () => setJobId(null),
+    onMutate: () => toast(t("job_scan.started")),
+    onSuccess: () => {
+      toast.success(t("job_scan.done"));
+      return queryClient.invalidateQueries({ queryKey: aiVisibilityKeys.all(siteId) });
+    },
+    onError: (error) => toast.error(getErrorMessage(error, t("failed"))),
+  });
+}
+
+export const GROWTH_STEPS = ["connect", "analyze", "discover", "optimize", "publish", "measure"] as const;
+
+/**
+ * How far the site is through the growth loop, from real data: the index of
+ * the first step not done yet (GROWTH_STEPS.length when all are done).
+ */
+export function useGrowthProgress(site: Site) {
+  const gsc = useGscOverview(site.id);
+  const connections = usePublishingConnections(site.id);
+  const maps = useQuery({
+    queryKey: topicalMapKeys.list(site.id),
+    queryFn: async () => (await topicalMapService.list(site.id)).data,
+  });
+  const opportunities = useQuery({
+    queryKey: opportunityKeys.list(site.id),
+    queryFn: async () => (await opportunityService.list(site.id)).data,
+  });
+  const publications = useQuery({
+    queryKey: publishingKeys.publications(site.id),
+    queryFn: async () => (await publishingService.publications(site.id)).data,
+  });
+  const visibility = useQuery({
+    queryKey: aiVisibilityKeys.overview(site.id),
+    queryFn: async () => (await aiVisibilityService.overview(site.id)).data,
+  });
+
+  const done: Record<(typeof GROWTH_STEPS)[number], boolean> = {
+    connect: isGscReady(gsc.data?.connection) || (connections.data?.some((c) => c.status === "active") ?? false),
+    analyze: Boolean(site.last_crawled_at),
+    discover: (maps.data?.length ?? 0) > 0,
+    optimize: (opportunities.data?.total ?? 0) > 0,
+    publish: (publications.data?.total ?? 0) > 0,
+    measure: (visibility.data?.total_tests ?? 0) > 0,
   };
+  const current = GROWTH_STEPS.findIndex((step) => !done[step]);
+  return current === -1 ? GROWTH_STEPS.length : current;
 }

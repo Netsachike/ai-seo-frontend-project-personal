@@ -8,7 +8,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { enabledLocales, localeMeta, type Locale } from "@/i18n/config";
 import { useUiStore } from "@/lib/store/ui";
 import { usePreferences } from "@/features/preferences/use-preferences";
-import { useBrands, useSwitchBrand, useSwitchWorkspace } from "@/features/workspace/hooks";
+import { useSites, useSwitchBrand, useSwitchWorkspace, workspaceTarget } from "@/features/workspace/hooks";
 import {
   CommandDialog,
   CommandEmpty,
@@ -42,7 +42,7 @@ function useCommandHotkey() {
 
 /**
  * Screens, workspaces, brands, language and theme. Anything that doesn't
- * match is handed to Orbit as a question.
+ * match is handed to Rankoya as a question.
  */
 export function CommandMenu() {
   const t = useTranslations("shell.command");
@@ -55,7 +55,7 @@ export function CommandMenu() {
   const [query, setQuery] = React.useState("");
   const { brandSlug, brand, workspace, workspaces } = useShell();
   const session = useSessionUser();
-  const brands = useBrands(workspace?.id);
+  const brands = useSites(workspace?.work_space_id);
   const switchBrand = useSwitchBrand();
   const switchWorkspace = useSwitchWorkspace();
   const { theme, setTheme, setLocale } = usePreferences();
@@ -88,7 +88,7 @@ export function CommandMenu() {
               <CommandItem
                 forceMount
                 value="__ask"
-                onSelect={() => run(() => useUiStore.getState().askOrbit(question))}
+                onSelect={() => run(() => useUiStore.getState().askRankoya(question))}
               >
                 <MessageCircleIcon />
                 <span className="min-w-0 flex-1 truncate">{t("ask", { question })}</span>
@@ -98,19 +98,21 @@ export function CommandMenu() {
           )}
           {navGroups.map((group) => (
             <CommandGroup key={group.key} heading={tNav(`groups.${group.key}`)}>
-              {group.items.filter((item) => !item.visible || item.visible(session)).map((item) => {
-                const Icon = item.icon;
-                return (
-                  <CommandItem
-                    key={item.key}
-                    value={`nav ${tNav(`items.${item.key}`)}`}
-                    onSelect={() => run(() => router.push(navItemHref(item, brandSlug)))}
-                  >
-                    <Icon />
-                    {tNav(`items.${item.key}`)}
-                  </CommandItem>
-                );
-              })}
+              {group.items
+                .filter((item) => !item.visible || item.visible(session))
+                .map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <CommandItem
+                      key={item.key}
+                      value={`nav ${tNav(`items.${item.key}`)}`}
+                      onSelect={() => run(() => router.push(navItemHref(item, brandSlug)))}
+                    >
+                      <Icon />
+                      {tNav(`items.${item.key}`)}
+                    </CommandItem>
+                  );
+                })}
             </CommandGroup>
           ))}
           <CommandSeparator />
@@ -133,13 +135,15 @@ export function CommandMenu() {
             <CommandGroup heading={t("workspaces")}>
               {workspaces.map((w) => (
                 <CommandItem
-                  key={w.id}
-                  value={`workspace ${w.name}`}
-                  onSelect={() => run(() => w.id !== workspace?.id && void switchWorkspace(w))}
+                  key={w.work_space_id}
+                  value={`workspace ${w.workspace.name}`}
+                  onSelect={() =>
+                    run(() => w.work_space_id !== workspace?.work_space_id && void switchWorkspace(workspaceTarget(w)))
+                  }
                 >
-                  <EntityAvatar name={w.name} size={20} />
-                  <span className="min-w-0 flex-1 truncate">{t("switchTo", { name: w.name })}</span>
-                  {w.id === workspace?.id && <CheckIcon className="text-fg!" />}
+                  <EntityAvatar name={w.workspace.name} size={20} />
+                  <span className="min-w-0 flex-1 truncate">{t("switchTo", { name: w.workspace.name })}</span>
+                  {w.work_space_id === workspace?.work_space_id && <CheckIcon className="text-fg!" />}
                 </CommandItem>
               ))}
             </CommandGroup>

@@ -18,11 +18,7 @@ import { WorkspacesTab } from "./workspaces-tab";
  * Reads the URL in a Suspense-isolated child, so switching tabs never causes
  * a full refresh in production builds.
  */
-function SettingsParamsReader({
-  onChange,
-}: {
-  onChange: (tab: SettingsTab, workspaceModal: string | null) => void;
-}) {
+function SettingsParamsReader({ onChange }: { onChange: (tab: SettingsTab, workspaceModal: string | null) => void }) {
   const searchParams = useSearchParams();
   const tab = normalizeSettingsTab(searchParams.get("tab"));
   const workspaceModal = searchParams.get("workspaceModal");

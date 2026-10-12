@@ -43,7 +43,7 @@ export function ArticleEditor({
     immediatelyRender: false,
     editorProps: {
       attributes: {
-        class: "orbit-editor min-h-[420px] px-5 py-4 outline-none",
+        class: "rankoya-editor min-h-[420px] px-5 py-4 outline-none",
         lang,
         dir: "auto",
         "aria-label": label,

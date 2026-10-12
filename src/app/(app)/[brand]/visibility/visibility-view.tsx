@@ -2,26 +2,21 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { ListPlusIcon, PlusIcon, RadarIcon } from "lucide-react";
+import { ListPlusIcon, RadarIcon, ScanSearchIcon, SparklesIcon } from "lucide-react";
 import { useFormatter, useNow, useTranslations } from "next-intl";
 import { toast } from "sonner";
 
-import type { Engine } from "@/lib/api/types";
-import { useFakeQuery } from "@/lib/fake-query";
-import {
-  displayEngines,
-  visibilityData,
-  type CitedSource,
-  type EngineVisibility,
-  type TrackedQuestion,
-} from "@/lib/mocks/ui-data";
+import type { Engine } from "@/types/types";
+import { getErrorMessage } from "@/lib/errors";
+import { displayEngines, type CitedSource, type EngineVisibility, type TrackedQuestion } from "@/lib/mocks/ui-data";
 import { cn } from "@/lib/utils";
+import { useRunAiScan } from "@/features/insights/hooks";
 import { useEngineFilter } from "@/features/insights/url-state";
+import { useGeneratePrompts, useVisibility } from "@/features/visibility/hooks";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardAction, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { DataTable, type DataColumn } from "@/components/data-table/data-table";
-import { DeltaChip } from "@/components/brand/delta-chip";
 import { EmptyState } from "@/components/brand/empty-state";
 import { EngineChip } from "@/components/brand/engine-chip";
 import { EngineName } from "@/components/brand/engine-icon";
@@ -31,9 +26,7 @@ import { RankCell } from "@/components/brand/rank-cell";
 import { brandHref } from "@/components/layout/nav";
 import { PageHeader } from "@/components/layout/page-header";
 import { PageSkeleton } from "@/components/layout/page-skeleton";
-import { RangePicker } from "@/components/layout/range-picker";
 import { useShell } from "@/components/layout/shell-context";
-import { AddQuestionsDialog } from "./add-questions-dialog";
 
 export function VisibilityView() {
   const t = useTranslations("visibility");
@@ -42,10 +35,15 @@ export function VisibilityView() {
   const format = useFormatter();
   const { brand } = useShell();
   const { engine, setEngine } = useEngineFilter();
-  const [adding, setAdding] = React.useState(false);
-  const query = useFakeQuery(["visibility", brand?.id], () => visibilityData(brand?.id ?? ""), {
-    enabled: Boolean(brand),
-  });
+  const query = useVisibility(brand);
+  const generate = useGeneratePrompts(brand?.id ?? 0);
+  const scan = useRunAiScan(brand?.id ?? 0);
+
+  const generateQuestions = () =>
+    generate.mutate(undefined, {
+      onSuccess: (result) => toast.success(t("generated", { count: result.prompts_created })),
+      onError: (error) => toast.error(getErrorMessage(error, t("generateFailed"))),
+    });
 
   if (!brand || query.isPending) return <PageSkeleton />;
   const data = query.data;
@@ -58,15 +56,17 @@ export function VisibilityView() {
         description={t("description", { count: data?.questions.length ?? 0 })}
         actions={
           <>
-            <RangePicker />
-            <Button variant="primary" onClick={() => setAdding(true)}>
-              <PlusIcon />
-              {t("addQuestions")}
+            <Button variant="secondary" loading={generate.isPending} onClick={generateQuestions}>
+              <SparklesIcon />
+              {t("generateQuestions")}
+            </Button>
+            <Button variant="primary" loading={scan.isPending} onClick={() => scan.mutate()}>
+              <ScanSearchIcon />
+              {t("runTest")}
             </Button>
           </>
         }
       />
-      <AddQuestionsDialog open={adding} onOpenChange={setAdding} />
 
       {query.isError && <ErrorState onRetry={() => query.refetch()} />}
       {data && data.score === null && (
@@ -76,8 +76,8 @@ export function VisibilityView() {
           title={t("emptyTitle")}
           description={t("emptyDescription")}
           action={
-            <Button variant="secondary" size="sm" onClick={() => setAdding(true)}>
-              {t("addQuestions")}
+            <Button variant="secondary" size="sm" loading={scan.isPending} onClick={() => scan.mutate()}>
+              {t("runTest")}
             </Button>
           }
         />
@@ -96,14 +96,12 @@ export function VisibilityView() {
               label={t("kpis.score")}
               value={data.score}
               format={(v) => format.number(v, "integer")}
-              delta={{ value: data.scoreDelta, unit: "points" }}
-              note={t("kpis.scoreNote", { rank: data.rank ?? 0, count: data.brandCount })}
+              note={t("kpis.scoreNoteTests", { count: data.answers })}
             />
             <KpiCard
               label={tKpi("mentionRate.label")}
               value={selected?.mentionRate ?? data.mentionRate}
               format={(v) => format.number(v, "percent")}
-              delta={{ value: selected?.change ?? data.mentionDelta, unit: "points" }}
               note={
                 selected
                   ? t("kpis.engineNote", { engine: tEngine(selected.engine) })
@@ -114,15 +112,13 @@ export function VisibilityView() {
               label={t("kpis.position")}
               value={selected?.avgPosition ?? data.avgPosition}
               format={(v) => tKpi("avgAiPosition.value", { value: format.number(v, "decimal") })}
-              delta={{ value: data.positionDelta, unit: "rank" }}
               note={tKpi("avgAiPosition.note")}
             />
             <KpiCard
-              label={t("kpis.sentiment")}
-              value={data.positiveSentiment}
-              format={(v) => format.number(v, "percent")}
-              delta={{ value: data.sentimentDelta, unit: "points" }}
-              note={t("kpis.sentimentNote")}
+              label={t("kpis.tests")}
+              value={data.answers}
+              format={(v) => format.number(v, "integer")}
+              note={t("kpis.testsNote", { prompts: data.questions.length })}
             />
           </div>
 
@@ -171,30 +167,6 @@ function EngineTable({ rows, checkedAt }: { rows: EngineVisibility[]; checkedAt:
         cell: ({ row }) => tKpi("avgAiPosition.value", { value: format.number(row.original.avgPosition, "decimal") }),
       },
       { accessorKey: "citations", header: t("citations"), meta: { label: t("citations"), numeric: true } },
-      {
-        accessorKey: "sentiment",
-        header: t("sentiment"),
-        meta: { label: t("sentiment") },
-        cell: ({ row }) => (
-          <Badge
-            variant={
-              row.original.sentiment === "positive"
-                ? "success"
-                : row.original.sentiment === "negative"
-                  ? "danger"
-                  : "neutral"
-            }
-          >
-            {t(`sentiments.${row.original.sentiment}`)}
-          </Badge>
-        ),
-      },
-      {
-        accessorKey: "change",
-        header: t("change"),
-        meta: { label: t("change"), numeric: true },
-        cell: ({ row }) => <DeltaChip value={row.original.change} unit="points" />,
-      },
     ],
     [t, tKpi, format],
   );

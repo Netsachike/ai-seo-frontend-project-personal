@@ -6,7 +6,7 @@ import { CORE_TOPIC_COUNT } from "../../steps";
 
 const CX = 200;
 const CY = 150;
-const ORBIT = 115;
+const RANKOYA = 115;
 
 /** Flat-top hexagon around the origin. */
 const hex = (r: number) =>
@@ -15,10 +15,10 @@ const hex = (r: number) =>
     return `${(r * Math.cos(a)).toFixed(2)},${(r * Math.sin(a)).toFixed(2)}`;
   }).join(" ");
 
-/** Slot i sits on the orbit, starting at the top and going clockwise. */
+/** Slot i sits on the rankoya, starting at the top and going clockwise. */
 const slot = (i: number) => {
   const a = ((-90 + i * (360 / CORE_TOPIC_COUNT)) * Math.PI) / 180;
-  return { x: CX + ORBIT * Math.cos(a), y: CY + ORBIT * Math.sin(a), below: Math.sin(a) > 0.2 };
+  return { x: CX + RANKOYA * Math.cos(a), y: CY + RANKOYA * Math.sin(a), below: Math.sin(a) > 0.2 };
 };
 
 const truncate = (s: string, n: number) => (s.length > n ? `${s.slice(0, n - 1)}…` : s);
@@ -43,7 +43,7 @@ export function TopicMap({
 
   return (
     <svg viewBox="0 0 400 300" role="img" aria-label={label} className="h-auto w-full max-w-[520px]">
-      <circle cx={CX} cy={CY} r={ORBIT} fill="none" className="stroke-border-strong" strokeDasharray="3 4" />
+      <circle cx={CX} cy={CY} r={RANKOYA} fill="none" className="stroke-border-strong" strokeDasharray="3 4" />
 
       {slots.map((s, i) => (
         <polygon

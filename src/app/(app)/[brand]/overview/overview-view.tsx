@@ -11,7 +11,6 @@ import {
   HeadsetIcon,
   LightbulbIcon,
   PlusIcon,
-  RadarIcon,
   RocketIcon,
   ScanSearchIcon,
   SearchIcon,
@@ -21,27 +20,19 @@ import {
 } from "lucide-react";
 import { useFormatter, useNow, useTranslations } from "next-intl";
 
-import { useJob } from "@/lib/api/use-job";
+import type { Site } from "@/types/types";
 import { useFakeQuery } from "@/lib/fake-query";
-import { orbitActivity } from "@/lib/mocks/ui-data";
-import {
-  platformGlance,
-  setupProgress,
-  setupSteps,
-  type Platform,
-  type PlatformGlance,
-} from "@/lib/mocks/ui-data-overview";
+import { rankoyaActivity } from "@/lib/mocks/ui-data";
+import { platformGlance, type Platform, type PlatformGlance } from "@/lib/mocks/ui-data-overview";
 import { cn } from "@/lib/utils";
 import { DOMAIN_PATTERN, NEW_SITE_PATH } from "@/features/site-setup/steps";
-import { useBrandSummary, useJobRunner } from "@/features/insights/hooks";
+import { GROWTH_STEPS, useBrandSummary, useGrowthProgress, useRunAiScan } from "@/features/insights/hooks";
 import { useRange } from "@/features/insights/url-state";
 import { Button } from "@/components/ui/button";
 import { Card, CardAction, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DeltaChip } from "@/components/brand/delta-chip";
 import { ErrorState } from "@/components/brand/error-state";
-import { JobBanner } from "@/components/brand/job-banner";
 import { PlatformLogo, platformLogos } from "@/components/brand/platform-logo";
 import { AreaSpark } from "@/components/charts/area-spark";
 import { ShareOfVoice } from "@/components/charts/share-of-voice";
@@ -68,10 +59,10 @@ const accent: Record<Platform, { tile: string; color: string; monogram: string }
 
 export function OverviewView() {
   const t = useTranslations("overview");
-  const { brand, workspace, me, brandSlug } = useShell();
+  const { brand, me, brandSlug } = useShell();
   const { range } = useRange();
-  const summary = useBrandSummary(workspace?.id, brand?.id, range);
-  const scan = useJobRunner("job_scan");
+  const summary = useBrandSummary(brand?.id, range);
+  const scan = useRunAiScan(brand?.id ?? 0);
   const firstName = me?.name.split(" ")[0] ?? "";
 
   if (!brand || summary.isPending) return <PageSkeleton />;
@@ -90,12 +81,11 @@ export function OverviewView() {
         <PromoBanner />
       </div>
 
-      {scan.job && <JobBanner job={scan.job} title={t("scanRunning")} onDismiss={scan.dismiss} />}
       {summary.isError && <ErrorState onRetry={() => summary.refetch()} />}
 
       <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_280px]">
         <div className="@container flex min-w-0 flex-col gap-6">
-          <GettingStarted brandId={brand.id} firstScanJobId={firstScan ? (data?.firstScanJobId ?? null) : null} />
+          <GettingStarted site={brand} />
 
           <Card className="@container gap-5">
             <CardHeader>
@@ -109,15 +99,15 @@ export function OverviewView() {
                   variant="secondary"
                   size="sm"
                   className="h-8"
-                  onClick={scan.start}
-                  disabled={scan.running || firstScan}
+                  onClick={() => scan.mutate()}
+                  loading={scan.isPending}
                 >
                   <ScanSearchIcon />
                   {t("runScan")}
                 </Button>
               </CardAction>
             </CardHeader>
-            <PlatformGrid brandId={brand.id} />
+            <PlatformGrid brandId={String(brand.id)} />
             <Link
               href={brandHref(brandSlug, "visibility")}
               className="inline-flex items-center gap-1.5 self-end text-small font-medium text-blue hover:underline"
@@ -162,7 +152,7 @@ export function OverviewView() {
         <aside className="flex flex-col gap-6" aria-label={t("rail")}>
           <QuickActions />
           <NeedHelp />
-          <RecentActivity brandId={brand.id} />
+          <RecentActivity brandId={String(brand.id)} />
         </aside>
       </div>
     </div>
@@ -190,13 +180,12 @@ function PromoBanner() {
   );
 }
 
-function GettingStarted({ brandId, firstScanJobId }: { brandId: string; firstScanJobId: string | null }) {
+function GettingStarted({ site }: { site: Site }) {
   const t = useTranslations("overview.setup");
   const tCommon = useTranslations("common");
   const format = useFormatter();
   const [hidden, setHidden] = React.useState(false);
-  const job = useJob(firstScanJobId);
-  const current = setupProgress(brandId);
+  const current = useGrowthProgress(site);
   if (hidden) return null;
 
   return (
@@ -212,7 +201,7 @@ function GettingStarted({ brandId, firstScanJobId }: { brandId: string; firstSca
           <CardDescription className="text-small">{t("description")}</CardDescription>
         </div>
         <ol className="-mx-1 flex flex-1 items-start gap-1 overflow-x-auto px-1 pb-1" aria-label={t("title")}>
-          {setupSteps.map((step, i) => {
+          {GROWTH_STEPS.map((step, i) => {
             const done = i < current;
             const now = i === current;
             return (
@@ -240,7 +229,7 @@ function GettingStarted({ brandId, firstScanJobId }: { brandId: string; firstSca
                     {done && <span className="sr-only">{t("done")}</span>}
                   </span>
                 </div>
-                {i < setupSteps.length - 1 && (
+                {i < GROWTH_STEPS.length - 1 && (
                   <ArrowRightIcon aria-hidden className="mt-2.5 size-4 shrink-0 text-blue/50 rtl:-scale-x-100" />
                 )}
               </li>
@@ -248,18 +237,6 @@ function GettingStarted({ brandId, firstScanJobId }: { brandId: string; firstSca
           })}
         </ol>
       </div>
-      {job.data && job.data.status !== "done" && (
-        <div className="flex flex-col gap-2 rounded-md bg-surface-2 p-3">
-          <div className="flex items-center justify-between gap-2 text-small">
-            <span className="flex items-center gap-2 font-medium text-fg">
-              <RadarIcon aria-hidden className="size-4 text-blue" />
-              {t("scanning")}
-            </span>
-            <span className="num text-caption text-fg-2">{format.number(job.data.progress, "percent")}</span>
-          </div>
-          <Progress value={job.data.progress * 100} tone="blue" aria-label={t("scanning")} />
-        </div>
-      )}
     </Card>
   );
 }
@@ -305,7 +282,7 @@ function PlatformCard({ item }: { item: PlatformGlance }) {
       className="group flex h-full flex-col gap-2.5 rounded-lg border border-border bg-surface p-3.5 transition-colors duration-120 hover:border-border-strong hover:shadow-raised"
     >
       {platformLogos[item.platform] ? (
-        <span aria-hidden className="grid size-10 place-items-center rounded-lg border border-border bg-surface">
+        <span aria-hidden className="grid size-10 place-items-center rounded-lg border border-border bg-white">
           <PlatformLogo platform={item.platform} size={24} />
         </span>
       ) : (
@@ -365,7 +342,7 @@ function AddWebsiteCard() {
     event.preventDefault();
     if (!DOMAIN_PATTERN.test(domain)) return setError(t("errors.domain"));
     const params = new URLSearchParams({ domain });
-    if (workspace) params.set("workspace", workspace.id);
+    if (workspace) params.set("workspace", String(workspace.work_space_id));
     router.push(`${NEW_SITE_PATH}?${params.toString()}`);
   };
 
@@ -423,7 +400,7 @@ function GrowthSteps() {
         <CardTitle className="text-h3 text-blue-ink">{t("title")}</CardTitle>
       </div>
       <ol className="flex flex-col gap-4">
-        {setupSteps.map((step, i) => (
+        {GROWTH_STEPS.map((step, i) => (
           <li key={step} className="flex items-start gap-3">
             <span
               className={cn(
@@ -516,7 +493,7 @@ function RecentActivity({ brandId }: { brandId: string }) {
   const format = useFormatter();
   const now = useNow({ updateInterval: 60_000 });
   const { brandSlug } = useShell();
-  const feed = useFakeQuery(["activity", brandId], () => orbitActivity(brandId));
+  const feed = useFakeQuery(["activity", brandId], () => rankoyaActivity(brandId));
   const icons: LucideIcon[] = [GlobeIcon, SearchIcon, LightbulbIcon, FileTextIcon];
   return (
     <Card className="gap-3">

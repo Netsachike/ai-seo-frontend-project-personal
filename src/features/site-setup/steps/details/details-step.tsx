@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useTranslations } from "next-intl";
 
-import type { Brand } from "@/lib/api/types";
+import type { Site } from "@/types/types";
 import { detectLocale } from "../../fake-ai";
 import { patchDraft, useDraft } from "../../store";
 import { StepHeading } from "../step-heading";
@@ -11,23 +11,22 @@ import { AiSection } from "./ai-section";
 import { DomainCard } from "./domain-card";
 import { LanguageFields } from "./language-fields";
 import { SetupSection, type SectionStatus } from "./setup-section";
+import { faviconFor } from "@/features/sites/site-utils";
 
 type SectionKey = "description" | "audience" | "language";
 
 /**
- * Step 2b. Three sections confirmed one at a time: Orbit writes the
+ * Step 2b. Three sections confirmed one at a time: Rankoya writes the
  * description, then the audience (reading the confirmed description), then
  * the user confirms country and language. Confirming ticks a section,
  * collapses it and opens the next.
  */
 export function DetailsStep({
   site,
-  onChangeDomain,
   onComplete,
   completing,
 }: {
-  site: Brand;
-  onChangeDomain: (domain: string) => Promise<string | null>;
+  site: Site;
   onComplete: (value: { country: string; language: string }) => void;
   completing: boolean;
 }) {
@@ -59,22 +58,16 @@ export function DetailsStep({
     setOpen(key === "description" && !draft.audienceConfirmed ? "audience" : "language");
   };
 
-  const locale = { country: draft.country ?? detectLocale(site).country, language: draft.language ?? detectLocale(site).language };
-  const analysisStarted = draft.description !== null || live.description !== "idle";
+  const locale = {
+    country: draft.country ?? detectLocale(site).country,
+    language: draft.language ?? detectLocale(site).language,
+  };
 
   return (
     <div className="flex flex-col gap-8">
       <StepHeading title={t("title")} description={t("description")} />
-      <DomainCard
-        domain={site.domain}
-        faviconUrl={site.faviconUrl}
-        editable={analysisStarted && !completing}
-        onChangeDomain={async (domain) => {
-          const failure = await onChangeDomain(domain);
-          if (!failure) setOpen("description");
-          return failure;
-        }}
-      />
+      {/* The backend has no endpoint to change a site's domain, so the card is read-only. */}
+      <DomainCard domain={site.domain} faviconUrl={faviconFor(site.domain)} editable={false} />
 
       <div className="overflow-hidden rounded-xl border border-border bg-surface shadow-card">
         <SetupSection

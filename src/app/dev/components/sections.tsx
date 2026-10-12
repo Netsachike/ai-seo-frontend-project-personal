@@ -16,8 +16,9 @@ import {
 import { useFormatter, useTranslations } from "next-intl";
 import { toast } from "sonner";
 
-import type { AgentMessage, Engine } from "@/lib/api/types";
-import { engines } from "@/lib/api/types";
+import type { Engine } from "@/types/types";
+import type { AgentMessage } from "@/lib/mocks/types";
+import { engines } from "@/types/types";
 import { agentThread, brandSummary } from "@/lib/mocks/fixtures";
 import { useUiStore } from "@/lib/store/ui";
 import { cn } from "@/lib/utils";
@@ -30,7 +31,7 @@ import { EmptyState } from "@/components/brand/empty-state";
 import { EngineChip } from "@/components/brand/engine-chip";
 import { EngineName } from "@/components/brand/engine-icon";
 import { KpiCard, KpiCardSkeleton } from "@/components/brand/kpi-card";
-import { OrbitAvatar } from "@/components/brand/logo";
+import { RankoyaAvatar } from "@/components/brand/logo";
 import { OwnerChip } from "@/components/brand/owner-chip";
 import { RankCell } from "@/components/brand/rank-cell";
 import { ScoreRing } from "@/components/brand/score-ring";
@@ -257,7 +258,7 @@ export function ButtonsSection() {
                 {sizes.map((s) => (
                   <td key={s} className="px-3 py-3">
                     <Button variant={v} size={s}>
-                      {v === "agent" && <OrbitIconSmall />}
+                      {v === "agent" && <RankoyaIconSmall />}
                       {t(`label.${v}`)}
                     </Button>
                   </td>
@@ -308,7 +309,7 @@ export function ButtonsSection() {
   );
 }
 
-function OrbitIconSmall() {
+function RankoyaIconSmall() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden className="size-4">
       <path
@@ -493,7 +494,7 @@ export function DataDisplaySection() {
         </Specimen>
         <Specimen label={t("owners")}>
           <div className="flex gap-2">
-            <OwnerChip owner="orbit" />
+            <OwnerChip owner="rankoya" />
             <OwnerChip owner="you" />
           </div>
         </Specimen>
@@ -734,13 +735,13 @@ export function AgentSection() {
             </div>
           </Specimen>
           <Button variant="agent" className="self-start" onClick={() => setOpen(true)}>
-            <OrbitAvatar size={20} className="bg-signal-ink text-signal" />
+            <RankoyaAvatar size={20} className="bg-signal-ink text-signal" />
             {t("openPanel")}
             <kbd className="font-mono text-[11px] opacity-70">{t("shortcut")}</kbd>
           </Button>
         </div>
       </div>
-      <AgentPanel workspaceId="ws_greek" agentHref="#agent" />
+      <AgentPanel siteId={1} agentHref="#agent" />
     </Section>
   );
 }

@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useTranslations } from "next-intl";
 
-import type { Brand } from "@/lib/api/types";
+import type { Site } from "@/types/types";
 import { cn } from "@/lib/utils";
 import { FormField } from "@/components/forms/form-field";
 import { Button } from "@/components/ui/button";
@@ -25,10 +25,10 @@ const defaults: NonNullable<SetupDraft["preferences"]> = {
 };
 
 /**
- * Step 7. How the content plan runs: cadence, the voice Orbit writes in, and
+ * Step 7. How the content plan runs: cadence, the voice Rankoya writes in, and
  * whether articles wait for approval (the default) or go live on schedule.
  */
-export function PreferencesStep({ site, onContinue }: { site: Brand; onContinue: () => void }) {
+export function PreferencesStep({ site, onContinue }: { site: Site; onContinue: () => void }) {
   const t = useTranslations("siteSetup.preferences");
   const draft = useDraft(site.id);
   const [prefs, setPrefs] = React.useState(draft.preferences ?? defaults);
@@ -90,7 +90,7 @@ export function PreferencesStep({ site, onContinue }: { site: Brand; onContinue:
                 aria-checked={on}
                 onClick={() => set({ articlesPerWeek: n })}
                 className={cn(
-                  "num h-10 min-w-14 rounded-md border px-3 text-body font-medium transition-colors duration-200",
+                  "h-10 min-w-14 rounded-md border px-3 num text-body font-medium transition-colors duration-200",
                   on ? "border-fg bg-fg text-surface" : "border-border-strong bg-surface text-fg hover:bg-surface-2",
                 )}
               >

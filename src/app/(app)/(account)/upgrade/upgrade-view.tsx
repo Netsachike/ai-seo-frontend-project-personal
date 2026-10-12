@@ -192,7 +192,8 @@ export function UpgradeView() {
   const [isProcessing, setIsProcessing] = React.useState(false);
 
   const cardName = React.useCallback(
-    (plan: PlanCard) => (plan.isOneTime ? t(`whiteLabelPlans.${plan.key as WhiteLabelTier}.name`) : tPlan(`${plan.key as PaidPlan}.label`)),
+    (plan: PlanCard) =>
+      plan.isOneTime ? t(`whiteLabelPlans.${plan.key as WhiteLabelTier}.name`) : tPlan(`${plan.key as PaidPlan}.label`),
     [t, tPlan],
   );
 
@@ -360,7 +361,10 @@ export function UpgradeView() {
           {/* The sales kit ships with a White Label licence; owners go straight in. */}
           <section className="flex flex-col gap-4 rounded-lg border border-border bg-surface p-5 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-start gap-3">
-              <span aria-hidden className="grid size-10 shrink-0 place-items-center rounded-md bg-signal text-signal-ink">
+              <span
+                aria-hidden
+                className="grid size-10 shrink-0 place-items-center rounded-md bg-signal text-signal-ink"
+              >
                 <FolderDownIcon className="size-[18px]" />
               </span>
               <div className="flex min-w-0 flex-col gap-0.5">
@@ -405,7 +409,11 @@ export function UpgradeView() {
         description={dialogBody}
         cancelLabel={t("confirm.keep")}
         confirmLabel={
-          isCancelFlow ? t("confirm.cancel") : isDowngradeFlow ? t("confirm.cancelDowngrade") : t("confirm.cancelUpgrade")
+          isCancelFlow
+            ? t("confirm.cancel")
+            : isDowngradeFlow
+              ? t("confirm.cancelDowngrade")
+              : t("confirm.cancelUpgrade")
         }
         isPending={isProcessing}
         onConfirm={confirmPlanChange}
@@ -471,9 +479,7 @@ function PricingCard({
 
   return (
     <li className="flex">
-      <Card
-        className={cn("relative w-full gap-5 p-6", plan.popular && "border-signal ring-1 ring-signal")}
-      >
+      <Card className={cn("relative w-full gap-5 p-6", plan.popular && "border-signal ring-1 ring-signal")}>
         <div className="flex flex-wrap items-center gap-2">
           <h3 className="text-h2 text-fg">{name}</h3>
           {plan.popular && (
@@ -492,21 +498,27 @@ function PricingCard({
         <div className="flex flex-col gap-1">
           <div className="flex items-end gap-2">
             {hasPromo && (
-              <span className="num mb-1 text-body-lg text-fg-3 line-through">
+              <span className="mb-1 num text-body-lg text-fg-3 line-through">
                 {format.number(original as number, "currency")}
               </span>
             )}
             {price != null ? (
               <>
                 <span className="text-metric-xl text-fg">{format.number(price, "currency")}</span>
-                <span className="mb-1.5 text-small text-fg-3">{plan.isOneTime ? t("card.oneTime") : t("card.perMonth")}</span>
+                <span className="mb-1.5 text-small text-fg-3">
+                  {plan.isOneTime ? t("card.oneTime") : t("card.perMonth")}
+                </span>
               </>
             ) : (
               <span className="text-h2 text-fg-2">{t("card.pricePending")}</span>
             )}
           </div>
           <p className="min-h-4 text-caption text-blue">
-            {plan.isOneTime ? t("card.oneTimeLicence") : period === "annually" && price != null ? t("card.billedAnnually") : null}
+            {plan.isOneTime
+              ? t("card.oneTimeLicence")
+              : period === "annually" && price != null
+                ? t("card.billedAnnually")
+                : null}
           </p>
         </div>
 

@@ -3,21 +3,22 @@
 import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 
-import { SITE_SETUP_STEPS, type Brand, type SiteSetupStep } from "@/lib/api/types";
-import { workspaceKeys } from "@/lib/api/query-keys";
-import { faviconFor, getSite, nameFromDomain, updateSite } from "@/lib/mocks/store";
+import { SITE_SETUP_STEPS, type SiteSetupStep } from "@/types/types";
 import { useUiStore } from "@/lib/store/ui";
+import contentPlannerService from "@/services/content-planner";
+import { useSite, useWorkspaces } from "@/features/workspace/hooks";
+import { siteSlug } from "@/features/sites/site-utils";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { crawledName } from "./fake-ai";
 import { useStepNav } from "./hooks/use-step-nav";
+import { setSetupStep, useSetupStep } from "./progress";
 import { Interstitial } from "./shell/interstitial";
 import { StepTransition } from "./shell/step-transition";
 import { SITES_PATH } from "./steps";
-import { patchDraft } from "./store";
+import { useSetupStore } from "./store";
 import { BillingStep } from "./steps/billing-step";
 import { CoreTopicsStep } from "./steps/core-topics/core-topics-step";
 import { DetailsStep } from "./steps/details/details-step";
@@ -31,36 +32,38 @@ import { topicsQuery } from "./topics-query";
 const INTERSTITIAL_MIN_MS = 900;
 
 const order = (step: SiteSetupStep) => SITE_SETUP_STEPS.indexOf(step);
-export const siteSetupKey = (siteId: string) => ["site-setup", siteId, "site"] as const;
+const thisMonth = () => new Date().toISOString().slice(0, 7);
 
 /**
- * Steps 2b–8 for one site, inside the persistent setup shell. The step comes
- * from the URL; moving on saves progress to the site first, then pushes the
- * next URL, so a refresh or a later visit resumes at the furthest step
- * reached. Jumping ahead of it by URL lands back on it.
+ * Steps 2b–8 for one site, inside the persistent setup shell. The site comes
+ * from `GET /sites/{site}`; the step from the URL. Moving on records the
+ * furthest step reached (in this browser, see progress.ts), then pushes the
+ * next URL, so a refresh resumes at it. Jumping ahead by URL lands back on it.
  */
-export function SetupFlow({ siteId }: { siteId: string }) {
+export function SetupFlow({ siteId: siteParam }: { siteId: string }) {
   const t = useTranslations("siteSetup.flow");
   const router = useRouter();
   const queryClient = useQueryClient();
-  const { step, direction, go } = useStepNav(siteId);
-  const query = useQuery({ queryKey: siteSetupKey(siteId), queryFn: () => getSite(siteId) });
+  const siteId = Number(siteParam);
+  const { step, direction, go } = useStepNav(siteParam);
+  const query = useSite(Number.isInteger(siteId) ? siteId : undefined);
+  const workspaces = useWorkspaces();
+  const furthest = useSetupStep(siteId);
   const [interstitial, setInterstitial] = React.useState(false);
   const [busy, setBusy] = React.useState(false);
-  const site = query.data?.site;
-  const workspaceId = query.data?.workspaceId;
+  const site = query.data;
   const current: SiteSetupStep = step === "account" ? "details" : step;
 
   React.useEffect(() => {
     if (!site) return;
-    if (!site.setupStep) {
-      router.replace(`/${site.slug}/overview`);
-    } else if (order(current) > order(site.setupStep)) {
-      go(site.setupStep, { replace: true });
+    if (!furthest) {
+      router.replace(`/${siteSlug(site)}/overview`);
+    } else if (order(current) > order(furthest)) {
+      go(furthest, { replace: true });
     }
-  }, [site, current, go, router]);
+  }, [site, furthest, current, go, router]);
 
-  if (query.isError) {
+  if (query.isError || !Number.isInteger(siteId)) {
     return (
       <div className="flex flex-col items-start gap-4">
         <h1 className="text-h1 text-fg">{t("notFound.title")}</h1>
@@ -72,7 +75,7 @@ export function SetupFlow({ siteId }: { siteId: string }) {
     );
   }
 
-  if (!site || !workspaceId) {
+  if (!site) {
     return (
       <div className="flex flex-col gap-6" aria-busy>
         <Skeleton className="h-9 w-64" />
@@ -83,75 +86,63 @@ export function SetupFlow({ siteId }: { siteId: string }) {
     );
   }
 
-  const save = async (patch: Partial<Omit<Brand, "id" | "slug">>) => {
-    const updated = await updateSite(siteId, patch);
-    queryClient.setQueryData(siteSetupKey(siteId), { site: updated, workspaceId });
-    void queryClient.invalidateQueries({ queryKey: workspaceKeys.brands(workspaceId) });
-    return updated;
-  };
-
   /** Records the furthest step reached, then moves to `next`. */
-  const advance = async (next: SiteSetupStep, patch: Partial<Brand> = {}) => {
-    const furthest = site.setupStep && order(site.setupStep) > order(next) ? site.setupStep : next;
-    await save({ ...patch, setupStep: furthest });
+  const advance = (next: SiteSetupStep) => {
+    if (!furthest || order(next) > order(furthest)) setSetupStep(site.id, next);
     go(next);
   };
 
-  const finishDetails = async ({ country, language }: { country: string; language: string }) => {
+  const finishDetails = async () => {
     setBusy(true);
-    const named = { ...site, name: crawledName(site) };
-    // Topic generation starts now, so step 4 often opens with topics ready.
-    void queryClient.prefetchQuery(topicsQuery(named));
+    // Topic discovery starts now, so step 4 often opens with topics ready.
+    void queryClient.prefetchQuery(topicsQuery(site));
     setInterstitial(true);
-    await Promise.all([
-      advance("google-search-console", { name: named.name, market: country, contentLanguage: language }),
-      new Promise((resolve) => setTimeout(resolve, INTERSTITIAL_MIN_MS)),
-    ]);
+    await new Promise((resolve) => setTimeout(resolve, INTERSTITIAL_MIN_MS));
+    advance("google-search-console");
     setInterstitial(false);
     setBusy(false);
   };
 
-  const changeDomain = async (domain: string) => {
-    await save({ domain, faviconUrl: faviconFor(domain), name: nameFromDomain(domain), setupStep: "details" });
-    patchDraft(siteId, {
-      description: null,
-      descriptionConfirmed: false,
-      audience: null,
-      audienceConfirmed: false,
-      country: null,
-      language: null,
-      topicSuggestions: null,
-      coreTopics: [],
-    });
-    return null;
-  };
-
-  // Clearing setupStep marks the site finished; the guard above then opens its dashboard.
+  /**
+   * Generates this month's content plan from the preferences step, then
+   * marks setup finished; the guard above opens the dashboard.
+   */
   const finish = async () => {
     setBusy(true);
+    const preferences = useSetupStore.getState().drafts[site.id]?.preferences;
+    try {
+      await contentPlannerService.generate(site.id, {
+        month: thisMonth(),
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        cadence: "weekly",
+        articles_target: Math.max(1, Math.min(100, (preferences?.articlesPerWeek ?? 2) * 4)),
+        autopilot_enabled: preferences?.publishMode === "auto",
+      });
+    } catch {
+      // The plan can be generated later from the content calendar; setup still finishes.
+    }
     const ui = useUiStore.getState();
-    ui.setWorkspace(workspaceId);
-    ui.setBrand(site.slug);
-    await save({ setupStep: null });
+    const workspaceId = workspaces.data?.active?.work_space_id;
+    if (workspaceId) ui.setWorkspace(String(workspaceId));
+    ui.setBrand(siteSlug(site));
+    setSetupStep(site.id, null);
   };
 
   const body = (() => {
     if (interstitial) return <Interstitial />;
     switch (current) {
       case "details":
-        return (
-          <DetailsStep site={site} onChangeDomain={changeDomain} onComplete={finishDetails} completing={busy} />
-        );
+        return <DetailsStep site={site} onComplete={() => void finishDetails()} completing={busy} />;
       case "google-search-console":
-        return <GscStep site={site} onContinue={() => void advance("core-topics")} />;
+        return <GscStep site={site} onContinue={() => advance("core-topics")} />;
       case "core-topics":
-        return <CoreTopicsStep site={site} onContinue={() => void advance("billing")} />;
+        return <CoreTopicsStep site={site} onContinue={() => advance("billing")} />;
       case "billing":
-        return <BillingStep site={site} onContinue={() => void advance("integration")} />;
+        return <BillingStep site={site} onContinue={() => advance("integration")} />;
       case "integration":
-        return <IntegrationStep site={site} onContinue={() => void advance("preferences")} />;
+        return <IntegrationStep site={site} onContinue={() => advance("preferences")} />;
       case "preferences":
-        return <PreferencesStep site={site} onContinue={() => void advance("done")} />;
+        return <PreferencesStep site={site} onContinue={() => advance("done")} />;
       case "done":
         return <DoneStep site={site} finishing={busy} onFinish={() => void finish()} />;
     }

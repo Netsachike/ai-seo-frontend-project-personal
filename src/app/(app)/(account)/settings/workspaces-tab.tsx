@@ -10,7 +10,7 @@ import { toast } from "@/lib/toast";
 import { getErrorMessage, mentionsUpgrade } from "@/lib/errors";
 import { hasWhiteLabel } from "@/lib/subscription";
 import { useWorkspaceStore, type Workspace } from "@/stores/workspace-store";
-import type { User } from "@/types/shared";
+import type { User } from "@/types/types";
 import { accountHref, type SettingsTab } from "@/features/account/routes";
 import { useSessionUser } from "@/features/account/use-session-user";
 import { getTeamMemberWorkspaceIds } from "@/features/account/use-team-members";

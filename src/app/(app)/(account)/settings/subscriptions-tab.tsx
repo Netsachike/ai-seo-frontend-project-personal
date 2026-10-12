@@ -10,7 +10,7 @@ import { getErrorMessage } from "@/lib/errors";
 import { getActivePlan, PLAN_META } from "@/lib/plan";
 import { getNextBillingDate, isValidAddon, type ValidAddonKey } from "@/lib/subscription";
 import SubscriptionService from "@/services/subscriptions";
-import type { SubscriptionDataNew } from "@/types/shared";
+import type { SubscriptionDataNew } from "@/types/types";
 import { accountHref } from "@/features/account/routes";
 import { useSessionUser } from "@/features/account/use-session-user";
 import { ConfirmDialog } from "@/components/account/confirm-dialog";
@@ -149,7 +149,10 @@ export function SubscriptionsTab() {
                   <li key={plan.id} className="flex flex-col gap-4 rounded-md border border-border p-5">
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-center gap-3">
-                        <span aria-hidden className="grid size-10 place-items-center rounded-md bg-blue-bg text-blue-ink">
+                        <span
+                          aria-hidden
+                          className="grid size-10 place-items-center rounded-md bg-blue-bg text-blue-ink"
+                        >
                           <PlanIcon className="size-[18px]" />
                         </span>
                         <div className="flex flex-col">

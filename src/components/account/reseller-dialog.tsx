@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useTranslations } from "next-intl";
 
-import type { User } from "@/types/shared";
+import type { User } from "@/types/types";
 import { FormField } from "@/components/forms/form-field";
 import { PasswordInput } from "@/components/forms/password-input";
 import { PasswordStrength } from "@/components/account/password-strength";

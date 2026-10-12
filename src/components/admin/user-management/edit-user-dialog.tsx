@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 
 import { toast } from "@/lib/toast";
 import adminService from "@/services/admin";
-import type { UpdateAddonsPayload, UpdateNewUserFromAdminPayload, User } from "@/types/shared";
+import type { UpdateAddonsPayload, UpdateNewUserFromAdminPayload, User } from "@/types/types";
 import { FormField } from "@/components/forms/form-field";
 import { PasswordInput } from "@/components/forms/password-input";
 import { Button } from "@/components/ui/button";

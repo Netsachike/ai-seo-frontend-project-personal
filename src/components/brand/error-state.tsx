@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "./empty-state";
 
-export const SUPPORT_EMAIL = "support@orbit.example";
+export const SUPPORT_EMAIL = "support@rankoya.uk";
 
 /** Shared error copy with a retry. Used by every data screen. */
 export function ErrorState({

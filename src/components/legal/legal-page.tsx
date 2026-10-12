@@ -72,7 +72,9 @@ export async function LegalPage({ document }: { document: LegalDocument }) {
         <p className="text-overline text-blue">{t("overline")}</p>
         <h1 className="mt-3 text-display text-fg">{document.title}</h1>
         <p className="mt-3 text-small text-fg-3">
-          {t("lastUpdated", { date: format.dateTime(new Date(`${document.lastUpdated}T12:00:00Z`), { dateStyle: "long" }) })}
+          {t("lastUpdated", {
+            date: format.dateTime(new Date(`${document.lastUpdated}T12:00:00Z`), { dateStyle: "long" }),
+          })}
         </p>
         {/* The binding text is English; mark it so screen readers and translators know. */}
         <article lang="en" dir="ltr" className="mt-10 flex flex-col gap-10">
@@ -80,7 +82,11 @@ export async function LegalPage({ document }: { document: LegalDocument }) {
             <section key={section.heading ?? index} className="flex flex-col gap-3">
               {section.heading && <h2 className="text-h2 text-fg">{section.heading}</h2>}
               {section.blocks.map((block, blockIndex) =>
-                block.type === "p" ? (
+                block.type === "h3" ? (
+                  <h3 key={blockIndex} className="mt-3 text-h3 text-fg">
+                    {block.text}
+                  </h3>
+                ) : block.type === "p" ? (
                   <p key={blockIndex} className="text-body-lg text-fg-2">
                     {linkify(block.text)}
                   </p>

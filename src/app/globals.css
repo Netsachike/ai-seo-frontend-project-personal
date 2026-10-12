@@ -10,7 +10,7 @@
   --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, monospace;
   --font-heading: var(--font-sans);
 
-  /* Orbit tokens */
+  /* Rankoya tokens */
   --color-bg: var(--bg);
   --color-surface: var(--surface);
   --color-surface-2: var(--surface-2);
@@ -55,7 +55,7 @@
   --color-nav-card: var(--nav-card);
   --color-nav-star: var(--nav-star);
 
-  /* shadcn semantic names mapped onto Orbit tokens, so primitives inherit the palette */
+  /* shadcn semantic names mapped onto Rankoya tokens, so primitives inherit the palette */
   --color-background: var(--surface);
   --color-foreground: var(--text);
   --color-card: var(--surface);
@@ -374,7 +374,7 @@
 }
 
 /* Skeleton shimmer, token-driven so it follows the theme */
-@keyframes orbit-shimmer {
+@keyframes rankoya-shimmer {
   from {
     background-position: 100% 0;
   }
@@ -391,7 +391,7 @@
     transparent 100%
   );
   background-size: 200% 100%;
-  animation: orbit-shimmer 1.4s var(--ease-in-out) infinite;
+  animation: rankoya-shimmer 1.4s var(--ease-in-out) infinite;
 }
 :dir(rtl) .skeleton-shimmer {
   animation-direction: reverse;
@@ -404,7 +404,7 @@
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  animation: orbit-shimmer 1.6s linear infinite;
+  animation: rankoya-shimmer 1.6s linear infinite;
 }
 :dir(rtl) .text-shimmer {
   animation-direction: reverse;
@@ -442,53 +442,53 @@
 }
 
 /* Article editor (Tiptap). Token-driven so it follows the theme. */
-.orbit-editor {
+.rankoya-editor {
   color: var(--text);
   font-size: 16px;
   line-height: 26px;
 }
-.orbit-editor > * + * {
+.rankoya-editor > * + * {
   margin-top: 14px;
 }
-.orbit-editor h2 {
+.rankoya-editor h2 {
   font-size: 22px;
   line-height: 30px;
   font-weight: 600;
   letter-spacing: -0.01em;
   margin-top: 28px;
 }
-.orbit-editor h3 {
+.rankoya-editor h3 {
   font-size: 17px;
   line-height: 26px;
   font-weight: 600;
   margin-top: 22px;
 }
-.orbit-editor ul,
-.orbit-editor ol {
+.rankoya-editor ul,
+.rankoya-editor ol {
   padding-inline-start: 22px;
 }
-.orbit-editor ul {
+.rankoya-editor ul {
   list-style: disc;
 }
-.orbit-editor ol {
+.rankoya-editor ol {
   list-style: decimal;
 }
-.orbit-editor li + li {
+.rankoya-editor li + li {
   margin-top: 4px;
 }
-.orbit-editor blockquote {
+.rankoya-editor blockquote {
   border-inline-start: 2px solid var(--border-strong);
   padding-inline-start: 14px;
   color: var(--text-2);
 }
-.orbit-editor strong {
+.rankoya-editor strong {
   font-weight: 600;
 }
-.orbit-editor ::selection {
+.rankoya-editor ::selection {
   background-color: var(--signal);
   color: var(--signal-ink);
 }
-.orbit-editor .placeholder-token {
+.rankoya-editor .placeholder-token {
   background: var(--warning-bg);
   color: var(--warning);
   border-radius: 3px;

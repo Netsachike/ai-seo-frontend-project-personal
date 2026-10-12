@@ -1,32 +1,23 @@
 "use client";
 
 import * as React from "react";
-import { CheckIcon, FilePenLineIcon, ListPlusIcon, MailIcon, PlusIcon, UsersIcon } from "lucide-react";
+import { CheckIcon, FilePenLineIcon, ListPlusIcon, MailIcon, ScanSearchIcon, UsersIcon } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import { fakeRequest } from "@/lib/auth/session";
-import { useFakeQuery } from "@/lib/fake-query";
-import { DOMAIN_PATTERN } from "@/features/site-setup/steps";
-import { competitorsData, type CompetitorRow } from "@/lib/mocks/ui-data";
+import { getErrorMessage } from "@/lib/errors";
+import type { CompetitorRow, KeywordGap, LinkSite, QuestionGap } from "@/lib/mocks/ui-data";
+import { useCompetitors, useResearchCompetitors } from "@/features/competitors/hooks";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardAction, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { EmptyState } from "@/components/brand/empty-state";
 import { ErrorState } from "@/components/brand/error-state";
 import { OwnerChip } from "@/components/brand/owner-chip";
 import { colorize } from "@/components/charts/series-colors";
-import { DomainInput, FormField } from "@/components/forms/form-field";
 import { PageHeader } from "@/components/layout/page-header";
 import { PageSkeleton } from "@/components/layout/page-skeleton";
 import { useShell } from "@/components/layout/shell-context";
@@ -34,10 +25,14 @@ import { useShell } from "@/components/layout/shell-context";
 export function CompetitorsView() {
   const t = useTranslations("competitors");
   const { brand } = useShell();
-  const [adding, setAdding] = React.useState(false);
-  const query = useFakeQuery(["competitors", brand?.id], () => competitorsData(brand?.id ?? ""), {
-    enabled: Boolean(brand),
-  });
+  const query = useCompetitors(brand);
+  const research = useResearchCompetitors(brand?.id ?? 0);
+
+  const runResearch = () =>
+    research.mutate(undefined, {
+      onSuccess: (result) => toast.success(t("researched", { count: result.competitors })),
+      onError: (error) => toast.error(getErrorMessage(error, t("researchFailed"))),
+    });
 
   if (!brand || query.isPending) return <PageSkeleton kpis={0} panels={4} />;
   const data = query.data;
@@ -50,13 +45,12 @@ export function CompetitorsView() {
           data && data.rows.length > 0 ? t("insight", { leader: data.leader, lead: data.lead }) : t("descriptionEmpty")
         }
         actions={
-          <Button variant="primary" onClick={() => setAdding(true)}>
-            <PlusIcon />
-            {t("add")}
+          <Button variant="primary" loading={research.isPending} onClick={runResearch}>
+            <ScanSearchIcon />
+            {t("research")}
           </Button>
         }
       />
-      <AddCompetitorDialog open={adding} onOpenChange={setAdding} />
 
       {query.isError && <ErrorState onRetry={() => query.refetch()} />}
       {data && data.rows.length === 0 && (
@@ -128,7 +122,7 @@ function ComparisonTable({ rows }: { rows: CompetitorRow[] }) {
   );
 }
 
-function QuestionGaps({ gaps }: { gaps: ReturnType<typeof competitorsData>["questionGaps"] }) {
+function QuestionGaps({ gaps }: { gaps: QuestionGap[] }) {
   const t = useTranslations("competitors.questionGaps");
   const format = useFormatter();
   const [drafting, setDrafting] = React.useState<Record<string, "busy" | "done">>({});
@@ -173,7 +167,7 @@ function QuestionGaps({ gaps }: { gaps: ReturnType<typeof competitorsData>["ques
   );
 }
 
-function KeywordGaps({ gaps }: { gaps: ReturnType<typeof competitorsData>["keywordGaps"] }) {
+function KeywordGaps({ gaps }: { gaps: KeywordGap[] }) {
   const t = useTranslations("competitors.keywordGaps");
   const format = useFormatter();
   const [added, setAdded] = React.useState<string[]>([]);
@@ -217,7 +211,7 @@ function KeywordGaps({ gaps }: { gaps: ReturnType<typeof competitorsData>["keywo
   );
 }
 
-function LinkSites({ sites }: { sites: ReturnType<typeof competitorsData>["sites"] }) {
+function LinkSites({ sites }: { sites: LinkSite[] }) {
   const t = useTranslations("competitors.sites");
   const [state, setState] = React.useState<"idle" | "busy" | "done">("idle");
   return (
@@ -263,60 +257,5 @@ function LinkSites({ sites }: { sites: ReturnType<typeof competitorsData>["sites
         ))}
       </ul>
     </Card>
-  );
-}
-
-function AddCompetitorDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
-  const t = useTranslations("competitors.addDialog");
-  const tCommon = useTranslations("common");
-  const [domain, setDomain] = React.useState("");
-  const [error, setError] = React.useState<string>();
-  const [saving, setSaving] = React.useState(false);
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <form
-          noValidate
-          className="flex flex-col gap-6"
-          onSubmit={async (e) => {
-            e.preventDefault();
-            if (!DOMAIN_PATTERN.test(domain)) return setError(t("invalid"));
-            setSaving(true);
-            await fakeRequest();
-            setSaving(false);
-            onOpenChange(false);
-            setDomain("");
-            toast.success(t("added", { domain }));
-          }}
-        >
-          <DialogHeader>
-            <DialogTitle>{t("title")}</DialogTitle>
-            <DialogDescription>{t("description")}</DialogDescription>
-          </DialogHeader>
-          <FormField label={t("label")} error={error} helper={t("helper")}>
-            {(props) => (
-              <DomainInput
-                {...props}
-                autoFocus
-                value={domain}
-                onChange={(v) => {
-                  setDomain(v);
-                  setError(undefined);
-                }}
-                placeholder={t("placeholder")}
-              />
-            )}
-          </FormField>
-          <DialogFooter>
-            <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>
-              {tCommon("cancel")}
-            </Button>
-            <Button type="submit" variant="primary" loading={saving}>
-              {t("submit")}
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
   );
 }

@@ -46,7 +46,10 @@ export function WorkspaceDialog({
   const switchId = React.useId();
 
   // Reset the form each time the dialog opens (adjusting state during render).
-  const [seen, setSeen] = React.useState<{ open: boolean; workspace: Workspace | null }>({ open: false, workspace: null });
+  const [seen, setSeen] = React.useState<{ open: boolean; workspace: Workspace | null }>({
+    open: false,
+    workspace: null,
+  });
   if (seen.open !== open || seen.workspace !== workspace) {
     setSeen({ open, workspace });
     if (open) {

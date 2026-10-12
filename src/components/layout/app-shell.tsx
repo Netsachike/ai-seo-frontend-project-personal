@@ -19,10 +19,13 @@ import { Topbar } from "./topbar";
 export function AppShell({
   brandSlug,
   initialCollapsed,
+  accountMode = false,
   children,
 }: {
   brandSlug: string;
   initialCollapsed: boolean;
+  /** Account pages keep the shell on the last-used site but must not 404 when it is gone. */
+  accountMode?: boolean;
   children: React.ReactNode;
 }) {
   const t = useTranslations("shell");
@@ -34,13 +37,13 @@ export function AppShell({
   const [help, setHelp] = React.useState(false);
   const [feedback, setFeedback] = React.useState(false);
 
-  if (lookup.notFound) notFound();
+  if (lookup.notFound && !accountMode) notFound();
 
-  const workspaceId = lookup.workspace?.id;
+  const workspaceId = lookup.workspace?.work_space_id;
   // Runs before children's passive effects, so their first queries see the active workspace.
   React.useLayoutEffect(() => {
     const store = useUiStore.getState();
-    if (workspaceId && store.workspaceId !== workspaceId) store.setWorkspace(workspaceId);
+    if (workspaceId && store.workspaceId !== String(workspaceId)) store.setWorkspace(String(workspaceId));
     if (lookup.brand && store.brandSlug !== brandSlug) store.setBrand(brandSlug);
   }, [workspaceId, brandSlug, lookup.brand]);
 
@@ -96,7 +99,7 @@ export function AppShell({
       </Sheet>
 
       <CommandMenu />
-      {workspaceId && <AgentPanel workspaceId={workspaceId} agentHref={brandHref(brandSlug, "agent")} />}
+      {lookup.brand && <AgentPanel siteId={lookup.brand.id} agentHref={brandHref(brandSlug, "agent")} />}
       <HelpSheet open={help} onOpenChange={setHelp} />
       <FeedbackDialog open={feedback} onOpenChange={setFeedback} />
     </ShellProvider>

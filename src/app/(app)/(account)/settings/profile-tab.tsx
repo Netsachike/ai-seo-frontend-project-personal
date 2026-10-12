@@ -8,12 +8,10 @@ import { getErrorMessage } from "@/lib/errors";
 import { LOCAL_UPLOAD_MAX_BYTES } from "@/lib/plan";
 import { clearProfileImage, setProfileImage, useProfileImage } from "@/lib/profile-image";
 import UploadService from "@/services/upload";
-import { isDemoApi } from "@/services/api/api";
 import { useSessionUser } from "@/features/account/use-session-user";
 import { FormField } from "@/components/forms/form-field";
 import { PasswordInput } from "@/components/forms/password-input";
 import { PasswordStrength, getStrength } from "@/components/account/password-strength";
-import { DemoAccountCard } from "@/components/account/demo-account-card";
 import { UserAvatar } from "@/components/layout/avatars";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -203,8 +201,6 @@ function ProfileForms({ fullName: initialName, email: initialEmail }: { fullName
           </div>
         </form>
       </Card>
-
-      {isDemoApi && <DemoAccountCard />}
     </div>
   );
 }

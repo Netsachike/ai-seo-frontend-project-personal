@@ -2,7 +2,7 @@
 
 import { useFormatter, useTranslations } from "next-intl";
 
-import type { Delta } from "@/lib/api/types";
+import type { Delta } from "@/lib/mocks/types";
 import { cn } from "@/lib/utils";
 import { DeltaChip } from "@/components/brand/delta-chip";
 import { colorize } from "./series-colors";

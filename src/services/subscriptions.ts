@@ -1,6 +1,6 @@
 import api from "./api/api";
 import { whiteLabelAccessPath } from "@/lib/white-label-access";
-import type { AddonAccessResponse } from "@/types/shared";
+import type { AddonAccessResponse } from "@/types/types";
 
 export interface CancelSubscriptionResponse {
   success: boolean;
@@ -19,10 +19,7 @@ const SubscriptionService = {
    */
   cancelSubscription: async (subscriptionId: string | number) => {
     try {
-      const res = await api.post<CancelSubscriptionResponse>(
-        "/cancle/subscription",
-        { subscriptionId },
-      );
+      const res = await api.post<CancelSubscriptionResponse>("/cancle/subscription", { subscriptionId });
       return res.data;
     } catch (error) {
       throw error;
@@ -39,12 +36,8 @@ const SubscriptionService = {
    * ask" and keep showing the optimistic state instead of locking someone out
    * over a dropped request.
    */
-  getWhiteLabelAccess: async (
-    userId: number | string,
-  ): Promise<AddonAccessResponse> => {
-    const response = await api.get<AddonAccessResponse>(
-      whiteLabelAccessPath(userId),
-    );
+  getWhiteLabelAccess: async (userId: number | string): Promise<AddonAccessResponse> => {
+    const response = await api.get<AddonAccessResponse>(whiteLabelAccessPath(userId));
     return response.data;
   },
 };

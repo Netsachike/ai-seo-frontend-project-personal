@@ -1,11 +1,11 @@
 import { deleteClientCookie, readClientCookie, setClientCookie } from "@/lib/cookies";
-import type { AllUserSubscriptionsNew, User } from "@/types/shared";
+import type { AllUserSubscriptionsNew, User } from "@/types/types";
 
 /**
  * Session cookies shared with every Netsach product: `authToken` (bearer token
  * for the API) and `authUser` (the trimmed user the UI gates on). Ported from
  * the Flowcasta handoff; only the cookie helpers and event prefix changed, and
- * the product-tour reset was dropped (Orbit has no tours). proxy.ts reads both
+ * the product-tour reset was dropped (Rankoya has no tours). proxy.ts reads both
  * cookies on the server.
  */
 export const AUTH_TOKEN_COOKIE_NAME = "authToken";
@@ -103,7 +103,7 @@ export const mapRegistrationUserToSession = (user: RegistrationUserState): Sessi
 
 // Fired whenever the session cookie is (re)written, so live UI such as the
 // sidebar plan card can re-read it without a full reload.
-export const SESSION_UPDATED_EVENT = "orbit:session-updated";
+export const SESSION_UPDATED_EVENT = "rankoya:session-updated";
 
 // Persist an already-mapped session user to the cookie and notify listeners.
 export const writeSessionUserCookie = (sessionUser: SessionUser) => {

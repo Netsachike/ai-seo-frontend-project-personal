@@ -28,7 +28,7 @@ function sessionIsAdmin(request: NextRequest): boolean {
 }
 
 /**
- * Whether the request arrived on Orbit's own host rather than a reseller's
+ * Whether the request arrived on Rankoya's own host rather than a reseller's
  * custom domain. Local development and preview deploys count as the vendor
  * host. Mirrors `isDefaultAppHost` in config/brand.ts, inlined to keep the
  * proxy bundle small.
@@ -36,7 +36,7 @@ function sessionIsAdmin(request: NextRequest): boolean {
 function isVendorHost(request: NextRequest): boolean {
   const rawHost = request.headers.get("x-forwarded-host") ?? request.headers.get("host") ?? "";
   const host = rawHost.trim().toLowerCase().split(":")[0];
-  const appHost = (process.env.NEXT_PUBLIC_APP_HOST ?? "app.orbit.example")
+  const appHost = (process.env.NEXT_PUBLIC_APP_HOST ?? "app.rankoya.uk")
     .trim()
     .toLowerCase()
     .replace(/^https?:\/\//, "")
@@ -53,14 +53,14 @@ function isVendorHost(request: NextRequest): boolean {
 
 /**
  * Sends signed-out visitors to /sign-in (and signed-in ones away from it),
- * keeps /admin to admins, hides Orbit's own legal pages on tenant domains, and
+ * keeps /admin to admins, hides Rankoya's own legal pages on tenant domains, and
  * resolves the UI language from Accept-Language when there is no cookie yet.
  */
 export function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
   const signedIn = request.cookies.has(SESSION_COOKIE);
 
-  // Orbit's legal documents. A reseller's customers have no relationship with
+  // Rankoya's legal documents. A reseller's customers have no relationship with
   // us, so on a white-label domain these URLs must not resolve at all.
   if (matches(pathname, LEGAL_PATHS) && !isVendorHost(request)) {
     return NextResponse.rewrite(new URL("/_vendor-only", request.url));
