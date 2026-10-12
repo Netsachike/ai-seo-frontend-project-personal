@@ -2,65 +2,18 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowUpIcon, ExternalLinkIcon } from "lucide-react";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 
-import type { AgentMessage, AgentThread } from "@/lib/api/types";
-import { getAgentThread, sendAgentMessage } from "@/lib/mocks/store";
-import { agentKeys } from "@/lib/api/query-keys";
+import type { AgentMessage } from "@/lib/mocks/types";
+import { getErrorMessage } from "@/lib/errors";
+import { useAgentThread, useSendAgentMessage } from "@/features/agent/hooks";
 import { useUiStore } from "@/lib/store/ui";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
-import { OrbitAvatar } from "@/components/brand/logo";
+import { RankoyaAvatar } from "@/components/brand/logo";
 import { DayDivider, Message } from "./message";
-
-export const MAIN_THREAD_ID = "thr_main";
-
-export function useAgentThread(workspaceId: string, threadId = MAIN_THREAD_ID) {
-  return useQuery({
-    queryKey: agentKeys.thread(workspaceId, threadId),
-    queryFn: getAgentThread,
-  });
-}
-
-export function useSendAgentMessage(workspaceId: string, threadId = MAIN_THREAD_ID) {
-  const locale = useLocale();
-  const queryClient = useQueryClient();
-  const key = agentKeys.thread(workspaceId, threadId);
-  return useMutation({
-    mutationFn: (text: string) => sendAgentMessage(text, locale),
-    onMutate: async (text) => {
-      await queryClient.cancelQueries({ queryKey: key });
-      const previous = queryClient.getQueryData<AgentThread>(key);
-      queryClient.setQueryData<AgentThread>(key, (thread) =>
-        thread
-          ? {
-              ...thread,
-              messages: [
-                ...thread.messages,
-                {
-                  id: `tmp_${Date.now()}`,
-                  role: "user",
-                  createdAt: new Date().toISOString(),
-                  source: "web",
-                  body: text,
-                  approval: null,
-                  task: null,
-                },
-              ],
-            }
-          : thread,
-      );
-      return { previous };
-    },
-    onError: (_error, _text, context) => {
-      if (context?.previous) queryClient.setQueryData(key, context.previous);
-    },
-    onSettled: () => queryClient.invalidateQueries({ queryKey: key }),
-  });
-}
 
 /** ⌘J / Ctrl+J toggles the panel from anywhere in the app. */
 export function useAgentHotkey() {
@@ -81,8 +34,8 @@ export function useAgentHotkey() {
  * 400px end-side sheet. Same thread as /agent and Telegram. Opens from the
  * left in RTL because the sheet side is logical.
  */
-/** `agentHref` links to the full agent page; left out where there is no site yet (the sites page). */
-export function AgentPanel({ workspaceId, agentHref }: { workspaceId: string; agentHref?: string }) {
+/** Ask Rankoya is site-scoped (the backend copilot), so the panel needs an open site. */
+export function AgentPanel({ siteId, agentHref }: { siteId: number; agentHref?: string }) {
   const t = useTranslations("agent");
   const open = useUiStore((s) => s.agentPanelOpen);
   const setOpen = useUiStore((s) => s.setAgentPanelOpen);
@@ -92,13 +45,13 @@ export function AgentPanel({ workspaceId, agentHref }: { workspaceId: string; ag
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetContent side="end" overlay={false} className="gap-0">
         <SheetHeader className="flex-row items-center gap-3">
-          <OrbitAvatar size={28} />
+          <RankoyaAvatar size={28} />
           <div className="flex min-w-0 flex-col">
             <SheetTitle>{t("panelTitle")}</SheetTitle>
             <SheetDescription>{t("panelDescription")}</SheetDescription>
           </div>
         </SheetHeader>
-        <AgentThreadView workspaceId={workspaceId} dense />
+        <AgentThreadView siteId={siteId} dense />
         {agentHref && (
           <div className="border-t border-border px-4 pt-2 pb-1">
             <Button asChild variant="link" size="sm" className="text-caption">
@@ -115,18 +68,18 @@ export function AgentPanel({ workspaceId, agentHref }: { workspaceId: string; ag
 }
 
 export function AgentThreadView({
-  workspaceId,
+  siteId,
   dense = false,
   suggestions,
 }: {
-  workspaceId: string;
+  siteId: number;
   dense?: boolean;
   /** One-tap prompts shown above the composer. */
   suggestions?: string[];
 }) {
   const t = useTranslations("agent");
-  const thread = useAgentThread(workspaceId);
-  const send = useSendAgentMessage(workspaceId);
+  const thread = useAgentThread(siteId);
+  const send = useSendAgentMessage(siteId);
   const draft = useUiStore((s) => s.agentDraft);
   const setDraft = useUiStore((s) => s.setAgentDraft);
   const endRef = React.useRef<HTMLDivElement>(null);
@@ -179,6 +132,11 @@ export function AgentThreadView({
           );
         })}
         {send.isPending && <TypingIndicator />}
+        {send.isError && (
+          <p role="alert" className="text-small text-danger">
+            {getErrorMessage(send.error, t("sendError"))}
+          </p>
+        )}
         <div ref={endRef} />
       </div>
       <form
@@ -261,7 +219,7 @@ function TypingIndicator() {
   const t = useTranslations("agent");
   return (
     <div className="flex items-center gap-3" role="status">
-      <OrbitAvatar size={24} />
+      <RankoyaAvatar size={24} />
       <span className="flex items-center gap-1 rounded-full bg-surface-2 px-3 py-2">
         {[0, 1, 2].map((i) => (
           <span

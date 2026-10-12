@@ -10,12 +10,14 @@ import { dirFor } from "@/i18n/config";
 import { getActivePlan, type PlanName } from "@/lib/plan-core";
 import { accountHref } from "@/features/account/routes";
 import { useSessionUser } from "@/features/account/use-session-user";
+import { faviconFor } from "@/features/sites/site-utils";
+import { workspaceRole } from "@/features/workspace/hooks";
 import { useBrandConfig } from "@/components/providers/brand-provider";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { OrbitMark, WORDMARK } from "@/components/brand/logo";
+import { Logo } from "@/components/brand/logo";
 import { UserAvatar } from "./avatars";
 import { SiteFavicon } from "./site-favicon";
 import { activeNavKey, navGroups, navItemHref, type NavItem } from "./nav";
@@ -72,7 +74,7 @@ export function AppSidebar() {
   );
 }
 
-/** Ring mark, wordmark and tagline, white on navy. On a White Label domain, the tenant's logo or name. */
+/** Logo and tagline, white on navy. On a White Label domain, the tenant's logo or name. */
 export function SidebarBrand({ className }: { className?: string }) {
   const t = useTranslations("shell.sidebar");
   const { brandConfig, isCustomDomain } = useBrandConfig();
@@ -94,14 +96,9 @@ export function SidebarBrand({ className }: { className?: string }) {
   }
 
   return (
-    <span className={cn("flex min-w-0 items-center gap-3", className)}>
-      <OrbitMark size={30} className="text-white" />
-      <span className="flex min-w-0 flex-col">
-        <span className="text-[20px] leading-6 font-semibold tracking-[-0.03em] text-white" translate="no">
-          {WORDMARK}
-        </span>
-        <span className="truncate text-caption font-normal text-nav-muted">{t("tagline")}</span>
-      </span>
+    <span className={cn("flex min-w-0 flex-col gap-1.5", className)}>
+      <Logo tone="onDark" height={28} />
+      <span className="truncate text-caption font-normal text-nav-muted">{t("tagline")}</span>
     </span>
   );
 }
@@ -141,7 +138,7 @@ export function SidebarSite({
         collapsed && "mx-auto size-11 justify-center border-0 bg-transparent p-0",
       )}
     >
-      <SiteFavicon src={brand.faviconUrl} name={brand.name} size={collapsed ? 32 : 34} />
+      <SiteFavicon src={faviconFor(brand.domain)} name={brand.name} size={collapsed ? 32 : 34} />
       {!collapsed && (
         <>
           <span className="flex min-w-0 flex-1 flex-col">
@@ -281,7 +278,7 @@ export function SidebarFooter({ collapsed = false, onNavigate }: { collapsed?: b
   }
 
   const telegramOn = Boolean(me.telegram?.connected);
-  const userLine = t("userLine", { role: tRole(workspace.role), plan: tPlan(`${plan}.label`) });
+  const userLine = t("userLine", { role: tRole(workspaceRole(workspace)), plan: tPlan(`${plan}.label`) });
 
   if (collapsed) {
     return (

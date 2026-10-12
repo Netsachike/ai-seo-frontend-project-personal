@@ -40,7 +40,7 @@ export function useWhiteLabelAccess(): WhiteLabelAccessState {
         const response = await SubscriptionService.getWhiteLabelAccess(userId as number);
         return Boolean(response?.has_access);
       } catch (error) {
-        console.warn("[Orbit][WhiteLabel] ACCESS_CHECK_FAILED", {
+        console.warn("[Rankoya][WhiteLabel] ACCESS_CHECK_FAILED", {
           userId,
           error: getErrorMessage(error, "Unable to verify White Label access."),
         });

@@ -29,7 +29,7 @@ const PRICE_IDS: Record<string, Record<string, string>> = {
   },
 };
 
-/** One-time (lifetime) add-on that removes "Powered by Orbit". */
+/** One-time (lifetime) add-on that removes "Powered by Rankoya". */
 export const REMOVE_BRANDING_PRICE_ID = process.env.NEXT_PUBLIC_PADDLE_REMOVE_BRANDING_LIFETIME ?? "";
 
 export const PADDLE_CONFIG = { prices: PRICE_IDS };

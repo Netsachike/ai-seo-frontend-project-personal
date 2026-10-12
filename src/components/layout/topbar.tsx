@@ -17,7 +17,7 @@ import { ThemeToggle } from "./theme-toggle";
 
 /**
  * 56px, sticky. Workspace on the start side; language, theme, notifications,
- * Ask Orbit and the profile on the end side. Sites are chosen on the sites
+ * Ask Rankoya and the profile on the end side. Sites are chosen on the sites
  * page, not here. Under md, language and theme move into the profile menu.
  *
  * `sites`: the sites page has no sidebar, so the logo takes the menu button's place.
@@ -55,7 +55,7 @@ export function Topbar({ variant = "app" }: { variant?: "app" | "sites" }) {
         variant="agent"
         size="icon"
         className="sm:hidden"
-        aria-label={t("askOrbit")}
+        aria-label={t("askRankoya")}
         aria-expanded={agentOpen}
         onClick={() => setAgentOpen(!agentOpen)}
       >
@@ -68,7 +68,7 @@ export function Topbar({ variant = "app" }: { variant?: "app" | "sites" }) {
         onClick={() => setAgentOpen(!agentOpen)}
       >
         <MessageCircleIcon />
-        {t("askOrbit")}
+        {t("askRankoya")}
         <Shortcut letter="J" className="opacity-70" />
       </Button>
 

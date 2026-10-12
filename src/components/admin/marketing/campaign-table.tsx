@@ -90,7 +90,7 @@ export function CampaignTable() {
                       {knownType ? tType(type) : campaign.type}
                     </Badge>
                   </TableCell>
-                  <TableCell className="num text-end text-fg">
+                  <TableCell className="text-end num text-fg">
                     {t("sentValue", {
                       sent: format.number(Number(campaign.sent || 0), "integer"),
                       total: format.number(Number(campaign.total || 0), "integer"),

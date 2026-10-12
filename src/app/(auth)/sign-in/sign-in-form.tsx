@@ -7,20 +7,19 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useTranslations } from "next-intl";
 
-import { fakeRequest, startSession } from "@/lib/auth/session";
+import { signIn } from "@/lib/auth/session";
+import { getErrorMessage } from "@/lib/errors";
+import { isApiConfigured } from "@/services/api/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { FormField } from "@/components/forms/form-field";
 import { PasswordInput } from "@/components/forms/password-input";
 import { AuthHeading, FormAlert, GoogleButton, OrDivider } from "../auth-ui";
 
-/** UI stage: any email and password signs in, except this password, which shows the error state. */
-const DEMO_WRONG_PASSWORD = "wrong-password";
-
 export function SignInForm({ next }: { next: string }) {
   const t = useTranslations("auth.signIn");
   const tErr = useTranslations("auth.errors");
-  const [failed, setFailed] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
 
   const schema = z.object({
     email: z.email(tErr("emailInvalid")),
@@ -32,25 +31,30 @@ export function SignInForm({ next }: { next: string }) {
   });
   const { errors, isSubmitting } = form.formState;
 
-  const onSubmit = form.handleSubmit(async ({ password }) => {
-    setFailed(false);
-    await fakeRequest();
-    if (password === DEMO_WRONG_PASSWORD) {
-      setFailed(true);
-      form.setFocus("password");
+  const onSubmit = form.handleSubmit(async (values) => {
+    setError(null);
+    if (!isApiConfigured) {
+      setError(tErr("apiUnavailable"));
       return;
     }
-    startSession();
-    window.location.assign(next);
+    try {
+      await signIn(values);
+      window.location.assign(next);
+    } catch (err) {
+      // 401 carries "Invalid credentials or email not verified"; anything else is shown as the server says it.
+      const status = (err as { response?: { status?: number } }).response?.status;
+      setError(status === 401 ? tErr("invalidCredentials") : getErrorMessage(err, tErr("generic")));
+      form.setFocus("password");
+    }
   });
 
   return (
     <div className="flex flex-col gap-6">
       <AuthHeading title={t("title")} description={t("description")} />
-      <GoogleButton next={next} />
+      <GoogleButton />
       <OrDivider />
       <form onSubmit={onSubmit} noValidate className="flex flex-col gap-5">
-        {failed && <FormAlert>{tErr("invalidCredentials")}</FormAlert>}
+        {error && <FormAlert>{error}</FormAlert>}
         <FormField label={t("email")} error={errors.email?.message}>
           {(props) => (
             <Input

@@ -1,12 +1,12 @@
 /**
- * Domain types the UI is built against. Hand-written while the backend is
- * built separately; adjust them to the real API when it lands.
+ * Shapes for features that have no backend endpoint yet: the user's UI
+ * preferences, usage meters, the overview trend summary, background jobs,
+ * notifications, and the agent's approval thread. They exist only for the
+ * mock data in this folder; anything the backend serves is typed in
+ * src/types/types.ts.
  */
+import type { Engine, ThemePreference } from "@/types/types";
 
-export type Engine = "chatgpt" | "gemini" | "perplexity" | "claude" | "aio";
-export type Range = "7d" | "30d" | "90d" | "custom";
-export type Role = "owner" | "admin" | "member" | "viewer";
-export type ThemePreference = "light" | "dark" | "system";
 export type PlanTier = "free" | "growth" | "agency";
 
 export type Me = {
@@ -29,58 +29,6 @@ export type Plan = {
   tier: PlanTier;
   /** Hides the Upgrade prompts when true */
   isTopTier: boolean;
-};
-
-export type Workspace = {
-  id: string;
-  name: string;
-  role: Role;
-  plan: Plan;
-  memberCount: number;
-  brandCount: number;
-  lastBrandSlug?: string | null;
-};
-
-export type Brand = {
-  id: string;
-  /** URL segment for /[brand]/… */
-  slug: string;
-  name: string;
-  domain: string;
-  /** Language Orbit writes in. Separate from the user's UI language. */
-  contentLanguage: string;
-  /** ISO 3166-1 alpha-2 country */
-  market: string;
-  faviconUrl?: string | null;
-  /** The setup step to resume at; null or absent once setup is finished. */
-  setupStep?: SiteSetupStep | null;
-};
-
-/**
- * Site setup steps after the account step, in order. Mirrors RankYak's
- * project setup, which the backend models.
- */
-export const SITE_SETUP_STEPS = [
-  "details",
-  "google-search-console",
-  "core-topics",
-  "billing",
-  "integration",
-  "preferences",
-  "done",
-] as const;
-export type SiteSetupStep = (typeof SITE_SETUP_STEPS)[number];
-
-/** One row on the sites page. */
-export type SiteListItem = Brand & {
-  stats: {
-    clustersCovered: number;
-    clustersTotal: number;
-    /** 0–100, null before the first scan */
-    visibility: number | null;
-    /** Weekly visibility, oldest first */
-    trend: number[];
-  };
 };
 
 export type UsageMeter = { used: number; limit: number };
@@ -185,6 +133,3 @@ export type AgentMessage = {
 };
 
 export type AgentThread = { id: string; messages: AgentMessage[] };
-
-export const engines = ["chatgpt", "gemini", "perplexity", "claude", "aio"] as const satisfies readonly Engine[];
-export const ranges = ["7d", "30d", "90d", "custom"] as const satisfies readonly Range[];

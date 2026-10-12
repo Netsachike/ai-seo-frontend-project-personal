@@ -4,7 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 
-import type { Me } from "@/lib/api/types";
+import type { Me } from "@/lib/mocks/types";
 import { LOCALE_COOKIE, type Locale } from "@/i18n/config";
 import { updateMe } from "@/lib/mocks/store";
 import { meKeys } from "@/lib/api/query-keys";

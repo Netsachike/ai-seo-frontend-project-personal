@@ -1,7 +1,7 @@
 import type { PlanName } from "@/lib/plan-core";
 
 /**
- * Display prices for the upgrade page, in USD. Orbit's pricing isn't set
+ * Display prices for the upgrade page, in USD. Rankoya's pricing isn't set
  * yet, so every price is `null` and the cards say so. Fill these in with the
  * amounts configured in Paddle; checkout always charges the Paddle price.
  *

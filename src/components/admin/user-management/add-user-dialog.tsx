@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 
 import { toast } from "@/lib/toast";
 import adminService from "@/services/admin";
-import type { AddNewUserFromAdminPayload } from "@/types/shared";
+import type { AddNewUserFromAdminPayload } from "@/types/types";
 import { FormField } from "@/components/forms/form-field";
 import { PasswordInput } from "@/components/forms/password-input";
 import { Button } from "@/components/ui/button";
@@ -21,7 +21,13 @@ import {
 } from "@/components/ui/dialog";
 import { AddonsEditor } from "./addons-editor";
 import { BillingSelect, PlanSelect, RoleSelect, StatusSelect } from "./user-fields";
-import { buildAddonsPayload, createDefaultAddons, type AddonsState, type AdminPlan, type BillingType } from "./user-utils";
+import {
+  buildAddonsPayload,
+  createDefaultAddons,
+  type AddonsState,
+  type AdminPlan,
+  type BillingType,
+} from "./user-utils";
 
 /** Create an account with its plan, billing type and add-ons. */
 export function AddUserDialog({

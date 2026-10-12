@@ -2,9 +2,9 @@
 
 import { useFormatter, useTranslations } from "next-intl";
 
-import type { AgentMessage } from "@/lib/api/types";
+import type { AgentMessage } from "@/lib/mocks/types";
 import { cn } from "@/lib/utils";
-import { OrbitAvatar } from "@/components/brand/logo";
+import { RankoyaAvatar } from "@/components/brand/logo";
 import { ApprovalCard } from "./approval-card";
 import { Markdown } from "./markdown";
 import { TaskRow } from "./task-row";
@@ -47,9 +47,9 @@ export function Message({
 
   return (
     <div className="flex items-start gap-3">
-      <OrbitAvatar size={dense ? 24 : 30} />
+      <RankoyaAvatar size={dense ? 24 : 30} />
       <div className={cn("flex min-w-0 flex-1 flex-col gap-3 text-fg", dense ? "text-body" : "text-body-lg")}>
-        <span className="sr-only">{t("orbitSaid")}</span>
+        <span className="sr-only">{t("rankoyaSaid")}</span>
         <Markdown>{message.body}</Markdown>
         {streaming && <span aria-hidden className="inline-block h-4 w-1.5 animate-pulse rounded-[1px] bg-fg-3" />}
         {message.approval && <ApprovalCard approval={message.approval} />}

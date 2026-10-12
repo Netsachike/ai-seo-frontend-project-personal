@@ -40,7 +40,10 @@ export function SetupShell({ children }: { children: React.ReactNode }) {
         transition={{ duration: dur.base }}
         className="flex h-dvh bg-surface"
       >
-        <div id={SETUP_SCROLL_ID} className={cn("flex min-w-0 flex-col overflow-y-auto", wide ? "flex-1" : "w-full lg:w-1/2")}>
+        <div
+          id={SETUP_SCROLL_ID}
+          className={cn("flex min-w-0 flex-col overflow-y-auto", wide ? "flex-1" : "w-full lg:w-1/2")}
+        >
           <header className="flex items-center justify-between gap-4 px-6 pt-6 sm:px-12 sm:pt-10">
             <Link href={SITES_PATH} aria-label={t("home")} className="rounded-md">
               <Logo />

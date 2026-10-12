@@ -14,11 +14,11 @@ Secondary: agencies managing several client brands. The workspace → brand hier
 
 ## Product Purpose
 
-Orbit (working name) shows a brand where it ranks on Google and inside AI answers (ChatGPT, Claude, Gemini, Perplexity, Google AI Overviews), compares it with competitors, and lets an AI agent do the work to close the gap: write articles, fix on-page SEO and publish after approval. Success means a rising AI visibility score with minimal effort from the owner.
+Rankoya shows a brand where it ranks on Google and inside AI answers (ChatGPT, Claude, Gemini, Perplexity, Google AI Overviews), compares it with competitors, and lets an AI agent do the work to close the gap: write articles, fix on-page SEO and publish after approval. Success means a rising AI visibility score with minimal effort from the owner.
 
 ## Positioning
 
-Measurement and execution in one product: the same agent that finds the gap writes the fix, and it takes approvals both in the web app and on Telegram (same conversation thread). Work is split explicitly into what "Orbit" does and what "You" must do.
+Measurement and execution in one product: the same agent that finds the gap writes the fix, and it takes approvals both in the web app and on Telegram (same conversation thread). Work is split explicitly into what "Rankoya" does and what "You" must do.
 
 ## Operating Context
 
@@ -34,14 +34,14 @@ Measurement and execution in one product: the same agent that finds the gap writ
 - Light, dark and system theme are MVP.
 - Plan tiers: Free / Growth / Agency. Mock plan is Growth. All limits come from the API, never hard-coded.
 - Roles: Owner, Admin, Member, Viewer.
-- Open decision: legal company name (placeholder until confirmed). Product name "Orbit" is a placeholder.
+- Open decision: legal company name (placeholder until confirmed).
 
 ## Brand Commitments
 
 - Brand guide "Ink and Signal": calm, dense, data-first; cool neutrals and near-black ink; one electric lime Signal reserved for the agent and for wins, never used as text color.
 - Geist and Geist Mono (tabular numbers for every compared figure).
 - No purple gradients, glowing orbs, sparkle icons or emoji.
-- Voice: plain and specific, numbers first then meaning then action, sentence case, no exclamation marks. The agent speaks as "Orbit" in first person. Banned words: supercharge, unleash, revolutionize, magic, game-changer, seamless.
+- Voice: plain and specific, numbers first then meaning then action, sentence case, no exclamation marks. The agent speaks as "Rankoya" in first person. Banned words: supercharge, unleash, revolutionize, magic, game-changer, seamless.
 
 ## Evidence on Hand
 
@@ -50,7 +50,7 @@ Only fictional mock entities: workspaces "Northwind Team" and "Ada's Agency", br
 ## Product Principles
 
 1. Numbers first, then meaning, then the next action.
-2. Always say who does the work: Orbit or You.
+2. Always say who does the work: Rankoya or You.
 3. Nothing touches a live site without an approval the user can see and undo.
 4. A brand-new workspace with zero data must still read as intentional, never as broken charts.
 5. Every surface works in any supported language, direction and theme.

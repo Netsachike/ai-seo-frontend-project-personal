@@ -5,20 +5,21 @@ import Link from "next/link";
 import { BellIcon, InboxIcon, ListChecksIcon, RadarIcon, UserPlusIcon } from "lucide-react";
 import { useFormatter, useNow, useTranslations } from "next-intl";
 
-import type { Engine, Notification } from "@/lib/api/types";
+import type { Engine } from "@/types/types";
+import type { Notification } from "@/lib/mocks/types";
 import { cn } from "@/lib/utils";
 import { useMarkAllRead, useNotifications } from "@/features/notifications/hooks";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Skeleton } from "@/components/ui/skeleton";
-import { OrbitAvatar } from "@/components/brand/logo";
+import { RankoyaAvatar } from "@/components/brand/logo";
 import { useShell } from "./shell-context";
 
 export function NotificationsPopover() {
   const t = useTranslations("shell.notifications");
   const { workspace } = useShell();
-  const notifications = useNotifications(workspace?.id);
-  const markAll = useMarkAllRead(workspace?.id ?? "none");
+  const notifications = useNotifications(workspace?.work_space_id);
+  const markAll = useMarkAllRead(workspace?.work_space_id ?? 0);
   const [open, setOpen] = React.useState(false);
   const unread = notifications.data?.filter((n) => !n.read).length ?? 0;
 
@@ -128,7 +129,7 @@ function NotificationRow({ notification: n, onNavigate }: { notification: Notifi
 }
 
 function KindIcon({ kind }: { kind: Notification["kind"] }) {
-  if (kind === "agent_event") return <OrbitAvatar size={28} />;
+  if (kind === "agent_event") return <RankoyaAvatar size={28} />;
   const Icon = kind === "approval_waiting" ? ListChecksIcon : kind === "scan_finished" ? RadarIcon : UserPlusIcon;
   return (
     <span aria-hidden className="grid size-7 shrink-0 place-items-center rounded-full bg-surface-2 text-fg-2">

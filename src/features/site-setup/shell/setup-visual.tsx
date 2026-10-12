@@ -1,7 +1,7 @@
 import { useTranslations } from "next-intl";
 
-import type { Engine } from "@/lib/api/types";
-import { OrbitMark } from "@/components/brand/logo";
+import type { Engine } from "@/types/types";
+import { RankoyaMark } from "@/components/brand/logo";
 import { EngineIcon } from "@/components/brand/engine-icon";
 
 /** Engines placed on the rings: [engine, ring radius, angle in degrees]. */
@@ -33,7 +33,7 @@ export function SetupVisual() {
           </svg>
           <span className="absolute inset-0 grid place-items-center">
             <span className="grid size-20 place-items-center rounded-full border border-nav-border bg-nav-card">
-              <OrbitMark size={40} className="text-white" />
+              <RankoyaMark size={40} tone="onDark" />
             </span>
           </span>
           {placements.map(([engine, r, deg]) => {

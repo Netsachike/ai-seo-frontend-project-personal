@@ -3,7 +3,7 @@
 import { create } from "zustand";
 
 import workspaceService from "@/services/workspaces";
-import type { AllUserWorkspace } from "@/types/shared";
+import type { AllUserWorkspace } from "@/types/types";
 
 /**
  * Backend workspaces (shared Netsach API) as the Settings → Workspaces tab and

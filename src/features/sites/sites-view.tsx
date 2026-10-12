@@ -6,13 +6,13 @@ import { useRouter } from "next/navigation";
 import { ChevronRightIcon, EllipsisIcon, PlusIcon, SettingsIcon, UsersIcon } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
 
-import type { SiteListItem } from "@/lib/api/types";
+import type { Site } from "@/types/types";
 import { useUiStore } from "@/lib/store/ui";
 import { accountHref } from "@/features/account/routes";
 import { useSessionUser } from "@/features/account/use-session-user";
+import { useSetupStep } from "@/features/site-setup/progress";
 import { NEW_SITE_PATH, setupPath, stepNumber, TOTAL_STEPS } from "@/features/site-setup/steps";
 import { useSites } from "@/features/workspace/hooks";
-import { Sparkline } from "@/components/charts/sparkline";
 import { useShell } from "@/components/layout/shell-context";
 import { SiteFavicon } from "@/components/layout/site-favicon";
 import { Badge } from "@/components/ui/badge";
@@ -25,6 +25,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
+import { faviconFor, siteSlug } from "./site-utils";
+import { useSiteStats } from "./hooks";
 
 /**
  * Where every session starts: pick the site to work on. Nothing else in the
@@ -35,7 +37,7 @@ export function SitesView() {
   const router = useRouter();
   const session = useSessionUser();
   const { workspace } = useShell();
-  const sites = useSites(workspace?.id);
+  const sites = useSites(workspace?.work_space_id);
 
   return (
     <div className="flex flex-col gap-10">
@@ -53,7 +55,7 @@ export function SitesView() {
         <div className="flex items-center justify-between gap-3">
           {workspace ? (
             <h2 id="workspace-sites" className="truncate text-h2 text-fg">
-              {workspace.name}
+              {workspace.workspace.name}
             </h2>
           ) : (
             <Skeleton className="h-7 w-40" />
@@ -101,7 +103,7 @@ export function SitesView() {
           <ul className="flex flex-col gap-3">
             {sites.data.map((site) => (
               <li key={site.id}>
-                <SiteRow site={site} workspaceId={workspace?.id ?? ""} />
+                <SiteRow site={site} workspaceId={String(workspace?.work_space_id ?? "")} />
               </li>
             ))}
             <li>
@@ -127,12 +129,13 @@ export function SitesView() {
   );
 }
 
-function SiteRow({ site, workspaceId }: { site: SiteListItem; workspaceId: string }) {
+function SiteRow({ site, workspaceId }: { site: Site; workspaceId: string }) {
   const t = useTranslations("sites");
   const format = useFormatter();
-  const inSetup = Boolean(site.setupStep);
-  const href = site.setupStep ? setupPath(site.id, site.setupStep) : `/${site.slug}/overview`;
-  const { stats } = site;
+  const setupStep = useSetupStep(site.id);
+  const { stats } = useSiteStats(site.id);
+  const inSetup = Boolean(setupStep);
+  const href = setupStep ? setupPath(site.id, setupStep) : `/${siteSlug(site)}/overview`;
 
   return (
     <Link
@@ -140,12 +143,12 @@ function SiteRow({ site, workspaceId }: { site: SiteListItem; workspaceId: strin
       onClick={() => {
         const ui = useUiStore.getState();
         ui.setWorkspace(workspaceId);
-        if (!inSetup) ui.setBrand(site.slug);
+        if (!inSetup) ui.setBrand(siteSlug(site));
       }}
       className="group grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-5 rounded-xl border border-border bg-surface p-5 shadow-card transition-[border-color,box-shadow] duration-150 hover:border-border-strong hover:shadow-raised sm:p-6 md:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,1fr)_auto]"
     >
       <div className="flex min-w-0 items-center gap-4">
-        <SiteFavicon src={site.faviconUrl} name={site.name} size={48} />
+        <SiteFavicon src={faviconFor(site.domain)} name={site.name} size={48} />
         <span className="flex min-w-0 flex-col">
           <span className="truncate text-h2 text-fg">{site.name}</span>
           <span dir="ltr" className="truncate text-start text-small text-fg-3">
@@ -172,13 +175,12 @@ function SiteRow({ site, workspaceId }: { site: SiteListItem; workspaceId: strin
           {stats.visibility === null ? "—" : format.number(stats.visibility, "integer")}
         </span>
         <span className="text-small text-fg-3">{t("visibility")}</span>
-        <Sparkline values={stats.trend} height={20} className="max-w-40" tone={stats.trend.length ? "you" : "neutral"} />
       </div>
 
       <div className="col-span-full -mt-1">
-        {inSetup && site.setupStep ? (
+        {inSetup && setupStep ? (
           <Badge variant="warning" shape="pill">
-            {t("setupIncomplete", { step: stepNumber(site.setupStep), total: TOTAL_STEPS })}
+            {t("setupIncomplete", { step: stepNumber(setupStep), total: TOTAL_STEPS })}
           </Badge>
         ) : (
           <Badge variant="success" shape="pill">

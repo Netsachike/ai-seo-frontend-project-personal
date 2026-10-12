@@ -9,10 +9,10 @@ import * as React from "react";
  * the endpoint exists.
  */
 
-export const PROFILE_IMAGE_STORAGE_KEY = "orbit:profile-image";
+export const PROFILE_IMAGE_STORAGE_KEY = "rankoya:profile-image";
 
 /** Fired whenever the stored image changes, so open UI can re-read it. */
-export const PROFILE_IMAGE_UPDATED_EVENT = "orbit:profile-image-updated";
+export const PROFILE_IMAGE_UPDATED_EVENT = "rankoya:profile-image-updated";
 
 export function getProfileImage(): string | null {
   if (typeof window === "undefined") return null;

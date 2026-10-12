@@ -7,7 +7,7 @@ import { ArrowLeftIcon, BarChart3Icon, MailIcon, MenuIcon, UsersIcon, type Lucid
 import { useTranslations } from "next-intl";
 
 import { cn } from "@/lib/utils";
-import { OrbitMark, WORDMARK } from "@/components/brand/logo";
+import { Logo } from "@/components/brand/logo";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";
@@ -25,14 +25,9 @@ function AdminNav({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname();
   return (
     <div className="flex h-full flex-col">
-      <div className="flex items-center gap-3 px-5 pt-5 pb-4">
-        <OrbitMark size={28} className="text-white" />
-        <span className="flex flex-col">
-          <span className="text-[18px] leading-6 font-semibold tracking-[-0.03em] text-white" translate="no">
-            {WORDMARK}
-          </span>
-          <span className="text-caption font-normal text-nav-muted">{t("subtitle")}</span>
-        </span>
+      <div className="flex flex-col gap-1.5 px-5 pt-5 pb-4">
+        <Logo tone="onDark" height={26} />
+        <span className="text-caption font-normal text-nav-muted">{t("subtitle")}</span>
       </div>
       <nav aria-label={t("label")} className="flex-1 px-3">
         <ul className="flex flex-col gap-1">

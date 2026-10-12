@@ -24,6 +24,7 @@ import { getActivePlan, isAdminSession } from "@/lib/plan-core";
 import { useProfileImage } from "@/lib/profile-image";
 import { accountHref } from "@/features/account/routes";
 import { useSessionUser } from "@/features/account/use-session-user";
+import { workspaceRole } from "@/features/workspace/hooks";
 import { useMounted } from "@/lib/hooks/use-mounted";
 import { usePreferences } from "@/features/preferences/use-preferences";
 import { Badge } from "@/components/ui/badge";
@@ -46,8 +47,8 @@ import { useShell } from "./shell-context";
 
 export function useSignOut() {
   const queryClient = useQueryClient();
-  return () => {
-    endSession();
+  return async () => {
+    await endSession();
     queryClient.clear();
     // full reload: drops every in-memory cache and re-runs proxy.ts
     // eslint-disable-next-line @next/next/no-location-assign-relative-destination
@@ -95,7 +96,7 @@ export function ProfileMenu() {
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-1.5 px-2 pb-2">
-          <Badge variant="neutral">{tRole(workspace.role)}</Badge>
+          <Badge variant="neutral">{tRole(workspaceRole(workspace))}</Badge>
           <Badge variant="outline">{t("plan", { plan: tPlan(`${plan}.label`) })}</Badge>
         </div>
         <DropdownMenuSeparator />

@@ -3,10 +3,10 @@ import type { CustomDomainConfig, LoginCarouselSlide } from "@/services/custom-d
 /**
  * Brand configuration resolved per request host.
  *
- * Orbit serves two kinds of host: the vendor host (`NEXT_PUBLIC_APP_HOST`, plus
+ * Rankoya serves two kinds of host: the vendor host (`NEXT_PUBLIC_APP_HOST`, plus
  * localhost during development) and white-label tenant domains that resellers
  * point at us. On a tenant host the workspace's saved custom-domain config
- * replaces the Orbit identity (colours, logo, favicon, brand name).
+ * replaces the Rankoya identity (colours, logo, favicon, brand name).
  */
 export type BrandConfig = {
   brand_name: string;
@@ -27,9 +27,9 @@ export type BrandConfig = {
 };
 
 /**
- * Orbit's stock palette, from the light tokens in globals.css. These seed the
+ * Rankoya's stock palette, from the light tokens in globals.css. These seed the
  * configure form, so a reseller who leaves the pickers alone gets an app that
- * looks exactly like Orbit.
+ * looks exactly like Rankoya.
  *
  * Where each colour lands at runtime (see `deriveTenantTokens`):
  *   primary    → links, active nav item, focus ring, "You" chart series
@@ -52,21 +52,21 @@ export const DEFAULT_BRAND_COLORS = {
  */
 export const DEFAULT_LOGIN_CAROUSEL: LoginCarouselSlide[] = [
   {
-    url: "/login/slide-visibility.svg",
+    url: "/login/slide-visibility.webp",
     position: 1,
     kicker: "AI visibility",
     title: "See where you show up in AI answers.",
     description: "Track how ChatGPT, Claude, Gemini and Perplexity mention your brand, all in {brand}.",
   },
   {
-    url: "/login/slide-rankings.svg",
+    url: "/login/slide-rankings.webp",
     position: 2,
     kicker: "Rankings and competitors",
     title: "Know who outranks you, and why.",
     description: "Google positions and AI share of voice side by side, every week.",
   },
   {
-    url: "/login/slide-agent.svg",
+    url: "/login/slide-agent.webp",
     position: 3,
     kicker: "Your SEO agent",
     title: "Approve the fix. {brand} does the work.",
@@ -119,7 +119,7 @@ export function normalizeCarousel(slides: LoginCarouselSlide[] | null | undefine
 }
 
 /** localStorage key prefix, namespaced by host so two tenant domains can't paint each other's brand. */
-export const BRAND_CONFIG_STORAGE_PREFIX = "orbit_brand_config";
+export const BRAND_CONFIG_STORAGE_PREFIX = "rankoya_brand_config";
 
 /** Strips protocol, path and port, then lowercases. Every host comparison goes through this. */
 export function normalizeHost(host: string | null | undefined): string {
@@ -132,13 +132,13 @@ export function normalizeHost(host: string | null | undefined): string {
     .split(":")[0];
 }
 
-export const DEFAULT_APP_HOST = normalizeHost(process.env.NEXT_PUBLIC_APP_HOST) || "app.orbit.example";
+export const DEFAULT_APP_HOST = normalizeHost(process.env.NEXT_PUBLIC_APP_HOST) || "app.rankoya.uk";
 
 const LOCAL_DEV_HOSTS = new Set(["localhost", "127.0.0.1", "0.0.0.0"]);
 
-/** The stock Orbit identity. */
+/** The stock Rankoya identity. */
 export const DEFAULT_BRAND_CONFIG: BrandConfig = {
-  brand_name: "Orbit",
+  brand_name: "Rankoya",
   logo_url: null,
   logo_icon_url: null,
   favicon_url: null,
@@ -165,7 +165,7 @@ export function isDefaultAppHost(host: string | null | undefined): boolean {
   return normalized === DEFAULT_APP_HOST || LOCAL_DEV_HOSTS.has(normalized) || normalized.endsWith(".vercel.app");
 }
 
-/** True when nothing distinguishes the config from stock Orbit. */
+/** True when nothing distinguishes the config from stock Rankoya. */
 export function isVendorBranding(config: BrandConfig): boolean {
   return (
     config.brand_name === DEFAULT_BRAND_CONFIG.brand_name &&
@@ -224,7 +224,7 @@ export function parseHexColor(hex: string | null | undefined): string | null {
 }
 
 /**
- * The Orbit tokens a tenant config overrides, inline on `:root`. Hover states
+ * The Rankoya tokens a tenant config overrides, inline on `:root`. Hover states
  * are derived in CSS with `color-mix`, so only base colours are needed. Tints
  * (`--blue-bg`) are mixed toward the surface so they work in both themes.
  */

@@ -75,24 +75,12 @@ class CustomDomainService {
   }
 
   // /custom-domains/{customDomain}/config
-  async updateConfig({
-    payload,
-    id,
-  }: {
-    payload: { config: CustomDomainConfig };
-    id: number | string;
-  }) {
+  async updateConfig({ payload, id }: { payload: { config: CustomDomainConfig }; id: number | string }) {
     const response = await api.patch(`/custom-domains/${id}/config`, payload);
     return response.data;
   }
-  async updateVerification(
-    id: number | string,
-    payload: UpdateVerificationPayload,
-  ) {
-    const response = await api.patch(
-      `/custom-domains/${id}/verification`,
-      payload,
-    );
+  async updateVerification(id: number | string, payload: UpdateVerificationPayload) {
+    const response = await api.patch(`/custom-domains/${id}/verification`, payload);
     return response.data;
   }
 
@@ -117,15 +105,13 @@ class CustomDomainService {
    * itself answers that way, which is how the app falls back to stock styling.
    */
   async resolveDomain(host?: string): Promise<ResolvedDomain | null> {
-    const tenantHost =
-      host ?? (typeof window !== "undefined" ? window.location.hostname : "");
+    const tenantHost = host ?? (typeof window !== "undefined" ? window.location.hostname : "");
 
     if (!tenantHost) return null;
 
-    const response = await api.get<ResolveDomainResponse>(
-      "/custom-domains/resolve",
-      { params: { domain: tenantHost } },
-    );
+    const response = await api.get<ResolveDomainResponse>("/custom-domains/resolve", {
+      params: { domain: tenantHost },
+    });
 
     const payload = response.data;
     if (!payload?.success || !payload.data) return null;

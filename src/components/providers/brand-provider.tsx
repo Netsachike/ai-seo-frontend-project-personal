@@ -20,7 +20,7 @@ import CustomDomainService from "@/services/custom-domain";
 type BrandContextValue = {
   brandConfig: BrandConfig;
   currentHost: string;
-  /** The request host is not Orbit's own host, i.e. a reseller domain. */
+  /** The request host is not Rankoya's own host, i.e. a reseller domain. */
   isCustomDomain: boolean;
   /** Brand resolution has settled. Always true immediately on the vendor host. */
   isBrandReady: boolean;
@@ -50,7 +50,7 @@ function writeStoredBrandConfig(host: string, config: BrandConfig) {
 }
 
 /**
- * Paints the tenant palette onto `:root`. Orbit's components read tokens
+ * Paints the tenant palette onto `:root`. Rankoya's components read tokens
  * (`--ink`, `--blue`, `--nav-bg`…), so overriding them inline restyles every
  * button, link, sidebar and focus ring at once; removing them restores the
  * stylesheet defaults.
@@ -63,7 +63,7 @@ function applyBrandColors(config: BrandConfig) {
   }
 }
 
-/** Clears every inline override so the stylesheet's Orbit palette wins. */
+/** Clears every inline override so the stylesheet's Rankoya palette wins. */
 function clearBrandColors() {
   const root = document.documentElement;
   for (const token of TENANT_TOKEN_NAMES) root.style.removeProperty(token);
@@ -104,7 +104,7 @@ type BrandState = { config: BrandConfig; host: string; ready: boolean };
 
 /**
  * Resolves the White Label brand for the host the app is served from. On
- * Orbit's own host (and localhost / previews) it keeps the stock identity
+ * Rankoya's own host (and localhost / previews) it keeps the stock identity
  * and is ready immediately; on a tenant host it paints the last known brand
  * from storage, then the backend's answer.
  */
@@ -126,7 +126,7 @@ export function BrandProvider({ children }: { children: React.ReactNode }) {
 
     // The vendor host never inherits a cached tenant brand. Tenant hosts
     // paint their last known brand straight away, so customers don't see a
-    // flash of Orbit while /resolve is in flight.
+    // flash of Rankoya while /resolve is in flight.
     const stored = onDefaultHost ? DEFAULT_BRAND_CONFIG : readStoredBrandConfig(host);
     const initial = !onDefaultHost && !isVendorBranding(stored) ? stored : DEFAULT_BRAND_CONFIG;
     if (initial !== DEFAULT_BRAND_CONFIG) {
@@ -138,7 +138,7 @@ export function BrandProvider({ children }: { children: React.ReactNode }) {
       if (!cancelled) setState({ config, host, ready });
     };
 
-    /** Drops every override so the stylesheet's Orbit palette wins. */
+    /** Drops every override so the stylesheet's Rankoya palette wins. */
     function applyDefaultBrand() {
       clearBrandColors();
       applyFavicon(null);
@@ -157,7 +157,7 @@ export function BrandProvider({ children }: { children: React.ReactNode }) {
     // setState inside this effect.
     void Promise.resolve().then(() => publish(initial, onDefaultHost));
 
-    // Runs on every host: the backend answers "not found" for Orbit's own
+    // Runs on every host: the backend answers "not found" for Rankoya's own
     // host, which is the signal to keep the stock palette.
     CustomDomainService.resolveDomain(host)
       .then((resolved) => {

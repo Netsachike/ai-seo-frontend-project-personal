@@ -3,7 +3,7 @@
 import * as React from "react";
 import { usePathname } from "next/navigation";
 
-import type { SiteSetupStep } from "@/lib/api/types";
+import type { SiteSetupStep } from "@/types/types";
 import { PROGRESS_STEPS, setupPath, stepFromPath } from "../steps";
 
 /**

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 
-import type { Delta } from "@/lib/api/types";
+import type { Delta } from "@/lib/mocks/types";
 import { cn } from "@/lib/utils";
 import { Sparkline } from "@/components/charts/sparkline";
 import { Skeleton } from "@/components/ui/skeleton";

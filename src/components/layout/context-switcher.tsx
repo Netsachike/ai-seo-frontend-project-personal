@@ -6,9 +6,9 @@ import { CheckIcon, ChevronsUpDownIcon, LayersIcon, PlusIcon } from "lucide-reac
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
-import type { Workspace } from "@/lib/api/types";
+import type { AllUserWorkspace } from "@/types/types";
 import { cn } from "@/lib/utils";
-import { useCreateWorkspace, useSwitchWorkspace } from "@/features/workspace/hooks";
+import { useCreateWorkspace, useSwitchWorkspace, workspaceRole, workspaceTarget } from "@/features/workspace/hooks";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -53,33 +53,34 @@ export function WorkspaceSwitcher({ className, full = false }: { className?: str
   const router = useRouter();
   const { brandSlug } = useShell();
   if (!workspace) return null;
+  const name = workspace.workspace.name;
 
   return (
     <>
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger
-          aria-label={t("workspaceTrigger", { name: workspace.name })}
+          aria-label={t("workspaceTrigger", { name })}
           className={cn(triggerClass, full && "h-12 w-full border border-border bg-surface px-3", className)}
         >
-          <EntityAvatar name={workspace.name} />
-          <span className={cn("truncate", full ? "flex-1 text-start" : "max-w-40")} title={workspace.name}>
-            {workspace.name}
+          <EntityAvatar name={name} />
+          <span className={cn("truncate", full ? "flex-1 text-start" : "max-w-40")} title={name}>
+            {name}
           </span>
           {full && <ChevronsUpDownIcon aria-hidden className="size-4 text-fg-3" />}
         </PopoverTrigger>
         <PopoverContent align="start" className="w-72 p-0">
-          <SwitcherList<Workspace>
+          <SwitcherList<AllUserWorkspace>
             heading={t("switchWorkspace")}
             searchPlaceholder={t("searchWorkspaces")}
             empty={t("noMatches")}
             items={workspaces}
-            activeId={workspace.id}
-            getId={(w) => w.id}
-            getName={(w) => w.name}
-            getMeta={(w) => tRole(w.role)}
+            activeId={String(workspace.work_space_id)}
+            getId={(w) => String(w.work_space_id)}
+            getName={(w) => w.workspace.name}
+            getMeta={(w) => tRole(workspaceRole(w))}
             onSelect={(w) => {
               setOpen(false);
-              if (w.id !== workspace.id) void switchWorkspace(w);
+              if (w.work_space_id !== workspace.work_space_id) void switchWorkspace(workspaceTarget(w));
             }}
             footer={[
               {
@@ -206,10 +207,10 @@ export function CreateWorkspaceDialog({
     if (!value) return setError(t("required"));
     if (value.length > 80) return setError(t("tooLong"));
     create.mutate(value, {
-      onSuccess: (workspace) => {
+      onSuccess: (response) => {
         onOpenChange(false);
         setName("");
-        void switchWorkspace(workspace);
+        if (response.workspace) void switchWorkspace({ id: response.workspace.id, name: response.workspace.name });
       },
       onError: () => toast.error(t("failed")),
     });

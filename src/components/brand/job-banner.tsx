@@ -3,7 +3,7 @@
 import { CheckIcon, Loader2Icon, XIcon } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
 
-import type { Job } from "@/lib/api/types";
+import type { Job } from "@/lib/mocks/types";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 

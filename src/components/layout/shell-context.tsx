@@ -2,13 +2,17 @@
 
 import * as React from "react";
 
-import type { Brand, Me, Workspace } from "@/lib/api/types";
+import type { AllUserWorkspace, Site } from "@/types/types";
+import type { Me } from "@/lib/mocks/types";
 
 export type ShellValue = {
+  /** The `/[brand]` route segment: the site id. Empty on the sites page. */
   brandSlug: string;
-  brand: Brand | undefined;
-  workspace: Workspace | undefined;
-  workspaces: Workspace[];
+  /** The open site. */
+  brand: Site | undefined;
+  /** The workspace the backend has active. */
+  workspace: AllUserWorkspace | undefined;
+  workspaces: AllUserWorkspace[];
   me: Me | undefined;
   /** Server-rendered value until the user toggles it. */
   collapsed: boolean;

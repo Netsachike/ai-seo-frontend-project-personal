@@ -37,7 +37,10 @@ function age(domain: string) {
 }
 
 const fakeToken = (domain: string) =>
-  Array.from(domain).reduce((hash, char) => (hash * 31 + char.charCodeAt(0)) >>> 0, 7).toString(16).padStart(8, "0");
+  Array.from(domain)
+    .reduce((hash, char) => (hash * 31 + char.charCodeAt(0)) >>> 0, 7)
+    .toString(16)
+    .padStart(8, "0");
 
 export const demoVercel = {
   add(domain: string) {

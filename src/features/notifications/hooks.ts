@@ -2,20 +2,20 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import type { Notification } from "@/lib/api/types";
+import type { Notification } from "@/lib/mocks/types";
 import { listNotifications, markAllNotificationsRead } from "@/lib/mocks/store";
 import { notificationKeys } from "@/lib/api/query-keys";
 
-export function useNotifications(workspaceId: string | undefined) {
+export function useNotifications(workspaceId: number | undefined) {
   return useQuery({
-    queryKey: notificationKeys.all(workspaceId ?? "none"),
+    queryKey: notificationKeys.all(workspaceId ?? 0),
     enabled: Boolean(workspaceId),
     queryFn: listNotifications,
     refetchInterval: 60_000,
   });
 }
 
-export function useMarkAllRead(workspaceId: string) {
+export function useMarkAllRead(workspaceId: number) {
   const queryClient = useQueryClient();
   const key = notificationKeys.all(workspaceId);
   return useMutation({

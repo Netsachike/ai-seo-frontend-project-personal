@@ -1,4 +1,4 @@
-export const THEME_COOKIE = "orbit_theme";
+export const THEME_COOKIE = "rankoya_theme";
 export const themePreferences = ["light", "dark", "system"] as const;
 export type ThemePreference = (typeof themePreferences)[number];
 

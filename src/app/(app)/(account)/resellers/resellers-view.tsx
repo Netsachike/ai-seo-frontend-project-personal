@@ -8,7 +8,7 @@ import { useFormatter, useTranslations } from "next-intl";
 import { toast } from "@/lib/toast";
 import { canUseResellerConsole } from "@/lib/plan-core";
 import resellerService from "@/services/reseller";
-import type { User } from "@/types/shared";
+import type { User } from "@/types/types";
 import { accountKeys } from "@/features/account/query-keys";
 import { useSessionUser } from "@/features/account/use-session-user";
 import { ConfirmDialog } from "@/components/account/confirm-dialog";

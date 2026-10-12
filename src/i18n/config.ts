@@ -12,10 +12,10 @@ export const enabledLocales: readonly Locale[] = ["en", "ar"];
 
 export const rtlLocales: readonly Locale[] = ["ar"];
 
-export const LOCALE_COOKIE = "orbit_locale";
-export const TIMEZONE_COOKIE = "orbit_tz";
+export const LOCALE_COOKIE = "rankoya_locale";
+export const TIMEZONE_COOKIE = "rankoya_tz";
 /** Set by proxy.ts from Accept-Language when there is no cookie. */
-export const LOCALE_HEADER = "x-orbit-locale";
+export const LOCALE_HEADER = "x-rankoya-locale";
 
 export const localeMeta: Record<Locale, { native: string; english: string; short: string }> = {
   en: { native: "English", english: "English", short: "EN" },

@@ -1,16 +1,7 @@
 import { faker } from "@faker-js/faker";
 
-import type {
-  AgentThread,
-  Brand,
-  BrandSeries,
-  BrandSummary,
-  Engine,
-  Me,
-  Notification,
-  Usage,
-  Workspace,
-} from "@/lib/api/types";
+import type { Engine } from "@/types/types";
+import type { AgentThread, BrandSeries, BrandSummary, Me, Notification, Usage } from "@/lib/mocks/types";
 
 /** Deterministic so the server and browser mock instances agree. */
 faker.seed(4021);
@@ -31,118 +22,16 @@ export const me: Me = {
   telegram: { handle: "fvo_northwind", connected: true },
 };
 
-/**
- * The account's Enterprise (`reseller`) lifetime subscription, from the login
- * response in lib/demo-login.ts. It covers every workspace, so each one shows
- * the top tier.
- */
-const enterprise = {
-  id: "plan_reseller",
-  name: "Enterprise",
-  tier: "agency",
-  isTopTier: true,
-} as const;
-
-/**
- * The login response's three workspaces (Greek is the default and active one).
- * Super Admin on the shared backend is `owner` in Orbit's role set. The
- * brands are Orbit-only data the backend doesn't send yet.
- */
-export const workspaces: Workspace[] = [
-  {
-    id: "ws_greek",
-    name: "Greek",
-    role: "owner",
-    plan: enterprise,
-    memberCount: 1,
-    brandCount: 1,
-    lastBrandSlug: "northwind-roasters",
+/** Usage meters have no backend endpoint yet. One record serves every workspace. */
+export const usage: Usage = {
+  plan: { id: "plan_reseller", name: "Enterprise", tier: "agency", isTopTier: true },
+  credits: { remaining: 1380, total: 2000 },
+  breakdown: {
+    scans: { used: 22, limit: 30 },
+    articles: { used: 7, limit: 12 },
+    prompts: { used: 50, limit: 100 },
   },
-  {
-    id: "ws_anotherwork",
-    name: "anotherwork",
-    role: "owner",
-    plan: enterprise,
-    memberCount: 1,
-    brandCount: 2,
-    lastBrandSlug: "harbor-tea",
-  },
-  {
-    id: "ws_test",
-    name: "test",
-    role: "owner",
-    plan: enterprise,
-    memberCount: 1,
-    brandCount: 0,
-    lastBrandSlug: null,
-  },
-];
-
-export const brandsByWorkspace: Record<string, Brand[]> = {
-  ws_greek: [
-    {
-      id: "br_northwind",
-      slug: "northwind-roasters",
-      name: "Northwind Roasters",
-      domain: "northwindroasters.com",
-      contentLanguage: "en",
-      market: "US",
-    },
-  ],
-  ws_anotherwork: [
-    {
-      id: "br_harbor",
-      slug: "harbor-tea",
-      name: "Harbor Tea Co.",
-      domain: "harbortea.example",
-      contentLanguage: "en",
-      market: "GB",
-    },
-    {
-      id: "br_new",
-      slug: "fresh-start",
-      name: "Fresh Start Bakery",
-      domain: "freshstart.example",
-      contentLanguage: "de",
-      market: "DE",
-      // Shows the "setup incomplete" state on the sites page.
-      setupStep: "core-topics",
-    },
-  ],
-  ws_test: [],
-};
-
-export const usageByWorkspace: Record<string, Usage> = {
-  ws_greek: {
-    plan: enterprise,
-    credits: { remaining: 1380, total: 2000 },
-    breakdown: {
-      scans: { used: 22, limit: 30 },
-      articles: { used: 7, limit: 12 },
-      prompts: { used: 50, limit: 100 },
-    },
-    renewsAt: iso(26 * DAY),
-  },
-  ws_anotherwork: {
-    plan: enterprise,
-    credits: { remaining: 240, total: 10000 },
-    breakdown: {
-      scans: { used: 140, limit: 150 },
-      articles: { used: 58, limit: 60 },
-      prompts: { used: 480, limit: 500 },
-    },
-    renewsAt: iso(9 * DAY),
-  },
-  ws_test: {
-    plan: enterprise,
-    credits: { remaining: 10000, total: 10000 },
-    breakdown: {
-      scans: { used: 0, limit: 150 },
-      articles: { used: 0, limit: 60 },
-      prompts: { used: 0, limit: 500 },
-    },
-    renewsAt: iso(9 * DAY),
-  },
+  renewsAt: iso(26 * DAY),
 };
 
 const engineScores: Record<Engine, number> = {

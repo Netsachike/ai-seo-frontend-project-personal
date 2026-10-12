@@ -1,4 +1,4 @@
-import type { AddonAccessResponse } from "@/types/shared";
+import type { AddonAccessResponse } from "@/types/types";
 
 /**
  * The backend's verification of the White Label (`reseller_seats`) add-on.

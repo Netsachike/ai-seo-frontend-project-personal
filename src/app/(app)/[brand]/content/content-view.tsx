@@ -25,10 +25,10 @@ import { parseAsString, parseAsStringLiteral, useQueryState } from "nuqs";
 import { useFormatter, useLocale, useNow, useTranslations } from "next-intl";
 import { toast } from "sonner";
 
-import { fakeRequest } from "@/lib/auth/session";
 import { dateLocale } from "@/lib/date-locale";
-import { useFakeQuery } from "@/lib/fake-query";
-import { contentPlan, type ArticleStatus, type ArticleSummary } from "@/lib/mocks/ui-data-work";
+import { getErrorMessage } from "@/lib/errors";
+import type { ArticleStatus, ArticleSummary } from "@/lib/mocks/ui-data-work";
+import { useContentMonth, useGeneratePlan } from "@/features/content/hooks";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
@@ -62,11 +62,9 @@ export function ContentView() {
   const { brand, brandSlug } = useShell();
   const [view, setView] = useQueryState("view", parseAsStringLiteral(views).withDefault("calendar"));
   const [month, setMonth] = useQueryState("month", parseAsString.withDefault(monthKey(now)));
-  const [planning, setPlanning] = React.useState(false);
   const monthDate = atNoon(parse(`${month}-01`, "yyyy-MM-dd", now));
-  const query = useFakeQuery(["content", brand?.id, month], () => contentPlan(brand?.id ?? "", month), {
-    enabled: Boolean(brand),
-  });
+  const query = useContentMonth(brand?.id, month);
+  const generate = useGeneratePlan(brand?.id ?? 0);
 
   if (!brand || query.isPending) return <PageSkeleton kpis={0} panels={2} />;
 
@@ -76,12 +74,11 @@ export function ContentView() {
   const waiting = articles.filter((a) => a.status === "needsApproval");
   const published = articles.filter((a) => a.status === "published");
 
-  const plan = async () => {
-    setPlanning(true);
-    await fakeRequest(1500);
-    setPlanning(false);
-    toast.success(t("planned", { month: nextMonthName }));
-  };
+  const plan = () =>
+    generate.mutate(monthKey(addMonths(monthDate, 1)), {
+      onSuccess: () => toast.success(t("planned", { month: nextMonthName })),
+      onError: (error) => toast.error(getErrorMessage(error, t("planFailed"))),
+    });
 
   return (
     <div className="flex flex-col gap-6">
@@ -111,7 +108,7 @@ export function ContentView() {
                 </TabsTrigger>
               </TabsList>
             </Tabs>
-            <Button variant="primary" loading={planning} onClick={plan}>
+            <Button variant="primary" loading={generate.isPending} onClick={plan}>
               <SparklesIcon />
               {t("plan", { month: nextMonthName })}
             </Button>

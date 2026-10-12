@@ -3,13 +3,13 @@
 import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowRightIcon, CheckCheckIcon, CheckIcon, ListChecksIcon } from "lucide-react";
+import { ArrowRightIcon, CheckCheckIcon, CheckIcon, ListChecksIcon, ScanSearchIcon } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
 import { toast } from "sonner";
 
-import { fakeRequest } from "@/lib/auth/session";
-import { useFakeQuery } from "@/lib/fake-query";
-import { actionPlan, type ActionCard, type ActionColumn } from "@/lib/mocks/ui-data-work";
+import { getErrorMessage } from "@/lib/errors";
+import type { ActionCard, ActionColumn } from "@/lib/mocks/ui-data-work";
+import { useActionPlan, useAnalyzeOpportunities, useUpdateOpportunities } from "@/features/actions/hooks";
 import { cn } from "@/lib/utils";
 import {
   AlertDialog,
@@ -36,23 +36,41 @@ const columns: ActionColumn[] = ["approval", "working", "yours", "done"];
 
 export function ActionsView() {
   const t = useTranslations("actions");
-  const { brand, brandSlug } = useShell();
-  const query = useFakeQuery(["actions", brand?.id], () => actionPlan(brand?.id ?? "", brandSlug), {
-    enabled: Boolean(brand),
-  });
-  // Local board state: decisions move cards between columns for this session.
+  const { brand } = useShell();
+  const query = useActionPlan(brand?.id);
+  const update = useUpdateOpportunities(brand?.id ?? 0);
+  const analyze = useAnalyzeOpportunities(brand?.id ?? 0);
+  // The list endpoint returns open opportunities only, so decisions also move cards locally for this session.
   const [moves, setMoves] = React.useState<Record<string, ActionColumn | "removed">>({});
   const [confirming, setConfirming] = React.useState(false);
   const [approvingAll, setApprovingAll] = React.useState(false);
 
-  if (!brand || query.isPending) return <PageSkeleton kpis={0} panels={4} />;
   if (query.isError) return <ErrorState onRetry={() => query.refetch()} />;
+  if (!brand || !query.data) return <PageSkeleton kpis={0} panels={4} />;
 
   const cards = query.data.cards
     .map((c) => ({ ...c, column: moves[c.id] ?? c.column }))
     .filter((c): c is ActionCard => c.column !== "removed");
   const pending = cards.filter((c) => c.column === "approval");
-  const move = (id: string, column: ActionColumn | "removed") => setMoves((m) => ({ ...m, [id]: column }));
+  const STATUS_FOR: Record<ActionColumn | "removed", "open" | "in_progress" | "completed" | "ignored"> = {
+    approval: "open",
+    working: "in_progress",
+    yours: "in_progress",
+    done: "completed",
+    removed: "ignored",
+  };
+  const move = (id: string, column: ActionColumn | "removed") => {
+    setMoves((m) => ({ ...m, [id]: column }));
+    update.mutate(
+      { ids: [Number(id)], status: STATUS_FOR[column] },
+      { onError: (error) => toast.error(getErrorMessage(error, t("updateFailed"))) },
+    );
+  };
+  const runAnalysis = () =>
+    analyze.mutate(undefined, {
+      onSuccess: (result) => toast.success(t("analyzed", { count: result.opportunities_created })),
+      onError: (error) => toast.error(getErrorMessage(error, t("analyzeFailed"))),
+    });
 
   const current = query.data.current;
   const projected = Math.min(100, current + cards.filter((c) => c.column !== "done").reduce((s, c) => s + c.points, 0));
@@ -63,17 +81,32 @@ export function ActionsView() {
         title={t("title")}
         description={t("description")}
         actions={
-          pending.length > 0 && (
-            <Button variant="primary" loading={approvingAll} onClick={() => setConfirming(true)}>
-              <CheckCheckIcon />
-              {t("approveAll", { count: pending.length })}
+          <>
+            <Button variant="secondary" loading={analyze.isPending} onClick={runAnalysis}>
+              <ScanSearchIcon />
+              {t("analyze")}
             </Button>
-          )
+            {pending.length > 0 && (
+              <Button variant="primary" loading={approvingAll} onClick={() => setConfirming(true)}>
+                <CheckCheckIcon />
+                {t("approveAll", { count: pending.length })}
+              </Button>
+            )}
+          </>
         }
       />
 
       {cards.length === 0 ? (
-        <EmptyState icon={ListChecksIcon} title={t("emptyTitle")} description={t("emptyDescription")} />
+        <EmptyState
+          icon={ListChecksIcon}
+          title={t("emptyTitle")}
+          description={t("emptyDescription")}
+          action={
+            <Button size="sm" variant="secondary" loading={analyze.isPending} onClick={runAnalysis}>
+              {t("analyze")}
+            </Button>
+          }
+        />
       ) : (
         <>
           <ProjectedStrip current={current} projected={projected} />
@@ -121,10 +154,15 @@ export function ActionsView() {
             <AlertDialogAction
               onClick={async () => {
                 setApprovingAll(true);
-                await fakeRequest();
-                pending.forEach((c) => move(c.id, "working"));
-                setApprovingAll(false);
-                toast.success(t("approvedAll", { count: pending.length }));
+                try {
+                  await update.mutateAsync({ ids: pending.map((c) => Number(c.id)), status: "in_progress" });
+                  setMoves((m) => ({ ...m, ...Object.fromEntries(pending.map((c) => [c.id, "working" as const])) }));
+                  toast.success(t("approvedAll", { count: pending.length }));
+                } catch (error) {
+                  toast.error(getErrorMessage(error, t("updateFailed")));
+                } finally {
+                  setApprovingAll(false);
+                }
               }}
             >
               {t("approveAll", { count: pending.length })}

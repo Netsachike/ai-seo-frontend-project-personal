@@ -2,74 +2,78 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { ChevronLeftIcon, KeyRoundIcon, PlugIcon, PlusIcon, UnplugIcon } from "lucide-react";
+import { ChevronLeftIcon, PlugIcon, PlusIcon, RefreshCwIcon, UnplugIcon } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
 
 import { toast } from "@/lib/toast";
 import { fakeRequest } from "@/lib/auth/session";
+import { getErrorMessage } from "@/lib/errors";
 import { PROVIDERS, type IntegrationProvider } from "@/features/integrations/catalog";
-import { connectionsFor, useIntegrations, type IntegrationConnection } from "@/features/integrations/store";
+import { useProviderAccounts, type ProviderAccount } from "@/features/integrations/connections";
+import { useIntegrations } from "@/features/integrations/store";
+import { isPublishingPlatform } from "@/features/publishing/forms";
+import { useTestConnection } from "@/features/publishing/hooks";
+import { useSyncGsc } from "@/features/search-console/hooks";
+import { workspaceRole } from "@/features/workspace/hooks";
 import { ConfirmDialog } from "@/components/account/confirm-dialog";
 import { ConnectDialog } from "@/components/integrations/connect-dialog";
 import { EmptyState } from "@/components/brand/empty-state";
-import { IntegrationTile } from "@/components/brand/integration-row";
-import { FormField } from "@/components/forms/form-field";
-import { PasswordInput } from "@/components/forms/password-input";
+import { IntegrationStatusBadge, IntegrationTile } from "@/components/brand/integration-row";
 import { brandHref } from "@/components/layout/nav";
 import { useShell } from "@/components/layout/shell-context";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 
-/** Connected accounts for one provider: details, credential update and disconnect. */
+/**
+ * Connected accounts for one provider. Publishing connections can be
+ * re-tested and Search Console re-synced through the backend, which has no
+ * endpoint to remove either; Analytics and Telegram (mock) can be disconnected.
+ */
 export function IntegrationDetailsView({ provider }: { provider: IntegrationProvider }) {
   const t = useTranslations("integrations");
-  const tCommon = useTranslations("common");
   const format = useFormatter();
-  const { brandSlug, workspace } = useShell();
-  const all = useIntegrations((s) => s.connections);
-  const disconnect = useIntegrations((s) => s.disconnect);
-  const accounts = connectionsFor(all, provider, brandSlug);
+  const { brandSlug, brand, workspace } = useShell();
+  const { accounts: byProvider } = useProviderAccounts(brand?.id, brandSlug);
+  const disconnectLocal = useIntegrations((s) => s.disconnect);
+  const testConnection = useTestConnection(brand?.id ?? 0);
+  const syncGsc = useSyncGsc(brand?.id ?? 0);
+  const accounts = byProvider[provider];
   const meta = PROVIDERS[provider];
   const name = t(`providers.${provider}.name`);
-  const canConnect = workspace?.role !== "viewer";
+  const canConnect = workspaceRole(workspace) !== "viewer";
+  // Search Console holds one property per site.
+  const canAddAnother = canConnect && provider !== "searchConsole" && !(meta.scope === "user" && accounts.length > 0);
 
   const [connecting, setConnecting] = React.useState(false);
-  const [toDisconnect, setToDisconnect] = React.useState<IntegrationConnection | null>(null);
+  const [toDisconnect, setToDisconnect] = React.useState<ProviderAccount | null>(null);
   const [isDisconnecting, setIsDisconnecting] = React.useState(false);
-  const [credentialsFor, setCredentialsFor] = React.useState<IntegrationConnection | null>(null);
-  const [newPassword, setNewPassword] = React.useState("");
-  const [isSaving, setIsSaving] = React.useState(false);
 
   async function handleDisconnect() {
     if (!toDisconnect) return;
     setIsDisconnecting(true);
     await fakeRequest(700);
-    disconnect(toDisconnect.id);
-    toast.success(t("toasts.disconnected", { name: toDisconnect.account.name }));
+    disconnectLocal(toDisconnect.id);
+    toast.success(t("toasts.disconnected", { name: toDisconnect.name }));
     setToDisconnect(null);
     setIsDisconnecting(false);
   }
 
-  async function handleUpdateCredentials(event: React.FormEvent) {
-    event.preventDefault();
-    if (!newPassword.trim()) {
-      toast.error(t("errors.passwordRequired"));
-      return;
-    }
-    setIsSaving(true);
-    await fakeRequest(800);
-    toast.success(t("toasts.credentialsUpdated"));
-    setIsSaving(false);
-    setCredentialsFor(null);
-    setNewPassword("");
+  function handleTest(account: ProviderAccount) {
+    if (!account.connectionId) return;
+    testConnection.mutate(account.connectionId, {
+      onSuccess: (result) =>
+        result.success
+          ? toast.success(result.message)
+          : toast.error(t("errors.testFailed", { message: result.message })),
+      onError: (error) => toast.error(getErrorMessage(error, t("errors.connectFailed"))),
+    });
+  }
+
+  function handleSync() {
+    syncGsc.mutate(undefined, {
+      onSuccess: (result) => toast.success(t("toasts.synced", { rows: result.rows_processed })),
+      onError: (error) => toast.error(getErrorMessage(error, t("errors.syncFailed"))),
+    });
   }
 
   return (
@@ -80,12 +84,12 @@ export function IntegrationDetailsView({ provider }: { provider: IntegrationProv
             <ChevronLeftIcon className="rtl:-scale-x-100" />
           </Link>
         </Button>
-        <IntegrationTile monogram={meta.monogram} />
+        <IntegrationTile monogram={meta.monogram} logo={provider} />
         <div className="flex min-w-0 flex-1 flex-col">
           <h1 className="truncate text-h1 text-fg">{name}</h1>
           <p className="text-body text-fg-2">{t(`providers.${provider}.description`)}</p>
         </div>
-        {canConnect && !(meta.scope === "user" && accounts.length > 0) && (
+        {canAddAnother && accounts.length > 0 && (
           <Button variant="primary" onClick={() => setConnecting(true)}>
             <PlusIcon />
             {t("addAnother")}
@@ -108,41 +112,69 @@ export function IntegrationDetailsView({ provider }: { provider: IntegrationProv
         />
       ) : (
         <ul className="flex flex-col gap-3">
-          {accounts.map((connection) => (
-            <li key={connection.id} id={connection.id}>
+          {accounts.map((account) => (
+            <li key={account.id} id={account.id}>
               <Card className="flex-row flex-wrap items-center gap-4">
-                <IntegrationTile monogram={meta.monogram} />
+                <IntegrationTile monogram={meta.monogram} logo={provider} />
                 <div className="flex min-w-0 flex-1 basis-56 flex-col gap-0.5">
-                  <p dir="auto" className="truncate text-body font-medium text-fg">
-                    {connection.account.name}
-                  </p>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p dir="auto" className="truncate text-body font-medium text-fg">
+                      {account.name}
+                    </p>
+                    {account.status && (
+                      <IntegrationStatusBadge
+                        status={
+                          account.status === "active"
+                            ? "connected"
+                            : account.status === "pending"
+                              ? "connecting"
+                              : "notConnected"
+                        }
+                      />
+                    )}
+                  </div>
                   <p className="text-caption font-normal text-fg-3">
                     {[
-                      connection.account.detail,
-                      connection.brandSlug === null ? t("details.allBrands") : null,
-                      t("details.connectedOn", { date: format.dateTime(new Date(connection.connectedAt), "medium") }),
+                      account.detail,
+                      meta.scope === "user" ? t("details.allBrands") : null,
+                      t("details.connectedOn", { date: format.dateTime(new Date(account.connectedAt), "medium") }),
                     ]
                       .filter(Boolean)
                       .join(" · ")}
                   </p>
+                  {account.lastError && account.status !== "active" && (
+                    <p className="text-caption font-normal text-danger">{account.lastError}</p>
+                  )}
                 </div>
                 {canConnect && (
                   <div className="flex items-center gap-2">
-                    {provider === "wordpress" && (
-                      <Button size="sm" onClick={() => setCredentialsFor(connection)}>
-                        <KeyRoundIcon />
-                        {t("details.updatePassword")}
+                    {isPublishingPlatform(provider) && (
+                      <Button
+                        size="sm"
+                        loading={testConnection.isPending && testConnection.variables === account.connectionId}
+                        onClick={() => handleTest(account)}
+                      >
+                        <RefreshCwIcon />
+                        {t("details.test")}
                       </Button>
                     )}
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="text-danger hover:bg-danger-bg hover:text-danger"
-                      onClick={() => setToDisconnect(connection)}
-                    >
-                      <UnplugIcon />
-                      {t("details.disconnect")}
-                    </Button>
+                    {provider === "searchConsole" && (
+                      <Button size="sm" loading={syncGsc.isPending} onClick={handleSync}>
+                        <RefreshCwIcon />
+                        {t("details.sync")}
+                      </Button>
+                    )}
+                    {!meta.backend && (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="text-danger hover:bg-danger-bg hover:text-danger"
+                        onClick={() => setToDisconnect(account)}
+                      >
+                        <UnplugIcon />
+                        {t("details.disconnect")}
+                      </Button>
+                    )}
                   </div>
                 )}
               </Card>
@@ -153,8 +185,9 @@ export function IntegrationDetailsView({ provider }: { provider: IntegrationProv
 
       <ConnectDialog
         provider={connecting ? provider : null}
+        site={brand}
         brandSlug={brandSlug}
-        workspaceId={workspace?.id ?? null}
+        workspaceId={workspace ? String(workspace.work_space_id) : null}
         onOpenChange={setConnecting}
       />
 
@@ -164,49 +197,11 @@ export function IntegrationDetailsView({ provider }: { provider: IntegrationProv
           if (!open) setToDisconnect(null);
         }}
         title={t("details.disconnectTitle", { name })}
-        description={t(`providers.${provider}.disconnectBody`, { account: toDisconnect?.account.name ?? "" })}
+        description={t(`providers.${provider}.disconnectBody`, { account: toDisconnect?.name ?? "" })}
         confirmLabel={t("details.disconnect")}
         isPending={isDisconnecting}
         onConfirm={handleDisconnect}
       />
-
-      <Dialog
-        open={Boolean(credentialsFor)}
-        onOpenChange={(open) => {
-          if (!open && !isSaving) {
-            setCredentialsFor(null);
-            setNewPassword("");
-          }
-        }}
-      >
-        <DialogContent className="max-w-[440px]">
-          <form className="flex flex-col gap-5" onSubmit={handleUpdateCredentials}>
-            <DialogHeader>
-              <DialogTitle>{t("details.updatePasswordTitle")}</DialogTitle>
-              <DialogDescription dir="auto">{credentialsFor?.account.name}</DialogDescription>
-            </DialogHeader>
-            <FormField label={t("wordpress.appPassword")} helper={t("wordpress.appPasswordHelper")}>
-              {(props) => (
-                <PasswordInput
-                  {...props}
-                  dir="ltr"
-                  autoComplete="off"
-                  value={newPassword}
-                  onChange={(event) => setNewPassword(event.target.value)}
-                />
-              )}
-            </FormField>
-            <DialogFooter>
-              <Button type="button" variant="secondary" disabled={isSaving} onClick={() => setCredentialsFor(null)}>
-                {tCommon("cancel")}
-              </Button>
-              <Button type="submit" variant="primary" loading={isSaving}>
-                {tCommon("save")}
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 
-import type { Engine } from "@/lib/api/types";
+import type { Engine } from "@/types/types";
 import { cn } from "@/lib/utils";
 import { PlatformLogo, platformLogos } from "./platform-logo";
 
@@ -37,7 +37,7 @@ export function EngineIcon({
       translate="no"
       className={cn(
         "grid shrink-0 place-items-center rounded-[6px] border border-border font-mono leading-none font-medium text-fg-2",
-        logo ? "bg-surface" : "bg-surface-2",
+        logo ? "bg-white" : "bg-surface-2",
         size <= 24 ? "text-[9px]" : "text-[10px]",
         className,
       )}

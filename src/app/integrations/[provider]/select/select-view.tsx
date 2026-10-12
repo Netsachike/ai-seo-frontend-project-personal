@@ -15,17 +15,18 @@ import {
   type IntegrationConnectedMessage,
   type IntegrationProvider,
 } from "@/features/integrations/catalog";
-import { brandsByWorkspace } from "@/lib/mocks/fixtures";
+import { useSite } from "@/features/workspace/hooks";
 import { IntegrationTile } from "@/components/brand/integration-row";
 import { Button } from "@/components/ui/button";
 
 type Choice = { name: string; detail: string };
 
-/** UI stage: the properties a Google account might offer for this brand's domain. */
-function choicesFor(provider: IntegrationProvider, brand: string | null): Choice[] {
-  const domain = Object.values(brandsByWorkspace)
-    .flat()
-    .find((b) => b.slug === brand)?.domain ?? "example.com";
+/**
+ * Google Analytics has no backend endpoint yet: these are the properties a
+ * Google account might offer for the site's domain. (Search Console uses the
+ * backend's OAuth redirect instead of this popup.)
+ */
+function choicesFor(provider: IntegrationProvider, domain: string): Choice[] {
   if (provider === "analytics") {
     return [
       { name: `${domain} – GA4`, detail: "Property 312 448 901" },
@@ -60,7 +61,9 @@ export function IntegrationSelectView({
   const t = useTranslations("integrations.select");
   const tProvider = useTranslations("integrations.providers");
   const name = tProvider(`${provider}.name`);
-  const choices = React.useMemo(() => choicesFor(provider, brand), [provider, brand]);
+  const site = useSite(brand && /^\d+$/.test(brand) ? Number(brand) : undefined);
+  const domain = site.data?.domain ?? "example.com";
+  const choices = React.useMemo(() => choicesFor(provider, domain), [provider, domain]);
   const [selected, setSelected] = React.useState(0);
   const [isConnecting, setIsConnecting] = React.useState(false);
   const [connected, setConnected] = React.useState<Choice | null>(null);
@@ -125,7 +128,7 @@ export function IntegrationSelectView({
         ) : (
           <>
             <div className="flex items-center gap-3">
-              <IntegrationTile monogram={PROVIDERS[provider].monogram} />
+              <IntegrationTile monogram={PROVIDERS[provider].monogram} logo={provider} />
               <div className="flex flex-col">
                 <h1 className="text-h2 text-fg">{t("chooseTitle")}</h1>
                 <p className="text-small text-fg-2">{t("chooseBody", { name })}</p>

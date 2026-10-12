@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 
 import { toast } from "@/lib/toast";
 import teamMemberService from "@/services/team-members";
-import type { User } from "@/types/shared";
+import type { User } from "@/types/types";
 import type { WorkspaceOption } from "@/components/account/team-member-dialog";
 import { accountKeys } from "./query-keys";
 

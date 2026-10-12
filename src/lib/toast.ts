@@ -2,7 +2,7 @@ import { toast as sonner } from "sonner";
 
 /**
  * The toast API the shared account pages call (`success`, `error`, `upgrade`,
- * `loading`, `dismiss`), on top of Orbit's sonner Toaster. Durations follow
+ * `loading`, `dismiss`), on top of Rankoya's sonner Toaster. Durations follow
  * the handoff. `upgrade` takes a translated action label and handler from the
  * caller, since this module has no access to the router or messages.
  */

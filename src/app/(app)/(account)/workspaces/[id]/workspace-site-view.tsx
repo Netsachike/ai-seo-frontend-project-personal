@@ -29,7 +29,10 @@ import { accountHref } from "@/features/account/routes";
 import { accountKeys } from "@/features/account/query-keys";
 import { useSessionUser } from "@/features/account/use-session-user";
 import { ConfirmDialog } from "@/components/account/confirm-dialog";
-import { ConfigureWhiteLabelDialog, type WhiteLabelFormValues } from "@/components/account/configure-white-label-dialog";
+import {
+  ConfigureWhiteLabelDialog,
+  type WhiteLabelFormValues,
+} from "@/components/account/configure-white-label-dialog";
 import { DnsRecordsDialog } from "@/components/account/dns-records-dialog";
 import { WhiteLabelUpgradeDialog } from "@/components/account/white-label-upgrade-dialog";
 import { EmptyState } from "@/components/brand/empty-state";
@@ -111,9 +114,7 @@ export function WorkspaceSiteView({ id }: { id: string }) {
       try {
         const res = await CustomDomainService.getUserDomains();
         if (res.success && Array.isArray(res.data)) {
-          return res.data.filter(
-            (d: DomainRecord) => String(d.workspace_id) === id || d.workspace_id === Number(id),
-          );
+          return res.data.filter((d: DomainRecord) => String(d.workspace_id) === id || d.workspace_id === Number(id));
         }
       } catch (err) {
         console.error("Failed to load workspace domain config", err);
@@ -254,7 +255,10 @@ export function WorkspaceSiteView({ id }: { id: string }) {
           setDomainConfig((prev) => prev.map((d) => (d.id === domainData.id ? { ...d, ...updated.data } : d)));
         }
       } catch {
-        setLiveStatus((prev) => ({ ...prev, [domainData.id]: { verified: false, message: "network" } satisfies LiveStatus }));
+        setLiveStatus((prev) => ({
+          ...prev,
+          [domainData.id]: { verified: false, message: "network" } satisfies LiveStatus,
+        }));
       }
     },
     [setDomainConfig],

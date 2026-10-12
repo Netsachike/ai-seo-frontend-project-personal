@@ -1,8 +1,8 @@
 {
   "meta": {
-    "title": "Orbit",
-    "titleTemplate": "%s · Orbit",
-    "description": "See where your brand ranks in Google and AI answers, and let Orbit close the gap."
+    "title": "Rankoya",
+    "titleTemplate": "%s · Rankoya",
+    "description": "See where your brand ranks in Google and AI answers, and let Rankoya close the gap."
   },
   "common": {
     "close": "Close",
@@ -41,7 +41,7 @@
     "ofHundred": "of 100"
   },
   "owner": {
-    "orbit": "Orbit",
+    "rankoya": "Rankoya",
     "you": "You"
   },
   "status": {
@@ -87,8 +87,8 @@
     "approved": "Approved",
     "rejected": "Rejected",
     "alsoTelegram": "Also sent to Telegram",
-    "approvedToast": "Approved. Orbit will make the change and tell you when it's live.",
-    "rejectedToast": "Rejected. Orbit won't make this change.",
+    "approvedToast": "Approved. Rankoya will make the change and tell you when it's live.",
+    "rejectedToast": "Rejected. Rankoya won't make this change.",
     "failedToast": "We couldn't save your decision. Try again."
   },
   "task": {
@@ -102,19 +102,20 @@
   },
   "agent": {
     "fromTelegram": "from Telegram",
-    "orbitSaid": "Orbit:",
+    "rankoyaSaid": "Rankoya:",
     "today": "Today",
     "yesterday": "Yesterday",
     "dayDividerWithNote": "{day} · {note}",
     "sameAsTelegram": "same conversation as Telegram",
-    "panelTitle": "Ask Orbit",
+    "panelTitle": "Ask Rankoya",
     "panelDescription": "Same conversation as Telegram.",
     "openFull": "Open full conversation",
     "loadError": "We couldn't load the conversation. Try again in a moment.",
-    "composerLabel": "Message Orbit",
+    "composerLabel": "Message Rankoya",
     "composerPlaceholder": "Ask about rankings, competitors or content",
     "send": "Send",
-    "typing": "Orbit is writing a reply"
+    "typing": "Rankoya is writing a reply",
+    "sendError": "Rankoya couldn't answer that. Try again."
   },
   "forms": {
     "readOnly": "Read only",
@@ -173,7 +174,7 @@
       "samples": {
         "display": "Be the answer.",
         "h1": "Good morning, Ada",
-        "h2": "How much should Orbit do on its own?",
+        "h2": "How much should Rankoya do on its own?",
         "h3": "Visibility vs competitors",
         "bodyLg": "Claude skips you mostly because you have no page about how you source beans.",
         "body": "Here's how Northwind Roasters showed up in Google and AI answers this month.",
@@ -197,7 +198,7 @@
         "primary": "Run new scan",
         "secondary": "Export report",
         "ghost": "Reject",
-        "agent": "Ask Orbit",
+        "agent": "Ask Rankoya",
         "destructive": "Delete workspace",
         "link": "Details"
       },
@@ -232,7 +233,7 @@
         "de": "Germany"
       },
       "voice": "Brand voice notes",
-      "voiceHelper": "Orbit follows these notes in every draft.",
+      "voiceHelper": "Rankoya follows these notes in every draft.",
       "voiceSample": "Warm and plain. Talk about farms and roast dates, not luxury.",
       "disabledField": "Maximum articles per month",
       "checkboxes": "Checkboxes",
@@ -331,7 +332,7 @@
       "toggleLoading": "Loading state",
       "toggleEmpty": "Empty state",
       "emptyTitle": "No keywords tracked yet",
-      "emptyDescription": "Add the keywords your customers search for and Orbit checks them daily.",
+      "emptyDescription": "Add the keywords your customers search for and Rankoya checks them daily.",
       "emptyAction": "Add keywords",
       "cols": {
         "keyword": "Keyword",
@@ -378,8 +379,8 @@
       "toastErrorButton": "Error toast",
       "command": "Command menu",
       "commandDescription": "Search screens and run actions",
-      "commandPlaceholder": "Search or ask Orbit",
-      "commandEmpty": "No matches. Press Enter to ask Orbit.",
+      "commandPlaceholder": "Search or ask Rankoya",
+      "commandEmpty": "No matches. Press Enter to ask Rankoya.",
       "commandGroup": "Actions",
       "commandScan": "Run new scan"
     }
@@ -411,7 +412,7 @@
         "actions": "Action plan",
         "content": "Content",
         "social": "Social",
-        "agent": "Ask Orbit",
+        "agent": "Ask Rankoya",
         "integrations": "Integrations",
         "reports": "Reports",
         "settings": "Settings",
@@ -422,7 +423,7 @@
     "sidebar": {
       "expand": "Expand sidebar",
       "collapse": "Collapse sidebar",
-      "telegramTitle": "Orbit on Telegram",
+      "telegramTitle": "Rankoya on Telegram",
       "telegramConnected": "Connected as @{handle}. Approvals go to both.",
       "telegramConnectedRich": "Connected as <mono>@{handle}</mono>. Approvals go to both.",
       "telegramOff": "Not connected. Connect to approve work from your phone.",
@@ -439,7 +440,7 @@
     },
     "topbar": {
       "openNav": "Open navigation",
-      "askOrbit": "Ask Orbit",
+      "askRankoya": "Ask Rankoya",
       "home": "All sites"
     },
     "shortcut": {
@@ -489,8 +490,8 @@
       "emptyDescription": "Approvals, finished scans and team invites show up here.",
       "unread": "Unread",
       "kinds": {
-        "approvalWaiting": "Orbit needs your approval: {title}",
-        "agentEvent": "Orbit published \"{title}\" to {site}",
+        "approvalWaiting": "Rankoya needs your approval: {title}",
+        "agentEvent": "Rankoya published \"{title}\" to {site}",
         "scanFinished": "Scan finished: {gained, plural, one {# new mention} other {# new mentions}} on {engine}",
         "teamInvite": "{name} accepted your invite"
       }
@@ -512,11 +513,11 @@
     },
     "command": {
       "title": "Command menu",
-      "description": "Go to a screen, switch workspace, brand, language or theme, or ask Orbit.",
-      "placeholder": "Search or ask Orbit",
-      "empty": "No matches. Press Enter to ask Orbit.",
-      "askGroup": "Ask Orbit",
-      "ask": "Ask Orbit: \"{question}\"",
+      "description": "Go to a screen, switch workspace, brand, language or theme, or ask Rankoya.",
+      "placeholder": "Search or ask Rankoya",
+      "empty": "No matches. Press Enter to ask Rankoya.",
+      "askGroup": "Ask Rankoya",
+      "ask": "Ask Rankoya: \"{question}\"",
       "enter": "↵",
       "brands": "Brands",
       "workspaces": "Workspaces",
@@ -530,10 +531,10 @@
       "description": "Guides, and a way to reach the team.",
       "docsTitle": "Guides",
       "docs": {
-        "gettingStarted": "Getting started with Orbit",
+        "gettingStarted": "Getting started with Rankoya",
         "visibility": "How AI visibility is measured",
         "approvals": "Approvals and autopilot",
-        "telegram": "Using Orbit on Telegram"
+        "telegram": "Using Rankoya on Telegram"
       },
       "ticketTitle": "Submit a ticket",
       "ticketDescription": "We reply by email, usually within one working day.",
@@ -556,7 +557,7 @@
       },
       "message": "Message",
       "placeholders": {
-        "idea": "What would make Orbit more useful?",
+        "idea": "What would make Rankoya more useful?",
         "bug": "What happened, and what did you expect?",
         "other": "What's on your mind?"
       },
@@ -574,7 +575,7 @@
     "googleMonogram": "G",
     "or": "or",
     "layout": {
-      "home": "Orbit home",
+      "home": "Rankoya home",
       "copyright": "© {year} {company}",
       "company": "NETSACH TECH LTD",
       "terms": "Terms",
@@ -582,15 +583,25 @@
       "refunds": "Refunds"
     },
     "panel": {
-      "label": "About Orbit",
-      "overline": "Google + AI search",
-      "headline": "Be the answer.",
-      "body": "See where you rank in Google, ChatGPT, Claude, Gemini and Perplexity. Then let Orbit write, fix and publish what closes the gap.",
-      "question": "best coffee subscription in the US",
-      "answer": "Top picks right now: <mark>Your brand</mark> for small-batch single origins, then two larger roasters for blends.",
-      "mentioned": "▲ Mentioned in 4 of 5 engines",
-      "rankBadge": "#1 on Gemini",
-      "slide": "Show slide {number} of {total}"
+      "label": "About Rankoya",
+      "slide": "Show slide {number} of {total}",
+      "slides": {
+        "visibility": {
+          "kicker": "AI visibility",
+          "title": "See where you show up in AI answers.",
+          "description": "Track how ChatGPT, Claude, Gemini and Perplexity mention your brand, all in Rankoya."
+        },
+        "rankings": {
+          "kicker": "Rankings and competitors",
+          "title": "Know who outranks you, and why.",
+          "description": "Google positions and AI share of voice side by side, every week."
+        },
+        "agent": {
+          "kicker": "Your SEO agent",
+          "title": "Approve the fix. Rankoya does the work.",
+          "description": "Articles and on-page fixes drafted for you, published only after you say yes."
+        }
+      }
     },
     "signIn": {
       "metaTitle": "Sign in",
@@ -600,7 +611,7 @@
       "password": "Password",
       "forgot": "Forgot password?",
       "submit": "Sign in",
-      "noAccount": "New to Orbit? <link>Create an account</link>"
+      "noAccount": "New to Rankoya? <link>Create an account</link>"
     },
     "signUp": {
       "metaTitle": "Create account",
@@ -648,7 +659,10 @@
       "passwordWeak": "Use at least 8 characters, including a number.",
       "workspaceRequired": "Enter a company or team name.",
       "codeIncomplete": "Enter all 6 digits.",
-      "codeInvalid": "That code doesn't match. Check the latest email or send a new code."
+      "codeInvalid": "That code doesn't match. Check the latest email or send a new code.",
+      "apiUnavailable": "Sign-in isn't available: this app isn't connected to the Rankoya server.",
+      "generic": "Something went wrong. Try again.",
+      "googleUnavailable": "Google sign-in isn't available yet. Use your email and password."
     }
   },
   "autopilot": {
@@ -656,7 +670,7 @@
     "recommended": "Default",
     "ask": {
       "title": "Ask me first",
-      "description": "Orbit drafts articles and fixes. Nothing goes live until you approve it."
+      "description": "Rankoya drafts articles and fixes. Nothing goes live until you approve it."
     },
     "content": {
       "title": "Auto-publish content",
@@ -664,14 +678,16 @@
     },
     "full": {
       "title": "Full autopilot",
-      "description": "Orbit publishes and fixes on its own and sends you a summary after each change."
+      "description": "Rankoya publishes and fixes on its own and sends you a summary after each change."
     }
   },
   "integrationStatus": {
     "connected": "Connected",
     "notConnected": "Not connected",
     "comingSoon": "Coming soon",
-    "connecting": "Connecting"
+    "connecting": "Connecting",
+    "tracking": "Tracking",
+    "paused": "Paused"
   },
   "insights": {
     "range": {
@@ -692,13 +708,14 @@
         "done": "Scan finished. Your numbers are up to date."
       },
       "job_audit": {
-        "started": "Audit started. Orbit is checking every page.",
+        "started": "Audit started. Rankoya is checking every page.",
         "done": "Audit finished."
       },
       "job_fix": {
-        "started": "Orbit is making the approved fixes.",
-        "done": "Fixes are live. Orbit will recheck them tomorrow."
-      }
+        "started": "Rankoya is making the approved fixes.",
+        "done": "Fixes are live. Rankoya will recheck them tomorrow."
+      },
+      "failed": "The check didn't finish. Try again."
     }
   },
   "overview": {
@@ -736,7 +753,7 @@
       }
     },
     "feed": {
-      "title": "What Orbit did",
+      "title": "What Rankoya did",
       "description": "Last 48 hours"
     },
     "firstScan": {
@@ -748,7 +765,7 @@
     "descriptionV2": "Here's how {brand} is performing across search and AI platforms.",
     "rail": "Shortcuts and activity",
     "promo": {
-      "title": "Get the most out of Orbit",
+      "title": "Get the most out of Rankoya",
       "body": "Add your other websites and start finding chances to rank in Google Search, Google Maps, ChatGPT and more.",
       "cta": "Add website"
     },
@@ -784,9 +801,9 @@
     },
     "add": {
       "title": "Add another website",
-      "description": "Tell us about the business and website. Orbit analyzes it and shows where it can grow across search and AI platforms.",
+      "description": "Tell us about the business and website. Rankoya analyzes it and shows where it can grow across search and AI platforms.",
       "url": "Website URL",
-      "urlHelper": "Orbit starts its analysis from this URL.",
+      "urlHelper": "Rankoya starts its analysis from this URL.",
       "urlPlaceholder": "yourwebsite.com",
       "later": "You can connect publishing later.",
       "submit": "Add website",
@@ -799,10 +816,10 @@
       "tagline": "More visibility. More customers.",
       "lines": {
         "connect": "Add your URL and business details",
-        "analyze": "Orbit reads your site and asks 5 AI engines about your market",
+        "analyze": "Rankoya reads your site and asks 5 AI engines about your market",
         "discover": "Find SEO and AI-answer opportunities",
         "optimize": "Get ranked, actionable fixes",
-        "publish": "Orbit writes and publishes after you approve",
+        "publish": "Rankoya writes and publishes after you approve",
         "measure": "Track rankings, mentions and growth"
       }
     },
@@ -818,7 +835,7 @@
       },
       "content": {
         "title": "Check content plan",
-        "body": "Articles Orbit is writing for you"
+        "body": "Articles Rankoya is writing for you"
       },
       "audit": {
         "title": "Run site audit",
@@ -827,7 +844,7 @@
     },
     "help": {
       "title": "Need help?",
-      "body": "Our support team can help you get the most out of Orbit.",
+      "body": "Our support team can help you get the most out of Rankoya.",
       "cta": "Contact support"
     },
     "activity": {
@@ -849,7 +866,10 @@
       "engineNote": "On {engine} only",
       "position": "Avg. position",
       "sentiment": "Positive sentiment",
-      "sentimentNote": "Of answers that mention you"
+      "sentimentNote": "Of answers that mention you",
+      "scoreNoteTests": "From {count, plural, one {# answer} other {# answers}}",
+      "tests": "Answers checked",
+      "testsNote": "Across {prompts, plural, one {# question} other {# questions}}"
     },
     "byEngine": {
       "title": "By engine",
@@ -892,7 +912,7 @@
     "add": {
       "questions": {
         "title": "Add questions",
-        "description": "Orbit asks these to 5 AI engines in every scan.",
+        "description": "Rankoya asks these to 5 AI engines in every scan.",
         "label": "Questions, one per line",
         "helper": "{count, plural, =0 {Nothing added yet} one {# question} other {# questions}}",
         "placeholder": "best coffee for french press",
@@ -902,15 +922,20 @@
       },
       "keywords": {
         "title": "Add keywords",
-        "description": "Orbit checks these in Google every day.",
+        "description": "Rankoya checks these in Google every day.",
         "label": "Keywords, one per line",
         "helper": "{count, plural, =0 {Nothing added yet} one {# keyword} other {# keywords}}",
         "placeholder": "cold brew coffee beans",
         "required": "Add at least one keyword.",
         "added": "{count, plural, one {Added # keyword} other {Added # keywords}}. First positions arrive tomorrow.",
-        "submit": "Add keywords"
+        "submit": "Add keywords",
+        "failed": "Couldn't add those keywords. Try again."
       }
-    }
+    },
+    "generateQuestions": "Generate questions",
+    "runTest": "Run test",
+    "generated": "{count, plural, =0 {No new questions.} one {# question added.} other {# questions added.}}",
+    "generateFailed": "Couldn't generate questions. Add keywords first, then try again."
   },
   "prompt": {
     "metaTitle": "Question",
@@ -926,7 +951,7 @@
     "checked": "Checked {when}",
     "recheck": "Recheck now",
     "rechecking": "Rechecking this question in 5 engines",
-    "closeGap": "Let Orbit close this gap",
+    "closeGap": "Let Rankoya close this gap",
     "closeGapPrompt": "Close the gap on \"{question}\". What will you do, and what do you need from me?",
     "unreachable": "Unreachable",
     "notMentioned": "Not mentioned",
@@ -934,7 +959,7 @@
     "mentionedAt": "Mentioned · #{position} of {listed}",
     "cited": "Cited:",
     "whyMissing": "Why you're missing:",
-    "planTitle": "Orbit's plan for this question",
+    "planTitle": "Rankoya's plan for this question",
     "planDescription": "What closes the gap, and who does each part",
     "addToPlan": "Add to action plan",
     "inPlan": "In your action plan",
@@ -953,7 +978,7 @@
     "mobile": "Mobile",
     "addKeywords": "Add keywords",
     "emptyTitle": "No keywords tracked yet",
-    "emptyDescription": "Add the keywords your customers search for and Orbit checks them in Google every day.",
+    "emptyDescription": "Add the keywords your customers search for and Rankoya checks them in Google every day.",
     "stats": {
       "avg": "Avg. position",
       "top3": "Top 3",
@@ -1022,7 +1047,7 @@
       "winner": "{name} in {engines} engines",
       "write": "Write answer page",
       "draftReady": "Draft in Content",
-      "drafted": "Orbit is drafting the answer page. It will wait in Content for your review."
+      "drafted": "Rankoya is drafting the answer page. It will wait in Content for your review."
     },
     "keywordGaps": {
       "title": "Keywords they rank for, you don't",
@@ -1035,10 +1060,10 @@
     },
     "sites": {
       "title": "Where competitors get cited and linked",
-      "description": "Orbit can't earn these links for you, but it drafts the pitch for each one.",
+      "description": "Rankoya can't earn these links for you, but it drafts the pitch for each one.",
       "draftAll": "Draft all outreach emails",
       "draftedShort": "Emails drafted",
-      "drafted": "Orbit drafted {count} outreach emails. They're in your action plan under You need to do.",
+      "drafted": "Rankoya drafted {count} outreach emails. They're in your action plan under You need to do.",
       "authority": "Authority {score}",
       "kinds": {
         "roundup": "Roundup",
@@ -1049,14 +1074,17 @@
     },
     "addDialog": {
       "title": "Add competitor",
-      "description": "Orbit adds them to every scan and comparison.",
+      "description": "Rankoya adds them to every scan and comparison.",
       "label": "Competitor website",
       "helper": "You can track up to 5 competitors.",
       "placeholder": "competitor.com",
       "invalid": "Enter a domain like competitor.com.",
       "added": "Added {domain}. They'll appear after the next scan.",
       "submit": "Add competitor"
-    }
+    },
+    "research": "Research competitors",
+    "researched": "{count, plural, one {# competitor} other {# competitors}} found.",
+    "researchFailed": "Couldn't run the research. Try again."
   },
   "audit": {
     "title": "Site audit",
@@ -1064,12 +1092,12 @@
     "descriptionEmpty": "SEO and AI readiness for {domain}.",
     "run": "Run audit",
     "auditRunning": "Auditing every page",
-    "fixRunning": "Orbit is fixing the approved issues",
-    "fixAll": "Let Orbit fix {count} issues",
+    "fixRunning": "Rankoya is fixing the approved issues",
+    "fixAll": "Let Rankoya fix {count} issues",
     "fixAllTitle": "Fix {count} issues on your site",
     "fixItem": "{title} ({pages} pages)",
     "approveTitle": "Approve these changes",
-    "approveDescription": "These change your live site. Orbit only starts after you approve, here or on Telegram.",
+    "approveDescription": "These change your live site. Rankoya only starts after you approve, here or on Telegram.",
     "emptyTitle": "No audit yet",
     "emptyDescription": "Run your first audit to see SEO health and AI readiness. It takes about a minute.",
     "seoHealth": "SEO health",
@@ -1090,7 +1118,7 @@
       "warning": "Warnings {count}",
       "notice": "Notices {count}"
     },
-    "orbitCan": "Orbit can fix {count} of these with your WordPress access.",
+    "rankoyaCan": "Rankoya can fix {count} of these with your WordPress access.",
     "severity": {
       "critical": "Critical",
       "warning": "Warning",
@@ -1098,7 +1126,7 @@
     },
     "siteWide": "Site-wide",
     "pages": "{count, plural, one {# page} other {# pages}}",
-    "letOrbitFix": "Let Orbit fix",
+    "letRankoyaFix": "Let Rankoya fix",
     "howToFix": "How to fix",
     "fixing": "Fixing",
     "fixed": "Fixed",
@@ -1109,36 +1137,52 @@
       "stepsTitle": "How to fix it",
       "affectedTitle": "Affected pages",
       "andMore": "And {count} more",
-      "fixApproved": "Approved. Orbit is making this change and will recheck it tomorrow.",
+      "fixApproved": "Approved. Rankoya is making this change and will recheck it tomorrow.",
       "markDone": "Mark as done",
       "doneLabel": "Marked as done",
-      "markedDone": "Marked as done. Orbit will confirm it in the next audit.",
-      "askHelp": "Ask Orbit for help",
-      "helpPrompt": "Help me fix this audit issue: \"{title}\". Give me the exact steps for my setup."
-    }
+      "markedDone": "Marked as done. Rankoya will confirm it in the next audit.",
+      "askHelp": "Ask Rankoya for help",
+      "helpPrompt": "Help me fix this audit issue: \"{title}\". Give me the exact steps for my setup.",
+      "verified": "Fixed and verified on the live page.",
+      "proposalTitle": "Proposed fix",
+      "proposalBody": "Nothing has been changed on your site. Get the package to apply it, then verify the live page.",
+      "getPackage": "Get deployment package",
+      "verify": "Verify on live site",
+      "currentValue": "Now: {value}",
+      "markInProgress": "Mark in progress",
+      "inProgress": "In progress",
+      "markedInProgress": "Marked in progress.",
+      "ignore": "Ignore issue",
+      "ignored": "Issue ignored."
+    },
+    "auditDone": "{count, plural, =0 {No new issues.} one {# new issue found.} other {# new issues found.}}",
+    "auditFailed": "Couldn't run the audit. Crawl the site first, then try again.",
+    "proposed": "{count, plural, one {Fix ready to deploy.} other {# fixes ready to deploy.}}",
+    "fixFailed": "That didn't work. Try again.",
+    "fixReady": "Fix ready"
   },
   "actions": {
     "title": "Action plan",
-    "description": "What to do next, ranked by impact. Orbit handles its part; the rest is yours.",
-    "approveAll": "Approve all {count} from Orbit",
-    "approvedAll": "Approved {count, plural, one {# change} other {# changes}}. Orbit is on it.",
-    "confirmTitle": "Approve {count, plural, one {# change} other {# changes}} from Orbit?",
-    "confirmDescription": "These change your live site. Orbit starts right away and tells you when each one is live.",
+    "description": "What to do next, ranked by impact. Rankoya handles its part; the rest is yours.",
+    "approveAll": "Approve all {count} from Rankoya",
+    "approvedAll": "Approved {count, plural, one {# change} other {# changes}}. Rankoya is on it.",
+    "confirmTitle": "Approve {count, plural, one {# change} other {# changes}} from Rankoya?",
+    "confirmDescription": "These change your live site. Rankoya starts right away and tells you when each one is live.",
     "cancel": "Cancel",
     "emptyTitle": "No actions yet",
-    "emptyDescription": "Nothing here yet. Your first scan finishes in about 3 minutes, then Orbit builds your plan.",
+    "emptyDescription": "Nothing here yet. Your first scan finishes in about 3 minutes, then Rankoya builds your plan.",
     "projected": "Projected AI visibility: <strong>{current}</strong> → <strong>{projected}</strong> when this plan is done",
     "projectedAria": "Visibility score {current} now, {projected} projected",
     "gain": "+{points} pts",
     "columns": {
       "approval": "Needs your approval",
-      "working": "Orbit is working on",
+      "working": "Rankoya is working on",
       "yours": "You need to do",
       "done": "Done this week"
     },
     "emptyColumn": {
       "approval": "Nothing waiting for you.",
-      "working": "Orbit is idle. Approve something to get it started.",
+      "working": "Rankoya is idle. Approve something to get it started.",
       "yours": "Nothing on your list.",
       "done": "Finished work shows up here."
     },
@@ -1161,8 +1205,12 @@
     "points": "+{points} pts",
     "progress": "{percent} done",
     "markDone": "Mark done",
-    "markedDone": "Nice. Orbit will check the result in the next scan.",
-    "open": "Open"
+    "markedDone": "Nice. Rankoya will check the result in the next scan.",
+    "open": "Open",
+    "analyze": "Find opportunities",
+    "analyzed": "{count, plural, =0 {No new opportunities.} one {# opportunity found.} other {# opportunities found.}}",
+    "analyzeFailed": "Couldn't look for opportunities. Try again.",
+    "updateFailed": "Couldn't save that change. Try again."
   },
   "content": {
     "title": "Content",
@@ -1172,7 +1220,7 @@
     "calendar": "Calendar",
     "list": "List",
     "plan": "Plan {month}",
-    "planned": "Orbit is planning {month}. Drafts show up here as they're ready.",
+    "planned": "Rankoya is planning {month}. Drafts show up here as they're ready.",
     "prevMonth": "Previous month",
     "nextMonth": "Next month",
     "legend": "Status legend",
@@ -1183,11 +1231,11 @@
       "draft": "Draft"
     },
     "emptyTitle": "Nothing planned for {month}",
-    "emptyDescription": "Ask Orbit to plan the month. It picks topics from questions you miss and keywords close to page one.",
+    "emptyDescription": "Ask Rankoya to plan the month. It picks topics from questions you miss and keywords close to page one.",
     "thisMonth": "This month",
     "articlesPlanned": "Articles planned",
     "avgScore": "Avg. content score",
-    "why": "Orbit picked these from 9 questions you miss in AI answers and 14 keywords close to page one.",
+    "why": "Rankoya picked these from 9 questions you miss in AI answers and 14 keywords close to page one.",
     "waitingTitle": "Waiting for you",
     "waitingDescription": "Approve to keep the schedule",
     "waitingEmpty": "Nothing to review.",
@@ -1199,20 +1247,21 @@
       "date": "Publish date",
       "score": "Score",
       "keyword": "Target keyword"
-    }
+    },
+    "planFailed": "Couldn't plan the month. Try again."
   },
   "editor": {
     "metaTitlePage": "Article",
     "breadcrumb": "Breadcrumb",
     "writtenIn": "Written in {language}",
-    "byline": "Written by Orbit · {words} words · saved {when}",
+    "byline": "Written by Rankoya · {words} words · saved {when}",
     "reject": "Reject",
-    "revise": "Ask Orbit to revise",
+    "revise": "Ask Rankoya to revise",
     "approve": "Approve and schedule",
-    "scheduledToast": "Scheduled for {date}. Orbit publishes it and tells you when it's live.",
-    "placeholders": "Replace {count, plural, one {the placeholder} other {# placeholders}} before publishing: <code>{list}</code>. Orbit leaves these where it needs a fact from you.",
-    "shortAnswer": "Short answer",
-    "shortAnswerHelp": "AI engines quote this first. Keep it to 2–3 sentences.",
+    "scheduledToast": "Scheduled for {date}. Rankoya publishes it and tells you when it's live.",
+    "placeholders": "Replace {count, plural, one {the placeholder} other {# placeholders}} before publishing: <code>{list}</code>. Rankoya leaves these where it needs a fact from you.",
+    "shortAnswer": "Meta description",
+    "shortAnswerHelp": "What search results and AI answers show under the title. Keep it under 160 characters.",
     "bodyLabel": "Article body",
     "score": "Content score",
     "checksPassed": "{passed} of {total} checks passed",
@@ -1239,16 +1288,16 @@
     "time": "Time",
     "notify": "Tell me on Telegram when it's live",
     "rejectTitle": "Reject this article?",
-    "rejectDescription": "Orbit removes it from the plan and won't publish it. You can ask for a new draft later.",
+    "rejectDescription": "Rankoya removes it from the plan and won't publish it. You can ask for a new draft later.",
     "keep": "Keep it",
-    "rejectedToast": "Article rejected. Orbit took it off the plan.",
-    "reviseTitle": "Ask Orbit to revise",
-    "reviseDescription": "Say what to change. Orbit sends a new draft in a few minutes.",
+    "rejectedToast": "Article rejected. Rankoya took it off the plan.",
+    "reviseTitle": "Ask Rankoya to revise",
+    "reviseDescription": "Say what to change. Rankoya sends a new draft in a few minutes.",
     "reviseLabel": "What should change?",
     "revisePlaceholder": "Make the price section shorter and add our free-shipping threshold.",
-    "reviseRequired": "Tell Orbit what to change.",
-    "reviseSubmit": "Send to Orbit",
-    "revisingToast": "Orbit is revising. The new draft will be here in about 2 minutes.",
+    "reviseRequired": "Tell Rankoya what to change.",
+    "reviseSubmit": "Send to Rankoya",
+    "revisingToast": "Rankoya is revising. The new draft will be here in about 2 minutes.",
     "toolbar": {
       "label": "Formatting",
       "h2": "Heading",
@@ -1260,17 +1309,29 @@
       "quote": "Quote",
       "undo": "Undo",
       "redo": "Redo"
-    }
+    },
+    "plannedLabel": "Planned article",
+    "plannedKeyword": "Keyword: {keyword}",
+    "writeBody": "Rankoya researches what ranks for this keyword, then writes the draft for you to review. This takes a few minutes.",
+    "write": "Write this article",
+    "writing": "Researching and writing…",
+    "writeFailed": "Couldn't write the article. Try again.",
+    "saveFailed": "Couldn't save your changes. Keep this tab open and try again.",
+    "approvePublish": "Approve and publish",
+    "noTarget": "Connect a publishing platform first.",
+    "noTargetHelp": "No publishing platform is connected. <link>Connect one</link> to publish from here.",
+    "publishedToast": "Published.",
+    "publishFailed": "Couldn't publish. Check the connection and try again."
   },
   "agentPage": {
-    "title": "Ask Orbit",
+    "title": "Ask Rankoya",
     "description": "Ask about rankings, competitors or content. Same conversation as Telegram.",
     "suggestions": {
       "week": "How did we do this week?",
       "gained": "Who gained on us?",
       "plan": "Plan next month's articles"
     },
-    "canTitle": "Orbit can",
+    "canTitle": "Rankoya can",
     "can": {
       "rankings": "Check rankings in Google and 5 AI engines",
       "compare": "Compare you with competitors",
@@ -1325,7 +1386,7 @@
       },
       "remove_branding": {
         "name": "Remove branding",
-        "description": "Hides \"Powered by Orbit\" from reports and shared pages."
+        "description": "Hides \"Powered by Rankoya\" from reports and shared pages."
       }
     },
     "password": {
@@ -1394,7 +1455,7 @@
         },
         "removeBranding": {
           "label": "Remove branding add-on",
-          "helper": "Hides \"Powered by Orbit\"."
+          "helper": "Hides \"Powered by Rankoya\"."
         },
         "cancelled": {
           "label": "Renewal cancelled",
@@ -1536,7 +1597,7 @@
     "whiteLabel": {
       "upgrade": {
         "title": "Upgrade to White Label",
-        "body": "Put your own domain, logo and colours on client workspaces, and remove Orbit branding, so the app looks like yours.",
+        "body": "Put your own domain, logo and colours on client workspaces, and remove Rankoya branding, so the app looks like yours.",
         "cta": "See White Label plans"
       },
       "configure": {
@@ -1711,7 +1772,7 @@
         "verifyBody": "Add this TXT record to prove you own the domain.",
         "routingTitle": "Configure routing (required)",
         "routingTitleStep": "2. Configure routing",
-        "routingBody": "Add this record to point your domain at Orbit.",
+        "routingBody": "Add this record to point your domain at Rankoya.",
         "noRouting": "No routing records available yet.",
         "doneTitle": "Domain is fully configured",
         "doneBody": "Your DNS records are correct and traffic is routing here.",
@@ -1734,7 +1795,7 @@
     "upgrade": {
       "metaTitle": "Plans",
       "title": "Choose the plan that fits your work",
-      "description": "Track more brands, bring in your team, or resell Orbit under your own name.",
+      "description": "Track more brands, bring in your team, or resell Rankoya under your own name.",
       "tabs": {
         "app": "Plans",
         "whitelabel": "White Label"
@@ -1750,7 +1811,7 @@
       "planCopy": {
         "professional": "For one brand that wants to show up in AI answers.",
         "agency": "For teams running several brands and clients.",
-        "reseller": "For partners who resell Orbit under their own brand."
+        "reseller": "For partners who resell Rankoya under their own brand."
       },
       "whiteLabelPlans": {
         "whitelabel_starter": {
@@ -1770,7 +1831,7 @@
         "rankings": "Google rankings by keyword and device",
         "competitors": "Competitor share of voice",
         "audit": "Site audit with approved fixes",
-        "agentArticles": "Articles drafted by Orbit, published after you approve",
+        "agentArticles": "Articles drafted by Rankoya, published after you approve",
         "telegram": "Approvals on Telegram",
         "team": "Team collaboration",
         "workspaces": "Multiple workspaces",
@@ -1852,7 +1913,7 @@
       "editAria": "Edit {name}",
       "deleteAria": "Delete {name}",
       "emptyTitle": "No resellers yet",
-      "emptyBody": "Add a reseller account to start selling Orbit under your brand.",
+      "emptyBody": "Add a reseller account to start selling Rankoya under your brand.",
       "stats": {
         "total": "Total users",
         "totalHint": "Across all resellers",
@@ -1930,7 +1991,7 @@
       "resources": {
         "reportTemplate": {
           "title": "Monthly client report",
-          "description": "A report layout for AI visibility, rankings and work done, ready to fill from Orbit's exports."
+          "description": "A report layout for AI visibility, rankings and work done, ready to fill from Rankoya's exports."
         },
         "auditDeck": {
           "title": "AI visibility audit deck",
@@ -1958,7 +2019,7 @@
         },
         "contentBrief": {
           "title": "Content brief template",
-          "description": "The brief format Orbit's articles follow, for writers and client sign-off."
+          "description": "The brief format Rankoya's articles follow, for writers and client sign-off."
         },
         "contract": {
           "title": "Service agreement",
@@ -2242,12 +2303,29 @@
   },
   "integrations": {
     "title": "Integrations",
-    "description": "Connect the tools Orbit talks through, publishes to and measures with.",
-    "groups": {
-      "talk": "Talk to Orbit",
-      "publish": "Publish",
-      "measure": "Measure"
+    "description": "Choose the AI engines Rankoya tracks, and connect the tools it publishes to, measures with and talks through.",
+    "tabsLabel": "Integration categories",
+    "tabs": {
+      "ai": "AI engines",
+      "platforms": "Platforms",
+      "analytics": "Analytics",
+      "messaging": "Messaging"
     },
+    "tabCount": "{active}/{total}",
+    "tabIntro": {
+      "ai": "The AI assistants Rankoya asks your customers' questions in. A paused engine drops out of your visibility score.",
+      "platforms": "Where Rankoya publishes the articles and on-page fixes you approve.",
+      "analytics": "Google's own data, so rankings and traffic come from real clicks and visits.",
+      "messaging": "Approve work and talk to Rankoya away from your desk."
+    },
+    "engines": {
+      "chatgpt": "Answers from ChatGPT, including when it searches the web.",
+      "claude": "Answers from Claude when it searches the web.",
+      "gemini": "Answers from Google's Gemini assistant.",
+      "perplexity": "Answers and cited sources from Perplexity.",
+      "aio": "The AI summary at the top of Google results."
+    },
+    "trackToggle": "Track {name}",
     "connect": "Connect",
     "addAnother": "Connect another",
     "manage": "Manage",
@@ -2258,22 +2336,29 @@
     "connectedAccounts": "{count, plural, one {{first}} other {{first} and # more}}",
     "connectTitle": "Connect {name}",
     "continueWith": "Continue to {name}",
-    "oauthNote": "You'll sign in with Google in a new window. Orbit asks for read-only access and never posts on your behalf.",
+    "oauthNote": "You'll sign in with Google in a new window. Rankoya asks for read-only access and never posts on your behalf.",
     "waiting": "Finish signing in in the other window…",
     "facts": {
       "access": "Access",
-      "data": "What Orbit uses",
+      "data": "What Rankoya uses",
       "control": "Control"
     },
     "errors": {
       "popupBlocked": "The sign-in window was blocked. Allow pop-ups for this site and try again.",
       "wordpressRequired": "Site address, username and application password are all required.",
-      "passwordRequired": "Enter the new application password."
+      "passwordRequired": "Enter the new application password.",
+      "testFailed": "Connected, but the test failed: {message}",
+      "connectFailed": "Couldn't connect. Check the details and try again.",
+      "fieldsRequired": "Fill in every field.",
+      "syncFailed": "Couldn't pull Search Console data. Try again."
     },
     "toasts": {
       "connected": "{name} connected.",
       "disconnected": "{name} disconnected.",
-      "credentialsUpdated": "Application password updated."
+      "credentialsUpdated": "Application password updated.",
+      "trackingOn": "Rankoya is tracking {name} again.",
+      "trackingOff": "{name} paused. It no longer counts toward your visibility score.",
+      "synced": "{rows, plural, one {# row} other {# rows}} pulled from Search Console."
     },
     "wordpress": {
       "siteUrl": "Site address",
@@ -2283,9 +2368,9 @@
       "appPasswordHelper": "Create one in WordPress under Users → Profile → Application passwords."
     },
     "telegram": {
-      "qrLabel": "QR code that opens Orbit in Telegram",
+      "qrLabel": "QR code that opens Rankoya in Telegram",
       "step1": "Scan the code or open the chat.",
-      "step2": "Press Start in the chat with Orbit, then come back here.",
+      "step2": "Press Start in the chat with Rankoya, then come back here.",
       "open": "Open Telegram",
       "copyAria": "Copy code {code}",
       "copied": "Code copied.",
@@ -2294,35 +2379,37 @@
     },
     "details": {
       "emptyTitle": "{name} isn't connected",
-      "emptyBody": "Connect it to let Orbit use it for this brand.",
+      "emptyBody": "Connect it to let Rankoya use it for this brand.",
       "allBrands": "All brands",
       "connectedOn": "Connected {date}",
       "updatePassword": "Update password",
       "updatePasswordTitle": "Update application password",
       "disconnect": "Disconnect",
-      "disconnectTitle": "Disconnect {name}?"
+      "disconnectTitle": "Disconnect {name}?",
+      "test": "Test connection",
+      "sync": "Sync now"
     },
     "providers": {
       "telegram": {
         "name": "Telegram",
         "description": "Get updates, approve changes and ask questions from your phone.",
-        "chat": "Orbit agent chat",
+        "chat": "Rankoya agent chat",
         "facts": {
-          "access": "A chat with the Orbit bot",
-          "data": "Messages you send Orbit",
+          "access": "A chat with the Rankoya bot",
+          "data": "Messages you send Rankoya",
           "control": "Stop the bot any time"
         },
-        "disconnectBody": "Orbit stops messaging {account}. Approvals will only be possible in the web app."
+        "disconnectBody": "Rankoya stops messaging {account}. Approvals will only be possible in the web app."
       },
       "wordpress": {
         "name": "WordPress",
-        "description": "Orbit publishes approved articles and on-page fixes to your site.",
+        "description": "Rankoya publishes approved articles and on-page fixes to your site.",
         "facts": {
           "access": "An application password",
           "data": "Posts, pages and SEO fields",
           "control": "Every change needs approval"
         },
-        "disconnectBody": "Orbit can no longer publish to {account}. Scheduled articles stay as drafts."
+        "disconnectBody": "Rankoya can no longer publish to {account}. Scheduled articles stay as drafts."
       },
       "searchConsole": {
         "name": "Google Search Console",
@@ -2332,7 +2419,7 @@
           "data": "Queries, clicks, impressions",
           "control": "Revoke in your Google account"
         },
-        "disconnectBody": "Rankings for {account} go back to Orbit's own checks until you reconnect."
+        "disconnectBody": "Rankings for {account} go back to Rankoya's own checks until you reconnect."
       },
       "analytics": {
         "name": "Google Analytics",
@@ -2346,21 +2433,41 @@
       },
       "shopify": {
         "name": "Shopify",
-        "description": "Publish product content and fixes to your store.",
+        "description": "Rankoya publishes approved articles to your store's blog.",
         "facts": {
-          "access": "—",
-          "data": "—",
-          "control": "—"
+          "access": "An Admin API access token",
+          "data": "Blog articles",
+          "control": "Every change needs approval"
         },
         "disconnectBody": "{account}"
       },
       "webflow": {
         "name": "Webflow",
-        "description": "Publish articles to your Webflow CMS.",
+        "description": "Rankoya publishes approved articles to a Webflow CMS collection.",
         "facts": {
-          "access": "—",
-          "data": "—",
-          "control": "—"
+          "access": "A site API token",
+          "data": "One CMS collection",
+          "control": "Every change needs approval"
+        },
+        "disconnectBody": "{account}"
+      },
+      "wix": {
+        "name": "Wix",
+        "description": "Rankoya publishes approved articles to your Wix blog.",
+        "facts": {
+          "access": "A Wix API key",
+          "data": "Blog posts",
+          "control": "Every change needs approval"
+        },
+        "disconnectBody": "{account}"
+      },
+      "ghost": {
+        "name": "Ghost",
+        "description": "Rankoya publishes approved articles to your Ghost site.",
+        "facts": {
+          "access": "An Admin API key",
+          "data": "Posts",
+          "control": "Every change needs approval"
         },
         "disconnectBody": "{account}"
       }
@@ -2370,15 +2477,25 @@
       "chooseBody": "Pick the {name} property that belongs to this brand.",
       "connect": "Connect property",
       "successTitle": "{name} connected",
-      "successBody": "{account} is connected. Close this window to go back to Orbit.",
+      "successBody": "{account} is connected. Close this window to go back to Rankoya.",
       "errorTitle": "Couldn't connect {name}",
       "errorBody": "Something went wrong while connecting {name}.",
       "close": "Close window",
-      "manualClose": "If this window doesn't close, close it yourself or <back>go back to Orbit</back>."
+      "manualClose": "If this window doesn't close, close it yourself or <back>go back to Rankoya</back>."
+    },
+    "fields": {
+      "siteUrl": "Site URL",
+      "username": "Username",
+      "applicationPassword": "Application password",
+      "storeDomain": "Store domain",
+      "accessToken": "Access token",
+      "collectionId": "Collection ID",
+      "wixSiteId": "Wix site ID",
+      "adminApiKey": "Admin API key"
     }
   },
   "legal": {
-    "home": "Orbit legal pages",
+    "home": "Rankoya legal pages",
     "nav": "Legal documents",
     "overline": "Legal",
     "lastUpdated": "Last updated: {date}",
@@ -2397,7 +2514,7 @@
     "subtitle": "Select a site to continue",
     "workspaceMenu": "Workspace options",
     "addSite": "Add a site",
-    "addSiteBody": "Orbit reads it and sets it up with you in a few minutes",
+    "addSiteBody": "Rankoya reads it and sets it up with you in a few minutes",
     "emptyBody": "This workspace has no sites yet. Start with your main website.",
     "workspaceSettings": "Workspace settings",
     "teamMembers": "Team members",
@@ -2410,17 +2527,17 @@
   },
   "siteSetup": {
     "shell": {
-      "home": "Orbit, back to your sites",
+      "home": "Rankoya, back to your sites",
       "backToSites": "Back to sites",
       "stepOf": "Step {step} of {total}",
       "progressLabel": "Site setup progress",
       "loggedInAs": "Logged in as {name},",
       "signOut": "sign out",
       "visual": {
-        "label": "About Orbit",
-        "overline": "Orbit",
+        "label": "About Rankoya",
+        "overline": "Rankoya",
         "headline": "Get found on Google and in AI answers",
-        "body": "Orbit tracks where your site shows up in ChatGPT, Gemini, Claude, Perplexity and Google, then writes the content that closes the gaps."
+        "body": "Rankoya tracks where your site shows up in ChatGPT, Gemini, Claude, Perplexity and Google, then writes the content that closes the gaps."
       }
     },
     "interstitial": {
@@ -2450,8 +2567,8 @@
       "workspace": "Workspace",
       "label": "Domain",
       "placeholder": "yourdomain.com",
-      "exists": "This site is already in Orbit. Open it from your sites.",
-      "failed": "Orbit couldn't add that domain. Check it and try again.",
+      "exists": "This site is already in Rankoya. Open it from your sites.",
+      "failed": "Rankoya couldn't add that domain. Check it and try again.",
       "continue": "Continue"
     },
     "details": {
@@ -2479,14 +2596,14 @@
         }
       },
       "review": {
-        "description": "Orbit has analysed your website and thinks this is what it is about. Does it look right?",
-        "audience": "Orbit thinks these are the people your website is for. Does it look right?"
+        "description": "Rankoya has analysed your website and thinks this is what it is about. Does it look right?",
+        "audience": "Rankoya thinks these are the people your website is for. Does it look right?"
       },
       "yes": "Yes, that's right",
       "no": "No, let me edit it",
       "save": "Save and continue",
       "editLabel": "Edit {section}",
-      "error": "Orbit couldn't read your website. Check that it's online, then try again.",
+      "error": "Rankoya couldn't read your website. Check that it's online, then try again.",
       "retry": "Try again",
       "country": "Country",
       "language": "Language",
@@ -2496,7 +2613,7 @@
     "gsc": {
       "title": "Connect Search Console",
       "recommended": "Recommended",
-      "description": "Connect Google Search Console so Orbit can use the searches you already appear for. Keyword research gets sharper and you see real clicks and impressions.",
+      "description": "Connect Google Search Console so Rankoya can use the searches you already appear for. Keyword research gets sharper and you see real clicks and impressions.",
       "name": "Google Search Console",
       "domainProperty": "Domain property",
       "connecting": "Connecting Search Console…",
@@ -2504,16 +2621,17 @@
       "notConnected": "Not connected",
       "connect": "Connect",
       "continue": "Continue",
-      "skip": "Skip for now"
+      "skip": "Skip for now",
+      "connectFailed": "Couldn't start the Google sign-in. Try again."
     },
     "topics": {
       "title": "Core topics",
-      "description": "Google and AI answers favour sites that cover a subject completely. Your core topics are those subjects: each one becomes a hub on your topical map, and Orbit researches the keywords you can win around it.",
+      "description": "Google and AI answers favour sites that cover a subject completely. Your core topics are those subjects: each one becomes a hub on your topical map, and Rankoya researches the keywords you can win around it.",
       "mapLabel": "Topical map with {count, plural, =0 {no core topics yet} one {# core topic} other {# core topics}}",
-      "error": "Orbit couldn't generate topics for your site.",
+      "error": "Rankoya couldn't generate topics for your site.",
       "retry": "Try again",
       "generating": {
-        "title": "Orbit is generating core topics for your website",
+        "title": "Rankoya is generating core topics for your website",
         "body": "Each topic is based on real search data, including search volume and competition.",
         "slow": "Checking search volume and competition…",
         "stuck": "Still working. This is taking longer than usual."
@@ -2528,11 +2646,11 @@
     },
     "billing": {
       "title": "Your growth plan is ready",
-      "descriptionPaid": "Your {plan} plan covers this site. Here is what Orbit will do for it.",
+      "descriptionPaid": "Your {plan} plan covers this site. Here is what Rankoya will do for it.",
       "descriptionFree": "Choose a plan to put this site on autopilot, or start on Free and upgrade later.",
       "autopilot": {
         "title": "Put your SEO on autopilot",
-        "body": "Orbit researches, plans and writes every week, and nothing goes live without your approval unless you turn on auto-publish."
+        "body": "Rankoya researches, plans and writes every week, and nothing goes live without your approval unless you turn on auto-publish."
       },
       "plan": {
         "active": "Active",
@@ -2565,7 +2683,7 @@
       "phases": {
         "first": {
           "when": "Months 1–3",
-          "what": "Orbit publishes your first articles and search engines start indexing them."
+          "what": "Rankoya publishes your first articles and search engines start indexing them."
         },
         "second": {
           "when": "Months 3–6",
@@ -2577,12 +2695,12 @@
         }
       },
       "how": {
-        "title": "How Orbit grows your traffic",
+        "title": "How Rankoya grows your traffic",
         "subtitle": "Set it up once",
         "eyebrow": "Step {n}",
         "research": {
           "title": "Keyword research",
-          "body": "Orbit finds the searches and AI questions your site can win."
+          "body": "Rankoya finds the searches and AI questions your site can win."
         },
         "plan": {
           "title": "Your content plan",
@@ -2594,7 +2712,7 @@
         },
         "publish": {
           "title": "Published with your approval",
-          "body": "Approve in Orbit or on Telegram, and Orbit publishes to your site."
+          "body": "Approve in Rankoya or on Telegram, and Rankoya publishes to your site."
         }
       },
       "included": {
@@ -2617,7 +2735,7 @@
     },
     "integration": {
       "title": "Connect your website",
-      "description": "Choose where Orbit publishes finished articles. You can skip this and copy articles over by hand.",
+      "description": "Choose where Rankoya publishes finished articles. You can skip this and copy articles over by hand.",
       "platforms": "Publishing platform",
       "connected": "Connected",
       "soon": "Soon",
@@ -2630,27 +2748,32 @@
         "webhook": {
           "name": "Webhook or API",
           "detail": "For custom sites and Next.js",
-          "help": "Orbit sends each approved article as JSON to this HTTPS endpoint."
+          "help": "Rankoya sends each approved article as JSON to this HTTPS endpoint."
         },
         "shopify": {
           "name": "Shopify",
           "detail": "Blog posts on your store",
-          "help": ""
+          "help": "Enter your store's myshopify.com domain and an Admin API access token with blog permissions."
         },
         "webflow": {
           "name": "Webflow",
           "detail": "CMS collection items",
-          "help": ""
+          "help": "Enter a site API token and the ID of the CMS collection articles go into."
         },
         "wix": {
           "name": "Wix",
           "detail": "Wix Blog",
-          "help": ""
+          "help": "Enter an API key with Blog permissions and your Wix site ID."
         },
         "ghost": {
           "name": "Ghost",
           "detail": "Ghost posts",
-          "help": ""
+          "help": "Enter your Ghost site URL and an Admin API key from Settings → Integrations."
+        },
+        "manual": {
+          "name": "Copy and paste",
+          "detail": "Any site, by hand",
+          "help": "Rankoya prepares each approved article for you to paste into your site."
         }
       },
       "fields": {
@@ -2662,16 +2785,18 @@
       },
       "connect": "Connect",
       "continue": "Continue",
-      "skip": "Skip for now"
+      "skip": "Skip for now",
+      "failed": "Couldn't connect. Check the details and try again.",
+      "testFailed": "Connected, but the test failed: {message}"
     },
     "preferences": {
-      "title": "How should Orbit work?",
-      "description": "Set how often Orbit writes and how articles go live. You can change these any time.",
+      "title": "How should Rankoya work?",
+      "description": "Set how often Rankoya writes and how articles go live. You can change these any time.",
       "mode": {
         "label": "Publishing",
         "review": {
           "title": "Ask me first",
-          "body": "Orbit drafts each article and waits for your approval."
+          "body": "Rankoya drafts each article and waits for your approval."
         },
         "auto": {
           "title": "Publish automatically",
@@ -2690,7 +2815,7 @@
           "expert": "Expert and detailed",
           "playful": "Playful"
         },
-        "notesLabel": "Anything Orbit should know about your voice?",
+        "notesLabel": "Anything Rankoya should know about your voice?",
         "notesHelper": "Optional. Words to use or avoid, how you address readers.",
         "notesPlaceholder": "For example: we say \"clients\", not \"customers\". Keep it British English."
       },
@@ -2704,7 +2829,7 @@
         "stage2": "Scheduling your first articles…"
       },
       "title": "Your site is ready",
-      "description": "Orbit has everything it needs to start on {name}. Your first scan and content plan are on the dashboard.",
+      "description": "Rankoya has everything it needs to start on {name}. Your first scan and content plan are on the dashboard.",
       "rows": {
         "profile": "Description and audience",
         "profileValue": "Confirmed",
@@ -2721,7 +2846,8 @@
           "shopify": "Shopify",
           "webflow": "Webflow",
           "wix": "Wix",
-          "ghost": "Ghost"
+          "ghost": "Ghost",
+          "manual": "Copy and paste"
         },
         "mode": {
           "review": "you approve each one",
@@ -2734,5 +2860,16 @@
       "later": "You can change any of this later in the site's settings.",
       "cta": "Go to dashboard"
     }
+  },
+  "searchConsoleReturn": {
+    "metaTitle": "Search Console",
+    "connectingTitle": "Connecting Search Console",
+    "connectingBody": "Choosing the property for {domain} and pulling its data.",
+    "chooseTitle": "Choose a property",
+    "chooseBody": "Pick the Search Console property that belongs to {domain}.",
+    "noPropertiesBody": "This Google account has no Search Console property for {domain}. Add the site in Search Console, or connect a different Google account.",
+    "failedTitle": "Search Console isn't connected",
+    "failedBody": "Google didn't finish connecting. Start again from Integrations or site setup.",
+    "back": "Go back"
   }
 }

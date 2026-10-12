@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 
-import type { Engine } from "@/lib/api/types";
+import type { Engine } from "@/types/types";
 import { cn } from "@/lib/utils";
 import { EngineIcon } from "./engine-icon";
 

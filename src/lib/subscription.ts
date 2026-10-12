@@ -1,4 +1,4 @@
-import type { AllUserSubscriptionsNew, SubscriptionDataNew } from "@/types/shared";
+import type { AllUserSubscriptionsNew, SubscriptionDataNew } from "@/types/types";
 
 /**
  * Add-on keys treated as real, user-facing add-ons. The subscriptions payload
@@ -13,7 +13,7 @@ export function isValidAddon(key: string): key is ValidAddonKey {
   return (VALID_ADDON_KEYS as readonly string[]).includes(key);
 }
 
-/** Whether the account owns the active `remove_branding` add-on (hides "Powered by Orbit"). */
+/** Whether the account owns the active `remove_branding` add-on (hides "Powered by Rankoya"). */
 export function hasRemoveBranding(subscriptions: AllUserSubscriptionsNew | null | undefined): boolean {
   const addons = subscriptions?.addons;
   if (!addons || Array.isArray(addons)) return false;

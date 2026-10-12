@@ -1,4 +1,5 @@
-import type { Engine, Job } from "@/lib/api/types";
+import type { Engine } from "@/types/types";
+import type { Job } from "@/lib/mocks/types";
 
 /**
  * UI mock jobs. They advance with wall-clock time from their first poll, so

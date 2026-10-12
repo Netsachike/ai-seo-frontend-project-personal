@@ -2,10 +2,11 @@
 
 import { create } from "zustand";
 
+import type { Engine } from "@/types/types";
 import type { IntegrationProvider } from "./catalog";
 
 /**
- * UI-stage connections. Orbit's integration endpoints don't exist yet, so
+ * UI-stage connections. Rankoya's integration endpoints don't exist yet, so
  * connects and disconnects are kept in memory (they reset on reload), the
  * same way the rest of the UI mock data works.
  */
@@ -30,7 +31,7 @@ const seed: IntegrationConnection[] = [
     id: "conn_tg",
     provider: "telegram",
     brandSlug: null,
-    account: { name: "@fvo_northwind", detail: "Orbit agent chat" },
+    account: { name: "@fvo_northwind", detail: "Rankoya agent chat" },
     connectedAt: "2026-09-21T10:12:00Z",
   },
   {
@@ -71,3 +72,22 @@ export function connectionsFor(
 ): IntegrationConnection[] {
   return connections.filter((c) => c.provider === provider && (c.brandSlug === null || c.brandSlug === brandSlug));
 }
+
+/**
+ * AI engines a brand tracks. Every engine is on by default; pausing one is
+ * kept in memory per brand until the tracking endpoints exist.
+ */
+type TrackedEnginesState = {
+  paused: Record<string, Engine[]>;
+  setTracked: (brandSlug: string, engine: Engine, tracked: boolean) => void;
+};
+
+export const useTrackedEngines = create<TrackedEnginesState>()((set) => ({
+  paused: {},
+  setTracked: (brandSlug, engine, tracked) =>
+    set((state) => {
+      const current = state.paused[brandSlug] ?? [];
+      const next = tracked ? current.filter((e) => e !== engine) : [...new Set([...current, engine])];
+      return { paused: { ...state.paused, [brandSlug]: next } };
+    }),
+}));

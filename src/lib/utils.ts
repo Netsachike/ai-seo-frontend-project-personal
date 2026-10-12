@@ -1,7 +1,7 @@
 import { createCn } from "cn/config";
 
 /**
- * Class merger aware of Orbit's type scale, so `text-h1` (size) and
+ * Class merger aware of Rankoya's type scale, so `text-h1` (size) and
  * `text-fg` (color) never cancel each other out.
  */
 export const cn = createCn({

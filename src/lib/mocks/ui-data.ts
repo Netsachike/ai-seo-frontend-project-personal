@@ -6,14 +6,14 @@
  * `br_new` (Fresh Start Bakery) is the brand-new workspace: every dataset is
  * empty for it, so zero-data states can be reviewed.
  */
-import type { Engine } from "@/lib/api/types";
+import type { Engine } from "@/types/types";
 
 const DAY = 24 * 60 * 60 * 1000;
 export const UI_NOW = new Date("2026-10-04T09:30:00Z").getTime();
 const iso = (offsetMs: number) => new Date(UI_NOW + offsetMs).toISOString();
 const isNew = (brandId: string) => brandId === "br_new";
 
-export type Owner = "orbit" | "you";
+export type Owner = "rankoya" | "you";
 export type Impact = "high" | "medium" | "low";
 export type Effort = "low" | "medium" | "high";
 
@@ -34,7 +34,7 @@ export function nextActions(brandId: string, slug: string): NextAction[] {
   return [
     {
       id: "na1",
-      owner: "orbit",
+      owner: "rankoya",
       title: "Publish a comparison page: Northwind vs Bluebird subscriptions",
       impact: "high",
       note: "Draft ready · targets 9 questions you miss",
@@ -43,7 +43,7 @@ export function nextActions(brandId: string, slug: string): NextAction[] {
     },
     {
       id: "na2",
-      owner: "orbit",
+      owner: "rankoya",
       title: "Add FAQ schema to 6 product pages",
       impact: "high",
       note: "Low effort · AI engines quote FAQ blocks",
@@ -55,13 +55,13 @@ export function nextActions(brandId: string, slug: string): NextAction[] {
       owner: "you",
       title: 'Get listed on 3 sites AI engines cite for "best coffee subscription"',
       impact: "high",
-      note: "Orbit can draft the outreach emails",
+      note: "Rankoya can draft the outreach emails",
       cta: "seeSites",
       href: `/${slug}/competitors`,
     },
     {
       id: "na4",
-      owner: "orbit",
+      owner: "rankoya",
       title: 'Refresh "How to brew pour-over", last updated 14 months ago',
       impact: "medium",
       note: "Freshness is a ranking signal",
@@ -73,7 +73,7 @@ export function nextActions(brandId: string, slug: string): NextAction[] {
 
 export type ActivityItem = { id: string; at: string; text: string; sub: string };
 
-export function orbitActivity(brandId: string): ActivityItem[] {
+export function rankoyaActivity(brandId: string): ActivityItem[] {
   if (isNew(brandId)) return [];
   return [
     {
@@ -342,14 +342,14 @@ export function questionDetail(brandId: string, id: string): QuestionDetail | nu
     plan: [
       {
         id: "p1",
-        owner: "orbit",
-        text: 'Publish "How we source our beans" with origin, farm and price data. Orbit writes it.',
+        owner: "rankoya",
+        text: 'Publish "How we source our beans" with origin, farm and price data. Rankoya writes it.',
       },
-      { id: "p2", owner: "orbit", text: "Add FAQ and Product schema to the subscription page. Orbit does it." },
+      { id: "p2", owner: "rankoya", text: "Add FAQ and Product schema to the subscription page. Rankoya does it." },
       {
         id: "p3",
         owner: "you",
-        text: "Pitch thekitchn.com and seriouseats.com for their next roundup. You send it; Orbit drafts the email.",
+        text: "Pitch thekitchn.com and seriouseats.com for their next roundup. You send it; Rankoya drafts the email.",
       },
     ],
     history: [1, 1, 2, 2, 2, 3, 3, question.mentionedBy.length],
@@ -759,7 +759,7 @@ const auditIssues: AuditIssue[] = [
   {
     id: "iss_schema",
     severity: "critical",
-    owner: "orbit",
+    owner: "rankoya",
     title: "Product pages have no Product or FAQ schema",
     why: "AI engines and rich results read structured data first; 6 key pages have none.",
     pages: 6,
@@ -781,13 +781,13 @@ const auditIssues: AuditIssue[] = [
     steps: [
       "Open robots.txt in your hosting panel or WordPress SEO plugin.",
       "Remove the Disallow rules for GPTBot and ClaudeBot.",
-      "Save, then ask Orbit to recheck. Engines pick it up within a few days.",
+      "Save, then ask Rankoya to recheck. Engines pick it up within a few days.",
     ],
   },
   {
     id: "iss_answer",
     severity: "critical",
-    owner: "orbit",
+    owner: "rankoya",
     title: "Subscription page answers the question after 600 words",
     why: "Lead with a 2–3 sentence answer so engines can quote you directly.",
     pages: 1,
@@ -797,7 +797,7 @@ const auditIssues: AuditIssue[] = [
   {
     id: "iss_fresh",
     severity: "warning",
-    owner: "orbit",
+    owner: "rankoya",
     title: "22 guides not updated in over 12 months",
     why: "Freshness matters for both Google and AI answers.",
     pages: 22,
@@ -817,7 +817,7 @@ const auditIssues: AuditIssue[] = [
   {
     id: "iss_alt",
     severity: "warning",
-    owner: "orbit",
+    owner: "rankoya",
     title: "Images without alt text",
     why: "Alt text helps accessibility and image search.",
     pages: 41,
@@ -827,9 +827,9 @@ const auditIssues: AuditIssue[] = [
   {
     id: "iss_meta",
     severity: "notice",
-    owner: "orbit",
+    owner: "rankoya",
     title: "Duplicate meta descriptions",
-    why: "Search engines may rewrite them; Orbit can write unique ones.",
+    why: "Search engines may rewrite them; Rankoya can write unique ones.",
     pages: 18,
     affected: ["/shop/huila", "/shop/house-blend"],
     steps: ["Write a unique 150-character description for each page."],

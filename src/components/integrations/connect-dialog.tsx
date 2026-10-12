@@ -1,13 +1,14 @@
 "use client";
 
 import * as React from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { CopyIcon, ExternalLinkIcon, Loader2Icon, ShieldCheckIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 
+import type { Site } from "@/types/types";
 import { toast } from "@/lib/toast";
 import { fakeRequest } from "@/lib/auth/session";
-import { mentionsUpgrade } from "@/lib/errors";
+import { getErrorMessage, mentionsUpgrade } from "@/lib/errors";
 import { accountHref } from "@/features/account/routes";
 import {
   INTEGRATION_CONNECTED_MESSAGE,
@@ -17,6 +18,9 @@ import {
   type IntegrationProvider,
 } from "@/features/integrations/catalog";
 import { useIntegrations } from "@/features/integrations/store";
+import { PUBLISHING_FIELDS, connectionPayload, isPublishingPlatform } from "@/features/publishing/forms";
+import { ConnectionTestError, useCreateConnection } from "@/features/publishing/hooks";
+import { startGscConnect } from "@/features/search-console/hooks";
 import { DomainInput, FormField } from "@/components/forms/form-field";
 import { PasswordInput } from "@/components/forms/password-input";
 import { IntegrationTile } from "@/components/brand/integration-row";
@@ -32,23 +36,27 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-/** UI-stage Telegram link token; the backend will issue one per user. */
+/** Telegram link token. No backend endpoint yet; the backend will issue one per user. */
 const LINK_CODE = "ORB-7K2Q-NW";
-const DEEP_LINK = `https://t.me/OrbitAgentBot?start=${LINK_CODE.replaceAll("-", "")}`;
+const DEEP_LINK = `https://t.me/RankoyaAgentBot?start=${LINK_CODE.replaceAll("-", "")}`;
 
 /**
- * Connects one provider. OAuth providers open the consent flow in a popup,
- * which reports back with a `postMessage` (the popup's close is polled as a
- * fallback); WordPress uses a credentials form; Telegram a chat link code.
+ * Connects one provider for the open site:
+ * - publishing platforms: a credentials form, created and tested through the backend;
+ * - Search Console: the backend's Google OAuth redirect;
+ * - Google Analytics: consent in a popup that reports back by `postMessage` (mock);
+ * - Telegram: a chat link code (mock).
  */
 export function ConnectDialog({
   provider,
+  site,
   brandSlug,
   workspaceId,
   onOpenChange,
   onConnected,
 }: {
   provider: IntegrationProvider | null;
+  site: Site | undefined;
   brandSlug: string;
   workspaceId: string | null;
   onOpenChange: (open: boolean) => void;
@@ -56,16 +64,19 @@ export function ConnectDialog({
 }) {
   const t = useTranslations("integrations");
   const router = useRouter();
-  const connect = useIntegrations((s) => s.connect);
+  const pathname = usePathname();
+  const connectLocal = useIntegrations((s) => s.connect);
+  const createConnection = useCreateConnection(site?.id ?? 0);
   const [isConnecting, setIsConnecting] = React.useState(false);
   const [isWaiting, setIsWaiting] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
-  const [wp, setWp] = React.useState({ siteUrl: "", username: "", appPassword: "" });
+  const [values, setValues] = React.useState<Record<string, string>>({});
   const popupRef = React.useRef<Window | null>(null);
   const pollRef = React.useRef<number | null>(null);
 
   const meta = provider ? PROVIDERS[provider] : null;
   const name = provider ? t(`providers.${provider}.name`) : "";
+  const fields = provider && isPublishingPlatform(provider) ? PUBLISHING_FIELDS[provider] : [];
 
   // Reset the form whenever a different provider opens.
   const [openFor, setOpenFor] = React.useState<IntegrationProvider | null>(null);
@@ -73,7 +84,7 @@ export function ConnectDialog({
     setOpenFor(provider);
     setError(null);
     setIsWaiting(false);
-    setWp({ siteUrl: "", username: "", appPassword: "" });
+    setValues({});
   }
 
   const cleanupPopup = React.useCallback(() => {
@@ -99,7 +110,7 @@ export function ConnectDialog({
         else setError(event.data.error);
         return;
       }
-      connect({
+      connectLocal({
         provider: event.data.provider,
         brandSlug: PROVIDERS[event.data.provider].scope === "user" ? null : (event.data.brand ?? brandSlug),
         account: event.data.account ?? { name: brandSlug, detail: "" },
@@ -110,16 +121,30 @@ export function ConnectDialog({
     };
     window.addEventListener("message", handleMessage);
     return () => window.removeEventListener("message", handleMessage);
-  }, [provider, brandSlug, cleanupPopup, connect, name, onConnected, onOpenChange, router, t]);
+  }, [provider, brandSlug, cleanupPopup, connectLocal, name, onConnected, onOpenChange, router, t]);
 
-  const handleOAuthConnect = () => {
+  const handleOAuthConnect = async () => {
     if (!provider) return;
     setError(null);
+
+    if (provider === "searchConsole") {
+      if (!site) return;
+      setIsWaiting(true);
+      try {
+        // Leaves the app for Google; /settings/search-console brings the browser back here.
+        await startGscConnect({ siteId: site.id, domain: site.domain, returnTo: pathname });
+      } catch (err) {
+        setError(getErrorMessage(err, t("errors.connectFailed")));
+        setIsWaiting(false);
+      }
+      return;
+    }
+
     // No noopener: the callback page needs window.opener to report back, and
     // the handle is needed to poll for close.
     const popup = window.open(
       oauthSelectUrl(provider, { workspaceId, brand: brandSlug }),
-      "orbit-oauth",
+      "rankoya-oauth",
       "width=520,height=720",
     );
     if (!popup) {
@@ -134,29 +159,38 @@ export function ConnectDialog({
     }, 700);
   };
 
-  const handleManualConnect = async () => {
-    const siteUrl = wp.siteUrl.trim();
-    const username = wp.username.trim();
-    const appPassword = wp.appPassword.trim();
-    if (!siteUrl || !username || !appPassword) {
-      setError(t("errors.wordpressRequired"));
+  const handleCredentialsConnect = () => {
+    if (!provider || !isPublishingPlatform(provider) || !site) return;
+    if (fields.some((field) => !(values[field.key] ?? "").trim())) {
+      setError(t("errors.fieldsRequired"));
       return;
     }
-    setIsConnecting(true);
     setError(null);
-    await fakeRequest(1200);
-    const created = connect({ provider: "wordpress", brandSlug, account: { name: siteUrl, detail: username } });
-    setIsConnecting(false);
-    toast.success(t("toasts.connected", { name }));
-    onConnected?.("wordpress");
-    onOpenChange(false);
-    router.push(`/${brandSlug}/integrations/wordpress#${created.id}`);
+    createConnection.mutate(connectionPayload(provider, `${name} · ${site.domain}`, values), {
+      onSuccess: () => {
+        toast.success(t("toasts.connected", { name }));
+        onConnected?.(provider);
+        onOpenChange(false);
+      },
+      onError: (err) => {
+        // A failed test keeps the connection (status `error`) so it can be retried from its details page.
+        setError(
+          err instanceof ConnectionTestError
+            ? t("errors.testFailed", { message: err.message })
+            : getErrorMessage(err, t("errors.connectFailed")),
+        );
+      },
+    });
   };
 
   const handleTelegramConnect = async () => {
     setIsConnecting(true);
     await fakeRequest(1500);
-    connect({ provider: "telegram", brandSlug: null, account: { name: "@fvo_northwind", detail: t("providers.telegram.chat") } });
+    connectLocal({
+      provider: "telegram",
+      brandSlug: null,
+      account: { name: "@fvo_northwind", detail: t("providers.telegram.chat") },
+    });
     setIsConnecting(false);
     toast.success(t("toasts.connected", { name }));
     onConnected?.("telegram");
@@ -184,7 +218,7 @@ export function ConnectDialog({
         {provider && meta && (
           <>
             <DialogHeader className="flex-row items-center gap-3">
-              <IntegrationTile monogram={meta.monogram} />
+              <IntegrationTile monogram={meta.monogram} logo={provider} />
               <div className="flex min-w-0 flex-col gap-0.5">
                 <DialogTitle>{t("connectTitle", { name })}</DialogTitle>
                 <DialogDescription>{t(`providers.${provider}.description`)}</DialogDescription>
@@ -200,47 +234,48 @@ export function ConnectDialog({
               ))}
             </ul>
 
-            {meta.method === "manual" && (
+            {meta.method === "credentials" && (
               <form
-                id="connect-manual"
+                id="connect-credentials"
                 className="flex flex-col gap-4"
                 onSubmit={(event) => {
                   event.preventDefault();
-                  void handleManualConnect();
+                  handleCredentialsConnect();
                 }}
               >
-                <FormField label={t("wordpress.siteUrl")}>
-                  {(props) => (
-                    <DomainInput
-                      {...props}
-                      value={wp.siteUrl}
-                      placeholder={t("wordpress.siteUrlPlaceholder")}
-                      onChange={(siteUrl) => setWp((prev) => ({ ...prev, siteUrl }))}
-                    />
-                  )}
-                </FormField>
-                <FormField label={t("wordpress.username")}>
-                  {(props) => (
-                    <Input
-                      {...props}
-                      dir="ltr"
-                      autoComplete="off"
-                      value={wp.username}
-                      onChange={(event) => setWp((prev) => ({ ...prev, username: event.target.value }))}
-                    />
-                  )}
-                </FormField>
-                <FormField label={t("wordpress.appPassword")} helper={t("wordpress.appPasswordHelper")}>
-                  {(props) => (
-                    <PasswordInput
-                      {...props}
-                      dir="ltr"
-                      autoComplete="off"
-                      value={wp.appPassword}
-                      onChange={(event) => setWp((prev) => ({ ...prev, appPassword: event.target.value }))}
-                    />
-                  )}
-                </FormField>
+                {fields.map((field) => {
+                  const value = values[field.key] ?? "";
+                  const set = (next: string) => setValues((prev) => ({ ...prev, [field.key]: next }));
+                  return (
+                    <FormField
+                      key={field.key}
+                      label={t(`fields.${field.label}`)}
+                      helper={field.key === "application_password" ? t("wordpress.appPasswordHelper") : undefined}
+                    >
+                      {(props) =>
+                        field.input === "url" ? (
+                          <DomainInput {...props} value={value} placeholder={site?.domain} onChange={set} />
+                        ) : field.input === "secret" ? (
+                          <PasswordInput
+                            {...props}
+                            dir="ltr"
+                            autoComplete="off"
+                            value={value}
+                            onChange={(event) => set(event.target.value)}
+                          />
+                        ) : (
+                          <Input
+                            {...props}
+                            dir="ltr"
+                            autoComplete="off"
+                            value={value}
+                            onChange={(event) => set(event.target.value)}
+                          />
+                        )
+                      }
+                    </FormField>
+                  );
+                })}
               </form>
             )}
 
@@ -282,7 +317,7 @@ export function ConnectDialog({
               </p>
             )}
 
-            {isWaiting && (
+            {isWaiting && provider !== "searchConsole" && (
               <p role="status" className="flex items-center gap-2 text-small text-fg-2">
                 <Loader2Icon aria-hidden className="size-4 animate-spin" />
                 {t("waiting")}
@@ -299,12 +334,12 @@ export function ConnectDialog({
                 {t("cancel")}
               </Button>
               {meta.method === "oauth" && (
-                <Button variant="primary" loading={isWaiting} onClick={handleOAuthConnect}>
+                <Button variant="primary" loading={isWaiting} onClick={() => void handleOAuthConnect()}>
                   {t("continueWith", { name })}
                 </Button>
               )}
-              {meta.method === "manual" && (
-                <Button type="submit" form="connect-manual" variant="primary" loading={isConnecting}>
+              {meta.method === "credentials" && (
+                <Button type="submit" form="connect-credentials" variant="primary" loading={createConnection.isPending}>
                   {t("connect")}
                 </Button>
               )}

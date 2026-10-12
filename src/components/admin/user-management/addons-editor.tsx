@@ -27,7 +27,9 @@ export function AddonsEditor({ value, onChange }: { value: AddonsState; onChange
           <Switch
             id={brandingId}
             checked={value.remove_branding.enabled}
-            onCheckedChange={(enabled) => onChange({ ...value, remove_branding: { ...value.remove_branding, enabled } })}
+            onCheckedChange={(enabled) =>
+              onChange({ ...value, remove_branding: { ...value.remove_branding, enabled } })
+            }
           />
         </div>
         {value.remove_branding.enabled && (

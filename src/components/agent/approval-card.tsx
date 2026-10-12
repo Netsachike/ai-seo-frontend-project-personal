@@ -6,7 +6,7 @@ import { CheckIcon, PencilIcon, XIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
-import type { Approval } from "@/lib/api/types";
+import type { Approval } from "@/lib/mocks/types";
 import { decideApproval } from "@/lib/mocks/store";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";

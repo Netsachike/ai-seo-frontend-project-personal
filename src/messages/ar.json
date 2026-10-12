@@ -1,9 +1,9 @@
 {
   "_status": "draft",
   "meta": {
-    "title": "Orbit",
-    "titleTemplate": "%s · Orbit",
-    "description": "اعرف أين تظهر علامتك التجارية في Google وإجابات الذكاء الاصطناعي، ودع Orbit يسد الفجوة."
+    "title": "Rankoya",
+    "titleTemplate": "%s · Rankoya",
+    "description": "اعرف أين تظهر علامتك التجارية في Google وإجابات الذكاء الاصطناعي، ودع Rankoya يسد الفجوة."
   },
   "common": {
     "close": "إغلاق",
@@ -41,7 +41,7 @@
     "ofHundred": "من 100"
   },
   "owner": {
-    "orbit": "Orbit",
+    "rankoya": "Rankoya",
     "you": "أنت"
   },
   "status": {
@@ -87,8 +87,8 @@
     "approved": "تمت الموافقة",
     "rejected": "مرفوض",
     "alsoTelegram": "أُرسل أيضًا إلى Telegram",
-    "approvedToast": "تمت الموافقة. سيُجري Orbit التغيير ويخبرك عند نشره.",
-    "rejectedToast": "تم الرفض. لن يُجري Orbit هذا التغيير.",
+    "approvedToast": "تمت الموافقة. سيُجري Rankoya التغيير ويخبرك عند نشره.",
+    "rejectedToast": "تم الرفض. لن يُجري Rankoya هذا التغيير.",
     "failedToast": "تعذّر حفظ قرارك. حاول مرة أخرى."
   },
   "task": {
@@ -102,16 +102,16 @@
   },
   "agent": {
     "fromTelegram": "من Telegram",
-    "orbitSaid": "Orbit:",
+    "rankoyaSaid": "Rankoya:",
     "today": "اليوم",
     "yesterday": "أمس",
     "dayDividerWithNote": "{day} · {note}",
     "sameAsTelegram": "نفس المحادثة على Telegram",
-    "panelTitle": "اسأل Orbit",
+    "panelTitle": "اسأل Rankoya",
     "panelDescription": "نفس المحادثة على Telegram.",
     "openFull": "فتح المحادثة كاملة",
     "loadError": "تعذّر تحميل المحادثة. حاول بعد قليل.",
-    "composerLabel": "رسالة إلى Orbit",
+    "composerLabel": "رسالة إلى Rankoya",
     "composerPlaceholder": "اسأل عن الترتيب أو المنافسين أو المحتوى",
     "send": "إرسال"
   },
@@ -172,7 +172,7 @@
       "samples": {
         "display": "كن أنت الإجابة.",
         "h1": "صباح الخير يا آدا",
-        "h2": "ما مقدار ما يفعله Orbit وحده؟",
+        "h2": "ما مقدار ما يفعله Rankoya وحده؟",
         "h3": "الظهور مقارنة بالمنافسين",
         "bodyLg": "يتجاهلك Claude غالبًا لأنه لا توجد لديك صفحة عن مصادر حبوبك.",
         "body": "هكذا ظهرت Northwind Roasters في Google وإجابات الذكاء الاصطناعي هذا الشهر.",
@@ -196,7 +196,7 @@
         "primary": "فحص جديد",
         "secondary": "تصدير التقرير",
         "ghost": "رفض",
-        "agent": "اسأل Orbit",
+        "agent": "اسأل Rankoya",
         "destructive": "حذف مساحة العمل",
         "link": "التفاصيل"
       },
@@ -231,7 +231,7 @@
         "de": "ألمانيا"
       },
       "voice": "ملاحظات أسلوب العلامة",
-      "voiceHelper": "يتّبع Orbit هذه الملاحظات في كل مسودة.",
+      "voiceHelper": "يتّبع Rankoya هذه الملاحظات في كل مسودة.",
       "voiceSample": "دافئ وبسيط. تحدّث عن المزارع وتواريخ التحميص، لا عن الفخامة.",
       "disabledField": "الحد الأقصى للمقالات شهريًا",
       "checkboxes": "مربعات الاختيار",
@@ -330,7 +330,7 @@
       "toggleLoading": "حالة التحميل",
       "toggleEmpty": "حالة فارغة",
       "emptyTitle": "لا توجد كلمات مفتاحية بعد",
-      "emptyDescription": "أضف الكلمات التي يبحث عنها عملاؤك وسيفحصها Orbit يوميًا.",
+      "emptyDescription": "أضف الكلمات التي يبحث عنها عملاؤك وسيفحصها Rankoya يوميًا.",
       "emptyAction": "إضافة كلمات مفتاحية",
       "cols": {
         "keyword": "الكلمة المفتاحية",
@@ -377,8 +377,8 @@
       "toastErrorButton": "إشعار خطأ",
       "command": "قائمة الأوامر",
       "commandDescription": "ابحث في الشاشات ونفّذ الإجراءات",
-      "commandPlaceholder": "ابحث أو اسأل Orbit",
-      "commandEmpty": "لا نتائج. اضغط Enter لسؤال Orbit.",
+      "commandPlaceholder": "ابحث أو اسأل Rankoya",
+      "commandEmpty": "لا نتائج. اضغط Enter لسؤال Rankoya.",
       "commandGroup": "الإجراءات",
       "commandScan": "فحص جديد"
     }
@@ -410,7 +410,7 @@
         "actions": "خطة العمل",
         "content": "المحتوى",
         "social": "التواصل الاجتماعي",
-        "agent": "اسأل Orbit",
+        "agent": "اسأل Rankoya",
         "integrations": "التكاملات",
         "reports": "التقارير",
         "settings": "الإعدادات"
@@ -419,7 +419,7 @@
     "sidebar": {
       "expand": "توسيع الشريط الجانبي",
       "collapse": "طي الشريط الجانبي",
-      "telegramTitle": "Orbit على تيليجرام",
+      "telegramTitle": "Rankoya على تيليجرام",
       "telegramConnected": "متصل باسم ‎@{handle}. تصل الموافقات إلى كليهما.",
       "telegramConnectedRich": "متصل باسم <mono>@{handle}</mono>. تصل الموافقات إلى كليهما.",
       "telegramOff": "غير متصل. اتصل للموافقة على العمل من هاتفك.",
@@ -436,7 +436,7 @@
     },
     "topbar": {
       "openNav": "فتح التنقل",
-      "askOrbit": "اسأل Orbit",
+      "askRankoya": "اسأل Rankoya",
       "home": "كل المواقع"
     },
     "switcher": {
@@ -481,8 +481,8 @@
       "emptyDescription": "تظهر هنا الموافقات وعمليات الفحص المكتملة ودعوات الفريق.",
       "unread": "غير مقروء",
       "kinds": {
-        "approvalWaiting": "يحتاج Orbit إلى موافقتك: {title}",
-        "agentEvent": "نشر Orbit ‏«{title}» على {site}",
+        "approvalWaiting": "يحتاج Rankoya إلى موافقتك: {title}",
+        "agentEvent": "نشر Rankoya ‏«{title}» على {site}",
         "scanFinished": "اكتمل الفحص: {gained, plural, one {إشارة جديدة واحدة} other {# إشارات جديدة}} على {engine}",
         "teamInvite": "قبل {name} دعوتك"
       }
@@ -501,11 +501,11 @@
     },
     "command": {
       "title": "قائمة الأوامر",
-      "description": "انتقل إلى شاشة، أو بدّل مساحة العمل أو العلامة أو اللغة أو المظهر، أو اسأل Orbit.",
-      "placeholder": "ابحث أو اسأل Orbit",
-      "empty": "لا توجد نتائج. اضغط Enter لسؤال Orbit.",
-      "askGroup": "اسأل Orbit",
-      "ask": "اسأل Orbit: «{question}»",
+      "description": "انتقل إلى شاشة، أو بدّل مساحة العمل أو العلامة أو اللغة أو المظهر، أو اسأل Rankoya.",
+      "placeholder": "ابحث أو اسأل Rankoya",
+      "empty": "لا توجد نتائج. اضغط Enter لسؤال Rankoya.",
+      "askGroup": "اسأل Rankoya",
+      "ask": "اسأل Rankoya: «{question}»",
       "brands": "العلامات التجارية",
       "workspaces": "مساحات العمل",
       "switchTo": "التبديل إلى {name}",
@@ -518,10 +518,10 @@
       "description": "أدلة، وطريقة للتواصل مع الفريق.",
       "docsTitle": "الأدلة",
       "docs": {
-        "gettingStarted": "البدء مع Orbit",
+        "gettingStarted": "البدء مع Rankoya",
         "visibility": "كيف يُقاس الظهور في الذكاء الاصطناعي",
         "approvals": "الموافقات والتشغيل التلقائي",
-        "telegram": "استخدام Orbit على تيليجرام"
+        "telegram": "استخدام Rankoya على تيليجرام"
       },
       "ticketTitle": "إرسال تذكرة",
       "ticketDescription": "نرد عبر البريد الإلكتروني، عادةً خلال يوم عمل واحد.",
@@ -544,7 +544,7 @@
       },
       "message": "الرسالة",
       "placeholders": {
-        "idea": "ما الذي سيجعل Orbit أكثر فائدة؟",
+        "idea": "ما الذي سيجعل Rankoya أكثر فائدة؟",
         "bug": "ماذا حدث، وماذا كنت تتوقع؟",
         "other": "بماذا تفكر؟"
       },
@@ -561,20 +561,30 @@
     "google": "المتابعة باستخدام Google",
     "or": "أو",
     "layout": {
-      "home": "الصفحة الرئيسية لـ Orbit",
+      "home": "الصفحة الرئيسية لـ Rankoya",
       "company": "[اسم الشركة]",
       "terms": "الشروط",
       "privacy": "الخصوصية"
     },
     "panel": {
-      "label": "عن Orbit",
-      "overline": "Google + بحث الذكاء الاصطناعي",
-      "headline": "كن أنت الإجابة.",
-      "body": "اعرف ترتيبك في Google وChatGPT وClaude وGemini وPerplexity. ثم دع Orbit يكتب ويصلح وينشر ما يسد الفجوة.",
-      "question": "أفضل اشتراك قهوة في الولايات المتحدة",
-      "answer": "أفضل الخيارات الآن: <mark>علامتك التجارية</mark> للقهوة أحادية المصدر، ثم محمصتان أكبر للخلطات.",
-      "mentioned": "▲ مذكور في 4 من 5 محركات",
-      "rankBadge": "#1 على Gemini"
+      "label": "عن Rankoya",
+      "slides": {
+        "visibility": {
+          "kicker": "الظهور في الذكاء الاصطناعي",
+          "title": "اعرف أين تظهر في إجابات الذكاء الاصطناعي.",
+          "description": "تابع كيف يذكر ChatGPT وClaude وGemini وPerplexity علامتك التجارية، كل ذلك في Rankoya."
+        },
+        "rankings": {
+          "kicker": "الترتيب والمنافسون",
+          "title": "اعرف من يتقدّم عليك، ولماذا.",
+          "description": "مواقعك في Google وحصتك من إجابات الذكاء الاصطناعي جنبًا إلى جنب، كل أسبوع."
+        },
+        "agent": {
+          "kicker": "وكيل تحسين محركات البحث",
+          "title": "وافق على الإصلاح، ويتولى Rankoya العمل.",
+          "description": "مقالات وإصلاحات للصفحات تُكتب لك، ولا تُنشر إلا بعد موافقتك."
+        }
+      }
     },
     "signIn": {
       "metaTitle": "تسجيل الدخول",
@@ -584,7 +594,7 @@
       "password": "كلمة المرور",
       "forgot": "نسيت كلمة المرور؟",
       "submit": "تسجيل الدخول",
-      "noAccount": "جديد على Orbit؟ <link>أنشئ حسابًا</link>"
+      "noAccount": "جديد على Rankoya؟ <link>أنشئ حسابًا</link>"
     },
     "signUp": {
       "metaTitle": "إنشاء حساب",
@@ -639,7 +649,7 @@
     "recommended": "افتراضي",
     "ask": {
       "title": "اسألني أولًا",
-      "description": "يُعدّ Orbit المقالات والإصلاحات. لا يُنشر شيء قبل موافقتك."
+      "description": "يُعدّ Rankoya المقالات والإصلاحات. لا يُنشر شيء قبل موافقتك."
     },
     "content": {
       "title": "نشر المحتوى تلقائيًا",
@@ -647,21 +657,23 @@
     },
     "full": {
       "title": "تشغيل تلقائي كامل",
-      "description": "ينشر Orbit ويصلح بنفسه ويرسل لك ملخصًا بعد كل تغيير."
+      "description": "ينشر Rankoya ويصلح بنفسه ويرسل لك ملخصًا بعد كل تغيير."
     }
   },
   "integrationStatus": {
     "connected": "متصل",
     "notConnected": "غير متصل",
     "comingSoon": "قريبًا",
-    "connecting": "جارٍ الاتصال"
+    "connecting": "جارٍ الاتصال",
+    "tracking": "قيد التتبع",
+    "paused": "متوقف مؤقتًا"
   },
   "overview": {
     "welcome": "مرحبًا بعودتك، {name}",
     "descriptionV2": "هذا أداء {brand} عبر البحث ومنصات الذكاء الاصطناعي.",
     "rail": "اختصارات ونشاط",
     "promo": {
-      "title": "استفد من Orbit إلى أقصى حد",
+      "title": "استفد من Rankoya إلى أقصى حد",
       "body": "أضف مواقعك الأخرى وابدأ في اكتشاف فرص الظهور في بحث Google وخرائط Google وChatGPT وغيرها.",
       "cta": "إضافة موقع"
     },
@@ -697,9 +709,9 @@
     },
     "add": {
       "title": "إضافة موقع آخر",
-      "description": "أخبرنا عن النشاط والموقع. يحلّله Orbit ويعرض فرص النمو عبر البحث ومنصات الذكاء الاصطناعي.",
+      "description": "أخبرنا عن النشاط والموقع. يحلّله Rankoya ويعرض فرص النمو عبر البحث ومنصات الذكاء الاصطناعي.",
       "url": "رابط الموقع",
-      "urlHelper": "يبدأ Orbit التحليل من هذا الرابط.",
+      "urlHelper": "يبدأ Rankoya التحليل من هذا الرابط.",
       "later": "يمكنك ربط النشر لاحقًا.",
       "submit": "إضافة موقع",
       "errors": {
@@ -711,10 +723,10 @@
       "tagline": "ظهور أكثر. عملاء أكثر.",
       "lines": {
         "connect": "أضف رابطك وتفاصيل نشاطك",
-        "analyze": "يقرأ Orbit موقعك ويسأل 5 محركات عن سوقك",
+        "analyze": "يقرأ Rankoya موقعك ويسأل 5 محركات عن سوقك",
         "discover": "اكتشف فرص تحسين البحث وإجابات الذكاء الاصطناعي",
         "optimize": "احصل على إصلاحات مرتّبة وقابلة للتنفيذ",
-        "publish": "يكتب Orbit وينشر بعد موافقتك",
+        "publish": "يكتب Rankoya وينشر بعد موافقتك",
         "measure": "تابع الترتيب والإشارات والنمو"
       }
     },
@@ -730,7 +742,7 @@
       },
       "content": {
         "title": "خطة المحتوى",
-        "body": "المقالات التي يكتبها Orbit لك"
+        "body": "المقالات التي يكتبها Rankoya لك"
       },
       "audit": {
         "title": "تدقيق الموقع",
@@ -739,7 +751,7 @@
     },
     "help": {
       "title": "تحتاج مساعدة؟",
-      "body": "فريق الدعم جاهز لمساعدتك على الاستفادة القصوى من Orbit.",
+      "body": "فريق الدعم جاهز لمساعدتك على الاستفادة القصوى من Rankoya.",
       "cta": "تواصل مع الدعم"
     },
     "activity": {
@@ -755,7 +767,7 @@
     "subtitle": "اختر موقعًا للمتابعة",
     "workspaceMenu": "خيارات مساحة العمل",
     "addSite": "إضافة موقع",
-    "addSiteBody": "يقرأ Orbit موقعك ويجهّزه معك خلال دقائق",
+    "addSiteBody": "يقرأ Rankoya موقعك ويجهّزه معك خلال دقائق",
     "emptyBody": "لا توجد مواقع في مساحة العمل هذه بعد. ابدأ بموقعك الرئيسي.",
     "workspaceSettings": "إعدادات مساحة العمل",
     "teamMembers": "أعضاء الفريق",
@@ -768,17 +780,17 @@
   },
   "siteSetup": {
     "shell": {
-      "home": "Orbit، العودة إلى مواقعك",
+      "home": "Rankoya، العودة إلى مواقعك",
       "backToSites": "العودة إلى المواقع",
       "stepOf": "الخطوة {step} من {total}",
       "progressLabel": "تقدّم إعداد الموقع",
       "loggedInAs": "تم تسجيل الدخول باسم {name}،",
       "signOut": "تسجيل الخروج",
       "visual": {
-        "label": "عن Orbit",
-        "overline": "Orbit",
+        "label": "عن Rankoya",
+        "overline": "Rankoya",
         "headline": "اجعل موقعك يظهر في Google وفي إجابات الذكاء الاصطناعي",
-        "body": "يتتبّع Orbit مكان ظهور موقعك في ChatGPT وGemini وClaude وPerplexity وGoogle، ثم يكتب المحتوى الذي يسدّ الفجوات."
+        "body": "يتتبّع Rankoya مكان ظهور موقعك في ChatGPT وGemini وClaude وPerplexity وGoogle، ثم يكتب المحتوى الذي يسدّ الفجوات."
       }
     },
     "interstitial": {
@@ -808,8 +820,8 @@
       "workspace": "مساحة العمل",
       "label": "النطاق",
       "placeholder": "yourdomain.com",
-      "exists": "هذا الموقع موجود في Orbit بالفعل. افتحه من قائمة مواقعك.",
-      "failed": "تعذّر على Orbit إضافة هذا النطاق. تحقّق منه وحاول مرة أخرى.",
+      "exists": "هذا الموقع موجود في Rankoya بالفعل. افتحه من قائمة مواقعك.",
+      "failed": "تعذّر على Rankoya إضافة هذا النطاق. تحقّق منه وحاول مرة أخرى.",
       "continue": "متابعة"
     },
     "details": {
@@ -837,14 +849,14 @@
         }
       },
       "review": {
-        "description": "حلّل Orbit موقعك ويرى أن هذا هو موضوعه. هل يبدو صحيحًا؟",
-        "audience": "يرى Orbit أن هؤلاء هم جمهور موقعك. هل يبدو صحيحًا؟"
+        "description": "حلّل Rankoya موقعك ويرى أن هذا هو موضوعه. هل يبدو صحيحًا؟",
+        "audience": "يرى Rankoya أن هؤلاء هم جمهور موقعك. هل يبدو صحيحًا؟"
       },
       "yes": "نعم، هذا صحيح",
       "no": "لا، سأعدّله",
       "save": "حفظ ومتابعة",
       "editLabel": "تعديل {section}",
-      "error": "تعذّر على Orbit قراءة موقعك. تأكّد أنه متاح على الإنترنت ثم حاول مرة أخرى.",
+      "error": "تعذّر على Rankoya قراءة موقعك. تأكّد أنه متاح على الإنترنت ثم حاول مرة أخرى.",
       "retry": "إعادة المحاولة",
       "country": "الدولة",
       "language": "اللغة",
@@ -854,7 +866,7 @@
     "gsc": {
       "title": "ربط Search Console",
       "recommended": "موصى به",
-      "description": "اربط Google Search Console ليستفيد Orbit من عمليات البحث التي يظهر فيها موقعك بالفعل. يصبح البحث عن الكلمات المفتاحية أدق وترى النقرات ومرات الظهور الفعلية.",
+      "description": "اربط Google Search Console ليستفيد Rankoya من عمليات البحث التي يظهر فيها موقعك بالفعل. يصبح البحث عن الكلمات المفتاحية أدق وترى النقرات ومرات الظهور الفعلية.",
       "name": "Google Search Console",
       "domainProperty": "موقع على مستوى النطاق",
       "connecting": "جارٍ ربط Search Console…",
@@ -866,12 +878,12 @@
     },
     "topics": {
       "title": "المواضيع الأساسية",
-      "description": "يفضّل Google وإجابات الذكاء الاصطناعي المواقع التي تغطي الموضوع بالكامل. مواضيعك الأساسية هي هذه الموضوعات: يصبح كل منها محورًا في خريطتك الموضوعية، ويبحث Orbit عن الكلمات المفتاحية التي يمكنك الفوز بها حوله.",
+      "description": "يفضّل Google وإجابات الذكاء الاصطناعي المواقع التي تغطي الموضوع بالكامل. مواضيعك الأساسية هي هذه الموضوعات: يصبح كل منها محورًا في خريطتك الموضوعية، ويبحث Rankoya عن الكلمات المفتاحية التي يمكنك الفوز بها حوله.",
       "mapLabel": "خريطة موضوعية {count, plural, =0 {بلا مواضيع أساسية بعد} one {بموضوع أساسي واحد} two {بموضوعين أساسيين} few {بـ # مواضيع أساسية} many {بـ # موضوعًا أساسيًا} other {بـ # موضوع أساسي}}",
-      "error": "تعذّر على Orbit إنشاء مواضيع لموقعك.",
+      "error": "تعذّر على Rankoya إنشاء مواضيع لموقعك.",
       "retry": "إعادة المحاولة",
       "generating": {
-        "title": "ينشئ Orbit المواضيع الأساسية لموقعك",
+        "title": "ينشئ Rankoya المواضيع الأساسية لموقعك",
         "body": "يعتمد كل موضوع على بيانات بحث حقيقية، منها حجم البحث والمنافسة.",
         "slow": "نتحقق من حجم البحث والمنافسة…",
         "stuck": "ما زال العمل جاريًا. يستغرق هذا وقتًا أطول من المعتاد."
@@ -886,11 +898,11 @@
     },
     "billing": {
       "title": "خطة نموك جاهزة",
-      "descriptionPaid": "تشمل خطة {plan} هذا الموقع. إليك ما سيفعله Orbit من أجله.",
+      "descriptionPaid": "تشمل خطة {plan} هذا الموقع. إليك ما سيفعله Rankoya من أجله.",
       "descriptionFree": "اختر خطة لتشغيل هذا الموقع تلقائيًا، أو ابدأ بالخطة المجانية وقم بالترقية لاحقًا.",
       "autopilot": {
         "title": "اجعل تحسين محركات البحث يعمل تلقائيًا",
-        "body": "يبحث Orbit ويخطط ويكتب كل أسبوع، ولا يُنشر شيء دون موافقتك ما لم تفعّل النشر التلقائي."
+        "body": "يبحث Rankoya ويخطط ويكتب كل أسبوع، ولا يُنشر شيء دون موافقتك ما لم تفعّل النشر التلقائي."
       },
       "plan": {
         "active": "نشطة",
@@ -923,7 +935,7 @@
       "phases": {
         "first": {
           "when": "الأشهر 1–3",
-          "what": "ينشر Orbit مقالاتك الأولى وتبدأ محركات البحث في فهرستها."
+          "what": "ينشر Rankoya مقالاتك الأولى وتبدأ محركات البحث في فهرستها."
         },
         "second": {
           "when": "الأشهر 3–6",
@@ -935,12 +947,12 @@
         }
       },
       "how": {
-        "title": "كيف ينمّي Orbit زياراتك",
+        "title": "كيف ينمّي Rankoya زياراتك",
         "subtitle": "أعدّه مرة واحدة",
         "eyebrow": "الخطوة {n}",
         "research": {
           "title": "بحث الكلمات المفتاحية",
-          "body": "يجد Orbit عمليات البحث وأسئلة الذكاء الاصطناعي التي يمكن لموقعك الفوز بها."
+          "body": "يجد Rankoya عمليات البحث وأسئلة الذكاء الاصطناعي التي يمكن لموقعك الفوز بها."
         },
         "plan": {
           "title": "خطة المحتوى",
@@ -952,7 +964,7 @@
         },
         "publish": {
           "title": "نشر بموافقتك",
-          "body": "وافق في Orbit أو على Telegram، وينشر Orbit على موقعك."
+          "body": "وافق في Rankoya أو على Telegram، وينشر Rankoya على موقعك."
         }
       },
       "included": {
@@ -975,7 +987,7 @@
     },
     "integration": {
       "title": "اربط موقعك",
-      "description": "اختر أين ينشر Orbit المقالات الجاهزة. يمكنك التخطي ونسخ المقالات يدويًا.",
+      "description": "اختر أين ينشر Rankoya المقالات الجاهزة. يمكنك التخطي ونسخ المقالات يدويًا.",
       "platforms": "منصة النشر",
       "connected": "متصل",
       "soon": "قريبًا",
@@ -988,7 +1000,7 @@
         "webhook": {
           "name": "Webhook أو API",
           "detail": "للمواقع المخصصة وNext.js",
-          "help": "يرسل Orbit كل مقال معتمد بصيغة JSON إلى نقطة HTTPS هذه."
+          "help": "يرسل Rankoya كل مقال معتمد بصيغة JSON إلى نقطة HTTPS هذه."
         },
         "shopify": {
           "name": "Shopify",
@@ -1023,13 +1035,13 @@
       "skip": "تخطٍّ الآن"
     },
     "preferences": {
-      "title": "كيف تريد أن يعمل Orbit؟",
-      "description": "حدّد عدد المقالات التي يكتبها Orbit وكيف تُنشر. يمكنك تغيير ذلك في أي وقت.",
+      "title": "كيف تريد أن يعمل Rankoya؟",
+      "description": "حدّد عدد المقالات التي يكتبها Rankoya وكيف تُنشر. يمكنك تغيير ذلك في أي وقت.",
       "mode": {
         "label": "النشر",
         "review": {
           "title": "اسألني أولًا",
-          "body": "يكتب Orbit مسودة كل مقال وينتظر موافقتك."
+          "body": "يكتب Rankoya مسودة كل مقال وينتظر موافقتك."
         },
         "auto": {
           "title": "النشر تلقائيًا",
@@ -1048,7 +1060,7 @@
           "expert": "متخصص ومفصّل",
           "playful": "مرح"
         },
-        "notesLabel": "هل هناك ما يجب أن يعرفه Orbit عن أسلوبك؟",
+        "notesLabel": "هل هناك ما يجب أن يعرفه Rankoya عن أسلوبك؟",
         "notesHelper": "اختياري. كلمات تستخدمها أو تتجنبها، وطريقة مخاطبة القرّاء.",
         "notesPlaceholder": "مثال: نقول \"العملاء\" لا \"الزبائن\"، ونكتب بالعربية الفصحى."
       },
@@ -1062,7 +1074,7 @@
         "stage2": "نجدول مقالاتك الأولى…"
       },
       "title": "موقعك جاهز",
-      "description": "لدى Orbit كل ما يحتاجه للبدء على {name}. أول فحص وخطة محتوى بانتظارك في لوحة التحكم.",
+      "description": "لدى Rankoya كل ما يحتاجه للبدء على {name}. أول فحص وخطة محتوى بانتظارك في لوحة التحكم.",
       "rows": {
         "profile": "الوصف والجمهور",
         "profileValue": "تم التأكيد",

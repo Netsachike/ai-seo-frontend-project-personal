@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AgentThreadView } from "@/components/agent/agent-panel";
-import { OrbitAvatar } from "@/components/brand/logo";
+import { RankoyaAvatar } from "@/components/brand/logo";
 import { brandHref } from "@/components/layout/nav";
 import { PageSkeleton } from "@/components/layout/page-skeleton";
 import { useShell } from "@/components/layout/shell-context";
@@ -20,7 +20,9 @@ const capabilities = ["rankings", "compare", "write", "fix", "outreach"] as cons
 export function AgentView() {
   const t = useTranslations("agentPage");
   const { workspace, brand, brandSlug, me } = useShell();
-  const tasks = useFakeQuery(["openTasks", brand?.id], () => openTasks(brand?.id ?? ""), { enabled: Boolean(brand) });
+  const tasks = useFakeQuery(["openTasks", brand?.id], () => openTasks(String(brand?.id ?? "")), {
+    enabled: Boolean(brand),
+  });
 
   if (!workspace || !brand) return <PageSkeleton kpis={0} panels={2} />;
   const telegram = me?.telegram;
@@ -32,7 +34,7 @@ export function AgentView() {
         className="flex h-[calc(100dvh-56px-48px)] min-h-[480px] flex-col overflow-hidden rounded-lg border border-border bg-surface shadow-card lg:h-auto"
       >
         <header className="flex items-center gap-3 border-b border-border px-4 py-3">
-          <OrbitAvatar size={32} />
+          <RankoyaAvatar size={32} />
           <div className="flex min-w-0 flex-col">
             <h1 id="agent-title" className="text-h3">
               {t("title")}
@@ -41,7 +43,7 @@ export function AgentView() {
           </div>
         </header>
         <AgentThreadView
-          workspaceId={workspace.id}
+          siteId={brand.id}
           suggestions={[t("suggestions.week"), t("suggestions.gained"), t("suggestions.plan")]}
         />
       </section>
@@ -72,7 +74,7 @@ export function AgentView() {
             </Badge>
           </div>
           <p className="text-small text-fg-2">
-            {telegram?.connected ? t("telegramOn", { bot: "@OrbitAgentBot" }) : t("telegramOff")}
+            {telegram?.connected ? t("telegramOn", { bot: "@RankoyaAgentBot" }) : t("telegramOff")}
           </p>
           {!telegram?.connected && (
             <Link

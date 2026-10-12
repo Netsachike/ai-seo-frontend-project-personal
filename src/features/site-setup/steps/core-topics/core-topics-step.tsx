@@ -6,7 +6,7 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { CheckIcon, StarIcon } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
 
-import type { Brand } from "@/lib/api/types";
+import type { Site } from "@/types/types";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -27,7 +27,7 @@ const STAGES = [8000, 30000] as const;
  * the map as they are made; at five the rest dim, which is the whole message
  * (no error for trying a sixth).
  */
-export function CoreTopicsStep({ site, onContinue }: { site: Brand; onContinue: () => void }) {
+export function CoreTopicsStep({ site, onContinue }: { site: Site; onContinue: () => void }) {
   const t = useTranslations("siteSetup.topics");
   const format = useFormatter();
   const reduce = useReducedMotion();
@@ -50,7 +50,9 @@ export function CoreTopicsStep({ site, onContinue }: { site: Brand; onContinue: 
   const list: TopicSuggestion[] = ready ? (topics.data ?? []) : [];
   const byId = new Map(list.map((topic) => [topic.id, topic]));
   const picked = selected.flatMap((id) => (byId.has(id) ? [byId.get(id)!] : []));
-  const full = selected.length >= CORE_TOPIC_COUNT;
+  // A small site can have fewer clusters than five; then every one of them is the full set.
+  const required = Math.min(CORE_TOPIC_COUNT, list.length);
+  const full = selected.length >= required;
 
   const toggle = (id: string) =>
     setSelected((s) => (s.includes(id) ? s.filter((x) => x !== id) : s.length < CORE_TOPIC_COUNT ? [...s, id] : s));
@@ -58,9 +60,12 @@ export function CoreTopicsStep({ site, onContinue }: { site: Brand; onContinue: 
   // The map fills one slot after another rather than all at once.
   const applyRecommended = () => {
     const ids = list.filter((topic) => topic.recommended && !selected.includes(topic.id)).map((topic) => topic.id);
-    const room = CORE_TOPIC_COUNT - selected.length;
+    const room = required - selected.length;
     ids.slice(0, room).forEach((id, i) => {
-      setTimeout(() => setSelected((s) => (s.length < CORE_TOPIC_COUNT && !s.includes(id) ? [...s, id] : s)), reduce ? 0 : i * 80);
+      setTimeout(
+        () => setSelected((s) => (s.length < CORE_TOPIC_COUNT && !s.includes(id) ? [...s, id] : s)),
+        reduce ? 0 : i * 80,
+      );
     });
   };
 
@@ -86,7 +91,9 @@ export function CoreTopicsStep({ site, onContinue }: { site: Brand; onContinue: 
               <LoaderLines
                 spinner
                 title={t("generating.title")}
-                subline={stage === 0 ? t("generating.body") : stage === 1 ? t("generating.slow") : t("generating.stuck")}
+                subline={
+                  stage === 0 ? t("generating.body") : stage === 1 ? t("generating.slow") : t("generating.stuck")
+                }
               />
               {stage === 2 && (
                 <Button variant="secondary" size="sm" onClick={() => void topics.refetch()}>
@@ -100,18 +107,30 @@ export function CoreTopicsStep({ site, onContinue }: { site: Brand; onContinue: 
         <div className="flex flex-col gap-4">
           <div className="flex min-h-9 items-center justify-between gap-3">
             <p className="num text-h3 text-fg" aria-live="polite">
-              {t("selected", { count: selected.length, total: CORE_TOPIC_COUNT })}
+              {t("selected", { count: selected.length, total: required })}
             </p>
             <AnimatePresence mode="wait" initial={false}>
               {full ? (
-                <motion.span key="ready" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: dur.fast }}>
+                <motion.span
+                  key="ready"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: dur.fast }}
+                >
                   <Badge variant="success" shape="pill" className="h-8 gap-1.5 px-3 text-small">
                     <CheckIcon aria-hidden className="size-3.5" />
                     {t("ready")}
                   </Badge>
                 </motion.span>
               ) : (
-                <motion.span key="use" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: dur.fast }}>
+                <motion.span
+                  key="use"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: dur.fast }}
+                >
                   <Button variant="secondary" size="sm" onClick={applyRecommended} className="text-signal">
                     <StarIcon aria-hidden />
                     {t("useRecommended")}
@@ -141,7 +160,9 @@ export function CoreTopicsStep({ site, onContinue }: { site: Brand; onContinue: 
                     onClick={() => !dimmed && toggle(topic.id)}
                     className={cn(
                       "flex h-full min-h-[76px] w-full items-start justify-between gap-3 rounded-xl border bg-surface p-4 text-start transition-[border-color,opacity,box-shadow] duration-200",
-                      on ? "border-fg shadow-[inset_0_0_0_1px_var(--text)]" : "border-border hover:border-border-strong",
+                      on
+                        ? "border-fg shadow-[inset_0_0_0_1px_var(--text)]"
+                        : "border-border hover:border-border-strong",
                       dimmed && "pointer-events-none opacity-50",
                     )}
                   >
@@ -150,7 +171,10 @@ export function CoreTopicsStep({ site, onContinue }: { site: Brand; onContinue: 
                         {topic.label}
                         {topic.recommended && (
                           <>
-                            <StarIcon aria-hidden className="ms-1.5 inline size-3.5 -translate-y-px fill-signal text-signal" />
+                            <StarIcon
+                              aria-hidden
+                              className="ms-1.5 inline size-3.5 -translate-y-px fill-signal text-signal"
+                            />
                             <span className="sr-only">{t("recommended")}</span>
                           </>
                         )}
@@ -182,7 +206,7 @@ export function CoreTopicsStep({ site, onContinue }: { site: Brand; onContinue: 
           variant="primary"
           size="lg"
           className="w-full"
-          disabled={!full}
+          disabled={!ready || !full}
           onClick={() => {
             patchDraft(site.id, { coreTopics: selected });
             onContinue();

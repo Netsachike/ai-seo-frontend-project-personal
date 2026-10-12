@@ -1,14 +1,10 @@
-import {
-  AUTH_TOKEN_COOKIE_NAME,
-  clearSession,
-  setAuthTokenCookie,
-  writeSessionUserCookie,
-} from "@/lib/auth-session";
-import { DEFAULT_DEMO_ACCOUNT, DEMO_TOKEN, buildDemoSessionUser, loadDemoAccount } from "@/lib/demo-session";
+import { AUTH_TOKEN_COOKIE_NAME, clearSession, initializeSession } from "@/lib/auth-session";
+import authService from "@/services/auth";
+import type { LoginPayload, RegisterPayload } from "@/types/types";
 
 /**
  * proxy.ts only checks that this cookie exists. It is the shared Netsach
- * `authToken` (see lib/auth-session.ts); the real API sets it on sign-in.
+ * `authToken` (see lib/auth-session.ts), set from `POST /login` → `data.token`.
  */
 export const SESSION_COOKIE = AUTH_TOKEN_COOKIE_NAME;
 
@@ -25,22 +21,29 @@ export const PUBLIC_PATHS = ["/sign-in", "/sign-up", "/forgot-password", "/verif
 /** Signed-in users who open these are sent into the app instead. */
 export const GUEST_ONLY_PATHS = ["/sign-in", "/sign-up"] as const;
 
-/**
- * UI stage: sign-in is faked in the browser until the auth endpoints are
- * wired. It writes the same two cookies the real login does, with a demo
- * account whose role and plan can be switched in Settings → Profile. A
- * previous demo choice survives signing out and back in.
- */
-export function startSession() {
-  setAuthTokenCookie(DEMO_TOKEN);
-  writeSessionUserCookie(buildDemoSessionUser(loadDemoAccount() ?? DEFAULT_DEMO_ACCOUNT));
+/** Signs in and writes the `authToken` + `authUser` cookies from the login response. */
+export async function signIn(payload: LoginPayload) {
+  const { data } = await authService.login(payload);
+  return initializeSession(data.user, data.token);
 }
 
-export function endSession() {
+/** Creates the account. Register returns the same shape as login, so the user is signed in straight away. */
+export async function signUp(payload: RegisterPayload) {
+  const { data } = await authService.register(payload);
+  return initializeSession(data.user, data.token);
+}
+
+/** Revokes the token on the backend (best effort), then clears the cookies. */
+export async function endSession() {
+  try {
+    await authService.logout();
+  } catch {
+    // The token may already be invalid; signing out locally is what matters.
+  }
   clearSession();
 }
 
-/** Simulated network wait for faked submits. */
+/** Simulated network wait for flows the backend does not serve yet (password reset, email codes). */
 export const fakeRequest = (ms = 700) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
 /** Only same-origin paths are allowed as a post-login destination. */

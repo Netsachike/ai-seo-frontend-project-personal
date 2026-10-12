@@ -6,27 +6,50 @@ import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { DEFAULT_LOGIN_CAROUSEL, normalizeCarousel, resolveSlideCopy } from "@/config/brand";
 import { useBrandConfig } from "@/components/providers/brand-provider";
+import type { LoginCarouselSlide } from "@/services/custom-domain";
 
 const SLIDE_MS = 6000;
 
+/** Message keys for the stock slides, in DEFAULT_LOGIN_CAROUSEL order. */
+const STOCK_SLIDE_KEYS = ["visibility", "rankings", "agent"] as const;
+
 /**
- * Orbit's own host keeps the stock brand panel (`children`). On a White
- * Label domain the panel becomes the reseller's sign-in carousel, painted
- * with their sign-in colours.
+ * The sign-in carousel. Rankoya's own host shows the stock slides with
+ * translated copy. On a White Label domain it shows the reseller's slides,
+ * painted with their sign-in colours.
  */
-export function TenantBrandPanel({ children }: { children: React.ReactNode }) {
+export function AuthBrandPanel() {
+  const t = useTranslations("auth.panel.slides");
   const { brandConfig, isCustomDomain } = useBrandConfig();
-  if (!isCustomDomain) return <>{children}</>;
-  return <TenantCarousel slides={normalizeCarousel(brandConfig.login_carousel) ?? DEFAULT_LOGIN_CAROUSEL} brandName={brandConfig.brand_name} />;
+
+  if (!isCustomDomain) {
+    const copy = STOCK_SLIDE_KEYS.map((key) => ({
+      kicker: t(`${key}.kicker`),
+      title: t(`${key}.title`),
+      description: t(`${key}.description`),
+    }));
+    return <BrandCarousel slides={DEFAULT_LOGIN_CAROUSEL} copyFor={(_, i) => copy[i]} />;
+  }
+
+  const slides = normalizeCarousel(brandConfig.login_carousel) ?? DEFAULT_LOGIN_CAROUSEL;
+  return <BrandCarousel slides={slides} copyFor={(slide, i) => resolveSlideCopy(slide, i, brandConfig.brand_name)} />;
 }
 
-/** Vendor-only content (Orbit's legal links), hidden on White Label domains. */
+/** Vendor-only content (Rankoya's legal links), hidden on White Label domains. */
 export function VendorOnly({ children }: { children: React.ReactNode }) {
   const { isCustomDomain } = useBrandConfig();
   return isCustomDomain ? null : <>{children}</>;
 }
 
-function TenantCarousel({ slides, brandName }: { slides: typeof DEFAULT_LOGIN_CAROUSEL; brandName: string }) {
+type SlideCopy = { kicker: string | null; title: string | null; description: string | null };
+
+function BrandCarousel({
+  slides,
+  copyFor,
+}: {
+  slides: LoginCarouselSlide[];
+  copyFor: (slide: LoginCarouselSlide, index: number) => SlideCopy;
+}) {
   const t = useTranslations("auth.panel");
   const [index, setIndex] = React.useState(0);
   const [paused, setPaused] = React.useState(false);
@@ -52,7 +75,7 @@ function TenantCarousel({ slides, brandName }: { slides: typeof DEFAULT_LOGIN_CA
       className="relative hidden flex-1 overflow-hidden border-s border-border bg-(--tenant-bg,var(--nav-bg)) text-(--tenant-text,white) lg:flex"
     >
       {slides.map((slide, i) => {
-        const copy = resolveSlideCopy(slide, i, brandName);
+        const copy = copyFor(slide, i);
         return (
           <div
             key={`${slide.position}-${slide.url}`}
@@ -63,7 +86,12 @@ function TenantCarousel({ slides, brandName }: { slides: typeof DEFAULT_LOGIN_CA
             )}
           >
             {/* eslint-disable-next-line @next/next/no-img-element -- tenant images come from any origin */}
-            <img src={slide.url} alt="" className="absolute inset-0 size-full object-cover" />
+            <img
+              src={slide.url}
+              alt=""
+              loading={i === 0 ? "eager" : "lazy"}
+              className="absolute inset-0 size-full object-cover"
+            />
             <div className="absolute inset-0 bg-linear-to-t from-black/85 via-black/35 to-black/10" />
             <div className="relative flex max-w-[560px] flex-col gap-3 p-14 pb-20 text-white">
               {copy.kicker && <span className="text-overline text-white/70">{copy.kicker}</span>}

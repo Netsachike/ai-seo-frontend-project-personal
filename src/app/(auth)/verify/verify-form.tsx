@@ -7,7 +7,7 @@ import { ArrowLeftIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
-import { NEW_ACCOUNT_START, fakeRequest, startSession } from "@/lib/auth/session";
+import { NEW_ACCOUNT_START, fakeRequest } from "@/lib/auth/session";
 import { Button } from "@/components/ui/button";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { Label } from "@/components/ui/label";
@@ -50,8 +50,8 @@ export function VerifyForm({ email, purpose }: { email: string; purpose: "signup
       setCode("");
       return setCodeError(tErr("codeInvalid"));
     }
-    startSession();
-    window.location.assign(NEW_ACCOUNT_START);
+    // No email-code endpoint yet: a reset ends at sign-in with the new password; sign-up already signed the user in.
+    window.location.assign(reset ? "/sign-in" : NEW_ACCOUNT_START);
   };
 
   const resend = async () => {

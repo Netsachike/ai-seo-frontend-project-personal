@@ -160,7 +160,9 @@ export function ConfigureWhiteLabelDialog({
     setValues({
       ...DEFAULTS,
       ...Object.fromEntries(
-        Object.entries(initialValues ?? {}).filter(([, value]) => value !== null && value !== undefined && value !== ""),
+        Object.entries(initialValues ?? {}).filter(
+          ([, value]) => value !== null && value !== undefined && value !== "",
+        ),
       ),
       brandName: initialValues?.brandName || workspace.name,
     });
@@ -318,7 +320,11 @@ export function ConfigureWhiteLabelDialog({
               )}
             >
               {/* eslint-disable-next-line @next/next/no-img-element -- uploads come from any origin */}
-              <img src={values[field]} alt={t(`images.${field}.name`)} className="max-h-full max-w-full object-contain" />
+              <img
+                src={values[field]}
+                alt={t(`images.${field}.name`)}
+                className="max-h-full max-w-full object-contain"
+              />
               <button
                 type="button"
                 onClick={() => handleChange(field, "")}
@@ -485,7 +491,7 @@ export function ConfigureWhiteLabelDialog({
                             <p className="line-clamp-2 text-[12px] leading-tight font-semibold">{preview.title}</p>
                           )}
                         </div>
-                        <span className="num absolute start-2 top-2 rounded-full bg-black/70 px-2 text-[11px] leading-5 font-semibold text-white">
+                        <span className="absolute start-2 top-2 rounded-full bg-black/70 px-2 num text-[11px] leading-5 font-semibold text-white">
                           {index + 1}
                         </span>
                         {carouselUploadIndex === index && (
