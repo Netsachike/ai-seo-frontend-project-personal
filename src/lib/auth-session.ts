@@ -1,5 +1,5 @@
 import { deleteClientCookie, readClientCookie, setClientCookie } from "@/lib/cookies";
-import type { AllUserSubscriptionsNew, User } from "@/types/types";
+import type { AllUserSubscriptionsNew, AllUserWorkspace, User, Workspace } from "@/types/types";
 
 /**
  * Session cookies shared with every Netsach product: `authToken` (bearer token
@@ -134,9 +134,50 @@ export const getSessionUserFromCookie = (): SessionUser | null => {
   }
 };
 
+// TEMPORARY: the backend has no workspace controller yet, so `GET /workspace`
+// returns 404. Until it ships, the workspaces from the login response are kept
+// in localStorage (too large for the `authUser` cookie) and served in its place
+// by services/workspaces.ts. Remove once the endpoint is live.
+const LOGIN_WORKSPACES_KEY = "rankoya:login-workspaces";
+
+export type LoginWorkspaces = {
+  active_workspace: Workspace | null;
+  all_user_workspaces: AllUserWorkspace[];
+};
+
+const storeLoginWorkspaces = (user: User) => {
+  try {
+    const value: LoginWorkspaces = {
+      active_workspace: user.active_workspace ?? null,
+      all_user_workspaces: user.all_user_workspaces ?? [],
+    };
+    window.localStorage.setItem(LOGIN_WORKSPACES_KEY, JSON.stringify(value));
+  } catch {
+    // Storage blocked: the workspace list just stays empty.
+  }
+};
+
+export const readLoginWorkspaces = (): LoginWorkspaces | null => {
+  try {
+    const raw = window.localStorage.getItem(LOGIN_WORKSPACES_KEY);
+    return raw ? (JSON.parse(raw) as LoginWorkspaces) : null;
+  } catch {
+    return null;
+  }
+};
+
+const clearLoginWorkspaces = () => {
+  try {
+    window.localStorage.removeItem(LOGIN_WORKSPACES_KEY);
+  } catch {
+    // Nothing to clear.
+  }
+};
+
 // initialize session
 export const initializeSession = (user: User, token: string): SessionUser => {
   setAuthTokenCookie(token);
+  storeLoginWorkspaces(user);
   return setSessionUserCookie(user);
 };
 
@@ -151,4 +192,5 @@ export const initializeSessionFromRegistration = (user: RegistrationUserState, t
 export const clearSession = () => {
   deleteClientCookie(AUTH_TOKEN_COOKIE_NAME);
   deleteClientCookie(AUTH_USER_COOKIE_NAME);
+  clearLoginWorkspaces();
 };

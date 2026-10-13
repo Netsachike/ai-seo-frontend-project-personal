@@ -1,3 +1,6 @@
+import { AxiosError } from "axios";
+
+import { readLoginWorkspaces } from "@/lib/auth-session";
 import api from "./api/api";
 import {
   ActivateWorkspacePayload,
@@ -50,6 +53,21 @@ const workspaceService = {
       const response = await api.get<GetAllWorkspacesResponse>("/workspace");
       return response.data;
     } catch (error) {
+      // TEMPORARY: no workspace controller on the backend yet (404). Serve the
+      // workspaces the login response carried. Remove once the endpoint is live.
+      if (error instanceof AxiosError && error.response?.status === 404) {
+        const login = readLoginWorkspaces();
+        if (login) {
+          const activeId = login.active_workspace?.id;
+          return {
+            status: "success",
+            currentWorkspace: login.active_workspace ? [login.active_workspace] : [],
+            userWorkspaces: login.all_user_workspaces.map((w) =>
+              activeId === undefined ? w : { ...w, is_active: w.work_space_id === activeId ? 1 : 0 },
+            ),
+          };
+        }
+      }
       throw error;
     }
   },
