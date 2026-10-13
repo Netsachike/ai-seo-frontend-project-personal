@@ -109,9 +109,27 @@ The progress bar counts "account" as step 1, so the domain screen reads "Step 2 
 | Right after create (fire and forget) | `POST /sites/{site}/crawl` | Starts the first crawl; the run id is saved to the setup draft |
 | Load the site on later steps | `GET /sites/{site}` | 404 shows "site not found" |
 
-### Step 2b: Details (`/setup/details`) 🔴
+### Step 2b: Details (`/setup/details`) 🟡
 
-The description, audience and language sections are **streamed from canned text** in [`fake-ai.ts`](../src/features/site-setup/fake-ai.ts). Confirmed answers are kept in the localStorage draft only; nothing is sent to the backend. Completing this step **prefetches topic discovery** (see step 4), so the topics are often ready by the time the user gets there.
+The description and audience are written from the site's first crawl in [`site-profile.ts`](../src/features/site-setup/site-profile.ts):
+
+| Order | Endpoint | Notes |
+|---|---|---|
+| 1 | `GET /sites/{site}/crawl-runs/{run}`, polled every 3 s | Waits for the crawl the domain step started (up to 3 min). If its id never reaches the draft within 10 s, it calls `POST /crawl` itself |
+| 2 | `GET /sites/{site}/crawl-runs/{run}/pages` | First 50 pages. Only pages that loaded and have text are kept, homepage first. Both sections share this one read |
+| 3 | `POST /sites/{site}/copilot/ask` | **Option B.** The question contains up to 12 page digests (path, type, title, meta description, H1 and a text excerpt), capped at 5,000 characters. It asks for markdown in the UI's language with fixed headings. The audience question also includes the confirmed description. Both sections use the same conversation |
+| fallback | none | **Option A.** If the copilot errors or returns an empty answer, the section is built from the pages' own text: homepage title, meta description, H1 and summary, plus key service or product pages. The audience gets a short list derived from the offer pages and the site's country and language. The fallback is always in English |
+
+- If no page could be read, the section shows the error with **Try again**. Retry reads the crawl again.
+- The finished answer is released in small bursts, so it writes itself in. The copilot does not stream.
+- The loader shows Retry after 90 s, because a first crawl can take minutes.
+- **Side effect:** the copilot conversation is stored, so the Agent screen (which opens the latest conversation) will show this setup thread until the user asks something new.
+- **Still local:** confirmed answers stay in the localStorage draft. There is no `PATCH /sites/{site}` to save them yet.
+- Language and country default from the domain's TLD, then from the site's `location` and `language`.
+
+Completing this step **prefetches topic discovery** (see step 4), so the topics are often ready by the time the user gets there.
+
+**Test:** add a domain and watch Network for the `crawl-runs/{id}` polls → `crawl-runs/{id}/pages` → `copilot/ask`. To test the fallback, block `copilot/ask` in DevTools (right-click → Block request URL), then retry. The text should come back built from the page titles and meta descriptions.
 
 ### Step 3: Google Search Console (`/setup/google-search-console`) ✅
 
@@ -371,7 +389,7 @@ These are in `openapi.yaml`, and most already have a service wrapper, but no scr
 
 - Password reset, email verification and Google sign-in
 - Profile details and password save
-- AI site profile in setup step 2b (`fake-ai.ts`)
+- Saving the confirmed site profile from setup step 2b (written live from the crawl and the copilot, but there is no endpoint to store it)
 - Overview trend charts, share of voice over time, platform cards and activity feed
 - Rank history (position change and sparklines) and audit category scores
 - Notifications, usage meters and the job banner
@@ -387,7 +405,7 @@ These are in `openapi.yaml`, and most already have a service wrapper, but no scr
 
 1. **Sign up** (`/register` + `/workspace/store`). You land on `/sites/new`.
 2. **Add a domain** (`POST /sites`; the crawl starts in the background).
-3. **Details**: let the profile stream in (canned text) and confirm each section. Topic discovery starts in the background.
+3. **Details**: the crawl finishes, then the copilot writes the description and audience from the crawled pages. Confirm each section. Topic discovery starts in the background.
 4. **Search Console**: Connect → Google consent → the property is picked automatically → sync. Or skip.
 5. **Core topics**: real clusters from crawl → keywords → topical map. Pick 5.
 6. **Billing** (continue on Free), then **Integration** (connect WordPress with an application password: create + test), then **Preferences**.

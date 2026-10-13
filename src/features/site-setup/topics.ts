@@ -9,7 +9,7 @@ const POLL_MS = 3000;
 /** A crawl that has not finished by then is used as it stands. */
 const CRAWL_WAIT_MS = 3 * 60_000;
 
-function sleep(ms: number, signal?: AbortSignal) {
+export function sleep(ms: number, signal?: AbortSignal) {
   return new Promise<void>((resolve, reject) => {
     if (signal?.aborted) return reject(new DOMException("Aborted", "AbortError"));
     const timer = setTimeout(resolve, ms);
@@ -25,7 +25,7 @@ function sleep(ms: number, signal?: AbortSignal) {
 }
 
 /** Polls a crawl run until it completes or fails, or the wait runs out. */
-async function waitForCrawl(siteId: number, run: CrawlRun, signal?: AbortSignal) {
+export async function waitForCrawl(siteId: number, run: CrawlRun, signal?: AbortSignal) {
   const started = Date.now();
   let current = run;
   while (current.status === "pending" || current.status === "running") {

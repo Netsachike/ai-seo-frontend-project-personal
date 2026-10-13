@@ -3,12 +3,12 @@
 import * as React from "react";
 import { motion } from "motion/react";
 import { QuoteIcon } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 import type { Site } from "@/types/types";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { streamProfileSection, type ProfileSection } from "../../fake-ai";
+import { streamProfileSection, type ProfileSection } from "../../site-profile";
 import { useElapsedStage, useMinDuration } from "../../hooks/use-min-duration";
 import { useSmoothText } from "../../hooks/use-smooth-text";
 import { useStickToBottom } from "../../hooks/use-stick-to-bottom";
@@ -20,8 +20,8 @@ import { StreamedMarkdown } from "./streamed-markdown";
 
 /** Minimum loader time per section, so a fast answer never flashes. */
 const MIN_LOADER_MS: Record<ProfileSection, number> = { description: 1200, audience: 900 };
-/** Subline changes at 8 s, Retry appears at 30 s. */
-const STAGES = [8000, 30000] as const;
+/** Subline changes at 8 s; Retry appears at 90 s, since the first crawl can take a few minutes. */
+const STAGES = [8000, 90000] as const;
 
 /**
  * Body of an AI-written section: a named loader, then text that writes itself
@@ -31,13 +31,16 @@ const STAGES = [8000, 30000] as const;
 export function AiSection({
   site,
   section,
+  description = null,
   saved,
   onStatus,
   onWritten,
   onConfirm,
 }: {
-  site: Pick<Site, "name" | "domain">;
+  site: Pick<Site, "id" | "name" | "domain" | "language" | "location">;
   section: ProfileSection;
+  /** The confirmed description, which the audience section is written from. */
+  description?: string | null;
   /** Text already written for this site, if any; it is shown as is. */
   saved: string | null;
   onStatus: (status: SectionStatus) => void;
@@ -46,9 +49,10 @@ export function AiSection({
   onConfirm: (text: string) => void;
 }) {
   const t = useTranslations("siteSetup.details");
+  const locale = useLocale();
   const [instant] = React.useState(saved !== null);
   const [editing, setEditing] = React.useState<string | null>(null);
-  const stream = useTextStream((signal) => streamProfileSection(site, section, signal));
+  const stream = useTextStream((signal) => streamProfileSection(site, section, { locale, description, signal }));
   const { start } = stream;
 
   React.useEffect(() => {
