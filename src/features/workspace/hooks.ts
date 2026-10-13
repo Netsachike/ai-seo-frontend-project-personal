@@ -12,14 +12,28 @@ import { meKeys, siteKeys, workspaceKeys } from "@/lib/api/query-keys";
 import { useUiStore } from "@/lib/store/ui";
 import siteService from "@/services/sites";
 import workspaceService from "@/services/workspaces";
+import { useSessionUser } from "@/features/account/use-session-user";
 import { siteIdFromSlug, siteSlug } from "@/features/sites/site-utils";
 
-/** UI preferences (language, theme, Telegram). No backend endpoint yet, so they stay on mock data. */
+/**
+ * The signed-in user. Name, email and id come from the `authUser` session
+ * cookie (written from the login response); UI preferences (language, theme,
+ * Telegram) have no backend endpoint yet, so they stay on mock data. Waits
+ * for the cookie to be read so the mock identity never shows.
+ */
 export function useMe() {
+  const session = useSessionUser();
   return useQuery({
     queryKey: meKeys.all,
     queryFn: getMe,
     staleTime: 5 * 60_000,
+    enabled: session !== undefined,
+    select: (me) => ({
+      ...me,
+      id: session ? String(session.id) : "",
+      name: session ? session.fullName || `${session.firstName} ${session.lastName}`.trim() || session.email : "",
+      email: session?.email ?? "",
+    }),
   });
 }
 

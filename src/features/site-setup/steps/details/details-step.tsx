@@ -4,7 +4,7 @@ import * as React from "react";
 import { useTranslations } from "next-intl";
 
 import type { Site } from "@/types/types";
-import { detectLocale } from "../../fake-ai";
+import { detectLocale } from "../../detect-locale";
 import { patchDraft, useDraft } from "../../store";
 import { StepHeading } from "../step-heading";
 import { AiSection } from "./ai-section";
@@ -98,6 +98,7 @@ export function DetailsStep({
             key={site.domain}
             site={site}
             section="audience"
+            description={draft.description}
             saved={draft.audience}
             onStatus={onAudienceStatus}
             onWritten={saveAudience}
