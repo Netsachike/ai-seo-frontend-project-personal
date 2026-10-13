@@ -1,0 +1,1910 @@
+SIDEBAR:
+
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Sidebar navigation</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<nav aria-label="Main" style="width: 232px; box-sizing: border-box; padding: 12px 8px 16px; font-family: 'Geist', 'Helvetica Neue', sans-serif; color: #0F1218; background: #F6F7F9; display: flex; flex-direction: column; gap: 20px">
+<a href="Main.dc.html" style="display: flex; align-items: center; gap: 10px; padding: 6px 8px; text-decoration: none; color: #0F1218">
+<svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="13" r="8" fill="none" stroke="#0F1218" stroke-width="2.2"></circle><circle cx="18.5" cy="5.5" r="3.3" fill="#C5F04A" stroke="#0F1218" stroke-width="1.6"></circle></svg>
+<span style="font-size: 18px; font-weight: 600; letter-spacing: -0.03em">rankoya</span>
+</a>
+<button aria-label="Switch brand" style="display: flex; align-items: center; gap: 10px; width: 100%; height: 52px; padding: 0 10px; background: #FFFFFF; border: 1px solid #E3E6EB; border-radius: 8px; font-family: inherit; color: #0F1218; text-align: left; cursor: pointer">
+<span style="width: 30px; height: 30px; flex: none; border-radius: 6px; background: #0F1218; color: #FFFFFF; display: grid; place-items: center; font-size: 12px; font-weight: 600">NR</span>
+<span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px">
+<span style="font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Northwind Roasters</span>
+<span style="font-size: 11px; color: #6B7380; font-family: 'Geist Mono', ui-monospace, monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">northwindroasters.com</span>
+</span>
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6B7380" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 9l4-4 4 4M8 15l4 4 4-4"></path></svg>
+</button>
+<div style="display: flex; flex-direction: column; gap: 2px">
+<div style="font-size: 11px; line-height: 16px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #6B7380; padding: 0 8px 6px">Insights</div>
+<a href="Main.dc.html" style="{{nav.overview}}"><span style="{{ic.overview}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"></rect><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"></rect><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"></rect><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"></rect></svg></span>Overview</a>
+<a href="Visibility.dc.html" style="{{nav.visibility}}"><span style="{{ic.visibility}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><circle cx="12" cy="12" r="5"></circle><circle cx="12" cy="12" r="1.2"></circle></svg></span>AI visibility</a>
+<a href="Rankings.dc.html" style="{{nav.rankings}}"><span style="{{ic.rankings}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 17l6-6 4 4 8-8"></path><path d="M15 7h6v6"></path></svg></span>Rankings</a>
+<a href="Competitors.dc.html" style="{{nav.competitors}}"><span style="{{ic.competitors}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"></circle><path d="M2.5 20c.8-3.5 3.4-5.5 6.5-5.5s5.7 2 6.5 5.5"></path><path d="M16 4.5a3.5 3.5 0 0 1 0 7"></path><path d="M18 14.8c1.9.7 3 2.4 3.5 5.2"></path></svg></span>Competitors</a>
+<a href="Audit.dc.html" style="{{nav.audit}}"><span style="{{ic.audit}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 3v6c0 4.5-3.4 8-8 9-4.6-1-8-4.5-8-9V6z"></path><path d="M8.5 12l2.5 2.5 4.5-5"></path></svg></span>Site audit</a>
+</div>
+<div style="display: flex; flex-direction: column; gap: 2px">
+<div style="font-size: 11px; line-height: 16px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #6B7380; padding: 0 8px 6px">Grow</div>
+<a href="Actions.dc.html" style="{{nav.actions}}"><span style="{{ic.actions}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 6h10M10 12h10M10 18h10"></path><path d="M3.5 6l1.5 1.5L7.5 5M3.5 12l1.5 1.5 2.5-2.5"></path><circle cx="5.2" cy="18" r="1.2"></circle></svg></span><span style="flex: 1">Action plan</span><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 11px; font-weight: 500; padding: 1px 6px; border-radius: 999px; background: #0F1218; color: #FFFFFF">4</span></a>
+<a href="Content.dc.html" style="{{nav.content}}"><span style="{{ic.content}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"></path><path d="M14 3v5h5M9 13h6M9 17h6"></path></svg></span>Content</a>
+<a href="Agent.dc.html" style="{{nav.agent}}"><span style="{{ic.agent}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 12a8.5 8.5 0 0 1-12.3 7.6L3.5 21l1.4-4.6A8.5 8.5 0 1 1 20.5 12z"></path></svg></span>Ask Rankoya</a>
+</div>
+<div style="display: flex; flex-direction: column; gap: 2px">
+<div style="font-size: 11px; line-height: 16px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #6B7380; padding: 0 8px 6px">Workspace</div>
+<a href="Integrations.dc.html" style="{{nav.integrations}}"><span style="{{ic.integrations}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 2.5v5M15 2.5v5M6 7.5h12v3.5a6 6 0 0 1-12 0zM12 17v4.5"></path></svg></span>Integrations</a>
+<a href="#" style="{{nav.reports}}"><span style="{{ic.reports}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><path d="M5 20V11M11 20V5M17 20v-6M3 20.5h18"></path></svg></span>Reports</a>
+<a href="Settings.dc.html" style="{{nav.settings}}"><span style="{{ic.settings}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><path d="M4 6h9M18 6h2M4 12h3M11 12h9M4 18h11M19 18h1"></path><circle cx="15.5" cy="6" r="2"></circle><circle cx="9" cy="12" r="2"></circle><circle cx="17" cy="18" r="2"></circle></svg></span>Settings</a>
+</div>
+<div style="margin-top: 8px; padding: 12px; border: 1px solid #E3E6EB; border-radius: 12px; background: #FFFFFF; display: flex; flex-direction: column; gap: 8px">
+<div style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600"><span style="width: 8px; height: 8px; border-radius: 999px; background: #0E7A55"></span>Rankoya on Telegram</div>
+<div style="font-size: 12px; line-height: 16px; color: #4A5260">Connected as <span style="font-family: 'Geist Mono', ui-monospace, monospace">@ada_northwind</span>. Approvals go to both.</div>
+</div>
+<div style="display: flex; align-items: center; gap: 10px; padding: 4px 8px">
+<span style="width: 28px; height: 28px; border-radius: 999px; background: #DDE3FB; color: #1E3BB8; display: grid; place-items: center; font-size: 11px; font-weight: 600">AO</span>
+<span style="display: flex; flex-direction: column"><span style="font-size: 13px; font-weight: 500">Ada Okafor</span><span style="font-size: 11px; color: #6B7380">Owner · [PLAN NAME]</span></span>
+</div>
+</nav>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"active":{"editor":"enum","options":["overview","visibility","rankings","competitors","audit","actions","content","agent","integrations","reports","settings"],"default":"overview"},"$preview":{"width":232,"height":820}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const a = this.props.active ?? 'overview';
+    const keys = ['overview','visibility','rankings','competitors','audit','actions','content','agent','integrations','reports','settings'];
+    const base = 'display: flex; align-items: center; gap: 10px; height: 36px; padding: 0 8px 0 6px; border-radius: 8px; text-decoration: none; font-size: 14px; ';
+    const on = base + 'font-weight: 600; color: #0F1218; background: #FFFFFF; box-shadow: 0 0 0 1px #E3E6EB, 0 1px 2px rgba(15,18,24,0.06)';
+    const off = base + 'font-weight: 500; color: #4A5260; background: transparent';
+    const icBase = 'width: 24px; height: 24px; flex: none; border-radius: 6px; display: grid; place-items: center; ';
+    const icOn = icBase + 'background: #C5F04A; color: #0F1218';
+    const icOff = icBase + 'background: transparent; color: #6B7380';
+    const nav = {}, ic = {};
+    keys.forEach((k) => { nav[k] = k === a ? on : off; ic[k] = k === a ? icOn : icOff; });
+    return { nav, ic };
+  }
+}
+</script>
+</body>
+</html>
+
+TOPBAR:
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Top bar</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<header style="min-height: 56px; box-sizing: border-box; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 10px 16px 10px 24px; border-bottom: 1px solid #E3E6EB; font-family: 'Geist', 'Helvetica Neue', sans-serif; color: #0F1218; background: #FFFFFF; border-radius: 12px 12px 0 0">
+<label style="flex: 1 1 220px; max-width: 420px; height: 36px; display: flex; align-items: center; gap: 8px; padding: 0 8px 0 10px; border: 1px solid #E3E6EB; border-radius: 8px; background: #F6F7F9; color: #6B7380; font-size: 13px">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="M20 20l-4.2-4.2"></path></svg>
+<input aria-label="Search or ask Rankoya" placeholder="Search or ask Rankoya" style="flex: 1; min-width: 0; border: 0; background: transparent; font-family: inherit; font-size: 13px; color: #0F1218; outline: none">
+<kbd style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 11px; color: #4A5260; background: #FFFFFF; border: 1px solid #CDD2DA; border-radius: 4px; padding: 1px 5px">⌘K</kbd>
+</label>
+<div style="flex: 1 1 0"></div>
+<div role="group" aria-label="Date range" style="display: flex; padding: 2px; background: #F0F2F5; border-radius: 8px">
+<button style="height: 30px; padding: 0 10px; border: 0; border-radius: 6px; background: transparent; font-family: inherit; font-size: 13px; font-weight: 500; color: #4A5260">7d</button>
+<button aria-pressed="true" style="height: 30px; padding: 0 10px; border: 0; border-radius: 6px; background: #FFFFFF; box-shadow: 0 1px 2px rgba(15,18,24,0.08); font-family: inherit; font-size: 13px; font-weight: 600; color: #0F1218">30d</button>
+<button style="height: 30px; padding: 0 10px; border: 0; border-radius: 6px; background: transparent; font-family: inherit; font-size: 13px; font-weight: 500; color: #4A5260">90d</button>
+</div>
+<button aria-label="Notifications, 3 unread" style="position: relative; width: 36px; height: 36px; display: grid; place-items: center; border: 1px solid #E3E6EB; border-radius: 8px; background: #FFFFFF; color: #4A5260">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9a6 6 0 0 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9z"></path><path d="M10 20a2 2 0 0 0 4 0"></path></svg>
+<span style="position: absolute; top: 7px; right: 8px; width: 7px; height: 7px; border-radius: 999px; background: #C42B2B; border: 1.5px solid #FFFFFF"></span>
+</button>
+<a href="Agent.dc.html" style="height: 36px; display: inline-flex; align-items: center; gap: 8px; padding: 0 14px 0 10px; border-radius: 8px; background: #C5F04A; color: #0F1218; font-size: 14px; font-weight: 600; text-decoration: none">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 12a8.5 8.5 0 0 1-12.3 7.6L3.5 21l1.4-4.6A8.5 8.5 0 1 1 20.5 12z"></path></svg>
+Ask Rankoya
+<kbd style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 11px; font-weight: 500; color: #0F1218; opacity: 0.7">⌘J</kbd>
+</a>
+</header>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1160,"height":56}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>
+
+DASHBOARD: 
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Overview</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0;background:#F6F7F9}
+*{box-sizing:border-box}
+a{color:#2D4FE0}a:hover{color:#1E3BB8}
+button{cursor:pointer}
+</style>
+</helmet>
+<div style="min-height: 100vh; background: #F6F7F9; font-family: 'Geist', 'Helvetica Neue', sans-serif; color: #0F1218; display: flex; flex-wrap: wrap; align-items: flex-start; padding: 8px">
+<dc-import name="Sidebar" active="overview" hint-size="232px,820px"></dc-import>
+<main style="flex: 999 1 560px; min-width: 0; background: #FFFFFF; border: 1px solid #E3E6EB; border-radius: 12px">
+<dc-import name="Topbar" hint-size="100%,56px"></dc-import>
+<div style="max-width: 1200px; margin: 0 auto; padding: 28px 32px 48px; display: flex; flex-direction: column; gap: 20px">
+
+<div style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<div style="font-size: 11px; line-height: 16px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #6B7380">Overview · Sep 4 – Oct 4, 2026</div>
+<h1 style="margin: 0; font-size: 28px; line-height: 34px; font-weight: 600; letter-spacing: -0.02em">Good morning, Ada</h1>
+<p style="margin: 0; font-size: 14px; line-height: 20px; color: #4A5260">Here's how Northwind Roasters showed up in Google and AI answers this month.</p>
+</div>
+<div style="display: flex; gap: 8px; flex-wrap: wrap">
+<button style="height: 40px; padding: 0 16px; border-radius: 8px; border: 1px solid #CDD2DA; background: #FFFFFF; font-family: inherit; font-size: 14px; font-weight: 500; color: #0F1218">Export report</button>
+<button style="height: 40px; padding: 0 16px; border-radius: 8px; border: 0; background: #0F1218; font-family: inherit; font-size: 14px; font-weight: 500; color: #FFFFFF">Run new scan</button>
+</div>
+</div>
+
+<div style="display: flex; flex-wrap: wrap; gap: 16px">
+<section style="flex: 5 1 360px; min-width: 0; border: 1px solid #E3E6EB; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 18px">
+<div style="display: flex; justify-content: space-between; align-items: center">
+<h2 style="margin: 0; font-size: 15px; line-height: 22px; font-weight: 600">AI visibility score</h2>
+<a href="Visibility.dc.html" style="font-size: 13px; font-weight: 500; text-decoration: none">Details</a>
+</div>
+<div style="display: flex; align-items: center; gap: 24px; flex-wrap: wrap">
+<div style="position: relative; width: 120px; height: 120px; flex: none">
+<svg width="120" height="120" viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="52" fill="none" stroke="#F0F2F5" stroke-width="10"></circle><circle cx="60" cy="60" r="52" fill="none" stroke="#2D4FE0" stroke-width="10" stroke-linecap="round" stroke-dasharray="209 327" transform="rotate(-90 60 60)"></circle></svg>
+<div style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center">
+<span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 36px; line-height: 40px; font-weight: 500; letter-spacing: -0.02em">64</span>
+<span style="font-size: 12px; color: #6B7380">of 100</span>
+</div>
+</div>
+<div style="flex: 1 1 160px; display: flex; flex-direction: column; gap: 8px">
+<span style="align-self: flex-start; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; font-weight: 500; color: #0E7A55; background: #E6F4EE; border-radius: 4px; padding: 2px 6px">▲ +8 vs last month</span>
+<p style="margin: 0; font-size: 13px; line-height: 18px; color: #4A5260">You're 2nd of 4 brands. Bluebird Coffee leads at 72, mostly on comparison questions.</p>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 10px">
+<sc-for list="{{engines}}" as="e" hint-placeholder-count="5">
+<div style="display: grid; grid-template-columns: 112px minmax(0, 1fr) 44px; align-items: center; gap: 12px; font-size: 13px">
+<span style="display: flex; align-items: center; gap: 8px"><span style="width: 22px; height: 22px; border-radius: 6px; background: #F0F2F5; border: 1px solid #E3E6EB; display: grid; place-items: center; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 9px; font-weight: 500">{{e.mono}}</span>{{e.name}}</span>
+<span style="height: 6px; border-radius: 999px; background: #F0F2F5; overflow: hidden"><span style="display: block; height: 6px; border-radius: 999px; background: #2D4FE0; width: {{e.pct}}%"></span></span>
+<span style="font-family: 'Geist Mono', ui-monospace, monospace; text-align: right">{{e.pct}}%</span>
+</div>
+</sc-for>
+</div>
+<p style="margin: 0; font-size: 12px; color: #6B7380">Share of 50 tracked questions where each engine mentions you.</p>
+</section>
+
+<div style="flex: 7 1 480px; min-width: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px">
+<sc-for list="{{kpis}}" as="k" hint-placeholder-count="4">
+<a href="{{k.href}}" style="border: 1px solid #E3E6EB; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 10px; text-decoration: none; color: #0F1218">
+<span style="font-size: 11px; line-height: 16px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #6B7380">{{k.label}}</span>
+<span style="display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap">
+<span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 26px; line-height: 30px; font-weight: 500; letter-spacing: -0.01em">{{k.value}}</span>
+<span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; font-weight: 500; color: #0E7A55; background: #E6F4EE; border-radius: 4px; padding: 2px 6px">{{k.delta}}</span>
+</span>
+<svg viewBox="0 0 200 40" preserveAspectRatio="none" style="width: 100%; height: 40px" aria-hidden="true"><path d="{{k.spark}}" fill="none" stroke="#2D4FE0" stroke-width="1.75" vector-effect="non-scaling-stroke"></path></svg>
+<span style="font-size: 12px; line-height: 16px; color: #4A5260">{{k.note}}</span>
+</a>
+</sc-for>
+</div>
+</div>
+
+<div style="display: flex; flex-wrap: wrap; gap: 16px">
+<section style="flex: 8 1 520px; min-width: 0; border: 1px solid #E3E6EB; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 16px">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px">
+<div style="display: flex; flex-direction: column; gap: 2px">
+<h2 style="margin: 0; font-size: 15px; line-height: 22px; font-weight: 600">Visibility vs competitors</h2>
+<span style="font-size: 12px; color: #6B7380">AI visibility score, daily, last 30 days</span>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 14px; font-size: 12px; color: #4A5260">
+<span style="display: flex; align-items: center; gap: 6px"><span style="width: 14px; height: 3px; border-radius: 2px; background: #2D4FE0"></span><strong style="font-weight: 600; color: #0F1218">You</strong></span>
+<span style="display: flex; align-items: center; gap: 6px"><span style="width: 14px; height: 3px; border-radius: 2px; background: #F08A24"></span>Bluebird Coffee</span>
+<span style="display: flex; align-items: center; gap: 6px"><span style="width: 14px; height: 3px; border-radius: 2px; background: #13A38B"></span>Halfmoon Roastery</span>
+<span style="display: flex; align-items: center; gap: 6px"><span style="width: 14px; height: 3px; border-radius: 2px; background: #B54AC7"></span>Ember &amp; Oak</span>
+</div>
+</div>
+<svg viewBox="0 0 760 240" style="width: 100%; height: auto" role="img" aria-label="Your visibility rose from 48 to 64 over 30 days; Bluebird stayed ahead at 72">
+<g font-family="Geist Mono, monospace" font-size="11" fill="#6B7380">
+<text x="0" y="64">70</text><text x="0" y="124">50</text><text x="0" y="184">30</text>
+<text x="36" y="232">Sep 4</text><text x="356" y="232">Sep 19</text><text x="700" y="232">Oct 4</text>
+</g>
+<g stroke="#E3E6EB" stroke-width="1"><line x1="36" x2="760" y1="60" y2="60"></line><line x1="36" x2="760" y1="120" y2="120"></line><line x1="36" x2="760" y1="180" y2="180"></line></g>
+<g fill="none" stroke-linejoin="round" stroke-linecap="round" transform="translate(40 0)">
+<path d="M0 180 L80 177 L160 171 L240 174 L320 168 L400 171 L480 165 L560 162 L640 165 L720 159" stroke="#B54AC7" stroke-width="1.5"></path>
+<path d="M0 135 L80 132 L160 138 L240 135 L320 129 L400 132 L480 135 L560 129 L640 126 L720 129" stroke="#13A38B" stroke-width="1.5"></path>
+<path d="M0 72 L80 69 L160 72 L240 66 L320 63 L400 66 L480 60 L560 57 L640 60 L720 54" stroke="#F08A24" stroke-width="1.5"></path>
+<path d="M0 126 L80 123 L160 117 L240 120 L320 111 L400 105 L480 99 L560 96 L640 87 L720 78" stroke="#2D4FE0" stroke-width="2.5"></path>
+<circle cx="720" cy="78" r="4" fill="#2D4FE0" stroke="#FFFFFF" stroke-width="2"></circle>
+</g>
+</svg>
+</section>
+
+<section style="flex: 4 1 300px; min-width: 0; border: 1px solid #E3E6EB; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; flex-direction: column; gap: 2px">
+<h2 style="margin: 0; font-size: 15px; line-height: 22px; font-weight: 600">Share of voice</h2>
+<span style="font-size: 12px; color: #6B7380">Mentions across all AI answers</span>
+</div>
+<div style="display: flex; height: 10px; border-radius: 999px; overflow: hidden; gap: 2px">
+<span style="width: 31%; background: #F08A24"></span><span style="width: 24%; background: #2D4FE0"></span><span style="width: 19%; background: #13A38B"></span><span style="width: 14%; background: #B54AC7"></span><span style="width: 12%; background: #8A94A6"></span>
+</div>
+<div style="display: flex; flex-direction: column">
+<sc-for list="{{sov}}" as="s" hint-placeholder-count="5">
+<div style="display: flex; align-items: center; gap: 10px; height: 36px; border-bottom: 1px solid #F0F2F5; font-size: 13px">
+<span style="width: 10px; height: 10px; border-radius: 3px; background: {{s.color}}"></span>
+<span style="flex: 1; font-weight: {{s.weight}}">{{s.name}}</span>
+<span style="font-family: 'Geist Mono', ui-monospace, monospace">{{s.pct}}</span>
+<span style="width: 56px; text-align: right; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; color: {{s.dcolor}}">{{s.delta}}</span>
+</div>
+</sc-for>
+</div>
+</section>
+</div>
+
+<div style="display: flex; flex-wrap: wrap; gap: 16px">
+<section style="flex: 7 1 480px; min-width: 0; border: 1px solid #E3E6EB; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 6px">
+<div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 8px">
+<div style="display: flex; flex-direction: column; gap: 2px">
+<h2 style="margin: 0; font-size: 15px; line-height: 22px; font-weight: 600">Next best actions</h2>
+<span style="font-size: 12px; color: #6B7380">Ranked by expected impact on your visibility score</span>
+</div>
+<a href="Actions.dc.html" style="font-size: 13px; font-weight: 500; text-decoration: none">Open action plan</a>
+</div>
+<sc-for list="{{actions}}" as="a" hint-placeholder-count="4">
+<div style="display: flex; align-items: center; gap: 14px; padding: 12px 0; border-top: 1px solid #F0F2F5; flex-wrap: wrap">
+<span style="font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 999px; background: {{a.ownerBg}}; color: {{a.ownerFg}}">{{a.owner}}</span>
+<span style="flex: 1 1 240px; min-width: 0; display: flex; flex-direction: column; gap: 2px">
+<span style="font-size: 14px; font-weight: 500">{{a.title}}</span>
+<span style="font-size: 12px; color: #6B7380">{{a.meta}}</span>
+</span>
+<a href="{{a.href}}" style="height: 32px; display: inline-flex; align-items: center; padding: 0 12px; border-radius: 8px; font-size: 13px; font-weight: 500; text-decoration: none; background: {{a.btnBg}}; color: {{a.btnFg}}; border: 1px solid {{a.btnBorder}}">{{a.cta}}</a>
+</div>
+</sc-for>
+</section>
+
+<section style="flex: 5 1 340px; min-width: 0; border: 1px solid #E3E6EB; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; align-items: center; gap: 10px">
+<span style="width: 28px; height: 28px; border-radius: 999px; background: #C5F04A; display: grid; place-items: center"><svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="13" r="7" fill="none" stroke="#0F1218" stroke-width="2.6"></circle><circle cx="18.5" cy="5.5" r="3" fill="#0F1218"></circle></svg></span>
+<div style="display: flex; flex-direction: column">
+<h2 style="margin: 0; font-size: 15px; line-height: 22px; font-weight: 600">What Rankoya did</h2>
+<span style="font-size: 12px; color: #6B7380">Last 48 hours</span>
+</div>
+</div>
+<ol style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px">
+<sc-for list="{{activity}}" as="t" hint-placeholder-count="4">
+<li style="display: grid; grid-template-columns: 52px minmax(0, 1fr); gap: 10px; font-size: 13px; line-height: 18px">
+<span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; color: #6B7380">{{t.time}}</span>
+<span style="display: flex; flex-direction: column; gap: 2px"><span>{{t.text}}</span><span style="font-size: 12px; color: #6B7380">{{t.sub}}</span></span>
+</li>
+</sc-for>
+</ol>
+</section>
+</div>
+
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1320}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const rankoya = { ownerBg: '#C5F04A', ownerFg: '#0F1218', owner: 'Rankoya' };
+    const you = { ownerBg: '#DDE3FB', ownerFg: '#1E3BB8', owner: 'You' };
+    const primary = { btnBg: '#0F1218', btnFg: '#FFFFFF', btnBorder: '#0F1218' };
+    const secondary = { btnBg: '#FFFFFF', btnFg: '#0F1218', btnBorder: '#CDD2DA' };
+    return {
+      engines: [
+        { name: 'ChatGPT', mono: 'GPT', pct: 52 },
+        { name: 'Gemini', mono: 'GEM', pct: 61 },
+        { name: 'Perplexity', mono: 'PPX', pct: 47 },
+        { name: 'Claude', mono: 'CLD', pct: 38 },
+        { name: 'AI Overviews', mono: 'AIO', pct: 29 }
+      ],
+      kpis: [
+        { label: 'Mention rate', value: '45%', delta: '▲ +6.2 pts', note: 'Mentioned in 113 of 250 AI answers', href: 'Visibility.dc.html', spark: 'M0 32 L25 30 L50 31 L75 26 L100 24 L125 25 L150 18 L175 14 L200 10' },
+        { label: 'Avg. AI position', value: '#3.4', delta: '▲ 0.8', note: 'Where you appear when you are listed', href: 'Visibility.dc.html', spark: 'M0 28 L25 29 L50 26 L75 27 L100 22 L125 20 L150 21 L175 16 L200 14' },
+        { label: 'Google top 10', value: '18 / 62', delta: '▲ +4', note: 'Tracked keywords on page one', href: 'Rankings.dc.html', spark: 'M0 30 L25 30 L50 27 L75 27 L100 24 L125 22 L150 22 L175 18 L200 16' },
+        { label: 'AI citations', value: '27', delta: '▲ +9', note: 'Answers that link to your site', href: 'Visibility.dc.html', spark: 'M0 34 L25 33 L50 30 L75 31 L100 25 L125 21 L150 19 L175 15 L200 9' }
+      ],
+      sov: [
+        { name: 'Bluebird Coffee', pct: '31%', color: '#F08A24', weight: 400, delta: '▼ 2.1', dcolor: '#C42B2B' },
+        { name: 'You', pct: '24%', color: '#2D4FE0', weight: 600, delta: '▲ 4.3', dcolor: '#0E7A55' },
+        { name: 'Halfmoon Roastery', pct: '19%', color: '#13A38B', weight: 400, delta: '▼ 0.9', dcolor: '#C42B2B' },
+        { name: 'Ember & Oak', pct: '14%', color: '#B54AC7', weight: 400, delta: '▲ 0.6', dcolor: '#0E7A55' },
+        { name: 'Others', pct: '12%', color: '#8A94A6', weight: 400, delta: '▼ 1.9', dcolor: '#C42B2B' }
+      ],
+      actions: [
+        Object.assign({ title: 'Publish a comparison page: Northwind vs Bluebird subscriptions', meta: 'High impact · draft ready · targets 9 prompts you miss', cta: 'Review draft', href: 'Editor.dc.html' }, rankoya, primary),
+        Object.assign({ title: 'Add FAQ schema to 6 product pages', meta: 'High impact · low effort · AI engines quote FAQ blocks', cta: 'Approve', href: 'Actions.dc.html' }, rankoya, secondary),
+        Object.assign({ title: 'Get listed on 3 sites AI engines cite for "best coffee subscription"', meta: 'High impact · Rankoya can draft the outreach emails', cta: 'See sites', href: 'Competitors.dc.html' }, you, secondary),
+        Object.assign({ title: 'Refresh "How to brew pour-over", last updated 14 months ago', meta: 'Medium impact · freshness is a ranking signal', cta: 'Approve', href: 'Actions.dc.html' }, rankoya, secondary)
+      ],
+      activity: [
+        { time: '09:12', text: 'Published "Single-origin vs blends: what to buy" to WordPress', sub: 'Approved by you on Telegram' },
+        { time: '08:40', text: 'Rechecked 50 questions across 5 AI engines', sub: 'You gained 3 new mentions on Gemini' },
+        { time: 'Sat', text: 'Drafted a comparison page against Bluebird Coffee', sub: 'Waiting for your approval' },
+        { time: 'Sat', text: 'Sent your weekly report to Telegram', sub: 'Visibility 64, up 8' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>
+
+AI VISIBILITY:
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>AI visibility</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0;background:#F6F7F9}
+*{box-sizing:border-box}
+a{color:#2D4FE0}a:hover{color:#1E3BB8}
+button{cursor:pointer}
+</style>
+</helmet>
+<div style="min-height: 100vh; background: #F6F7F9; font-family: 'Geist', 'Helvetica Neue', sans-serif; color: #0F1218; display: flex; flex-wrap: wrap; align-items: flex-start; padding: 8px">
+<dc-import name="Sidebar" active="visibility" hint-size="232px,820px"></dc-import>
+<main style="flex: 999 1 560px; min-width: 0; background: #FFFFFF; border: 1px solid #E3E6EB; border-radius: 12px">
+<dc-import name="Topbar" hint-size="100%,56px"></dc-import>
+<div style="max-width: 1200px; margin: 0 auto; padding: 28px 32px 48px; display: flex; flex-direction: column; gap: 20px">
+
+<div style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<h1 style="margin: 0; font-size: 28px; line-height: 34px; font-weight: 600; letter-spacing: -0.02em">AI visibility</h1>
+<p style="margin: 0; font-size: 14px; line-height: 20px; color: #4A5260">How often AI engines mention and cite you, and where you rank in their answers. 50 questions, rechecked daily.</p>
+</div>
+<button style="height: 40px; padding: 0 16px; border-radius: 8px; border: 0; background: #0F1218; font-family: inherit; font-size: 14px; font-weight: 500; color: #FFFFFF">Add questions</button>
+</div>
+
+<div role="group" aria-label="Filter by AI engine" style="display: flex; flex-wrap: wrap; gap: 8px">
+<sc-for list="{{chips}}" as="c" hint-placeholder-count="6">
+<button aria-pressed="{{c.pressed}}" style="height: 32px; display: inline-flex; align-items: center; gap: 8px; padding: 0 12px 0 6px; border-radius: 999px; font-family: inherit; font-size: 13px; font-weight: 500; border: 1px solid {{c.border}}; background: {{c.bg}}; color: {{c.fg}}">
+<span style="width: 22px; height: 22px; border-radius: 999px; background: {{c.tile}}; display: grid; place-items: center; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 9px; font-weight: 500; color: {{c.tileFg}}">{{c.mono}}</span>{{c.name}}</button>
+</sc-for>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px">
+<sc-for list="{{kpis}}" as="k" hint-placeholder-count="4">
+<div style="border: 1px solid #E3E6EB; border-radius: 12px; padding: 18px 20px; display: flex; flex-direction: column; gap: 8px">
+<span style="font-size: 11px; line-height: 16px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #6B7380">{{k.label}}</span>
+<span style="display: flex; align-items: baseline; gap: 10px">
+<span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 26px; line-height: 30px; font-weight: 500">{{k.value}}</span>
+<span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; font-weight: 500; color: #0E7A55; background: #E6F4EE; border-radius: 4px; padding: 2px 6px">{{k.delta}}</span>
+</span>
+<span style="font-size: 12px; color: #4A5260">{{k.note}}</span>
+</div>
+</sc-for>
+</div>
+
+<section style="border: 1px solid #E3E6EB; border-radius: 12px; overflow: hidden">
+<div style="padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap">
+<h2 style="margin: 0; font-size: 15px; line-height: 22px; font-weight: 600">By engine</h2>
+<span style="font-size: 12px; color: #6B7380">Last checked today, 08:40</span>
+</div>
+<div style="overflow-x: auto">
+<table style="width: 100%; min-width: 760px; border-collapse: collapse; font-size: 13px">
+<thead>
+<tr style="height: 36px; background: #F6F7F9; text-align: left; font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #6B7380">
+<th style="padding: 0 20px; font-weight: 600">Engine</th><th style="padding: 0 12px; font-weight: 600">Mention rate</th><th style="padding: 0 12px; font-weight: 600; text-align: right">Avg. position</th><th style="padding: 0 12px; font-weight: 600; text-align: right">Citations</th><th style="padding: 0 12px; font-weight: 600">Sentiment</th><th style="padding: 0 20px; font-weight: 600; text-align: right">30-day change</th>
+</tr>
+</thead>
+<tbody>
+<sc-for list="{{engines}}" as="e" hint-placeholder-count="5">
+<tr style="height: 48px; border-top: 1px solid #E3E6EB">
+<td style="padding: 0 20px"><span style="display: flex; align-items: center; gap: 10px; font-weight: 500"><span style="width: 24px; height: 24px; border-radius: 6px; background: #F0F2F5; border: 1px solid #E3E6EB; display: grid; place-items: center; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 9px">{{e.mono}}</span>{{e.name}}</span></td>
+<td style="padding: 0 12px"><span style="display: flex; align-items: center; gap: 10px"><span style="width: 120px; height: 6px; border-radius: 999px; background: #F0F2F5; overflow: hidden"><span style="display: block; height: 6px; background: #2D4FE0; width: {{e.pct}}%"></span></span><span style="font-family: 'Geist Mono', ui-monospace, monospace">{{e.pct}}%</span></span></td>
+<td style="padding: 0 12px; text-align: right; font-family: 'Geist Mono', ui-monospace, monospace">{{e.pos}}</td>
+<td style="padding: 0 12px; text-align: right; font-family: 'Geist Mono', ui-monospace, monospace">{{e.cites}}</td>
+<td style="padding: 0 12px"><span style="font-size: 12px; font-weight: 500; padding: 2px 8px; border-radius: 4px; background: {{e.sBg}}; color: {{e.sFg}}">{{e.sentiment}}</span></td>
+<td style="padding: 0 20px; text-align: right"><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; font-weight: 500; padding: 2px 6px; border-radius: 4px; background: {{e.dBg}}; color: {{e.dFg}}">{{e.delta}}</span></td>
+</tr>
+</sc-for>
+</tbody>
+</table>
+</div>
+</section>
+
+<div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start">
+<section style="flex: 8 1 560px; min-width: 0; border: 1px solid #E3E6EB; border-radius: 12px; overflow: hidden">
+<div style="padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap">
+<div style="display: flex; flex-direction: column; gap: 2px">
+<h2 style="margin: 0; font-size: 15px; line-height: 22px; font-weight: 600">Questions you track</h2>
+<span style="font-size: 12px; color: #6B7380">Filled dot = that engine mentions you. Engines left to right: ChatGPT, Gemini, Perplexity, Claude, AI Overviews</span>
+</div>
+<label style="height: 32px; display: flex; align-items: center; gap: 6px; padding: 0 10px; border: 1px solid #CDD2DA; border-radius: 8px; font-size: 13px; color: #6B7380"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="M20 20l-4.2-4.2"></path></svg><input aria-label="Filter questions" placeholder="Filter questions" style="border: 0; outline: none; font-family: inherit; font-size: 13px; width: 140px"></label>
+</div>
+<div style="overflow-x: auto">
+<table style="width: 100%; min-width: 640px; border-collapse: collapse; font-size: 13px">
+<thead>
+<tr style="height: 36px; background: #F6F7F9; text-align: left; font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #6B7380">
+<th style="padding: 0 20px; font-weight: 600">Question</th><th style="padding: 0 12px; font-weight: 600">Engines</th><th style="padding: 0 12px; font-weight: 600; text-align: right">Your rank</th><th style="padding: 0 20px; font-weight: 600">Top competitor</th>
+</tr>
+</thead>
+<tbody>
+<sc-for list="{{prompts}}" as="p" hint-placeholder-count="7">
+<tr style="height: 48px; border-top: 1px solid #E3E6EB">
+<td style="padding: 0 20px"><a href="Prompt.dc.html" style="color: #0F1218; text-decoration: none; font-weight: 500">{{p.q}}</a></td>
+<td style="padding: 0 12px"><span style="display: flex; gap: 5px" aria-label="{{p.aria}}">
+<sc-for list="{{p.dots}}" as="d" hint-placeholder-count="5"><span style="width: 10px; height: 10px; border-radius: 999px; border: 1.5px solid #2D4FE0; background: {{d.fill}}"></span></sc-for>
+</span></td>
+<td style="padding: 0 12px; text-align: right; font-family: 'Geist Mono', ui-monospace, monospace">{{p.rank}}</td>
+<td style="padding: 0 20px; color: #4A5260">{{p.comp}}</td>
+</tr>
+</sc-for>
+</tbody>
+</table>
+</div>
+</section>
+
+<section style="flex: 4 1 300px; min-width: 0; border: 1px solid #E3E6EB; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; flex-direction: column; gap: 2px">
+<h2 style="margin: 0; font-size: 15px; line-height: 22px; font-weight: 600">Sources AI engines cite</h2>
+<span style="font-size: 12px; color: #6B7380">Being mentioned on these pages raises your odds of being cited</span>
+</div>
+<sc-for list="{{sources}}" as="s" hint-placeholder-count="6">
+<div style="display: flex; align-items: center; gap: 10px; font-size: 13px; padding: 8px 0; border-top: 1px solid #F0F2F5">
+<span style="flex: 1; min-width: 0; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{s.domain}}</span>
+<span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; color: #4A5260">{{s.n}}</span>
+<span style="font-size: 11px; font-weight: 600; padding: 2px 6px; border-radius: 4px; background: {{s.bg}}; color: {{s.fg}}">{{s.status}}</span>
+</div>
+</sc-for>
+<a href="Competitors.dc.html" style="font-size: 13px; font-weight: 500; text-decoration: none">Turn gaps into tasks</a>
+</section>
+</div>
+
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1460}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const up = { dBg: '#E6F4EE', dFg: '#0E7A55' }, down = { dBg: '#FCEBEB', dFg: '#C42B2B' };
+    const pos = { sBg: '#E6F4EE', sFg: '#0E7A55' }, neu = { sBg: '#F0F2F5', sFg: '#4A5260' };
+    const chip = (name, mono, on) => ({ name, mono, pressed: on ? 'true' : 'false', border: on ? '#0F1218' : '#CDD2DA', bg: on ? '#0F1218' : '#FFFFFF', fg: on ? '#FFFFFF' : '#0F1218', tile: on ? '#C5F04A' : '#F0F2F5', tileFg: '#0F1218' });
+    const dots = (s) => s.split('').map((c) => ({ fill: c === '1' ? '#2D4FE0' : 'transparent' }));
+    const row = (q, s, rank, comp) => ({ q, dots: dots(s), rank, comp, aria: 'Mentioned by ' + s.split('').filter((c) => c === '1').length + ' of 5 engines' });
+    return {
+      chips: [chip('All engines', 'ALL', true), chip('ChatGPT', 'GPT', false), chip('Gemini', 'GEM', false), chip('Perplexity', 'PPX', false), chip('Claude', 'CLD', false), chip('AI Overviews', 'AIO', false)],
+      kpis: [
+        { label: 'Visibility score', value: '64', delta: '▲ +8', note: '2nd of 4 tracked brands' },
+        { label: 'Mention rate', value: '45%', delta: '▲ +6.2 pts', note: '113 of 250 answers mention you' },
+        { label: 'Avg. position', value: '#3.4', delta: '▲ 0.8', note: 'When you are listed' },
+        { label: 'Positive sentiment', value: '78%', delta: '▲ +3 pts', note: 'Of answers that mention you' }
+      ],
+      engines: [
+        Object.assign({ name: 'Gemini', mono: 'GEM', pct: 61, pos: '#2.8', cites: 9, sentiment: 'Positive' }, pos, up, { delta: '▲ +9 pts' }),
+        Object.assign({ name: 'ChatGPT', mono: 'GPT', pct: 52, pos: '#3.1', cites: 7, sentiment: 'Positive' }, pos, up, { delta: '▲ +7 pts' }),
+        Object.assign({ name: 'Perplexity', mono: 'PPX', pct: 47, pos: '#3.6', cites: 8, sentiment: 'Neutral' }, neu, up, { delta: '▲ +5 pts' }),
+        Object.assign({ name: 'Claude', mono: 'CLD', pct: 38, pos: '#4.0', cites: 1, sentiment: 'Positive' }, pos, up, { delta: '▲ +2 pts' }),
+        Object.assign({ name: 'AI Overviews', mono: 'AIO', pct: 29, pos: '#4.2', cites: 2, sentiment: 'Neutral' }, neu, down, { delta: '▼ −1 pt' })
+      ],
+      prompts: [
+        row('best coffee subscription in the US', '11001', '#2', 'Bluebird Coffee'),
+        row('best single origin coffee beans online', '11110', '#1', 'Halfmoon Roastery'),
+        row('Northwind Roasters vs Bluebird Coffee', '11111', '#1', 'Bluebird Coffee'),
+        row('ethically sourced coffee brands', '01100', '#4', 'Ember & Oak'),
+        row('best coffee gift for coffee lovers', '00100', '#6', 'Bluebird Coffee'),
+        row('low acid coffee brands', '00000', '—', 'Halfmoon Roastery'),
+        row('how fresh should coffee beans be', '10010', '#3', 'Bluebird Coffee')
+      ],
+      sources: [
+        { domain: 'reddit.com/r/Coffee', n: '41', status: 'Mentions you', bg: '#E6F4EE', fg: '#0E7A55' },
+        { domain: 'thekitchn.com', n: '23', status: 'Missing', bg: '#FCEBEB', fg: '#C42B2B' },
+        { domain: 'seriouseats.com', n: '19', status: 'Missing', bg: '#FCEBEB', fg: '#C42B2B' },
+        { domain: 'northwindroasters.com', n: '27', status: 'Your site', bg: '#DDE3FB', fg: '#1E3BB8' },
+        { domain: 'coffeereview.com', n: '12', status: 'Missing', bg: '#FCEBEB', fg: '#C42B2B' },
+        { domain: 'youtube.com', n: '9', status: 'Mentions you', bg: '#E6F4EE', fg: '#0E7A55' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>
+
+PROMPT DETAIL:
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Question detail</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0;background:#F6F7F9}
+*{box-sizing:border-box}
+a{color:#2D4FE0}a:hover{color:#1E3BB8}
+button{cursor:pointer}
+</style>
+</helmet>
+<div style="min-height: 100vh; background: #F6F7F9; font-family: 'Geist', 'Helvetica Neue', sans-serif; color: #0F1218; display: flex; flex-wrap: wrap; align-items: flex-start; padding: 8px">
+<dc-import name="Sidebar" active="visibility" hint-size="232px,820px"></dc-import>
+<main style="flex: 999 1 560px; min-width: 0; background: #FFFFFF; border: 1px solid #E3E6EB; border-radius: 12px">
+<dc-import name="Topbar" hint-size="100%,56px"></dc-import>
+<div style="max-width: 1200px; margin: 0 auto; padding: 24px 32px 48px; display: flex; flex-direction: column; gap: 20px">
+
+<nav aria-label="Breadcrumb" style="display: flex; gap: 6px; font-size: 13px; color: #6B7380"><a href="Visibility.dc.html" style="text-decoration: none; color: #4A5260">AI visibility</a><span>/</span><span>Questions</span></nav>
+
+<div style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px">
+<div style="display: flex; flex-direction: column; gap: 8px">
+<h1 style="margin: 0; font-size: 28px; line-height: 34px; font-weight: 600; letter-spacing: -0.02em">"best coffee subscription in the US"</h1>
+<div style="display: flex; flex-wrap: wrap; gap: 8px; font-size: 13px; color: #4A5260">
+<span style="padding: 2px 8px; border-radius: 4px; background: #F0F2F5">Commercial intent</span>
+<span style="padding: 2px 8px; border-radius: 4px; background: #F0F2F5">United States · English</span>
+<span style="padding: 2px 8px; border-radius: 4px; background: #F0F2F5">Checked today, 08:40</span>
+</div>
+</div>
+<div style="display: flex; gap: 8px">
+<button style="height: 40px; padding: 0 16px; border-radius: 8px; border: 1px solid #CDD2DA; background: #FFFFFF; font-family: inherit; font-size: 14px; font-weight: 500">Recheck now</button>
+<a href="Editor.dc.html" style="height: 40px; display: inline-flex; align-items: center; gap: 8px; padding: 0 16px; border-radius: 8px; background: #C5F04A; color: #0F1218; font-size: 14px; font-weight: 600; text-decoration: none">Let Rankoya close this gap</a>
+</div>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px">
+<sc-for list="{{summary}}" as="s" hint-placeholder-count="5">
+<div style="border: 1px solid #E3E6EB; border-radius: 12px; padding: 14px 16px; display: flex; align-items: center; gap: 12px">
+<span style="width: 28px; height: 28px; border-radius: 6px; background: #F0F2F5; border: 1px solid #E3E6EB; display: grid; place-items: center; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 9px">{{s.mono}}</span>
+<span style="display: flex; flex-direction: column; gap: 2px">
+<span style="font-size: 13px; font-weight: 500">{{s.name}}</span>
+<span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; font-weight: 500; color: {{s.fg}}">{{s.state}}</span>
+</span>
+</div>
+</sc-for>
+</div>
+
+<div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start">
+<div style="flex: 8 1 560px; min-width: 0; display: flex; flex-direction: column; gap: 16px">
+
+<article style="border: 1px solid #E3E6EB; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 12px">
+<header style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap">
+<span style="display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 600"><span style="width: 28px; height: 28px; border-radius: 6px; background: #F0F2F5; border: 1px solid #E3E6EB; display: grid; place-items: center; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 9px; font-weight: 500">GPT</span>ChatGPT</span>
+<span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; font-weight: 500; padding: 2px 8px; border-radius: 4px; background: #E6F4EE; color: #0E7A55">Mentioned · #2 of 5</span>
+</header>
+<p style="margin: 0; font-size: 15px; line-height: 24px; color: #0F1218">Here are some of the best coffee subscriptions in the US right now: <strong>1. Bluebird Coffee</strong>, known for its wide roaster selection and flexible delivery. <strong>2. <mark style="background: #C5F04A; color: #0F1218; padding: 0 3px; border-radius: 3px">Northwind Roasters</mark></strong>, a good pick if you want small-batch single origins roasted to order. <strong>3. Halfmoon Roastery</strong>, popular for espresso blends…</p>
+<footer style="display: flex; flex-wrap: wrap; gap: 8px; font-size: 12px; color: #4A5260"><span style="color: #6B7380">Cited:</span><span style="font-family: 'Geist Mono', ui-monospace, monospace; padding: 2px 6px; border-radius: 4px; background: #F0F2F5">thekitchn.com</span><span style="font-family: 'Geist Mono', ui-monospace, monospace; padding: 2px 6px; border-radius: 4px; background: #DDE3FB; color: #1E3BB8">northwindroasters.com</span></footer>
+</article>
+
+<article style="border: 1px solid #E3E6EB; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 12px">
+<header style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap">
+<span style="display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 600"><span style="width: 28px; height: 28px; border-radius: 6px; background: #F0F2F5; border: 1px solid #E3E6EB; display: grid; place-items: center; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 9px; font-weight: 500">CLD</span>Claude</span>
+<span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; font-weight: 500; padding: 2px 8px; border-radius: 4px; background: #FCEBEB; color: #C42B2B">Not mentioned</span>
+</header>
+<p style="margin: 0; font-size: 15px; line-height: 24px; color: #0F1218">Popular options include <strong>Bluebird Coffee</strong> for variety, <strong>Halfmoon Roastery</strong> for espresso drinkers, and <strong>Ember &amp; Oak</strong> if ethical sourcing matters most to you. Look for a subscription that lets you pause, choose grind size…</p>
+<div style="display: flex; gap: 12px; align-items: flex-start; padding: 12px 14px; border-radius: 8px; background: #F6F7F9; font-size: 13px; line-height: 18px; color: #4A5260">
+<span style="width: 22px; height: 22px; flex: none; border-radius: 999px; background: #C5F04A; display: grid; place-items: center"><svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="13" r="7" fill="none" stroke="#0F1218" stroke-width="2.8"></circle><circle cx="18.5" cy="5.5" r="3" fill="#0F1218"></circle></svg></span>
+<span><strong style="color: #0F1218; font-weight: 600">Why you're missing:</strong> Claude leans on review roundups and sourcing pages. You have no page explaining how you source beans, and you're absent from the 2 roundups it read.</span>
+</div>
+</article>
+
+<article style="border: 1px solid #E3E6EB; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 12px">
+<header style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap">
+<span style="display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 600"><span style="width: 28px; height: 28px; border-radius: 6px; background: #F0F2F5; border: 1px solid #E3E6EB; display: grid; place-items: center; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 9px; font-weight: 500">GEM</span>Gemini</span>
+<span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; font-weight: 500; padding: 2px 8px; border-radius: 4px; background: #E6F4EE; color: #0E7A55">Mentioned · #1 of 4</span>
+</header>
+<p style="margin: 0; font-size: 15px; line-height: 24px; color: #0F1218"><strong><mark style="background: #C5F04A; color: #0F1218; padding: 0 3px; border-radius: 3px">Northwind Roasters</mark></strong> stands out for freshness, roasting every order within 48 hours, followed by Bluebird Coffee and Halfmoon Roastery…</p>
+</article>
+
+</div>
+
+<aside style="flex: 4 1 300px; min-width: 0; display: flex; flex-direction: column; gap: 16px">
+<section style="border: 1px solid #E3E6EB; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 14px">
+<h2 style="margin: 0; font-size: 15px; line-height: 22px; font-weight: 600">Rankoya's plan for this question</h2>
+<ol style="margin: 0; padding: 0 0 0 18px; display: flex; flex-direction: column; gap: 10px; font-size: 13px; line-height: 18px; color: #0F1218">
+<li>Publish "How we source our beans" with origin, farm and price data. <span style="color: #6B7380">Rankoya writes it.</span></li>
+<li>Add FAQ and Product schema to the subscription page. <span style="color: #6B7380">Rankoya does it.</span></li>
+<li>Pitch thekitchn.com and seriouseats.com for their next roundup. <span style="color: #6B7380">You send it; Rankoya drafts the email.</span></li>
+</ol>
+<a href="Actions.dc.html" style="height: 40px; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; background: #0F1218; color: #FFFFFF; font-size: 14px; font-weight: 500; text-decoration: none">Add to action plan</a>
+</section>
+<section style="border: 1px solid #E3E6EB; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 10px">
+<h2 style="margin: 0; font-size: 15px; line-height: 22px; font-weight: 600">Engines mentioning you</h2>
+<span style="font-size: 12px; color: #6B7380">Out of 5, last 8 weeks</span>
+<svg viewBox="0 0 280 90" style="width: 100%; height: auto" aria-label="Rose from 1 to 3 engines over 8 weeks" role="img">
+<g stroke="#E3E6EB"><line x1="0" x2="280" y1="10" y2="10"></line><line x1="0" x2="280" y1="45" y2="45"></line><line x1="0" x2="280" y1="80" y2="80"></line></g>
+<g fill="#2D4FE0"><rect x="6" y="66" width="22" height="14" rx="3"></rect><rect x="40" y="66" width="22" height="14" rx="3"></rect><rect x="74" y="52" width="22" height="28" rx="3"></rect><rect x="108" y="52" width="22" height="28" rx="3"></rect><rect x="142" y="52" width="22" height="28" rx="3"></rect><rect x="176" y="38" width="22" height="42" rx="3"></rect><rect x="210" y="38" width="22" height="42" rx="3"></rect><rect x="244" y="38" width="22" height="42" rx="3"></rect></g>
+</svg>
+</section>
+</aside>
+</div>
+
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1240}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const ok = '#0E7A55', no = '#C42B2B';
+    return {
+      summary: [
+        { name: 'ChatGPT', mono: 'GPT', state: '#2', fg: ok },
+        { name: 'Gemini', mono: 'GEM', state: '#1', fg: ok },
+        { name: 'Perplexity', mono: 'PPX', state: 'Not mentioned', fg: no },
+        { name: 'Claude', mono: 'CLD', state: 'Not mentioned', fg: no },
+        { name: 'AI Overviews', mono: 'AIO', state: '#3', fg: ok }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>
+
+GOOGLE RANKINGS:
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Google rankings</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0;background:#F6F7F9}
+*{box-sizing:border-box}
+a{color:#2D4FE0}a:hover{color:#1E3BB8}
+button{cursor:pointer}
+</style>
+</helmet>
+<div style="min-height: 100vh; background: #F6F7F9; font-family: 'Geist', 'Helvetica Neue', sans-serif; color: #0F1218; display: flex; flex-wrap: wrap; align-items: flex-start; padding: 8px">
+<dc-import name="Sidebar" active="rankings" hint-size="232px,820px"></dc-import>
+<main style="flex: 999 1 560px; min-width: 0; background: #FFFFFF; border: 1px solid #E3E6EB; border-radius: 12px">
+<dc-import name="Topbar" hint-size="100%,56px"></dc-import>
+<div style="max-width: 1200px; margin: 0 auto; padding: 28px 32px 48px; display: flex; flex-direction: column; gap: 20px">
+
+<div style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<h1 style="margin: 0; font-size: 28px; line-height: 34px; font-weight: 600; letter-spacing: -0.02em">Google rankings</h1>
+<p style="margin: 0; font-size: 14px; line-height: 20px; color: #4A5260">Daily positions for 62 tracked keywords in the United States.</p>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center">
+<div role="group" aria-label="Device" style="display: flex; padding: 2px; background: #F0F2F5; border-radius: 8px">
+<button aria-pressed="true" style="height: 34px; padding: 0 12px; border: 0; border-radius: 6px; background: #FFFFFF; box-shadow: 0 1px 2px rgba(15,18,24,0.08); font-family: inherit; font-size: 13px; font-weight: 600">Desktop</button>
+<button style="height: 34px; padding: 0 12px; border: 0; border-radius: 6px; background: transparent; font-family: inherit; font-size: 13px; font-weight: 500; color: #4A5260">Mobile</button>
+</div>
+<button style="height: 40px; padding: 0 16px; border-radius: 8px; border: 0; background: #0F1218; font-family: inherit; font-size: 14px; font-weight: 500; color: #FFFFFF">Add keywords</button>
+</div>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); border: 1px solid #E3E6EB; border-radius: 12px; overflow: hidden">
+<sc-for list="{{stats}}" as="s" hint-placeholder-count="5">
+<div style="padding: 16px 20px; display: flex; flex-direction: column; gap: 6px; border-right: 1px solid #E3E6EB">
+<span style="font-size: 11px; line-height: 16px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #6B7380">{{s.label}}</span>
+<span style="display: flex; align-items: baseline; gap: 8px"><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 24px; line-height: 28px; font-weight: 500">{{s.value}}</span><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; font-weight: 500; color: {{s.fg}}">{{s.delta}}</span></span>
+</div>
+</sc-for>
+</div>
+
+<div style="display: flex; flex-wrap: wrap; gap: 16px">
+<section style="flex: 7 1 480px; min-width: 0; border: 1px solid #E3E6EB; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; flex-direction: column; gap: 2px">
+<h2 style="margin: 0; font-size: 15px; line-height: 22px; font-weight: 600">Average position</h2>
+<span style="font-size: 12px; color: #6B7380">Lower is better · last 30 days</span>
+</div>
+<svg viewBox="0 0 640 200" style="width: 100%; height: auto" role="img" aria-label="Average position improved from 31 to 23 over 30 days">
+<g font-family="Geist Mono, monospace" font-size="11" fill="#6B7380"><text x="0" y="34">20</text><text x="0" y="94">30</text><text x="0" y="154">40</text><text x="32" y="194">Sep 4</text><text x="588" y="194">Oct 4</text></g>
+<g stroke="#E3E6EB"><line x1="30" x2="640" y1="30" y2="30"></line><line x1="30" x2="640" y1="90" y2="90"></line><line x1="30" x2="640" y1="150" y2="150"></line></g>
+<path d="M36 96 L104 94 L172 98 L240 84 L308 80 L376 72 L444 74 L512 60 L580 52 L632 50" fill="none" stroke="#2D4FE0" stroke-width="2.5" stroke-linejoin="round"></path>
+</svg>
+</section>
+<section style="flex: 5 1 320px; min-width: 0; border: 1px solid #E3E6EB; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; flex-direction: column; gap: 2px">
+<h2 style="margin: 0; font-size: 15px; line-height: 22px; font-weight: 600">Position distribution</h2>
+<span style="font-size: 12px; color: #6B7380">Keywords per position band</span>
+</div>
+<div style="display: flex; flex-direction: column; gap: 10px">
+<sc-for list="{{bands}}" as="b" hint-placeholder-count="6">
+<div style="display: grid; grid-template-columns: 84px minmax(0, 1fr) 28px; align-items: center; gap: 10px; font-size: 13px">
+<span style="color: #4A5260">{{b.label}}</span>
+<span style="height: 14px; border-radius: 4px; background: #F0F2F5; overflow: hidden"><span style="display: block; height: 14px; border-radius: 4px; background: {{b.color}}; width: {{b.w}}%"></span></span>
+<span style="font-family: 'Geist Mono', ui-monospace, monospace; text-align: right">{{b.n}}</span>
+</div>
+</sc-for>
+</div>
+</section>
+</div>
+
+<section style="border: 1px solid #E3E6EB; border-radius: 12px; overflow: hidden">
+<div style="padding: 14px 20px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between">
+<div role="tablist" aria-label="Keyword views" style="display: flex; gap: 4px">
+<button role="tab" aria-selected="true" style="height: 32px; padding: 0 12px; border-radius: 8px; border: 0; background: #F0F2F5; font-family: inherit; font-size: 13px; font-weight: 600">All 62</button>
+<button role="tab" style="height: 32px; padding: 0 12px; border-radius: 8px; border: 0; background: transparent; font-family: inherit; font-size: 13px; font-weight: 500; color: #4A5260">Improved 21</button>
+<button role="tab" style="height: 32px; padding: 0 12px; border-radius: 8px; border: 0; background: transparent; font-family: inherit; font-size: 13px; font-weight: 500; color: #4A5260">Declined 7</button>
+<button role="tab" style="height: 32px; padding: 0 12px; border-radius: 8px; border: 0; background: transparent; font-family: inherit; font-size: 13px; font-weight: 500; color: #4A5260">Close to page one 9</button>
+</div>
+<button style="height: 32px; padding: 0 12px; border-radius: 8px; border: 1px solid #CDD2DA; background: #FFFFFF; font-family: inherit; font-size: 13px; font-weight: 500">Export CSV</button>
+</div>
+<div style="overflow-x: auto">
+<table style="width: 100%; min-width: 860px; border-collapse: collapse; font-size: 13px">
+<thead>
+<tr style="height: 36px; background: #F6F7F9; text-align: left; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: #6B7380">
+<th style="padding: 0 20px; font-weight: 600">Keyword</th><th style="padding: 0 12px; font-weight: 600; text-align: right">Position</th><th style="padding: 0 12px; font-weight: 600; text-align: right">Change</th><th style="padding: 0 12px; font-weight: 600">30 days</th><th style="padding: 0 12px; font-weight: 600; text-align: right">Volume</th><th style="padding: 0 12px; font-weight: 600; text-align: right">Difficulty</th><th style="padding: 0 12px; font-weight: 600">Ranking URL</th><th style="padding: 0 20px; font-weight: 600">In AI answers</th>
+</tr>
+</thead>
+<tbody>
+<sc-for list="{{rows}}" as="r" hint-placeholder-count="9">
+<tr style="height: 46px; border-top: 1px solid #E3E6EB">
+<td style="padding: 0 20px; font-weight: 500">{{r.kw}}</td>
+<td style="padding: 0 12px; text-align: right; font-family: 'Geist Mono', ui-monospace, monospace; font-weight: 500">{{r.pos}}</td>
+<td style="padding: 0 12px; text-align: right; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; color: {{r.fg}}">{{r.delta}}</td>
+<td style="padding: 0 12px"><svg width="88" height="24" viewBox="0 0 88 24" aria-hidden="true"><path d="{{r.spark}}" fill="none" stroke="{{r.fg}}" stroke-width="1.5"></path></svg></td>
+<td style="padding: 0 12px; text-align: right; font-family: 'Geist Mono', ui-monospace, monospace">{{r.vol}}</td>
+<td style="padding: 0 12px; text-align: right; font-family: 'Geist Mono', ui-monospace, monospace">{{r.kd}}</td>
+<td style="padding: 0 12px; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; color: #4A5260">{{r.url}}</td>
+<td style="padding: 0 20px"><span style="font-size: 12px; font-weight: 500; padding: 2px 8px; border-radius: 4px; background: {{r.aiBg}}; color: {{r.aiFg}}">{{r.ai}}</span></td>
+</tr>
+</sc-for>
+</tbody>
+</table>
+</div>
+</section>
+
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1300}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const g = '#0E7A55', r = '#C42B2B', n = '#6B7380';
+    const upS = 'M0 20 L15 18 L30 19 L45 14 L60 11 L75 8 L88 5', dnS = 'M0 6 L15 8 L30 7 L45 11 L60 14 L75 15 L88 18', flS = 'M0 12 L15 13 L30 11 L45 12 L60 12 L75 11 L88 12';
+    const yes = { ai: '3 of 5 engines', aiBg: '#E6F4EE', aiFg: '#0E7A55' }, some = { ai: '1 of 5 engines', aiBg: '#FDF1E1', aiFg: '#A35A00' }, none = { ai: 'Not mentioned', aiBg: '#F0F2F5', aiFg: '#4A5260' };
+    return {
+      stats: [
+        { label: 'Avg. position', value: '23.4', delta: '▲ 7.6', fg: g },
+        { label: 'Top 3', value: '5', delta: '▲ 2', fg: g },
+        { label: 'Top 10', value: '18', delta: '▲ 4', fg: g },
+        { label: 'Top 100', value: '49', delta: '▲ 6', fg: g },
+        { label: 'Not ranking', value: '13', delta: '▼ 6', fg: g }
+      ],
+      bands: [
+        { label: '1–3', n: 5, w: 28, color: '#0E7A55' },
+        { label: '4–10', n: 13, w: 72, color: '#2D4FE0' },
+        { label: '11–20', n: 9, w: 50, color: '#2D4FE0' },
+        { label: '21–50', n: 14, w: 78, color: '#8A94A6' },
+        { label: '51–100', n: 8, w: 44, color: '#8A94A6' },
+        { label: 'Not ranking', n: 13, w: 72, color: '#CDD2DA' }
+      ],
+      rows: [
+        Object.assign({ kw: 'single origin coffee subscription', pos: '2', delta: '▲ 3', fg: g, spark: upS, vol: '2,900', kd: '34', url: '/subscriptions' }, yes),
+        Object.assign({ kw: 'fresh roasted coffee beans', pos: '4', delta: '▲ 5', fg: g, spark: upS, vol: '6,600', kd: '41', url: '/shop/beans' }, yes),
+        Object.assign({ kw: 'best coffee subscription', pos: '7', delta: '▲ 2', fg: g, spark: upS, vol: '14,800', kd: '62', url: '/subscriptions' }, some),
+        Object.assign({ kw: 'ethiopian yirgacheffe beans', pos: '3', delta: '—', fg: n, spark: flS, vol: '1,600', kd: '22', url: '/shop/yirgacheffe' }, some),
+        Object.assign({ kw: 'how to brew pour over coffee', pos: '14', delta: '▼ 4', fg: r, spark: dnS, vol: '9,900', kd: '48', url: '/guides/pour-over' }, none),
+        Object.assign({ kw: 'coffee gift box', pos: '11', delta: '▲ 6', fg: g, spark: upS, vol: '5,400', kd: '39', url: '/gifts' }, none),
+        Object.assign({ kw: 'low acid coffee', pos: '38', delta: '▼ 2', fg: r, spark: dnS, vol: '12,100', kd: '45', url: '/blog/low-acid' }, none),
+        Object.assign({ kw: 'ethically sourced coffee', pos: '19', delta: '▲ 8', fg: g, spark: upS, vol: '3,600', kd: '37', url: '/about' }, some),
+        Object.assign({ kw: 'whole bean coffee online', pos: '—', delta: 'new', fg: n, spark: flS, vol: '4,400', kd: '51', url: '—' }, none)
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>
+
+COMPETITORS SCREEN:
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Competitors</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0;background:#F6F7F9}
+*{box-sizing:border-box}
+a{color:#2D4FE0}a:hover{color:#1E3BB8}
+button{cursor:pointer}
+</style>
+</helmet>
+<div style="min-height: 100vh; background: #F6F7F9; font-family: 'Geist', 'Helvetica Neue', sans-serif; color: #0F1218; display: flex; flex-wrap: wrap; align-items: flex-start; padding: 8px">
+<dc-import name="Sidebar" active="competitors" hint-size="232px,820px"></dc-import>
+<main style="flex: 999 1 560px; min-width: 0; background: #FFFFFF; border: 1px solid #E3E6EB; border-radius: 12px">
+<dc-import name="Topbar" hint-size="100%,56px"></dc-import>
+<div style="max-width: 1200px; margin: 0 auto; padding: 28px 32px 48px; display: flex; flex-direction: column; gap: 20px">
+
+<div style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<h1 style="margin: 0; font-size: 28px; line-height: 34px; font-weight: 600; letter-spacing: -0.02em">Competitors</h1>
+<p style="margin: 0; font-size: 14px; line-height: 20px; color: #4A5260">Bluebird Coffee leads AI answers by 7 points. Most of the gap is comparison and gift questions.</p>
+</div>
+<button style="height: 40px; padding: 0 16px; border-radius: 8px; border: 1px solid #CDD2DA; background: #FFFFFF; font-family: inherit; font-size: 14px; font-weight: 500">Add competitor</button>
+</div>
+
+<section style="border: 1px solid #E3E6EB; border-radius: 12px; overflow: hidden">
+<div style="overflow-x: auto">
+<table style="width: 100%; min-width: 820px; border-collapse: collapse; font-size: 13px">
+<thead>
+<tr style="height: 36px; background: #F6F7F9; text-align: left; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: #6B7380">
+<th style="padding: 0 20px; font-weight: 600">Brand</th><th style="padding: 0 12px; font-weight: 600">AI visibility</th><th style="padding: 0 12px; font-weight: 600; text-align: right">Share of voice</th><th style="padding: 0 12px; font-weight: 600; text-align: right">Avg. AI position</th><th style="padding: 0 12px; font-weight: 600; text-align: right">Citations</th><th style="padding: 0 20px; font-weight: 600; text-align: right">Google top 10</th>
+</tr>
+</thead>
+<tbody>
+<sc-for list="{{brands}}" as="b" hint-placeholder-count="4">
+<tr style="height: 52px; border-top: 1px solid #E3E6EB; background: {{b.rowBg}}">
+<td style="padding: 0 20px"><span style="display: flex; align-items: center; gap: 10px"><span style="width: 10px; height: 10px; border-radius: 3px; background: {{b.color}}"></span><span style="display: flex; flex-direction: column"><span style="font-weight: {{b.weight}}">{{b.name}}</span><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 11px; color: #6B7380">{{b.domain}}</span></span></span></td>
+<td style="padding: 0 12px"><span style="display: flex; align-items: center; gap: 10px"><span style="width: 140px; height: 8px; border-radius: 999px; background: #F0F2F5; overflow: hidden"><span style="display: block; height: 8px; border-radius: 999px; background: {{b.color}}; width: {{b.score}}%"></span></span><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-weight: 500">{{b.score}}</span></span></td>
+<td style="padding: 0 12px; text-align: right; font-family: 'Geist Mono', ui-monospace, monospace">{{b.sov}}</td>
+<td style="padding: 0 12px; text-align: right; font-family: 'Geist Mono', ui-monospace, monospace">{{b.pos}}</td>
+<td style="padding: 0 12px; text-align: right; font-family: 'Geist Mono', ui-monospace, monospace">{{b.cites}}</td>
+<td style="padding: 0 20px; text-align: right; font-family: 'Geist Mono', ui-monospace, monospace">{{b.top10}}</td>
+</tr>
+</sc-for>
+</tbody>
+</table>
+</div>
+</section>
+
+<div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start">
+<section style="flex: 1 1 340px; min-width: 0; border: 1px solid #E3E6EB; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 4px">
+<div style="display: flex; flex-direction: column; gap: 2px; padding-bottom: 10px">
+<h2 style="margin: 0; font-size: 15px; line-height: 22px; font-weight: 600">Questions they win, you don't</h2>
+<span style="font-size: 12px; color: #6B7380">Competitors mentioned, you absent, in 2 or more engines</span>
+</div>
+<sc-for list="{{promptGaps}}" as="p" hint-placeholder-count="4">
+<div style="display: flex; align-items: center; gap: 10px; padding: 10px 0; border-top: 1px solid #F0F2F5; flex-wrap: wrap">
+<span style="flex: 1 1 200px; min-width: 0; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 13px; font-weight: 500">{{p.q}}</span><span style="font-size: 12px; color: #6B7380">{{p.who}}</span></span>
+<button style="height: 32px; padding: 0 12px; border-radius: 8px; border: 0; background: #C5F04A; font-family: inherit; font-size: 13px; font-weight: 600; color: #0F1218">Write answer page</button>
+</div>
+</sc-for>
+</section>
+
+<section style="flex: 1 1 340px; min-width: 0; border: 1px solid #E3E6EB; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 4px">
+<div style="display: flex; flex-direction: column; gap: 2px; padding-bottom: 10px">
+<h2 style="margin: 0; font-size: 15px; line-height: 22px; font-weight: 600">Keywords they rank for, you don't</h2>
+<span style="font-size: 12px; color: #6B7380">Google top 10 for a competitor, outside top 50 for you</span>
+</div>
+<sc-for list="{{kwGaps}}" as="k" hint-placeholder-count="4">
+<div style="display: flex; align-items: center; gap: 10px; padding: 10px 0; border-top: 1px solid #F0F2F5">
+<span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 13px; font-weight: 500">{{k.kw}}</span><span style="font-size: 12px; color: #6B7380">{{k.who}}</span></span>
+<span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; color: #4A5260">{{k.vol}}/mo</span>
+<button aria-label="Add {{k.kw}} to content plan" style="width: 32px; height: 32px; display: grid; place-items: center; border-radius: 8px; border: 1px solid #CDD2DA; background: #FFFFFF; color: #0F1218"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></button>
+</div>
+</sc-for>
+</section>
+</div>
+
+<section style="border: 1px solid #E3E6EB; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 12px">
+<div style="display: flex; flex-direction: column; gap: 2px">
+<div style="display: flex; align-items: center; gap: 8px"><h2 style="margin: 0; font-size: 15px; line-height: 22px; font-weight: 600">Where competitors get cited and linked</h2><span style="font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 999px; background: #DDE3FB; color: #1E3BB8">You need to do</span></div>
+<span style="font-size: 12px; color: #6B7380">Rankoya can't earn these links for you, but it drafts the pitch for each one.</span>
+</div>
+<button style="height: 36px; padding: 0 14px; border-radius: 8px; border: 1px solid #CDD2DA; background: #FFFFFF; font-family: inherit; font-size: 13px; font-weight: 500">Draft all outreach emails</button>
+</div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px">
+<sc-for list="{{sites}}" as="s" hint-placeholder-count="4">
+<div style="border: 1px solid #E3E6EB; border-radius: 8px; padding: 14px; display: flex; flex-direction: column; gap: 8px">
+<span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 13px; font-weight: 500">{{s.domain}}</span>
+<span style="font-size: 12px; line-height: 16px; color: #4A5260">{{s.why}}</span>
+<span style="display: flex; gap: 6px; flex-wrap: wrap; font-size: 11px"><span style="padding: 2px 6px; border-radius: 4px; background: #F0F2F5">Authority {{s.da}}</span><span style="padding: 2px 6px; border-radius: 4px; background: #F0F2F5">{{s.type}}</span></span>
+</div>
+</sc-for>
+</div>
+</section>
+
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1240}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      brands: [
+        { name: 'Bluebird Coffee', domain: 'bluebirdcoffee.example', color: '#F08A24', score: 72, sov: '31%', pos: '#2.1', cites: 41, top10: 29, weight: 500, rowBg: '#FFFFFF' },
+        { name: 'Northwind Roasters (you)', domain: 'northwindroasters.com', color: '#2D4FE0', score: 64, sov: '24%', pos: '#3.4', cites: 27, top10: 18, weight: 600, rowBg: '#F5F7FF' },
+        { name: 'Halfmoon Roastery', domain: 'halfmoonroastery.example', color: '#13A38B', score: 47, sov: '19%', pos: '#3.9', cites: 16, top10: 22, weight: 500, rowBg: '#FFFFFF' },
+        { name: 'Ember & Oak', domain: 'emberandoak.example', color: '#B54AC7', score: 37, sov: '14%', pos: '#4.6', cites: 9, top10: 11, weight: 500, rowBg: '#FFFFFF' }
+      ],
+      promptGaps: [
+        { q: 'best coffee gift for coffee lovers', who: 'Bluebird in 4 engines, Ember & Oak in 2' },
+        { q: 'low acid coffee brands', who: 'Halfmoon in 3 engines' },
+        { q: 'Bluebird Coffee alternatives', who: 'Halfmoon in 3 engines, Ember & Oak in 2' },
+        { q: 'is a coffee subscription worth it', who: 'Bluebird in 3 engines' }
+      ],
+      kwGaps: [
+        { kw: 'coffee of the month club', who: 'Bluebird #3', vol: '8,100' },
+        { kw: 'decaf coffee beans', who: 'Halfmoon #6', vol: '6,600' },
+        { kw: 'espresso subscription', who: 'Halfmoon #4', vol: '2,400' },
+        { kw: 'coffee for cold brew', who: 'Bluebird #8', vol: '5,400' }
+      ],
+      sites: [
+        { domain: 'thekitchn.com', why: 'Cited in 23 answers. Lists Bluebird and Halfmoon in its subscription roundup.', da: '89', type: 'Roundup' },
+        { domain: 'seriouseats.com', why: 'Cited in 19 answers. Reviews beans by origin; you are not reviewed yet.', da: '90', type: 'Review' },
+        { domain: 'coffeereview.com', why: 'Cited in 12 answers. Accepts roaster submissions for scoring.', da: '72', type: 'Submission' },
+        { domain: 'reddit.com/r/Coffee', why: 'Already mentions you. Bluebird gets 3× more recommendations.', da: '96', type: 'Community' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>
+
+
+SITE AUDIT SCREEN:
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Site audit</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0;background:#F6F7F9}
+*{box-sizing:border-box}
+a{color:#2D4FE0}a:hover{color:#1E3BB8}
+button{cursor:pointer}
+</style>
+</helmet>
+<div style="min-height: 100vh; background: #F6F7F9; font-family: 'Geist', 'Helvetica Neue', sans-serif; color: #0F1218; display: flex; flex-wrap: wrap; align-items: flex-start; padding: 8px">
+<dc-import name="Sidebar" active="audit" hint-size="232px,820px"></dc-import>
+<main style="flex: 999 1 560px; min-width: 0; background: #FFFFFF; border: 1px solid #E3E6EB; border-radius: 12px">
+<dc-import name="Topbar" hint-size="100%,56px"></dc-import>
+<div style="max-width: 1200px; margin: 0 auto; padding: 28px 32px 48px; display: flex; flex-direction: column; gap: 20px">
+
+<div style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<h1 style="margin: 0; font-size: 28px; line-height: 34px; font-weight: 600; letter-spacing: -0.02em">Site audit</h1>
+<p style="margin: 0; font-size: 14px; line-height: 20px; color: #4A5260">SEO and AI readiness for northwindroasters.com. 148 pages checked today at 06:00.</p>
+</div>
+<div style="display: flex; gap: 8px">
+<button style="height: 40px; padding: 0 16px; border-radius: 8px; border: 1px solid #CDD2DA; background: #FFFFFF; font-family: inherit; font-size: 14px; font-weight: 500">Run audit</button>
+<button style="height: 40px; padding: 0 16px; border-radius: 8px; border: 0; background: #C5F04A; font-family: inherit; font-size: 14px; font-weight: 600; color: #0F1218">Let Rankoya fix 9 issues</button>
+</div>
+</div>
+
+<div style="display: flex; flex-wrap: wrap; gap: 16px">
+<section style="flex: 4 1 320px; min-width: 0; border: 1px solid #E3E6EB; border-radius: 12px; padding: 20px; display: flex; gap: 24px; justify-content: space-around; flex-wrap: wrap">
+<div style="display: flex; flex-direction: column; align-items: center; gap: 10px">
+<div style="position: relative; width: 120px; height: 120px">
+<svg width="120" height="120" viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="52" fill="none" stroke="#F0F2F5" stroke-width="10"></circle><circle cx="60" cy="60" r="52" fill="none" stroke="#0E7A55" stroke-width="10" stroke-linecap="round" stroke-dasharray="248 327" transform="rotate(-90 60 60)"></circle></svg>
+<span style="position: absolute; inset: 0; display: grid; place-items: center; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 34px; font-weight: 500">76</span>
+</div>
+<span style="font-size: 13px; font-weight: 600">SEO health</span>
+</div>
+<div style="display: flex; flex-direction: column; align-items: center; gap: 10px">
+<div style="position: relative; width: 120px; height: 120px">
+<svg width="120" height="120" viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="52" fill="none" stroke="#F0F2F5" stroke-width="10"></circle><circle cx="60" cy="60" r="52" fill="none" stroke="#A35A00" stroke-width="10" stroke-linecap="round" stroke-dasharray="190 327" transform="rotate(-90 60 60)"></circle></svg>
+<span style="position: absolute; inset: 0; display: grid; place-items: center; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 34px; font-weight: 500">58</span>
+</div>
+<span style="font-size: 13px; font-weight: 600">AI readiness</span>
+</div>
+</section>
+<section style="flex: 8 1 480px; min-width: 0; border: 1px solid #E3E6EB; border-radius: 12px; padding: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px 28px; align-content: center">
+<sc-for list="{{cats}}" as="c" hint-placeholder-count="6">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<span style="display: flex; justify-content: space-between; font-size: 13px"><span style="font-weight: 500">{{c.name}}</span><span style="font-family: 'Geist Mono', ui-monospace, monospace">{{c.score}}</span></span>
+<span style="height: 6px; border-radius: 999px; background: #F0F2F5; overflow: hidden"><span style="display: block; height: 6px; border-radius: 999px; background: {{c.color}}; width: {{c.score}}%"></span></span>
+<span style="font-size: 12px; color: #6B7380">{{c.note}}</span>
+</div>
+</sc-for>
+</section>
+</div>
+
+<section style="border: 1px solid #E3E6EB; border-radius: 12px; overflow: hidden">
+<div style="padding: 14px 20px; display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-between; align-items: center">
+<div role="tablist" aria-label="Severity" style="display: flex; gap: 4px; flex-wrap: wrap">
+<button role="tab" aria-selected="true" style="height: 32px; padding: 0 12px; border-radius: 8px; border: 0; background: #F0F2F5; font-family: inherit; font-size: 13px; font-weight: 600">All 23</button>
+<button role="tab" style="height: 32px; padding: 0 12px; border-radius: 8px; border: 0; background: transparent; font-family: inherit; font-size: 13px; font-weight: 500; color: #4A5260">Critical 3</button>
+<button role="tab" style="height: 32px; padding: 0 12px; border-radius: 8px; border: 0; background: transparent; font-family: inherit; font-size: 13px; font-weight: 500; color: #4A5260">Warnings 12</button>
+<button role="tab" style="height: 32px; padding: 0 12px; border-radius: 8px; border: 0; background: transparent; font-family: inherit; font-size: 13px; font-weight: 500; color: #4A5260">Notices 8</button>
+</div>
+<span style="font-size: 12px; color: #6B7380">Rankoya can fix 9 of these with your WordPress access</span>
+</div>
+<sc-for list="{{issues}}" as="i" hint-placeholder-count="6">
+<div style="display: flex; align-items: center; gap: 14px; padding: 14px 20px; border-top: 1px solid #E3E6EB; flex-wrap: wrap">
+<span style="width: 72px; flex: none"><span style="font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 4px; background: {{i.sBg}}; color: {{i.sFg}}">{{i.sev}}</span></span>
+<span style="flex: 1 1 280px; min-width: 0; display: flex; flex-direction: column; gap: 2px">
+<span style="font-size: 14px; font-weight: 500">{{i.title}}</span>
+<span style="font-size: 12px; line-height: 16px; color: #6B7380">{{i.why}}</span>
+</span>
+<span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; color: #4A5260; width: 80px">{{i.pages}}</span>
+<span style="font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 999px; background: {{i.oBg}}; color: {{i.oFg}}">{{i.owner}}</span>
+<button style="height: 32px; min-width: 104px; padding: 0 12px; border-radius: 8px; font-family: inherit; font-size: 13px; font-weight: 500; background: {{i.bBg}}; color: {{i.bFg}}; border: 1px solid {{i.bBd}}">{{i.cta}}</button>
+</div>
+</sc-for>
+</section>
+
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1180}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const crit = { sev: 'Critical', sBg: '#FCEBEB', sFg: '#C42B2B' }, warn = { sev: 'Warning', sBg: '#FDF1E1', sFg: '#A35A00' }, note = { sev: 'Notice', sBg: '#F0F2F5', sFg: '#4A5260' };
+    const rankoya = { owner: 'Rankoya', oBg: '#C5F04A', oFg: '#0F1218', cta: 'Let Rankoya fix', bBg: '#0F1218', bFg: '#FFFFFF', bBd: '#0F1218' };
+    const you = { owner: 'You', oBg: '#DDE3FB', oFg: '#1E3BB8', cta: 'How to fix', bBg: '#FFFFFF', bFg: '#0F1218', bBd: '#CDD2DA' };
+    return {
+      cats: [
+        { name: 'Technical', score: 84, color: '#0E7A55', note: 'Fast pages, 2 broken links' },
+        { name: 'Core Web Vitals', score: 78, color: '#0E7A55', note: 'LCP 2.1 s on mobile' },
+        { name: 'Answer-first content', score: 66, color: '#A35A00', note: '41 pages bury the answer' },
+        { name: 'Citation signals', score: 52, color: '#A35A00', note: 'Few stats, sources or authors' },
+        { name: 'Freshness', score: 45, color: '#A35A00', note: '22 guides older than 12 months' },
+        { name: 'Structured data', score: 41, color: '#C42B2B', note: 'No FAQ or Product schema' }
+      ],
+      issues: [
+        Object.assign({ title: 'Product pages have no Product or FAQ schema', why: 'AI engines and rich results read structured data first; 6 key pages have none.', pages: '6 pages' }, crit, rankoya),
+        Object.assign({ title: 'robots.txt blocks GPTBot and ClaudeBot', why: 'ChatGPT and Claude cannot read your site, so they cannot cite it.', pages: 'Site-wide' }, crit, you),
+        Object.assign({ title: 'Subscription page answers the question after 600 words', why: 'Lead with a 2–3 sentence answer so engines can quote you directly.', pages: '1 page' }, crit, rankoya),
+        Object.assign({ title: '22 guides not updated in over 12 months', why: 'Freshness matters for both Google and AI answers.', pages: '22 pages' }, warn, rankoya),
+        Object.assign({ title: 'Missing author bios on blog posts', why: 'Named, credible authors strengthen E-E-A-T and citation odds.', pages: '34 pages' }, warn, you),
+        Object.assign({ title: 'Duplicate meta descriptions', why: 'Search engines may rewrite them; Rankoya can write unique ones.', pages: '18 pages' }, note, rankoya)
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>
+
+ACTION PLAN 
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Site audit</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0;background:#F6F7F9}
+*{box-sizing:border-box}
+a{color:#2D4FE0}a:hover{color:#1E3BB8}
+button{cursor:pointer}
+</style>
+</helmet>
+<div style="min-height: 100vh; background: #F6F7F9; font-family: 'Geist', 'Helvetica Neue', sans-serif; color: #0F1218; display: flex; flex-wrap: wrap; align-items: flex-start; padding: 8px">
+<dc-import name="Sidebar" active="audit" hint-size="232px,820px"></dc-import>
+<main style="flex: 999 1 560px; min-width: 0; background: #FFFFFF; border: 1px solid #E3E6EB; border-radius: 12px">
+<dc-import name="Topbar" hint-size="100%,56px"></dc-import>
+<div style="max-width: 1200px; margin: 0 auto; padding: 28px 32px 48px; display: flex; flex-direction: column; gap: 20px">
+
+<div style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<h1 style="margin: 0; font-size: 28px; line-height: 34px; font-weight: 600; letter-spacing: -0.02em">Site audit</h1>
+<p style="margin: 0; font-size: 14px; line-height: 20px; color: #4A5260">SEO and AI readiness for northwindroasters.com. 148 pages checked today at 06:00.</p>
+</div>
+<div style="display: flex; gap: 8px">
+<button style="height: 40px; padding: 0 16px; border-radius: 8px; border: 1px solid #CDD2DA; background: #FFFFFF; font-family: inherit; font-size: 14px; font-weight: 500">Run audit</button>
+<button style="height: 40px; padding: 0 16px; border-radius: 8px; border: 0; background: #C5F04A; font-family: inherit; font-size: 14px; font-weight: 600; color: #0F1218">Let Rankoya fix 9 issues</button>
+</div>
+</div>
+
+<div style="display: flex; flex-wrap: wrap; gap: 16px">
+<section style="flex: 4 1 320px; min-width: 0; border: 1px solid #E3E6EB; border-radius: 12px; padding: 20px; display: flex; gap: 24px; justify-content: space-around; flex-wrap: wrap">
+<div style="display: flex; flex-direction: column; align-items: center; gap: 10px">
+<div style="position: relative; width: 120px; height: 120px">
+<svg width="120" height="120" viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="52" fill="none" stroke="#F0F2F5" stroke-width="10"></circle><circle cx="60" cy="60" r="52" fill="none" stroke="#0E7A55" stroke-width="10" stroke-linecap="round" stroke-dasharray="248 327" transform="rotate(-90 60 60)"></circle></svg>
+<span style="position: absolute; inset: 0; display: grid; place-items: center; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 34px; font-weight: 500">76</span>
+</div>
+<span style="font-size: 13px; font-weight: 600">SEO health</span>
+</div>
+<div style="display: flex; flex-direction: column; align-items: center; gap: 10px">
+<div style="position: relative; width: 120px; height: 120px">
+<svg width="120" height="120" viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="52" fill="none" stroke="#F0F2F5" stroke-width="10"></circle><circle cx="60" cy="60" r="52" fill="none" stroke="#A35A00" stroke-width="10" stroke-linecap="round" stroke-dasharray="190 327" transform="rotate(-90 60 60)"></circle></svg>
+<span style="position: absolute; inset: 0; display: grid; place-items: center; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 34px; font-weight: 500">58</span>
+</div>
+<span style="font-size: 13px; font-weight: 600">AI readiness</span>
+</div>
+</section>
+<section style="flex: 8 1 480px; min-width: 0; border: 1px solid #E3E6EB; border-radius: 12px; padding: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px 28px; align-content: center">
+<sc-for list="{{cats}}" as="c" hint-placeholder-count="6">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<span style="display: flex; justify-content: space-between; font-size: 13px"><span style="font-weight: 500">{{c.name}}</span><span style="font-family: 'Geist Mono', ui-monospace, monospace">{{c.score}}</span></span>
+<span style="height: 6px; border-radius: 999px; background: #F0F2F5; overflow: hidden"><span style="display: block; height: 6px; border-radius: 999px; background: {{c.color}}; width: {{c.score}}%"></span></span>
+<span style="font-size: 12px; color: #6B7380">{{c.note}}</span>
+</div>
+</sc-for>
+</section>
+</div>
+
+<section style="border: 1px solid #E3E6EB; border-radius: 12px; overflow: hidden">
+<div style="padding: 14px 20px; display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-between; align-items: center">
+<div role="tablist" aria-label="Severity" style="display: flex; gap: 4px; flex-wrap: wrap">
+<button role="tab" aria-selected="true" style="height: 32px; padding: 0 12px; border-radius: 8px; border: 0; background: #F0F2F5; font-family: inherit; font-size: 13px; font-weight: 600">All 23</button>
+<button role="tab" style="height: 32px; padding: 0 12px; border-radius: 8px; border: 0; background: transparent; font-family: inherit; font-size: 13px; font-weight: 500; color: #4A5260">Critical 3</button>
+<button role="tab" style="height: 32px; padding: 0 12px; border-radius: 8px; border: 0; background: transparent; font-family: inherit; font-size: 13px; font-weight: 500; color: #4A5260">Warnings 12</button>
+<button role="tab" style="height: 32px; padding: 0 12px; border-radius: 8px; border: 0; background: transparent; font-family: inherit; font-size: 13px; font-weight: 500; color: #4A5260">Notices 8</button>
+</div>
+<span style="font-size: 12px; color: #6B7380">Rankoya can fix 9 of these with your WordPress access</span>
+</div>
+<sc-for list="{{issues}}" as="i" hint-placeholder-count="6">
+<div style="display: flex; align-items: center; gap: 14px; padding: 14px 20px; border-top: 1px solid #E3E6EB; flex-wrap: wrap">
+<span style="width: 72px; flex: none"><span style="font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 4px; background: {{i.sBg}}; color: {{i.sFg}}">{{i.sev}}</span></span>
+<span style="flex: 1 1 280px; min-width: 0; display: flex; flex-direction: column; gap: 2px">
+<span style="font-size: 14px; font-weight: 500">{{i.title}}</span>
+<span style="font-size: 12px; line-height: 16px; color: #6B7380">{{i.why}}</span>
+</span>
+<span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; color: #4A5260; width: 80px">{{i.pages}}</span>
+<span style="font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 999px; background: {{i.oBg}}; color: {{i.oFg}}">{{i.owner}}</span>
+<button style="height: 32px; min-width: 104px; padding: 0 12px; border-radius: 8px; font-family: inherit; font-size: 13px; font-weight: 500; background: {{i.bBg}}; color: {{i.bFg}}; border: 1px solid {{i.bBd}}">{{i.cta}}</button>
+</div>
+</sc-for>
+</section>
+
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1180}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const crit = { sev: 'Critical', sBg: '#FCEBEB', sFg: '#C42B2B' }, warn = { sev: 'Warning', sBg: '#FDF1E1', sFg: '#A35A00' }, note = { sev: 'Notice', sBg: '#F0F2F5', sFg: '#4A5260' };
+    const rankoya = { owner: 'Rankoya', oBg: '#C5F04A', oFg: '#0F1218', cta: 'Let Rankoya fix', bBg: '#0F1218', bFg: '#FFFFFF', bBd: '#0F1218' };
+    const you = { owner: 'You', oBg: '#DDE3FB', oFg: '#1E3BB8', cta: 'How to fix', bBg: '#FFFFFF', bFg: '#0F1218', bBd: '#CDD2DA' };
+    return {
+      cats: [
+        { name: 'Technical', score: 84, color: '#0E7A55', note: 'Fast pages, 2 broken links' },
+        { name: 'Core Web Vitals', score: 78, color: '#0E7A55', note: 'LCP 2.1 s on mobile' },
+        { name: 'Answer-first content', score: 66, color: '#A35A00', note: '41 pages bury the answer' },
+        { name: 'Citation signals', score: 52, color: '#A35A00', note: 'Few stats, sources or authors' },
+        { name: 'Freshness', score: 45, color: '#A35A00', note: '22 guides older than 12 months' },
+        { name: 'Structured data', score: 41, color: '#C42B2B', note: 'No FAQ or Product schema' }
+      ],
+      issues: [
+        Object.assign({ title: 'Product pages have no Product or FAQ schema', why: 'AI engines and rich results read structured data first; 6 key pages have none.', pages: '6 pages' }, crit, rankoya),
+        Object.assign({ title: 'robots.txt blocks GPTBot and ClaudeBot', why: 'ChatGPT and Claude cannot read your site, so they cannot cite it.', pages: 'Site-wide' }, crit, you),
+        Object.assign({ title: 'Subscription page answers the question after 600 words', why: 'Lead with a 2–3 sentence answer so engines can quote you directly.', pages: '1 page' }, crit, rankoya),
+        Object.assign({ title: '22 guides not updated in over 12 months', why: 'Freshness matters for both Google and AI answers.', pages: '22 pages' }, warn, rankoya),
+        Object.assign({ title: 'Missing author bios on blog posts', why: 'Named, credible authors strengthen E-E-A-T and citation odds.', pages: '34 pages' }, warn, you),
+        Object.assign({ title: 'Duplicate meta descriptions', why: 'Search engines may rewrite them; Rankoya can write unique ones.', pages: '18 pages' }, note, rankoya)
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>
+
+CONTENT CALENDAR:
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Content calendar</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0;background:#F6F7F9}
+*{box-sizing:border-box}
+a{color:#2D4FE0}a:hover{color:#1E3BB8}
+button{cursor:pointer}
+</style>
+</helmet>
+<div style="min-height: 100vh; background: #F6F7F9; font-family: 'Geist', 'Helvetica Neue', sans-serif; color: #0F1218; display: flex; flex-wrap: wrap; align-items: flex-start; padding: 8px">
+<dc-import name="Sidebar" active="content" hint-size="232px,820px"></dc-import>
+<main style="flex: 999 1 560px; min-width: 0; background: #FFFFFF; border: 1px solid #E3E6EB; border-radius: 12px">
+<dc-import name="Topbar" hint-size="100%,56px"></dc-import>
+<div style="max-width: 1240px; margin: 0 auto; padding: 28px 32px 48px; display: flex; flex-direction: column; gap: 20px">
+
+<div style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<h1 style="margin: 0; font-size: 28px; line-height: 34px; font-weight: 600; letter-spacing: -0.02em">Content</h1>
+<p style="margin: 0; font-size: 14px; line-height: 20px; color: #4A5260">Your plan for October: 11 articles, 2 published, 2 waiting for you.</p>
+</div>
+<div style="display: flex; gap: 8px; flex-wrap: wrap">
+<div role="group" aria-label="View" style="display: flex; padding: 2px; background: #F0F2F5; border-radius: 8px">
+<button aria-pressed="true" style="height: 34px; padding: 0 12px; border: 0; border-radius: 6px; background: #FFFFFF; box-shadow: 0 1px 2px rgba(15,18,24,0.08); font-family: inherit; font-size: 13px; font-weight: 600">Calendar</button>
+<button style="height: 34px; padding: 0 12px; border: 0; border-radius: 6px; background: transparent; font-family: inherit; font-size: 13px; font-weight: 500; color: #4A5260">List</button>
+</div>
+<button style="height: 40px; padding: 0 16px; border-radius: 8px; border: 1px solid #CDD2DA; background: #FFFFFF; font-family: inherit; font-size: 14px; font-weight: 500">New article</button>
+<button style="height: 40px; padding: 0 16px; border-radius: 8px; border: 0; background: #C5F04A; font-family: inherit; font-size: 14px; font-weight: 600; color: #0F1218">Plan November</button>
+</div>
+</div>
+
+<div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start">
+<section style="flex: 9 1 640px; min-width: 0; border: 1px solid #E3E6EB; border-radius: 12px; overflow: hidden">
+<div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; gap: 12px; flex-wrap: wrap">
+<div style="display: flex; align-items: center; gap: 8px">
+<button aria-label="Previous month" style="width: 32px; height: 32px; display: grid; place-items: center; border-radius: 8px; border: 1px solid #E3E6EB; background: #FFFFFF; color: #4A5260"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg></button>
+<h2 style="margin: 0; font-size: 15px; font-weight: 600; min-width: 108px; text-align: center">October 2026</h2>
+<button aria-label="Next month" style="width: 32px; height: 32px; display: grid; place-items: center; border-radius: 8px; border: 1px solid #E3E6EB; background: #FFFFFF; color: #4A5260"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg></button>
+</div>
+<div style="display: flex; gap: 12px; flex-wrap: wrap; font-size: 12px; color: #4A5260">
+<span style="display: flex; align-items: center; gap: 6px"><span style="width: 8px; height: 8px; border-radius: 2px; background: #0E7A55"></span>Published</span>
+<span style="display: flex; align-items: center; gap: 6px"><span style="width: 8px; height: 8px; border-radius: 2px; background: #2D4FE0"></span>Scheduled</span>
+<span style="display: flex; align-items: center; gap: 6px"><span style="width: 8px; height: 8px; border-radius: 2px; background: #A35A00"></span>Needs approval</span>
+<span style="display: flex; align-items: center; gap: 6px"><span style="width: 8px; height: 8px; border-radius: 2px; background: #8A94A6"></span>Planned</span>
+</div>
+</div>
+<div style="overflow-x: auto">
+<div style="min-width: 640px">
+<div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); background: #F6F7F9; border-top: 1px solid #E3E6EB; font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #6B7380">
+<span style="padding: 8px 10px">Mon</span><span style="padding: 8px 10px">Tue</span><span style="padding: 8px 10px">Wed</span><span style="padding: 8px 10px">Thu</span><span style="padding: 8px 10px">Fri</span><span style="padding: 8px 10px">Sat</span><span style="padding: 8px 10px">Sun</span>
+</div>
+<div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr))">
+<sc-for list="{{days}}" as="d" hint-placeholder-count="35">
+<div style="min-height: 112px; border-top: 1px solid #E3E6EB; border-right: 1px solid #F0F2F5; padding: 8px; display: flex; flex-direction: column; gap: 6px; background: {{d.bg}}">
+<span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; font-weight: {{d.fw}}; color: {{d.fg}}; align-self: flex-start; padding: 1px 6px; border-radius: 999px; background: {{d.numBg}}">{{d.n}}</span>
+<sc-for list="{{d.items}}" as="it" hint-placeholder-count="0">
+<a href="Editor.dc.html" style="display: flex; flex-direction: column; gap: 2px; padding: 6px 8px; border-radius: 6px; text-decoration: none; background: {{it.bg}}; color: #0F1218; font-size: 12px; line-height: 16px">
+<span style="display: flex; align-items: center; gap: 6px; font-size: 10px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: {{it.c}}"><span style="width: 6px; height: 6px; border-radius: 2px; background: {{it.c}}"></span>{{it.status}}</span>
+<span style="font-weight: 500">{{it.t}}</span>
+</a>
+</sc-for>
+</div>
+</sc-for>
+</div>
+</div>
+</div>
+</section>
+
+<aside style="flex: 3 1 260px; min-width: 0; display: flex; flex-direction: column; gap: 16px">
+<section style="border: 1px solid #E3E6EB; border-radius: 12px; padding: 18px; display: flex; flex-direction: column; gap: 12px">
+<h2 style="margin: 0; font-size: 15px; font-weight: 600">This month</h2>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+<div style="padding: 10px; border-radius: 8px; background: #F6F7F9; display: flex; flex-direction: column; gap: 2px"><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 20px; font-weight: 500">11</span><span style="font-size: 12px; color: #4A5260">Articles planned</span></div>
+<div style="padding: 10px; border-radius: 8px; background: #F6F7F9; display: flex; flex-direction: column; gap: 2px"><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 20px; font-weight: 500">87</span><span style="font-size: 12px; color: #4A5260">Avg. content score</span></div>
+</div>
+<p style="margin: 0; font-size: 12px; line-height: 16px; color: #4A5260">Rankoya picked these from 9 questions you miss in AI answers and 14 keywords close to page one.</p>
+</section>
+<section style="border: 1px solid #E3E6EB; border-radius: 12px; padding: 18px; display: flex; flex-direction: column; gap: 4px">
+<h2 style="margin: 0 0 8px; font-size: 15px; font-weight: 600">Waiting for you</h2>
+<a href="Editor.dc.html" style="display: flex; flex-direction: column; gap: 2px; padding: 10px 0; border-top: 1px solid #F0F2F5; text-decoration: none; color: #0F1218"><span style="font-size: 13px; font-weight: 500">Northwind vs Bluebird: which subscription fits you</span><span style="font-size: 12px; color: #6B7380">Score 86 · publishes Oct 7 once approved</span></a>
+<a href="Editor.dc.html" style="display: flex; flex-direction: column; gap: 2px; padding: 10px 0; border-top: 1px solid #F0F2F5; text-decoration: none; color: #0F1218"><span style="font-size: 13px; font-weight: 500">How to brew pour-over (2026 refresh)</span><span style="font-size: 12px; color: #6B7380">Score 82 · publishes Oct 15 once approved</span></a>
+</section>
+</aside>
+</div>
+
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1060}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const S = {
+      pub: { status: 'Published', c: '#0E7A55', bg: '#E6F4EE' },
+      sch: { status: 'Scheduled', c: '#2D4FE0', bg: '#EEF1FD' },
+      app: { status: 'Needs approval', c: '#A35A00', bg: '#FDF1E1' },
+      plan: { status: 'Planned', c: '#4A5260', bg: '#F0F2F5' }
+    };
+    const map = {
+      1: [Object.assign({ t: 'Coffee subscription FAQ' }, S.pub)],
+      4: [Object.assign({ t: 'Single-origin vs blends' }, S.pub)],
+      6: [Object.assign({ t: 'How we source our beans' }, S.sch)],
+      7: [Object.assign({ t: 'Northwind vs Bluebird' }, S.app)],
+      9: [Object.assign({ t: 'Best coffee gifts for 2026' }, S.sch)],
+      13: [Object.assign({ t: 'A guide to low acid coffee' }, S.plan)],
+      15: [Object.assign({ t: 'How to brew pour-over' }, S.app)],
+      18: [Object.assign({ t: 'Decaf beans, explained' }, S.plan)],
+      21: [Object.assign({ t: 'Cold brew at home' }, S.plan)],
+      24: [Object.assign({ t: 'Is a coffee subscription worth it?' }, S.plan)],
+      28: [Object.assign({ t: 'Choosing an espresso subscription' }, S.plan)]
+    };
+    const days = [];
+    const lead = [28, 29, 30];
+    lead.forEach((n) => days.push({ n, items: [], bg: '#FBFBFC', fg: '#8A94A6', fw: 400, numBg: 'transparent' }));
+    for (let n = 1; n <= 31; n++) {
+      const today = n === 4;
+      days.push({ n, items: map[n] || [], bg: '#FFFFFF', fg: today ? '#FFFFFF' : '#0F1218', fw: today ? 600 : 400, numBg: today ? '#0F1218' : 'transparent' });
+    }
+    days.push({ n: 1, items: [], bg: '#FBFBFC', fg: '#8A94A6', fw: 400, numBg: 'transparent' });
+    return { days };
+  }
+}
+</script>
+</body>
+</html>
+
+
+AGENT CHAT SCREEN
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Ask Rankoya</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0;background:#F6F7F9}
+*{box-sizing:border-box}
+a{color:#2D4FE0}a:hover{color:#1E3BB8}
+button{cursor:pointer}
+</style>
+</helmet>
+<div style="min-height: 100vh; background: #F6F7F9; font-family: 'Geist', 'Helvetica Neue', sans-serif; color: #0F1218; display: flex; flex-wrap: wrap; align-items: flex-start; padding: 8px">
+<dc-import name="Sidebar" active="agent" hint-size="232px,820px"></dc-import>
+<main style="flex: 999 1 560px; min-width: 0; background: #FFFFFF; border: 1px solid #E3E6EB; border-radius: 12px">
+<dc-import name="Topbar" hint-size="100%,56px"></dc-import>
+<div style="display: flex; flex-wrap: wrap; align-items: stretch">
+
+<section aria-label="Conversation" style="flex: 999 1 520px; min-width: 0; display: flex; flex-direction: column">
+<div style="max-width: 760px; width: 100%; margin: 0 auto; padding: 28px 24px 24px; display: flex; flex-direction: column; gap: 22px">
+
+<div style="align-self: center; font-size: 12px; color: #6B7380; padding: 2px 10px; border-radius: 999px; background: #F6F7F9">Today · same conversation as Telegram</div>
+
+<div style="align-self: flex-end; max-width: 80%; display: flex; flex-direction: column; align-items: flex-end; gap: 4px">
+<div style="padding: 10px 14px; border-radius: 14px 14px 4px 14px; background: #F0F2F5; font-size: 15px; line-height: 22px">Where do we rank on ChatGPT and Claude for coffee subscriptions?</div>
+<span style="font-size: 11px; color: #6B7380">08:52 · from Telegram</span>
+</div>
+
+<div style="display: flex; gap: 12px; align-items: flex-start">
+<span style="width: 30px; height: 30px; flex: none; border-radius: 999px; background: #C5F04A; display: grid; place-items: center"><svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="13" r="7" fill="none" stroke="#0F1218" stroke-width="2.6"></circle><circle cx="18.5" cy="5.5" r="3" fill="#0F1218"></circle></svg></span>
+<div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 12px; font-size: 15px; line-height: 24px">
+<p style="margin: 0">I asked both engines 12 questions about coffee subscriptions this morning.</p>
+<div style="border: 1px solid #E3E6EB; border-radius: 8px; overflow: hidden">
+<table style="width: 100%; border-collapse: collapse; font-size: 13px; line-height: 18px">
+<thead><tr style="background: #F6F7F9; text-align: left; color: #4A5260"><th style="padding: 8px 12px; font-weight: 600">Engine</th><th style="padding: 8px 12px; font-weight: 600; text-align: right">Mentions you</th><th style="padding: 8px 12px; font-weight: 600; text-align: right">Avg. position</th><th style="padding: 8px 12px; font-weight: 600">Leader</th></tr></thead>
+<tbody>
+<tr style="border-top: 1px solid #E3E6EB"><td style="padding: 8px 12px">ChatGPT</td><td style="padding: 8px 12px; text-align: right; font-family: 'Geist Mono', ui-monospace, monospace">7 of 12</td><td style="padding: 8px 12px; text-align: right; font-family: 'Geist Mono', ui-monospace, monospace">#2.6</td><td style="padding: 8px 12px">Bluebird (10 of 12)</td></tr>
+<tr style="border-top: 1px solid #E3E6EB"><td style="padding: 8px 12px">Claude</td><td style="padding: 8px 12px; text-align: right; font-family: 'Geist Mono', ui-monospace, monospace">3 of 12</td><td style="padding: 8px 12px; text-align: right; font-family: 'Geist Mono', ui-monospace, monospace">#3.7</td><td style="padding: 8px 12px">Bluebird (9 of 12)</td></tr>
+</tbody>
+</table>
+</div>
+<p style="margin: 0">Claude skips you mostly because you have no page about how you source beans, and it leans on sourcing and roundup pages. I can write that page and add FAQ schema to your 6 product pages. Want me to?</p>
+</div>
+</div>
+
+<div style="align-self: flex-end; max-width: 80%; display: flex; flex-direction: column; align-items: flex-end; gap: 4px">
+<div style="padding: 10px 14px; border-radius: 14px 14px 4px 14px; background: #F0F2F5; font-size: 15px; line-height: 22px">Yes, do both.</div>
+<span style="font-size: 11px; color: #6B7380">08:54</span>
+</div>
+
+<div style="display: flex; gap: 12px; align-items: flex-start">
+<span style="width: 30px; height: 30px; flex: none; border-radius: 999px; background: #C5F04A; display: grid; place-items: center"><svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="13" r="7" fill="none" stroke="#0F1218" stroke-width="2.6"></circle><circle cx="18.5" cy="5.5" r="3" fill="#0F1218"></circle></svg></span>
+<div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 12px; font-size: 15px; line-height: 24px">
+<p style="margin: 0">Started the article. The schema change touches your live site, so I need your go-ahead first.</p>
+<div style="border: 1px solid #E3E6EB; border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 1px 2px rgba(15,18,24,0.04)">
+<div style="display: flex; justify-content: space-between; gap: 12px; align-items: center; flex-wrap: wrap"><span style="font-size: 14px; font-weight: 600">Add FAQ and Product schema to 6 pages</span><span style="font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 4px; background: #FDF1E1; color: #A35A00">Needs approval</span></div>
+<ul style="margin: 0; padding: 0 0 0 18px; font-size: 13px; line-height: 20px; color: #4A5260">
+<li>/subscriptions · FAQ (5 questions) + Product</li>
+<li>/shop/yirgacheffe, /shop/huila, /shop/house-blend · Product</li>
+<li>/gifts, /shop/beans · Product</li>
+</ul>
+<div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center">
+<button style="height: 36px; padding: 0 14px; border-radius: 8px; border: 0; background: #0F1218; color: #FFFFFF; font-family: inherit; font-size: 13px; font-weight: 500">Approve</button>
+<button style="height: 36px; padding: 0 14px; border-radius: 8px; border: 1px solid #CDD2DA; background: #FFFFFF; font-family: inherit; font-size: 13px; font-weight: 500">Preview changes</button>
+<button style="height: 36px; padding: 0 12px; border-radius: 8px; border: 0; background: transparent; font-family: inherit; font-size: 13px; font-weight: 500; color: #4A5260">Reject</button>
+<span style="margin-left: auto; font-size: 12px; color: #6B7380">Also sent to Telegram</span>
+</div>
+</div>
+<div style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; background: #F6F7F9; font-size: 13px">
+<span style="width: 14px; height: 14px; border-radius: 999px; border: 2px solid #CDD2DA; border-top-color: #2D4FE0"></span>
+<span style="flex: 1">Writing "How we source our beans"</span>
+<span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; color: #6B7380">1,240 words</span>
+</div>
+</div>
+</div>
+
+</div>
+<div style="margin-top: auto; border-top: 1px solid #E3E6EB; padding: 16px 24px 20px">
+<div style="max-width: 760px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; gap: 8px; flex-wrap: wrap">
+<button style="height: 30px; padding: 0 12px; border-radius: 999px; border: 1px solid #E3E6EB; background: #FFFFFF; font-family: inherit; font-size: 12px; color: #4A5260">How did we do this week?</button>
+<button style="height: 30px; padding: 0 12px; border-radius: 999px; border: 1px solid #E3E6EB; background: #FFFFFF; font-family: inherit; font-size: 12px; color: #4A5260">Who gained on us?</button>
+<button style="height: 30px; padding: 0 12px; border-radius: 999px; border: 1px solid #E3E6EB; background: #FFFFFF; font-family: inherit; font-size: 12px; color: #4A5260">Plan next month's articles</button>
+</div>
+<label style="display: flex; align-items: flex-end; gap: 10px; padding: 10px 10px 10px 14px; border: 1px solid #CDD2DA; border-radius: 12px">
+<textarea aria-label="Message Rankoya" rows="2" placeholder="Ask about rankings, competitors or content" style="flex: 1; border: 0; outline: none; resize: none; font-family: inherit; font-size: 15px; line-height: 22px"></textarea>
+<button aria-label="Send" style="width: 36px; height: 36px; flex: none; display: grid; place-items: center; border: 0; border-radius: 8px; background: #0F1218; color: #FFFFFF"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"></path></svg></button>
+</label>
+</div>
+</div>
+</section>
+
+<aside style="flex: 1 1 280px; min-width: 0; max-width: 340px; border-left: 1px solid #E3E6EB; padding: 24px 20px; display: flex; flex-direction: column; gap: 18px">
+<section style="display: flex; flex-direction: column; gap: 10px">
+<h2 style="margin: 0; font-size: 15px; font-weight: 600">Rankoya can</h2>
+<ul style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; font-size: 13px; line-height: 18px; color: #4A5260">
+<li style="display: flex; gap: 8px"><span style="color: #0E7A55; font-weight: 700">✓</span>Check rankings in Google and 5 AI engines</li>
+<li style="display: flex; gap: 8px"><span style="color: #0E7A55; font-weight: 700">✓</span>Compare you with competitors</li>
+<li style="display: flex; gap: 8px"><span style="color: #0E7A55; font-weight: 700">✓</span>Write, optimize and publish articles</li>
+<li style="display: flex; gap: 8px"><span style="color: #0E7A55; font-weight: 700">✓</span>Fix meta tags and schema on your site</li>
+<li style="display: flex; gap: 8px"><span style="color: #6B7380; font-weight: 700">→</span>Draft outreach for backlinks you send</li>
+</ul>
+</section>
+<section style="padding: 14px; border-radius: 12px; background: #F6F7F9; display: flex; flex-direction: column; gap: 8px">
+<span style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600"><span style="width: 8px; height: 8px; border-radius: 999px; background: #0E7A55"></span>Telegram connected</span>
+<span style="font-size: 12px; line-height: 16px; color: #4A5260">Message <span style="font-family: 'Geist Mono', ui-monospace, monospace">@RankoyaSEO_bot</span> from your phone. Approvals work in both places.</span>
+</section>
+<section style="display: flex; flex-direction: column; gap: 8px">
+<h2 style="margin: 0; font-size: 15px; font-weight: 600">Open tasks</h2>
+<div style="display: flex; justify-content: space-between; font-size: 13px; padding: 8px 0; border-top: 1px solid #F0F2F5"><span>Approve schema change</span><span style="color: #A35A00; font-weight: 500">Waiting</span></div>
+<div style="display: flex; justify-content: space-between; font-size: 13px; padding: 8px 0; border-top: 1px solid #F0F2F5"><span>Sourcing article</span><span style="color: #2D4FE0; font-weight: 500">Writing</span></div>
+<div style="display: flex; justify-content: space-between; font-size: 13px; padding: 8px 0; border-top: 1px solid #F0F2F5"><span>Comparison page</span><span style="color: #A35A00; font-weight: 500">Waiting</span></div>
+</section>
+</aside>
+
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1120}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>
+
+TELEGRAM CONVERSATIONS:
+
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Rankoya on Telegram</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0}
+*{box-sizing:border-box}
+button{cursor:pointer}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; display: flex; flex-direction: column; font-family: 'Geist', 'Helvetica Neue', sans-serif; color: #0F1218; background: #E9ECF1; overflow: hidden">
+<header style="height: 64px; flex: none; display: flex; align-items: center; gap: 12px; padding: 0 12px; background: #FFFFFF; border-bottom: 1px solid #E3E6EB">
+<button aria-label="Back" style="width: 44px; height: 44px; display: grid; place-items: center; border: 0; background: transparent; color: #2D4FE0"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg></button>
+<span style="width: 38px; height: 38px; border-radius: 999px; background: #C5F04A; display: grid; place-items: center"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="13" r="7" fill="none" stroke="#0F1218" stroke-width="2.6"></circle><circle cx="18.5" cy="5.5" r="3" fill="#0F1218"></circle></svg></span>
+<span style="display: flex; flex-direction: column"><span style="font-size: 16px; font-weight: 600">Rankoya</span><span style="font-size: 12px; color: #6B7380">bot</span></span>
+</header>
+
+<div style="flex: 1; min-height: 0; overflow: hidden; padding: 14px 12px; display: flex; flex-direction: column; gap: 10px; justify-content: flex-end">
+
+<div style="align-self: flex-end; max-width: 82%; padding: 8px 12px; border-radius: 16px 16px 4px 16px; background: #DCEFC0; font-size: 15px; line-height: 21px">northwindroasters.com — where do I rank on ChatGPT and Claude?<span style="display: block; text-align: right; font-size: 11px; color: #4A5260; margin-top: 2px">08:52</span></div>
+
+<div style="align-self: flex-start; max-width: 88%; display: flex; flex-direction: column; gap: 4px">
+<div style="padding: 10px 12px; border-radius: 16px 16px 16px 4px; background: #FFFFFF; font-size: 15px; line-height: 21px; display: flex; flex-direction: column; gap: 8px">
+<span>For coffee subscription questions today:</span>
+<span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 13px; line-height: 19px; padding: 8px 10px; border-radius: 8px; background: #F6F7F9">ChatGPT  7/12 answers · #2.6<br>Claude   3/12 answers · #3.7<br>Leader   Bluebird 10/12</span>
+<span>Claude skips you because you have no sourcing page. I can write one and add FAQ schema to 6 product pages.</span>
+<span style="text-align: right; font-size: 11px; color: #6B7380">08:53</span>
+</div>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px">
+<button style="height: 44px; border: 0; border-radius: 10px; background: rgba(255,255,255,0.7); font-family: inherit; font-size: 14px; font-weight: 500; color: #1E3BB8">Do both</button>
+<button style="height: 44px; border: 0; border-radius: 10px; background: rgba(255,255,255,0.7); font-family: inherit; font-size: 14px; font-weight: 500; color: #1E3BB8">Show full plan</button>
+</div>
+</div>
+
+<div style="align-self: flex-end; max-width: 82%; padding: 8px 12px; border-radius: 16px 16px 4px 16px; background: #DCEFC0; font-size: 15px; line-height: 21px">Do both<span style="display: block; text-align: right; font-size: 11px; color: #4A5260; margin-top: 2px">08:54</span></div>
+
+<div style="align-self: flex-start; max-width: 88%; display: flex; flex-direction: column; gap: 4px">
+<div style="padding: 10px 12px; border-radius: 16px 16px 16px 4px; background: #FFFFFF; font-size: 15px; line-height: 21px; display: flex; flex-direction: column; gap: 6px">
+<span style="font-weight: 600">Approval needed</span>
+<span>Add FAQ + Product schema to 6 pages on northwindroasters.com.</span>
+<span style="font-size: 13px; color: #4A5260">I've also started the sourcing article. You'll get it to review by Oct 6.</span>
+<span style="text-align: right; font-size: 11px; color: #6B7380">08:54</span>
+</div>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px">
+<button style="height: 44px; border: 0; border-radius: 10px; background: rgba(255,255,255,0.7); font-family: inherit; font-size: 14px; font-weight: 600; color: #0E7A55">Approve</button>
+<button style="height: 44px; border: 0; border-radius: 10px; background: rgba(255,255,255,0.7); font-family: inherit; font-size: 14px; font-weight: 500; color: #1E3BB8">Preview</button>
+<button style="height: 44px; border: 0; border-radius: 10px; background: rgba(255,255,255,0.7); font-family: inherit; font-size: 14px; font-weight: 500; color: #C42B2B">Reject</button>
+</div>
+</div>
+
+</div>
+
+<div style="flex: none; display: flex; align-items: center; gap: 8px; padding: 8px 10px 24px; background: #FFFFFF; border-top: 1px solid #E3E6EB">
+<button aria-label="Commands" style="height: 36px; padding: 0 10px; border: 1px solid #E3E6EB; border-radius: 8px; background: #F6F7F9; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 13px; color: #4A5260">/menu</button>
+<input aria-label="Message" placeholder="Message" style="flex: 1; min-width: 0; height: 40px; padding: 0 12px; border: 1px solid #E3E6EB; border-radius: 20px; font-family: inherit; font-size: 15px; outline: none">
+<button aria-label="Send" style="width: 44px; height: 44px; display: grid; place-items: center; border: 0; border-radius: 999px; background: #2D4FE0; color: #FFFFFF"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"></path></svg></button>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>
+
+INTEGRATIONS
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Integrations</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0;background:#F6F7F9}
+*{box-sizing:border-box}
+a{color:#2D4FE0}a:hover{color:#1E3BB8}
+button{cursor:pointer}
+</style>
+</helmet>
+<div style="min-height: 100vh; background: #F6F7F9; font-family: 'Geist', 'Helvetica Neue', sans-serif; color: #0F1218; display: flex; flex-wrap: wrap; align-items: flex-start; padding: 8px">
+<dc-import name="Sidebar" active="integrations" hint-size="232px,820px"></dc-import>
+<main style="flex: 999 1 560px; min-width: 0; background: #FFFFFF; border: 1px solid #E3E6EB; border-radius: 12px">
+<dc-import name="Topbar" hint-size="100%,56px"></dc-import>
+<div style="max-width: 1200px; margin: 0 auto; padding: 28px 32px 48px; display: flex; flex-direction: column; gap: 24px">
+
+<div style="display: flex; flex-direction: column; gap: 6px">
+<h1 style="margin: 0; font-size: 28px; line-height: 34px; font-weight: 600; letter-spacing: -0.02em">Integrations</h1>
+<p style="margin: 0; font-size: 14px; line-height: 20px; color: #4A5260">Connect where Rankoya reads your data and where it publishes. Rankoya only uses the access you give it.</p>
+</div>
+
+<sc-for list="{{groups}}" as="g" hint-placeholder-count="3">
+<section style="display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; flex-direction: column; gap: 2px">
+<h2 style="margin: 0; font-size: 15px; font-weight: 600">{{g.title}}</h2>
+<span style="font-size: 12px; color: #6B7380">{{g.sub}}</span>
+</div>
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px">
+<sc-for list="{{g.items}}" as="i" hint-placeholder-count="3">
+<article style="border: 1px solid #E3E6EB; border-radius: 12px; padding: 18px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; align-items: center; gap: 12px">
+<span style="width: 40px; height: 40px; border-radius: 10px; background: #F0F2F5; border: 1px solid #E3E6EB; display: grid; place-items: center; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 11px; font-weight: 500">{{i.mono}}</span>
+<span style="flex: 1; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 14px; font-weight: 600">{{i.name}}</span><span style="font-size: 12px; font-weight: 500; color: {{i.sFg}}">{{i.status}}</span></span>
+</div>
+<p style="margin: 0; font-size: 13px; line-height: 18px; color: #4A5260; flex: 1">{{i.desc}}</p>
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 8px">
+<span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 11px; color: #6B7380">{{i.meta}}</span>
+<button style="height: 32px; padding: 0 12px; border-radius: 8px; font-family: inherit; font-size: 13px; font-weight: 500; background: {{i.bBg}}; color: {{i.bFg}}; border: 1px solid {{i.bBd}}">{{i.cta}}</button>
+</div>
+</article>
+</sc-for>
+</div>
+</section>
+</sc-for>
+
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1080}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const on = { status: 'Connected', sFg: '#0E7A55', cta: 'Manage', bBg: '#FFFFFF', bFg: '#0F1218', bBd: '#CDD2DA' };
+    const off = { status: 'Not connected', sFg: '#6B7380', cta: 'Connect', bBg: '#0F1218', bFg: '#FFFFFF', bBd: '#0F1218' };
+    const soon = { status: 'Coming soon', sFg: '#6B7380', cta: 'Notify me', bBg: '#FFFFFF', bFg: '#4A5260', bBd: '#E3E6EB' };
+    return {
+      groups: [
+        { title: 'Talk to Rankoya', sub: 'Ask questions and approve work from your phone', items: [
+          Object.assign({ name: 'Telegram', mono: 'TG', desc: 'Chat with Rankoya, get weekly reports and approve articles and site changes.', meta: '@ada_northwind' }, on)
+        ] },
+        { title: 'Publish', sub: 'Where Rankoya puts approved content and on-page fixes', items: [
+          Object.assign({ name: 'WordPress', mono: 'WP', desc: 'Publish articles, update meta tags and add schema through the Rankoya plugin.', meta: 'northwindroasters.com' }, on),
+          Object.assign({ name: 'Webflow', mono: 'WF', desc: 'Publish to your Webflow CMS collections.', meta: '' }, soon),
+          Object.assign({ name: 'Shopify', mono: 'SH', desc: 'Publish blog posts and improve product pages.', meta: '' }, soon)
+        ] },
+        { title: 'Data', sub: 'Real traffic data makes Rankoya\u2019s plan sharper', items: [
+          Object.assign({ name: 'Google Search Console', mono: 'GSC', desc: 'Clicks, impressions and queries you already rank for.', meta: '' }, off),
+          Object.assign({ name: 'Google Analytics 4', mono: 'GA4', desc: 'See which pages bring visitors from AI engines.', meta: '' }, off)
+        ] },
+        { title: 'Social', sub: 'Rankoya drafts posts; you choose what goes out', items: [
+          Object.assign({ name: 'LinkedIn', mono: 'IN', desc: 'Share article summaries to your company page.', meta: '' }, soon),
+          Object.assign({ name: 'X', mono: 'X', desc: 'Post threads from new articles.', meta: '' }, soon),
+          Object.assign({ name: 'Facebook', mono: 'FB', desc: 'Share posts to your business page.', meta: '' }, soon)
+        ] }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>
+
+SETTINGS:
+
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Settings: autopilot</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0;background:#F6F7F9}
+*{box-sizing:border-box}
+a{color:#2D4FE0}a:hover{color:#1E3BB8}
+button{cursor:pointer}
+</style>
+</helmet>
+<div style="min-height: 100vh; background: #F6F7F9; font-family: 'Geist', 'Helvetica Neue', sans-serif; color: #0F1218; display: flex; flex-wrap: wrap; align-items: flex-start; padding: 8px">
+<dc-import name="Sidebar" active="settings" hint-size="232px,820px"></dc-import>
+<main style="flex: 999 1 560px; min-width: 0; background: #FFFFFF; border: 1px solid #E3E6EB; border-radius: 12px">
+<dc-import name="Topbar" hint-size="100%,56px"></dc-import>
+<div style="max-width: 1120px; margin: 0 auto; padding: 28px 32px 48px; display: flex; flex-direction: column; gap: 24px">
+<h1 style="margin: 0; font-size: 28px; line-height: 34px; font-weight: 600; letter-spacing: -0.02em">Settings</h1>
+
+<div style="display: flex; flex-wrap: wrap; gap: 32px; align-items: flex-start">
+<nav aria-label="Settings sections" style="flex: 0 0 200px; display: flex; flex-direction: column; gap: 2px">
+<a href="#" style="height: 36px; display: flex; align-items: center; padding: 0 10px; border-radius: 8px; text-decoration: none; font-size: 14px; color: #4A5260">Brand profile</a>
+<a href="#" aria-current="page" style="height: 36px; display: flex; align-items: center; padding: 0 10px; border-radius: 8px; text-decoration: none; font-size: 14px; font-weight: 600; color: #0F1218; background: #F0F2F5">Autopilot</a>
+<a href="#" style="height: 36px; display: flex; align-items: center; padding: 0 10px; border-radius: 8px; text-decoration: none; font-size: 14px; color: #4A5260">Competitors and topics</a>
+<a href="#" style="height: 36px; display: flex; align-items: center; padding: 0 10px; border-radius: 8px; text-decoration: none; font-size: 14px; color: #4A5260">Team</a>
+<a href="#" style="height: 36px; display: flex; align-items: center; padding: 0 10px; border-radius: 8px; text-decoration: none; font-size: 14px; color: #4A5260">Notifications</a>
+<a href="#" style="height: 36px; display: flex; align-items: center; padding: 0 10px; border-radius: 8px; text-decoration: none; font-size: 14px; color: #4A5260">API keys</a>
+<a href="#" style="height: 36px; display: flex; align-items: center; padding: 0 10px; border-radius: 8px; text-decoration: none; font-size: 14px; color: #4A5260">Billing</a>
+</nav>
+
+<div style="flex: 1 1 520px; min-width: 0; display: flex; flex-direction: column; gap: 28px">
+<section style="display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; flex-direction: column; gap: 4px">
+<h2 style="margin: 0; font-size: 20px; line-height: 28px; font-weight: 600; letter-spacing: -0.01em">How much should Rankoya do on its own?</h2>
+<p style="margin: 0; font-size: 14px; line-height: 20px; color: #4A5260">You can change this anytime. Rankoya never touches your site without the access you give it.</p>
+</div>
+<div role="radiogroup" aria-label="Autopilot mode" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px">
+<sc-for list="{{modes}}" as="m" hint-placeholder-count="3">
+<button role="radio" aria-checked="{{m.checked}}" onClick="{{m.pick}}" style="text-align: left; padding: 16px; border-radius: 12px; font-family: inherit; color: #0F1218; display: flex; flex-direction: column; gap: 8px; border: {{m.border}}; background: {{m.bg}}">
+<span style="display: flex; align-items: center; justify-content: space-between; width: 100%"><span style="font-size: 14px; font-weight: 600">{{m.name}}</span><span style="width: 18px; height: 18px; border-radius: 999px; border: {{m.ring}}; background: #FFFFFF"></span></span>
+<span style="font-size: 13px; line-height: 18px; color: #4A5260">{{m.desc}}</span>
+<span style="font-size: 11px; font-weight: 600; color: {{m.tagFg}}">{{m.tag}}</span>
+</button>
+</sc-for>
+</div>
+</section>
+
+<section style="border: 1px solid #E3E6EB; border-radius: 12px">
+<div style="padding: 16px 20px; border-bottom: 1px solid #E3E6EB"><h2 style="margin: 0; font-size: 15px; font-weight: 600">What Rankoya may do</h2></div>
+<sc-for list="{{perms}}" as="p" hint-placeholder-count="5">
+<div style="display: flex; align-items: center; gap: 16px; padding: 14px 20px; border-top: 1px solid #F0F2F5">
+<span style="flex: 1; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 14px; font-weight: 500">{{p.t}}</span><span style="font-size: 12px; color: #6B7380">{{p.sub}}</span></span>
+<select aria-label="{{p.t}}" style="height: 36px; padding: 0 10px; border: 1px solid #CDD2DA; border-radius: 8px; font-family: inherit; font-size: 13px; background: #FFFFFF; min-width: 170px"><option>{{p.v}}</option></select>
+</div>
+</sc-for>
+</section>
+
+<section style="border: 1px solid #E3E6EB; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 14px">
+<h2 style="margin: 0; font-size: 15px; font-weight: 600">Guardrails</h2>
+<label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 500">Maximum articles per month<input value="12" inputmode="numeric" style="height: 40px; width: 120px; padding: 0 12px; border: 1px solid #CDD2DA; border-radius: 8px; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 13px"></label>
+<label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 500">Topics Rankoya must not write about<input value="health claims, competitor pricing without a source" style="height: 40px; padding: 0 12px; border: 1px solid #CDD2DA; border-radius: 8px; font-family: inherit; font-size: 13px; font-weight: 400"></label>
+<label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 500">Brand voice notes<textarea rows="3" style="padding: 10px 12px; border: 1px solid #CDD2DA; border-radius: 8px; font-family: inherit; font-size: 13px; line-height: 20px; font-weight: 400; resize: vertical">Warm and plain. Talk about farms and roast dates, not luxury. Never use "best in the world".</textarea></label>
+</section>
+
+<div style="display: flex; justify-content: flex-end; gap: 8px">
+<button style="height: 40px; padding: 0 16px; border-radius: 8px; border: 1px solid #CDD2DA; background: #FFFFFF; font-family: inherit; font-size: 14px; font-weight: 500">Cancel</button>
+<button style="height: 40px; padding: 0 16px; border-radius: 8px; border: 0; background: #0F1218; color: #FFFFFF; font-family: inherit; font-size: 14px; font-weight: 500">Save changes</button>
+</div>
+</div>
+</div>
+
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1240}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { mode: 'ask' }; }
+  renderVals() {
+    const sel = this.state.mode;
+    const list = [
+      { id: 'ask', name: 'Ask me first', desc: 'Rankoya drafts everything and waits for your approval in the app or on Telegram.', tag: 'Recommended to start', tagFg: '#0E7A55' },
+      { id: 'content', name: 'Auto-publish content', desc: 'Articles go live on schedule. Site changes still need your approval.', tag: 'After 2 weeks of approvals', tagFg: '#6B7380' },
+      { id: 'full', name: 'Full autopilot', desc: 'Rankoya publishes and fixes on its own and tells you what it did each day.', tag: 'You can undo any change', tagFg: '#6B7380' }
+    ];
+    const modes = list.map((m) => Object.assign({}, m, {
+      checked: m.id === sel ? 'true' : 'false',
+      border: m.id === sel ? '2px solid #0F1218' : '1px solid #E3E6EB',
+      bg: m.id === sel ? '#FBFBFC' : '#FFFFFF',
+      ring: m.id === sel ? '5px solid #0F1218' : '1.5px solid #CDD2DA',
+      pick: () => this.setState({ mode: m.id })
+    }));
+    return {
+      modes,
+      perms: [
+        { t: 'Publish articles', sub: 'To WordPress, on your content calendar', v: 'Ask me first' },
+        { t: 'Edit meta titles and descriptions', sub: 'On existing pages', v: 'Ask me first' },
+        { t: 'Add or change schema markup', sub: 'FAQ, Product, Article, Organization', v: 'Ask me first' },
+        { t: 'Refresh old articles', sub: 'Update facts, dates and links', v: 'Ask me first' },
+        { t: 'Weekly report', sub: 'Every Monday, 08:00 your time', v: 'Telegram and email' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>
+
+SIGN IN]
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Sign in</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0;background:#FFFFFF}
+*{box-sizing:border-box}
+a{color:#2D4FE0}a:hover{color:#1E3BB8}
+button{cursor:pointer}
+</style>
+</helmet>
+<div style="min-height: 100vh; display: flex; flex-wrap: wrap; font-family: 'Geist', 'Helvetica Neue', sans-serif; color: #0F1218; background: #FFFFFF">
+
+<section style="flex: 1 1 480px; min-width: 0; display: flex; flex-direction: column; padding: 32px 40px">
+<div style="display: flex; align-items: center; gap: 10px">
+<svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="13" r="8" fill="none" stroke="#0F1218" stroke-width="2.2"></circle><circle cx="18.5" cy="5.5" r="3.3" fill="#C5F04A" stroke="#0F1218" stroke-width="1.6"></circle></svg>
+<span style="font-size: 19px; font-weight: 600; letter-spacing: -0.03em">rankoya</span>
+</div>
+<div style="flex: 1; display: flex; align-items: center; justify-content: center; padding: 48px 0">
+<form style="width: 100%; max-width: 380px; display: flex; flex-direction: column; gap: 20px">
+<div style="display: flex; flex-direction: column; gap: 8px">
+<h1 style="margin: 0; font-size: 32px; line-height: 38px; font-weight: 600; letter-spacing: -0.025em">Welcome back</h1>
+<p style="margin: 0; font-size: 15px; line-height: 22px; color: #4A5260">Sign in to see how your brand ranks today.</p>
+</div>
+<button type="button" style="height: 48px; display: flex; align-items: center; justify-content: center; gap: 10px; border: 1px solid #CDD2DA; border-radius: 8px; background: #FFFFFF; font-family: inherit; font-size: 15px; font-weight: 500; color: #0F1218">
+<span style="width: 20px; height: 20px; border-radius: 4px; background: #F0F2F5; display: grid; place-items: center; font-size: 11px; font-weight: 700">G</span>Continue with Google</button>
+<div style="display: flex; align-items: center; gap: 12px; font-size: 12px; color: #6B7380"><span style="flex: 1; height: 1px; background: #E3E6EB"></span>or<span style="flex: 1; height: 1px; background: #E3E6EB"></span></div>
+<label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 500">Work email<input type="email" value="ada@northwindroasters.com" style="height: 48px; padding: 0 14px; border: 1px solid #CDD2DA; border-radius: 8px; font-family: inherit; font-size: 15px; font-weight: 400"></label>
+<label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 500"><span style="display: flex; justify-content: space-between"><span>Password</span><a href="#" style="font-weight: 500; text-decoration: none">Forgot password?</a></span><input type="password" value="••••••••••" style="height: 48px; padding: 0 14px; border: 2px solid #2D4FE0; border-radius: 8px; font-family: inherit; font-size: 15px; font-weight: 400; outline: none"></label>
+<a href="OnboardBrand.dc.html" style="height: 48px; display: flex; align-items: center; justify-content: center; border-radius: 8px; background: #0F1218; color: #FFFFFF; font-size: 15px; font-weight: 600; text-decoration: none">Sign in</a>
+<p style="margin: 0; font-size: 14px; color: #4A5260; text-align: center">New to Rankoya? <a href="OnboardBrand.dc.html" style="font-weight: 500; text-decoration: none">Create an account</a></p>
+</form>
+</div>
+<p style="margin: 0; font-size: 12px; color: #6B7380">© 2026 [COMPANY NAME] · <a href="#" style="color: #4A5260">Terms</a> · <a href="#" style="color: #4A5260">Privacy</a></p>
+</section>
+
+<section style="flex: 1 1 480px; min-width: 0; background: #0F1218; color: #F2F4F7; display: flex; flex-direction: column; justify-content: center; gap: 36px; padding: 64px 56px">
+<div style="display: flex; flex-direction: column; gap: 14px; max-width: 520px">
+<span style="font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #C5F04A">Google + AI search</span>
+<h2 style="margin: 0; font-size: 44px; line-height: 48px; font-weight: 600; letter-spacing: -0.025em">Be the answer.</h2>
+<p style="margin: 0; font-size: 17px; line-height: 26px; color: #A9B0BC">See where you rank in Google, ChatGPT, Claude, Gemini and Perplexity. Then let Rankoya write, fix and publish what closes the gap.</p>
+</div>
+<div style="max-width: 480px; border: 1px solid #262B35; border-radius: 16px; background: #12151B; padding: 20px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: #A9B0BC"><span style="width: 22px; height: 22px; border-radius: 6px; background: #1A1E26; border: 1px solid #353B47; display: grid; place-items: center; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 9px; color: #F2F4F7">AI</span>"best coffee subscription in the US"</div>
+<p style="margin: 0; font-size: 15px; line-height: 24px; color: #F2F4F7">Top picks right now: <mark style="background: #C5F04A; color: #0F1218; padding: 0 4px; border-radius: 3px; font-weight: 600">Your brand</mark> for small-batch single origins, then…</p>
+<div style="display: flex; gap: 8px; flex-wrap: wrap">
+<span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; padding: 3px 8px; border-radius: 4px; background: #0F2A20; color: #3DD39A">▲ Mentioned in 4 of 5 engines</span>
+<span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; padding: 3px 8px; border-radius: 4px; background: #1A1E26; color: #A9B0BC">#1 on Gemini</span>
+</div>
+</div>
+</section>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>
+
+
+ONBOARDING 1:
+
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Onboarding: your brand</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0;background:#F6F7F9}
+*{box-sizing:border-box}
+a{color:#2D4FE0}a:hover{color:#1E3BB8}
+button{cursor:pointer}
+</style>
+</helmet>
+<div style="min-height: 100vh; background: #F6F7F9; font-family: 'Geist', 'Helvetica Neue', sans-serif; color: #0F1218; display: flex; flex-direction: column">
+<header style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; padding: 18px 32px; border-bottom: 1px solid #E3E6EB; background: #FFFFFF">
+<div style="display: flex; align-items: center; gap: 10px"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="13" r="8" fill="none" stroke="#0F1218" stroke-width="2.2"></circle><circle cx="18.5" cy="5.5" r="3.3" fill="#C5F04A" stroke="#0F1218" stroke-width="1.6"></circle></svg><span style="font-size: 18px; font-weight: 600; letter-spacing: -0.03em">rankoya</span></div>
+<ol aria-label="Setup progress" style="list-style: none; margin: 0; padding: 0; display: flex; gap: 6px; flex-wrap: wrap">
+<sc-for list="{{steps}}" as="s" hint-placeholder-count="5">
+<li style="display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 12px 0 6px; border-radius: 999px; font-size: 13px; font-weight: {{s.fw}}; color: {{s.fg}}; background: {{s.bg}}"><span style="width: 20px; height: 20px; border-radius: 999px; display: grid; place-items: center; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 11px; background: {{s.dotBg}}; color: {{s.dotFg}}">{{s.n}}</span>{{s.label}}</li>
+</sc-for>
+</ol>
+<a href="#" style="font-size: 13px; font-weight: 500; color: #4A5260; text-decoration: none">Save and exit</a>
+</header>
+
+<div style="flex: 1; display: flex; justify-content: center; padding: 56px 24px">
+<div style="width: 100%; max-width: 600px; display: flex; flex-direction: column; gap: 28px">
+<div style="display: flex; flex-direction: column; gap: 8px">
+<span style="font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #6B7380">Step 1 of 5</span>
+<h1 style="margin: 0; font-size: 36px; line-height: 42px; font-weight: 600; letter-spacing: -0.025em">What are we growing?</h1>
+<p style="margin: 0; font-size: 16px; line-height: 24px; color: #4A5260">Add your website and Rankoya will learn your brand, products and audience.</p>
+</div>
+
+<label style="display: flex; flex-direction: column; gap: 8px; font-size: 13px; font-weight: 500">Website
+<span style="display: flex; height: 52px; border: 2px solid #2D4FE0; border-radius: 10px; background: #FFFFFF; overflow: hidden">
+<span style="display: grid; place-items: center; padding: 0 12px; background: #F6F7F9; border-right: 1px solid #E3E6EB; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 14px; color: #6B7380">https://</span>
+<input value="northwindroasters.com" style="flex: 1; min-width: 0; border: 0; outline: none; padding: 0 14px; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 15px; font-weight: 400">
+<span style="display: flex; align-items: center; gap: 6px; padding: 0 14px; font-size: 13px; font-weight: 500; color: #0E7A55"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>Read 148 pages</span>
+</span>
+</label>
+
+<section style="background: #FFFFFF; border: 1px solid #E3E6EB; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 16px">
+<div style="display: flex; align-items: center; gap: 10px"><span style="width: 24px; height: 24px; border-radius: 999px; background: #C5F04A; display: grid; place-items: center"><svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="13" r="7" fill="none" stroke="#0F1218" stroke-width="2.8"></circle><circle cx="18.5" cy="5.5" r="3" fill="#0F1218"></circle></svg></span><h2 style="margin: 0; font-size: 15px; font-weight: 600">Here's what Rankoya learned. Fix anything that's off.</h2></div>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px">
+<label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 500">Brand name<input value="Northwind Roasters" style="height: 40px; padding: 0 12px; border: 1px solid #CDD2DA; border-radius: 8px; font-family: inherit; font-size: 14px; font-weight: 400"></label>
+<label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 500">Industry<select style="height: 40px; padding: 0 10px; border: 1px solid #CDD2DA; border-radius: 8px; font-family: inherit; font-size: 14px; background: #FFFFFF"><option>Food and drink · E-commerce</option></select></label>
+<label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 500">Main market<select style="height: 40px; padding: 0 10px; border: 1px solid #CDD2DA; border-radius: 8px; font-family: inherit; font-size: 14px; background: #FFFFFF"><option>United States</option></select></label>
+<label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 500">Language<select style="height: 40px; padding: 0 10px; border: 1px solid #CDD2DA; border-radius: 8px; font-family: inherit; font-size: 14px; background: #FFFFFF"><option>English</option></select></label>
+</div>
+<label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 500">What you sell, in one line<input value="Small-batch, single-origin coffee roasted to order and sold by subscription." style="height: 40px; padding: 0 12px; border: 1px solid #CDD2DA; border-radius: 8px; font-family: inherit; font-size: 14px; font-weight: 400"><span style="font-size: 12px; font-weight: 400; color: #6B7380">Rankoya uses this to pick the questions your customers ask AI engines.</span></label>
+</section>
+
+<div style="display: flex; justify-content: space-between; align-items: center">
+<span style="font-size: 13px; color: #6B7380">About 4 minutes to finish setup</span>
+<a href="OnboardConnect.dc.html" style="height: 48px; display: inline-flex; align-items: center; gap: 8px; padding: 0 22px; border-radius: 8px; background: #0F1218; color: #FFFFFF; font-size: 15px; font-weight: 600; text-decoration: none">Continue<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a>
+</div>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":960}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const cur = 1;
+    const labels = ['Brand', 'Competitors', 'Topics', 'Connect', 'First scan'];
+    const steps = labels.map((label, i) => {
+      const n = i + 1, done = n < cur, now = n === cur;
+      return { n: done ? '✓' : String(n), label, fw: now ? 600 : 500, fg: now ? '#0F1218' : '#6B7380', bg: now ? '#F0F2F5' : 'transparent', dotBg: done ? '#0E7A55' : now ? '#0F1218' : '#E3E6EB', dotFg: done || now ? '#FFFFFF' : '#4A5260' };
+    });
+    return { steps };
+  }
+}
+</script>
+</body>
+</html>
