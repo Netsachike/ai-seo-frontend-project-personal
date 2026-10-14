@@ -1,11 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRightIcon, CheckIcon, SendIcon } from "lucide-react";
+import { ArrowRightIcon, CheckIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-import { useFakeQuery } from "@/lib/fake-query";
-import { openTasks } from "@/lib/mocks/ui-data-work";
+import { useActionPlan } from "@/features/actions/hooks";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -19,13 +18,12 @@ const capabilities = ["rankings", "compare", "write", "fix", "outreach"] as cons
 
 export function AgentView() {
   const t = useTranslations("agentPage");
-  const { workspace, brand, brandSlug, me } = useShell();
-  const tasks = useFakeQuery(["openTasks", brand?.id], () => openTasks(String(brand?.id ?? "")), {
-    enabled: Boolean(brand),
-  });
+  const { workspace, brand, brandSlug } = useShell();
+  // Open work comes from the action plan: what Rankoya is working on and what waits for approval.
+  const plan = useActionPlan(brand?.id);
+  const tasks = (plan.data?.cards ?? []).filter((c) => c.column === "working" || c.column === "approval").slice(0, 6);
 
   if (!workspace || !brand) return <PageSkeleton kpis={0} panels={2} />;
-  const telegram = me?.telegram;
 
   return (
     <div className="grid gap-4 lg:h-[calc(100dvh-56px-64px)] lg:grid-cols-[minmax(0,1fr)_300px]">
@@ -65,36 +63,17 @@ export function AgentView() {
           </ul>
         </Card>
 
-        <Card className="gap-2">
-          <div className="flex items-center gap-2">
-            <SendIcon aria-hidden className="size-4 text-fg-2 rtl:-scale-x-100" />
-            <CardTitle as="h2">{t("telegramTitle")}</CardTitle>
-            <Badge variant={telegram?.connected ? "success" : "outline"} className="ms-auto">
-              {telegram?.connected ? t("connected") : t("notConnected")}
-            </Badge>
-          </div>
-          <p className="text-small text-fg-2">
-            {telegram?.connected ? t("telegramOn", { bot: "@RankoyaAgentBot" }) : t("telegramOff")}
-          </p>
-          {!telegram?.connected && (
-            <Link
-              href={brandHref(brandSlug, "integrations")}
-              className="text-small font-medium text-blue hover:underline"
-            >
-              {t("connect")}
-            </Link>
-          )}
-        </Card>
-
         <Card>
           <CardTitle>{t("tasksTitle")}</CardTitle>
-          {tasks.isPending && <Skeleton className="h-16" />}
-          {tasks.data?.length === 0 && <p className="text-small text-fg-3">{t("tasksEmpty")}</p>}
+          {plan.isPending && <Skeleton className="h-16" />}
+          {!plan.isPending && tasks.length === 0 && <p className="text-small text-fg-3">{t("tasksEmpty")}</p>}
           <ul className="flex flex-col divide-y divide-border">
-            {tasks.data?.map((task) => (
+            {tasks.map((task) => (
               <li key={task.id} className="flex items-center gap-2 py-2.5">
                 <span className="min-w-0 flex-1 truncate text-small text-fg">{task.title}</span>
-                <Badge variant={task.status === "waiting" ? "warning" : "blue"}>{t(`taskStatus.${task.status}`)}</Badge>
+                <Badge variant={task.column === "approval" ? "warning" : "blue"}>
+                  {t(`taskStatus.${task.column === "approval" ? "waiting" : "working"}`)}
+                </Badge>
               </li>
             ))}
           </ul>

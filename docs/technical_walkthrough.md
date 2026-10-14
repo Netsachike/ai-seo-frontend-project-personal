@@ -1,17 +1,19 @@
 # Rankoya: technical walkthrough
 
-**Branch:** `feat/backend-wiring` · **Written:** 2026-10-13
-**API contract:** `docs/backend/docs/openapi.yaml` (gitignored, local only; open `docs/backend/docs/index.html` for Swagger UI)
+**Branch:** `feat/backend-wiring` · **Updated:** 2026-10-14
+**API contract:** `docs/backend/docs/openapi.yaml` (gitignored, local only; open `docs/backend/docs/index.html` for Swagger UI). 90 operations.
 
-This guide follows a user through the app screen by screen. For each screen it lists the backend endpoints called, what triggers each call, and what is still faked in the UI. Use it to run a demo, to check what is integrated, and to test.
+This guide follows a user through the app screen by screen. For each screen it lists the backend endpoints called, what triggers each call, and what has no endpoint yet. Use it to run a demo, to check what is integrated, and to test.
+
+**Rule since 2026-10-14: live data only.** No screen shows mock, demo or sample values. When the API returns nothing, the screen shows 0 or an empty state. Features with no endpoint are hidden or marked "coming soon", never faked.
 
 **Legend**
 
 | Mark | Meaning |
 |---|---|
 | ✅ **Live** | Calls the real backend |
-| 🟡 **Partial** | Some data is live; parts are derived in the browser, kept in browser storage, or mocked |
-| 🔴 **Mock** | No endpoint yet: fake delay, UI mock data, or browser-only state |
+| 🟡 **Partial** | Live, but part of it has no endpoint yet (kept in the browser or not saved) |
+| ⛔ **No endpoint** | Hidden, marked "coming soon", or replaced by an email to support |
 
 ---
 
@@ -22,20 +24,23 @@ This guide follows a user through the app screen by screen. For each screen it l
 - **HTTP client:** axios in [`src/services/api/api.ts`](../src/services/api/api.ts). Each endpoint wrapper lives in `src/services/<area>.ts`, and screens call them through React Query hooks in `src/features/<area>/hooks.ts`.
 - **Base URL:** `NEXT_PUBLIC_API_BASE_URL`, including the `/api` prefix (for example `http://127.0.0.1:8001/api`). If it is unset, every request is rejected with `ERR_API_NOT_CONFIGURED` and nobody can sign in.
 - **Headers on every request:** `Accept: application/json`, `Content-Type: application/json`, and `Authorization: Bearer <authToken cookie>`.
-- **Timeouts:** 60 s by default. LLM, SERP and crawl-type calls use `LONG_REQUEST_TIMEOUT_MS` (5 min). These calls are **synchronous on the backend**, so a spinner running for a minute or more is expected. Services that use the long timeout: ai-visibility, article-research, articles, authority, content-planner, copilot, keywords, opportunities, search-console, serp, site-guard, topical-maps.
+- **Timeouts:** 60 s by default. LLM, SERP, crawl and DataForSEO calls use `LONG_REQUEST_TIMEOUT_MS` (5 min). These calls are **synchronous on the backend**, so a spinner running for a minute or more is expected.
 - **Site scoping:** site endpoints are built with `sitePath(siteId, "...")`, which gives `/sites/{site}/...`. The backend resolves the **active workspace from the token**, and a site outside that workspace returns 404.
 - **401 handling:** any 401 except on `/login` and `/register` clears the session cookies and fires `rankoya:session-expired`, which sends the user back to sign-in.
+- **Paid calls:** live backlink metrics, the backlinks list and competitor prospects call DataForSEO, which bills per call. The UI only makes these calls when the user asks (a confirm dialog or a Load button), and shows the cost and a "Sandbox data" badge when the backend reports them.
 
-### Session and route guard
+### Session, browser storage and route guard
 
 | Where | Key | What it holds |
 |---|---|---|
 | Cookie | `authToken` | Sanctum bearer token from `POST /login` → `data.token` |
-| Cookie | `authUser` | Trimmed user JSON (name, role, active workspace, subscriptions). The UI gates plan and admin features on it |
-| localStorage | `rankoya:login-workspaces` | **Temporary:** the workspaces from the login response, used as a fallback while `GET /workspace` returns 404 |
+| Cookie | `authUser` | Trimmed user JSON (name, role, active workspace, subscriptions). Name and email are refreshed from `GET /me` on load |
+| localStorage | `rankoya:login-workspaces` | **Temporary:** the workspaces from the login response, used while `GET /workspace` returns 404 |
 | localStorage | `rankoya:setup-progress` | Furthest setup step reached, per site. `null` means setup is finished |
-| localStorage | `rankoya:site-setup` | Setup draft per site: description, audience, topics, preferences, crawl run id |
-| sessionStorage | `rankoya:gsc-pending` | The site and return path held across the Google OAuth redirect |
+| localStorage | `rankoya:site-setup` | Setup draft per site: crawl run id, description, audience, topics, preferences |
+| localStorage | `rankoya:crawl-runs` | Newest crawl run id per site (there is no "latest crawl" endpoint) |
+| sessionStorage | `rankoya:gsc-pending` | Site and return path held across the Google OAuth redirect |
+| sessionStorage | `rankoya:wpcom-pending` | Site and return path held across the WordPress.com OAuth redirect |
 
 [`src/proxy.ts`](../src/proxy.ts) (Next 16's replacement for middleware):
 - A visitor with no `authToken` cookie is redirected to `/sign-in?next=<path>`.
@@ -60,19 +65,16 @@ This guide follows a user through the app screen by screen. For each screen it l
 
 | Screen / action | Endpoint | Status | Notes |
 |---|---|---|---|
-| `/sign-in`: submit | `POST /login` | ✅ | Writes the `authToken` and `authUser` cookies and stores the workspaces in localStorage. Lands on `/sites`, or on `?next=` |
-| `/sign-up`: submit | `POST /register` | ✅ | Register returns the same shape as login, so the user is signed in immediately |
-| `/sign-up`: workspace name | `POST /workspace/store` (multipart) | ✅ | Creates the first workspace (`is_default: 1`) right after register, then lands on `/sites/new` |
-| Profile menu: **Sign out** | `POST /logout` | ✅ | Best effort; the cookies are cleared even if the call fails |
-| "Continue with Google" | none | 🔴 | Shows an "unavailable" message |
-| `/forgot-password` | none | 🔴 | `fakeRequest()` delay |
-| `/verify` (email code) | none | 🔴 | `fakeRequest()` delay, then continues to `/sites/new` |
+| `/sign-in`: submit | `POST /login` | ✅ | Writes `authToken` and `authUser` and stores the workspaces. Lands on `/sites`, or on `?next=` |
+| `/sign-up`: submit | `POST /register` | ✅ | Signs the user in straight away |
+| `/sign-up`: workspace name | `POST /workspace/store` (multipart) | ✅ | First workspace (`is_default: 1`), then `/sites/new` |
+| Every app load | `GET /me` | ✅ | Confirms the token (a 401 signs out) and refreshes name and email in `authUser` |
+| Profile menu: **Sign out** | `POST /logout` | ✅ | Best effort; cookies are cleared either way |
+| "Continue with Google" | none | ⛔ | Shows "unavailable" |
+| `/forgot-password` | none | ⛔ | Opens an email to support with the reset request (tenant's support address on white-label domains) |
+| `/verify` | none | ⛔ | Redirects to `/sign-in` (no email-code endpoint) |
 
-`GET /me` is wrapped in `services/auth.ts` but no screen calls it yet. The session comes from the login response.
-
-**Test:** sign up with a new email and confirm that `register` and `workspace/store` both return 2xx and that you land on `/sites/new`. Sign out, then sign in again and confirm you land on `/sites`. Delete the `authToken` cookie and open any app page: you should be redirected to `/sign-in?next=…`.
-
-Code: [`src/lib/auth/session.ts`](../src/lib/auth/session.ts), [`src/lib/auth-session.ts`](../src/lib/auth-session.ts), [`src/services/auth.ts`](../src/services/auth.ts)
+**Test:** sign up with a new email and confirm `register` and `workspace/store` return 2xx and you land on `/sites/new`. Reload any page and look for `GET /me`. Delete `authToken` and open an app page: you should land on `/sign-in?next=…`.
 
 ---
 
@@ -80,237 +82,234 @@ Code: [`src/lib/auth/session.ts`](../src/lib/auth/session.ts), [`src/lib/auth-se
 
 | Action | Endpoint | Status | Notes |
 |---|---|---|---|
-| Load the workspace list and the active workspace | `GET /workspace` | 🟡 | **Returns 404 today** (no controller on the backend yet). The service falls back to `rankoya:login-workspaces` from login |
-| Load the sites in the active workspace | `GET /sites` | ✅ | |
+| Workspace list and active workspace | `GET /workspace` | 🟡 | **Returns 404 today.** Falls back to `rankoya:login-workspaces` |
+| Sites in the active workspace | `GET /sites` | ✅ | |
 | Site card: clusters covered | `GET /sites/{site}/topical-maps` | ✅ | One call per card |
-| Site card: AI visibility score | `GET /sites/{site}/ai-visibility/overview` | ✅ | One call per card. Shown only after the first visibility test |
-| Switch workspace (top bar, ⌘K, setup) | `POST /workspaces/{id}` | ✅ | Activates the workspace on the backend, updates the `authUser` cookie, clears the whole React Query cache, then goes to `/sites` |
-| Create workspace (switcher) | `POST /workspace/store` | ✅ | |
-| Usage meters, UI preferences (`useMe`, `useUsage`) | none | 🔴 | `lib/mocks/store` |
-
-A card links to `/sites/{id}/setup/{step}` while setup is unfinished (according to `rankoya:setup-progress`), and to `/{siteId}/overview` once it is done.
-
-**Test:** with two workspaces, switch between them. You should see `POST /workspaces/{id}`, then a fresh `GET /sites` that returns the other workspace's sites.
-
-Code: [`src/features/workspace/hooks.ts`](../src/features/workspace/hooks.ts), [`src/services/workspaces.ts`](../src/services/workspaces.ts), [`src/services/sites.ts`](../src/services/sites.ts), [`src/features/sites/hooks.ts`](../src/features/sites/hooks.ts)
+| Site card: AI visibility score | `GET /sites/{site}/ai-visibility/overview` | ✅ | 0 before the first scan |
+| Switch workspace (top bar, ⌘K, setup) | `POST /workspaces/{id}` | ✅ | Clears the query cache, then `/sites` |
+| Create workspace | `POST /workspace/store` | ✅ | |
 
 ---
 
 ## 3. Adding a site: the 8-step setup (`/sites/new` → `/sites/{id}/setup/{step}`)
 
-The progress bar counts "account" as step 1, so the domain screen reads "Step 2 of 8". Progress is stored per site in `rankoya:setup-progress`, so a refresh resumes at the right step, and jumping ahead by URL sends you back to the furthest step reached.
+"Add website" anywhere in the app (Overview banner, Quick actions, sites page) opens this flow at `/sites/new?workspace={id}`.
 
 ### Step 2a: Domain (`/sites/new`) ✅
 
 | Action | Endpoint | Notes |
 |---|---|---|
-| (if a different workspace is picked) | `POST /workspaces/{id}` | Sites are created in the backend's active workspace |
-| **Continue** | `POST /sites` `{ name, url: "https://<domain>" }` | Errors from the server show under the field |
-| Right after create (fire and forget) | `POST /sites/{site}/crawl` | Starts the first crawl; the run id is saved to the setup draft |
-| Load the site on later steps | `GET /sites/{site}` | 404 shows "site not found" |
+| (if another workspace is picked) | `POST /workspaces/{id}` | Sites are created in the active workspace |
+| **Continue** | `POST /sites` `{ name, url }` | Server errors show under the field |
+| Right after create | `POST /sites/{site}/crawl` | Fire and forget; the run id goes into the draft |
 
 ### Step 2b: Details (`/setup/details`) 🟡
 
-The description and audience are written from the site's first crawl in [`site-profile.ts`](../src/features/site-setup/site-profile.ts):
+Code: [`site-profile.ts`](../src/features/site-setup/site-profile.ts), [`crawl.ts`](../src/features/site-setup/crawl.ts).
 
 | Order | Endpoint | Notes |
 |---|---|---|
-| 1 | `GET /sites/{site}/crawl-runs/{run}`, polled every 3 s | Waits for the crawl the domain step started (up to 3 min). If its id never reaches the draft within 10 s, it calls `POST /crawl` itself |
-| 2 | `GET /sites/{site}/crawl-runs/{run}/pages` | First 50 pages. Only pages that loaded and have text are kept, homepage first. Both sections share this one read |
-| 3 | `POST /sites/{site}/copilot/ask` | **Option B.** The question contains up to 12 page digests (path, type, title, meta description, H1 and a text excerpt), capped at 5,000 characters. It asks for markdown in the UI's language with fixed headings. The audience question also includes the confirmed description. Both sections use the same conversation |
-| fallback | none | **Option A.** If the copilot errors or returns an empty answer, the section is built from the pages' own text: homepage title, meta description, H1 and summary, plus key service or product pages. The audience gets a short list derived from the offer pages and the site's country and language. The fallback is always in English |
+| 1 | `GET /sites/{site}/crawl-runs/{run}`, every 3 s | Waits for the first crawl (up to 3 min). If no run id arrives within 10 s, starts one with `POST /crawl` |
+| 2 | `GET /sites/{site}/crawl-runs/{run}/pages` | First 50 pages, readable ones only, homepage first. Shared with step 4 |
+| 3 | `POST /sites/{site}/copilot/ask` | Writes each section in **RankYak's structure** from up to 12 page digests (≤ 5,000 chars). Description: *Core Business · Key Features ("Name: explanation") · Unique Value Proposition*, with claims marked "The site claims…" and testimonials marked "not independently verified". Audience: *Primary Audience · Key Characteristics (Professional roles, Business needs, Pain points, Buying behavior, Company profile)*. Replies in the UI language; both sections share one conversation |
+| fallback | none | If the copilot fails or answers empty, the same headings are filled from the pages' titles, meta descriptions, H1s, summaries and offer pages (English) |
 
-- If no page could be read, the section shows the error with **Try again**. Retry reads the crawl again.
-- The finished answer is released in small bursts, so it writes itself in. The copilot does not stream.
-- The loader shows Retry after 90 s, because a first crawl can take minutes.
-- **Side effect:** the copilot conversation is stored, so the Agent screen (which opens the latest conversation) will show this setup thread until the user asks something new.
-- **Still local:** confirmed answers stay in the localStorage draft. There is no `PATCH /sites/{site}` to save them yet.
-- Language and country default from the domain's TLD, then from the site's `location` and `language`.
+- No readable pages → the error with **Try again**. Retry appears after 90 s.
+- **Not saved to the backend:** there is no `PATCH /sites/{site}`. Confirmed text stays in the draft.
+- **Side effect:** the copilot thread shows on the Agent screen until the user asks something new.
 
-Completing this step **prefetches topic discovery** (see step 4), so the topics are often ready by the time the user gets there.
+### Step 3: Google Search Console ✅
 
-**Test:** add a domain and watch Network for the `crawl-runs/{id}` polls → `crawl-runs/{id}/pages` → `copilot/ask`. To test the fallback, block `copilot/ask` in DevTools (right-click → Block request URL), then retry. The text should come back built from the page titles and meta descriptions.
+`GET search-console/overview` → **Connect**: `GET search-console/connect` → Google → backend `GET /google/search-console/callback` → `/settings/search-console?connected=1` → `GET search-console/properties` → `POST search-console/property` (auto-picked when one matches the domain) → `POST search-console/sync` (not awaited). **Skip** is allowed.
 
-### Step 3: Google Search Console (`/setup/google-search-console`) ✅
+### Step 4: Core topics ✅
 
-| Action | Endpoint | Notes |
-|---|---|---|
-| Check connection status | `GET /sites/{site}/search-console/overview` | `connection` is null until connected. "Ready" means `status = connected` **and** a property is chosen |
-| **Connect** | `GET /sites/{site}/search-console/connect` | Returns `authorization_url`. The browser goes to Google, and `rankoya:gsc-pending` is written to sessionStorage |
-| Google → backend | `GET /google/search-console/callback` | Handled by the backend, which redirects to `{FRONTEND_URL}/settings/search-console?connected=1` |
-| Return page: list properties | `GET /sites/{site}/search-console/properties` | A property matching the domain is picked automatically (domain property first, then URL-prefix) |
-| Return page: save property | `POST /sites/{site}/search-console/property` | Then sends the user back to the setup step |
-| After saving (not awaited) | `POST /sites/{site}/search-console/sync` | Pulls the last 30 days |
+Code: [`topics.ts`](../src/features/site-setup/topics.ts). This step is the **topical map builder**:
 
-**Skip** is allowed and continues without a connection.
+1. `GET topical-maps` → if a map with clusters exists, its clusters are offered straight away (`GET topical-maps/{id}`).
+2. Otherwise, after the crawl (same pages as step 2b): `POST keywords/discover` with **seed keywords taken from page titles, H1s and headings**, then `POST keywords/analyze`, then `POST topical-map/build`, then `GET topical-maps/{id}`.
+3. If the map is empty (common on small sites), the site's own keywords are grouped by cluster name and offered instead (`GET keywords`).
+4. If all of that is empty, the step shows the error and the backend's message with **Try again**. It never shows an empty list.
 
-### Step 4: Core topics (`/setup/core-topics`) ✅
+The 5 topics with the highest search volume are recommended. Retry appears after 2 min. An empty list cached by an earlier version is ignored.
 
-[`topics.ts`](../src/features/site-setup/topics.ts) runs this chain. Each call is slow, so the step can take several minutes on a fresh site.
+**Why you saw no topics before:** the map came back `null` (too few usable keywords from a 4-page crawl), the empty list was cached forever, and the step let you continue with zero topics. All three are fixed.
 
-1. `GET /sites/{site}/crawl-runs/{run}`, **polled every 3 s** until the crawl completes or fails. It gives up after 3 minutes and uses whatever has been crawled. If there is no saved run id, it calls `POST /crawl` first.
-2. `POST /sites/{site}/keywords/discover`
-3. `POST /sites/{site}/keywords/analyze` (scores and clusters the keywords)
-4. `POST /sites/{site}/topical-map/build`
-5. `GET /sites/{site}/topical-maps/{id}`. The clusters become topic chips, and the 5 with the highest search volume are pre-selected.
+### Step 5: Billing 🟡 · Step 6: Integration ✅ · Step 7: Preferences 🟡
 
-The topics the user chooses are kept in the local draft only.
+- Billing reads the plan from `authUser`; upgrading goes to `/upgrade` (Paddle).
+- Integration: `GET/POST publishing/connections`, then `POST publishing/connections/{id}/test`.
+- Preferences stay in the draft and are sent in step 8.
 
-### Step 5: Billing (`/setup/billing`) 🟡
+### Step 8: Done ✅
 
-Shows plans and reads the plan from the `authUser` cookie. Upgrading links to `/upgrade` (Paddle checkout, see section 6). The user can also continue on Free.
+1. `POST keywords/discover` with the **chosen core topics as seed keywords**. The backend has no core-topics field, so this is how the choice reaches it.
+2. `POST content-planner/generate` with `{ month, timezone, cadence: "weekly", articles_target, autopilot_enabled }`.
+3. Setup is marked finished and the user lands on `/{siteId}/overview`. Failures in 1–2 don't block finishing.
 
-### Step 6: Integration (`/setup/integration`) ✅
-
-| Action | Endpoint |
-|---|---|
-| List connections | `GET /sites/{site}/publishing/connections` |
-| Connect a CMS | `POST /sites/{site}/publishing/connections`, then `POST /publishing/connections/{id}/test` |
-
-API connections are created as `pending`. Only a passing test makes them `active`. If the test returns `success: false`, the connection is kept in `error` state and the message is shown. The form fields for each platform are in [`publishing/forms.ts`](../src/features/publishing/forms.ts):
-
-| Platform | Fields |
-|---|---|
-| WordPress | site_url, username, application_password |
-| Shopify | store_domain, access_token |
-| Webflow | access_token, config.collection_id |
-| Wix | access_token, site_id |
-| Ghost | config.site_url, admin_api_key |
-
-### Step 7: Preferences (`/setup/preferences`) 🔴
-
-Articles per week and publish mode (manual or auto) are kept in the local draft. They are sent in step 8.
-
-### Step 8: Done (`/setup/done`) ✅
-
-**Finish** calls `POST /sites/{site}/content-planner/generate` with:
-```json
-{ "month": "YYYY-MM", "timezone": "<browser tz>", "cadence": "weekly",
-  "articles_target": "articlesPerWeek × 4 (1–100)", "autopilot_enabled": "publishMode === auto" }
-```
-If the call fails, setup still finishes, and the plan can be generated later from Content. Setup is then marked finished, and the user is sent to `/{siteId}/overview`.
-
-**Test the whole flow:** add a real domain you control. In Network you should see, in order: `POST /sites` → `POST /crawl` → (step 4) `crawl-runs/{id}` polls → `keywords/discover` → `keywords/analyze` → `topical-map/build` → `topical-maps/{id}` → (step 8) `content-planner/generate`.
+**Test the whole flow:** `POST /sites` → `POST /crawl` → `crawl-runs/{id}` polls → `crawl-runs/{id}/pages` → `copilot/ask` ×2 → (step 4) `topical-maps` → `keywords/discover` → `keywords/analyze` → `topical-map/build` → `topical-maps/{id}` → (step 8) `keywords/discover` → `content-planner/generate`.
 
 ---
 
-## 4. Site dashboard (`/{siteId}/…`)
+## 4. The site dashboard (`/{siteId}/…`)
 
-The `[brand]` URL segment is the site id. The layout resolves it with `GET /sites/{site}` and `GET /workspace`. A 404 shows not-found, and an unknown site id shows not-found too.
+The sidebar follows the growth loop:
 
-### 4.1 Overview (`/{site}/overview`) 🟡
+| Group | Screens |
+|---|---|
+| **Insights** (where you stand) | Overview · AI visibility · Rankings · Competitors · Site audit |
+| **Grow** (what to do) | Action plan · **Topical map** · Content · **Money pages** · **Authority** · Ask Rankoya |
+| **Workspace** (connect and run) | Integrations · **SEO tools** · Resellers · Agency · Settings |
 
-| Element | Source | Status |
-|---|---|---|
-| Growth loop progress (connect → analyze → discover → optimize → publish → measure) | `search-console/overview`, `publishing/connections`, `site.last_crawled_at`, `topical-maps`, `opportunities`, `publishing/publications`, `ai-visibility/overview` | ✅ Each step counts as done when its data exists |
-| **Run AI scan** | `GET ai-visibility/prompts` → (if there are none) `POST ai-visibility/prompts/generate` → `POST ai-visibility/test` | ✅ Slow, synchronous |
-| Trend charts, sparklines, share of voice | `getBrandSummary` mock | 🔴 No history endpoint |
-| Platform cards (`platformGlance`), activity feed | `lib/mocks/ui-data*` | 🔴 |
+**Social** and **Reports** are commented out in [`nav.ts`](../src/components/layout/nav.ts) until the backend has endpoints for them.
 
-### 4.2 AI Visibility (`/{site}/visibility`) ✅
+### 4.1 Overview ✅
+
+Code: [`features/overview/hooks.ts`](../src/features/overview/hooks.ts). Everything is calculated from live data for the selected range (7/30/90 days), with 0 when there is none.
+
+| Element | Source |
+|---|---|
+| Platform cards: ChatGPT, Claude, Gemini, Perplexity | `GET ai-visibility/results`: share of that engine's answers that mention the site, change vs the previous range, daily sparkline |
+| Platform card: Google | `GET search-console/overview`: share of Search Console queries averaging top-10, change and sparkline |
+| Trend chart | Daily share of AI answers that mention the site |
+| Share of voice | Mentions of the site vs competitors named in the same answers |
+| Recent activity | Last crawl, latest scan, articles written (`GET articles`), articles published (`GET publishing/publications`) |
+| Getting started | `search-console/overview`, `publishing/connections`, `topical-maps`, `opportunities`, `publications`, `ai-visibility/overview` |
+| **Run new scan** | `GET ai-visibility/prompts` → (none) `POST ai-visibility/prompts/generate` → `POST ai-visibility/test` |
+| **Add website** | Opens site setup (§3) |
+
+Google Maps was removed (no endpoint).
+
+### 4.2 AI visibility ✅
+
+`GET ai-visibility/overview`, `GET ai-visibility/prompts`, `GET ai-visibility/results`. **Generate prompts**: `POST ai-visibility/prompts/generate`. **Run scan**: `POST ai-visibility/test`. The score is 0 before the first test. Engines shown are the four the backend tests (ChatGPT, Gemini, Perplexity, Claude).
+
+### 4.3 Rankings ✅
+
+`GET keywords`, `GET serp/results`, `GET ai-visibility/prompts`, `GET ai-visibility/results`, `GET search-console/overview`. **Add keywords**: `POST keywords/discover` `{ seed_keywords }` → `POST keywords/analyze`. Position change and sparklines are empty because the API has no rank history.
+
+### 4.4 Competitors ✅
 
 | Action | Endpoint |
 |---|---|
-| Load the screen | `GET ai-visibility/overview`, `GET ai-visibility/prompts`, `GET ai-visibility/results` (newest 100) |
-| Generate prompts | `POST ai-visibility/prompts/generate` `{ limit? }` |
-| Run scan | as on Overview, or `POST ai-visibility/test` `{ prompt_ids }` for selected prompts |
-| Prompt detail `/visibility/prompts/{id}` | Reuses prompts and results. "Re-run" calls `POST ai-visibility/test` with that prompt id |
-
-The engine list, cited sources and the per-engine breakdown are **built in the browser** from these results ([`visibility/model.ts`](../src/features/visibility/model.ts)). The display engine catalogue is static.
-
-### 4.3 Rankings (`/{site}/rankings`) 🟡
-
-| Action | Endpoint |
-|---|---|
-| Load the screen | `GET keywords`, `GET serp/results`, `GET ai-visibility/prompts`, `GET ai-visibility/results`, `GET search-console/overview` |
-| **Add keywords** | `POST keywords/discover` `{ seed_keywords }`, then `POST keywords/analyze` |
-
-Positions come from Search Console first (impression-weighted average per query and device), then fall back to the best SERP result. The "AI engines" column counts the engines that mentioned the site for prompts generated from each keyword. **Position change and sparklines are empty** because the API has no rank history yet.
-
-### 4.4 Competitors (`/{site}/competitors`) 🟡
-
-| Action | Endpoint |
-|---|---|
-| Load the screen | `GET competitors`, `GET content-gaps`, `GET serp/results`, `GET keywords`, `GET ai-visibility/prompts`, `GET ai-visibility/results`, `GET authority/opportunities?per_page=20` |
+| Load | `GET competitors`, `GET content-gaps`, `GET serp/results`, `GET keywords`, `GET ai-visibility/prompts`, `GET ai-visibility/results`, `GET authority/opportunities?per_page=20` |
 | **Research competitors** | `POST serp/research` |
-| "Draft answer" on question gaps, "Draft outreach" on link sites | none | 🔴 `fakeRequest` |
+| **Research history** card | `GET serp/runs` |
+| Per competitor: **Find link prospects** | `POST authority/backlink-prospects` `{ competitor_domain, limit: 20 }` (paid) |
+| Question gaps: **Write the answer** | `POST copilot/ask`; the drafted answer opens in a dialog |
+| Keyword gaps: **Add to keywords** | `POST keywords/discover` `{ seed_keywords: [keyword] }` |
+| Link sites: **Open link opportunities** | Goes to Authority |
 
-Share of voice, question gaps (prompts where competitors were named and the site was not), keyword gaps and link sites are all computed in the browser from the responses above.
+### 4.5 Site audit ✅
 
-### 4.5 Site Audit (`/{site}/audit`) ✅
+Code: [`audit-view.tsx`](../src/app/(app)/[brand]/audit/audit-view.tsx), [`features/audit/crawl.ts`](../src/features/audit/crawl.ts).
+
+| Element / action | Endpoint |
+|---|---|
+| **Latest crawl** card (status, pages read/found/failed, progress) | `GET crawl-runs/{run}`, polled every 3 s while running |
+| **Recrawl site** | `POST crawl` → poll → when finished, `POST site-guard/analyze` automatically |
+| **Run audit** | `POST site-guard/analyze` |
+| Scores and stats | `GET site-guard/issues` (summary page), `GET authority/profile` |
+| **Issues** tab, filter by status (open, in progress, resolved, ignored) | `GET site-guard/issues?status=&page=` (50 per page, with pager) |
+| Issues **By issue** layout | Rows grouped by issue type, with a count; expand to see **every affected page URL**, its current value, status and fix control |
+| Issues **All rows** layout | One row per issue, with its page URL |
+| **Crawled pages** tab | `GET crawl-runs/{run}/pages?page=` (50 per page): URL, title, status code, meta description length or **Missing**, H1, words, indexable, issue count. CSV export |
+| Page detail drawer | Title and meta (with lengths), H1, canonical, indexable, structured data, words, internal/external links, images without alt text, headings, summary, and the issues on that page |
+| Bulk / per-row **Let Rankoya fix** | `POST site-guard/issues/{id}/propose-fix` |
+| Issue page: apply / verify / status | `POST …/apply-fix`, `POST …/verify-fix`, `PATCH site-guard/issues/{id}` |
+
+The crawl run id comes from `rankoya:crawl-runs`, the setup draft, or the newest `crawl_run_id` on the issues' pages. The backend has no "latest crawl" endpoint. Only canonical and meta-description issues can be fixed by Rankoya.
+
+### 4.6 Action plan ✅
+
+`GET opportunities`, `GET ai-visibility/overview`. **Find opportunities**: `POST opportunities/analyze`. Move cards: `PATCH opportunities/{id}` `{ status }`. **Details** on any card: `GET opportunities/{id}` (description, what to do, impact/effort/score, evidence). The made-up progress bar on "working" cards is gone.
+
+### 4.7 Topical map (new) ✅
+
+| Element / action | Endpoint |
+|---|---|
+| Coverage ring, clusters, keywords, mapped, clusters with a page | `GET topical-maps`, `GET topical-maps/{id}` |
+| Map version picker | `GET topical-maps` (when there is more than one) |
+| Cluster cards: core topic, coverage, keywords and volume, strategy, money-page badge, target page or **Plan content** | `GET topical-maps/{id}` |
+| **All keywords** tab (volume, difficulty, CPC, opportunity, intent, cluster, quality) | `GET keywords?page=` (100 per page) |
+| **Discover keywords** (optional seeds) | `POST keywords/discover` → `POST keywords/analyze` → `POST topical-map/build` |
+| **Rebuild map** | `POST topical-map/build` |
+
+### 4.8 Content ✅
 
 | Action | Endpoint |
 |---|---|
-| Load the screen | `GET site-guard/issues`, `GET authority/profile` (for the AI-readiness score) |
-| **Run audit** | `POST site-guard/analyze` (scans the latest crawl) |
-| Bulk "Let Rankoya fix" | `POST site-guard/issues/{id}/propose-fix`, once per issue, one at a time |
-| Issue detail `/audit/{issueId}` | `GET site-guard/issues/{id}` |
-| ↳ Propose fix | `POST …/propose-fix` (proposal stored in `metadata.fix`) |
-| ↳ Apply fix | `POST …/apply-fix` (returns a deployment package) |
-| ↳ Verify fix | `POST …/verify-fix` (checks the live page; resolves the issue on success) |
-| ↳ Ignore / reopen / in progress | `PATCH site-guard/issues/{id}` `{ status }` |
+| Month calendar / list | `GET content-calendar?from=&to=`, `GET articles?per_page=100` |
+| **Plan next month** | `POST content-planner/generate` |
+| Row menu: **Reschedule** | `PATCH content-calendar/{item}/reschedule` `{ scheduled_date, scheduled_time }` |
+| Row menu: **Change keyword** | `PATCH content-calendar/{item}/swap-keyword` `{ keyword_id }` (from `GET keywords`) |
+| Row menu: **Remove from calendar** | `PATCH content-calendar/{item}/remove` |
+| **Plans** tab | `GET content-plans?page=` |
+| **Research briefs** tab + drawer | `GET articles/research?page=`, `GET articles/research/{id}` |
+| Planned item → **Write it** | `POST articles/research/keywords/{keyword}` → `POST articles/generate/{research}` |
+| Article: save / publish | `PUT articles/{id}`, `POST publishing/articles/{id}/publish` |
 
-The backend can write fixes only for **canonical** and **meta_description** issues; other issues are marked "yours". The SEO health score is calculated in the browser as 100 minus 8, 3 or 1 points for each critical, warning or notice issue. **Category scores are empty** because there is no API for them.
+"Reject" and "Ask for revisions" were removed from the article page: the backend can't reject or revise an article.
 
-### 4.6 Action plan (`/{site}/actions`) ✅
-
-| Action | Endpoint |
-|---|---|
-| Load the board | `GET opportunities`, `GET ai-visibility/overview` |
-| **Find opportunities** | `POST opportunities/analyze` |
-| Approve, start, complete or ignore cards | `PATCH opportunities/{id}` `{ status }`, once per selected card |
-
-Each card's column comes from its status and type: Rankoya handles content, gap, refresh, article, cluster and internal-link work; everything else is yours.
-
-### 4.7 Content (`/{site}/content`) ✅
+### 4.9 Money pages (new) ✅
 
 | Action | Endpoint |
 |---|---|
-| Month calendar | `GET content-calendar?from=&to=`, plus `GET articles?per_page=100` (matched to calendar items by `keyword_id`) |
-| **Generate plan** for a month | `POST content-planner/generate` `{ month, timezone }` |
-| Open an item with no article yet (`/content/item-{id}`) | `GET content-calendar` (finds the item) |
-| ↳ **Write it** | `POST articles/research/keywords/{keywordId}`, then `POST articles/generate/{researchId}` (both slow) |
-| Open an article (`/content/{articleId}`) | `GET articles/{id}` |
-| ↳ Save edits | `PUT articles/{id}` (the backend saves a revision first) |
-| ↳ Publish | `GET publishing/connections` (to pick a target), then `POST publishing/articles/{id}/publish` |
-| ↳ "Ask for revisions" | none | 🔴 `fakeRequest` |
+| **Find money pages** | `POST money-pages/analyze` |
+| Table: page, commercial score, role, intent, primary keyword, conversion signals, analyzed | `GET money-pages?page=&per_page=20` |
+| Page drawer | `GET money-pages/{id}`, `GET money-pages/{id}/recommendations` (prioritised recommendations, workflow, conversion signals, supporting content, internal-link opportunities) |
 
-Wrapped in the service but **not used in the UI yet:** `content-plans`, `content-calendar/{item}/reschedule`, `/swap-keyword` and `/remove`, plus `articles/research` (list and get).
-
-### 4.8 Agent (`/{site}/agent` and the ⌘J panel) 🟡
+### 4.10 Authority (new) ✅
 
 | Action | Endpoint |
 |---|---|
-| Load the thread | `GET copilot/conversations?per_page=1`, then `GET copilot/conversations/{id}` for the latest conversation |
-| Send a message | `POST copilot/ask` `{ question, conversation_id }`. The question appears straight away and is replaced by the stored pair from the response |
-| Approval cards, open tasks list | none | 🔴 `decideApproval` and `openTasks` mocks |
+| Scores (readiness, internal, external), backlinks, referring domains, competitor gap | `GET authority/profile` |
+| **Analyze authority** | `POST authority/analyze` |
+| **Fetch live metrics** (confirm first; paid) | `GET authority/backlinks/summary`: backlinks, referring domains/pages, spam score, new/lost, rank, cost |
+| **Link opportunities** tab, status dropdown | `GET authority/opportunities?page=&per_page=20`, `PATCH authority/opportunities/{id}` `{ status }` |
+| Opportunity drawer | `GET authority/opportunities/{id}` |
+| **Live backlinks** tab (Load button; paid per page) | `GET authority/backlinks?limit=20&offset=` |
+| **Find prospects** (competitor domain, page to pitch, limit) | `POST authority/backlink-prospects` |
 
-### 4.9 Integrations (`/{site}/integrations`) 🟡
+### 4.11 Ask Rankoya (agent) ✅
 
-| Provider | Status | Endpoints |
-|---|---|---|
-| WordPress, Shopify, Webflow, Wix, Ghost | ✅ | `GET/POST publishing/connections`, `POST publishing/connections/{id}/test` (detail page "Test again") |
-| Search Console | ✅ | Same OAuth flow as setup step 3. The detail page's **Sync** calls `POST search-console/sync` |
-| Google Analytics, Telegram | 🔴 | Browser-only Zustand store, `fakeRequest` |
-| **Disconnect** (any provider) | 🔴 | `fakeRequest`; it only removes the local entry |
-| `/integrations/{provider}/select` (account picker) | 🔴 | `fakeRequest` |
+`GET copilot/conversations?per_page=1` → `GET copilot/conversations/{id}`; send: `POST copilot/ask`. The "Open tasks" card lists the action-plan cards that are working or waiting for approval. The Telegram card was removed (no endpoint).
 
-WordPress.com OAuth (`publishing/wordpress-com/authorize` / `callback` / `complete`) is wrapped in `services/publishing.ts` but **not used in the UI**.
+### 4.12 Integrations ✅
 
-### 4.10 Placeholders
+| Element | Endpoint |
+|---|---|
+| **Website platform** card: detected vs confirmed, change it | `PATCH sites/{site}/platform` `{ platform }` |
+| WordPress, Shopify, Webflow, Wix, Ghost | `GET/POST publishing/connections`, `POST publishing/connections/{id}/test` |
+| **WordPress.com** (new) | `GET publishing/wordpress-com/authorize` → WordPress.com → `/integrations/wordpress-com/callback` → `GET publishing/wordpress-com/callback?code&state` → pick a site → `POST publishing/wordpress-com/complete` → `POST publishing/connections/{id}/test` |
+| Search Console | OAuth as in setup; **Sync**: `POST search-console/sync` |
+| AI engines tab | Read-only list of the 4 engines every scan tests |
+| Telegram, Google Analytics | ⛔ Coming soon |
+| Disconnect | ⛔ Removed (no endpoint) |
 
-`social` (marked "soon") and `reports` render an empty-state placeholder through `[brand]/[...section]`. Old `/{site}/settings/...` links redirect to `/settings`.
+**Backend config needed:** the WordPress.com OAuth redirect URI must point to `{FRONTEND_URL}/integrations/wordpress-com/callback`.
 
-### 4.11 Shell (all dashboard pages)
+### 4.13 SEO tools (new) ✅
+
+| Tab | Endpoint |
+|---|---|
+| Meta tags | `POST free-tools/meta-tags` |
+| Redirects | `POST free-tools/redirect-checker` |
+| Broken links | `POST free-tools/broken-links` (limit 100) |
+| Robots.txt | `POST free-tools/robots-txt` |
+| Keyword clustering | `POST free-tools/keyword-clustering` |
+| Schema markup | `POST free-tools/schema-generator` (copy the `<script>` tag) |
+| Agent tools (MCP) | `GET mcp/tools`, `POST mcp/sites/{site}/call` (pick a tool, see its arguments, send JSON, see the result) |
+
+### 4.14 Shell
 
 | Element | Status |
 |---|---|
-| Brand switcher, ⌘K site list | ✅ `GET /sites` |
-| Workspace switcher | ✅ `POST /workspaces/{id}` |
-| Notifications popover | 🔴 Mock, refetched every 60 s |
-| Help sheet: support ticket and feedback | 🔴 `fakeRequest` |
-| Theme and language | 🔴 Local preferences (`updateMe` mock) |
-| Job banner (`useJob`) | 🔴 `getMockJob` |
+| Brand and workspace switchers, ⌘K | ✅ `GET /sites`, `POST /workspaces/{id}` |
+| User card and profile menu | ✅ From `authUser` (+ `GET /me`) |
+| Help: support ticket and feedback | ⛔ Opens an email to support with the message filled in |
+| Notifications bell | ⛔ Hidden (no endpoint) |
+| Theme and language | Browser preferences |
 
 ---
 
@@ -318,103 +317,71 @@ WordPress.com OAuth (`publishing/wordpress-com/authorize` / `callback` / `comple
 
 | Page / action | Endpoint | Status |
 |---|---|---|
-| **Settings → Profile**: upload photo | `POST /upload-loacal-image` (`image`; the misspelling is the real route) or `POST /upload-gif` (`gif_file`) | ✅ |
-| Settings → Profile: save details, change password | none | 🔴 Toast only |
-| **Settings → Workspaces**: list, create, update, delete, activate | `GET /workspace`, `POST /workspace/store`, `POST /workspace/update`, `POST /workspace/delete`, `POST /workspaces/{id}` | ✅ (list falls back to the login data while `GET /workspace` is 404) |
-| **Settings → Team**: list, add, edit, change password, delete | `GET /team`, `POST /team/add`, `POST /team/update`, `POST /team/update/password`, `DELETE /team/delete` | ✅ |
-| **Settings → Subscriptions**: cancel | `POST /cancle/subscription` `{ subscriptionId }` (the misspelling is the real route) | ✅ |
-| `/settings/search-console?connected=1` | GSC OAuth return page (see §3 step 3) | ✅ |
-| **Resellers** `/resellers`: list, add, edit, change password, delete | `GET /reseller`, `POST /reseller/add`, `POST /reseller/update/details`, `POST /reseller/update/password`, `DELETE /reseller/delete` | ✅ |
-| **Agency** `/agency` | Gated on the `authUser` cookie | 🟡 |
-| **White Label** `/workspaces/{id}`: list domains | `GET /custom-domains` | ✅ |
-| ↳ Configure (logo, colours, domain) | `POST /upload-loacal-image`, `POST /custom-domains` or `PATCH /custom-domains/{id}/config` | ✅ |
-| ↳ DNS records and verify | Next routes `GET /api/custom-domains/{domain}` and `/config` (Vercel), then `PATCH /custom-domains/{id}/verification` | ✅ (Vercel is simulated when `VERCEL_TOKEN` is unset) |
-| ↳ Delete domain | Next route `DELETE /api/custom-domains/{domain}`, then `DELETE /custom-domains/{id}` | ✅ |
-| White-label tenant branding (every page load on a custom host) | `GET /custom-domains/resolve?domain=<host>` | ✅ |
-| White Label access check | `GET /users/{id}/addons/reseller-seats/access` | ✅ |
+| **Settings → Profile**: photo | `POST /upload-loacal-image` (`image`) or `POST /upload-gif` (`gif_file`) | ✅ (URL kept on this device) |
+| Settings → Profile: name, email, password | none | ⛔ Read-only, with a note to contact support |
+| **Settings → Workspaces** | `GET /workspace`, `POST /workspace/store`, `/workspace/update`, `/workspace/delete`, `POST /workspaces/{id}` | ✅ (list falls back while `GET /workspace` is 404) |
+| **Settings → Team** | `GET /team`, `POST /team/add`, `/team/update`, `/team/update/password`, `DELETE /team/delete` | ✅ |
+| **Settings → Subscriptions**: cancel | `POST /cancle/subscription` | ✅ |
+| **Resellers** | `GET /reseller`, `POST /reseller/add`, `/reseller/update/details`, `/reseller/update/password`, `DELETE /reseller/delete` | ✅ |
+| **White Label** `/workspaces/{id}` | `GET/POST /custom-domains`, `PATCH /custom-domains/{id}/config`, `PATCH …/verification`, `DELETE /custom-domains/{id}`, Next routes `/api/custom-domains/**` (Vercel) | ✅ |
+| Tenant branding on custom hosts | `GET /custom-domains/resolve?domain=` | ✅ |
+| White Label access | `GET /users/{id}/addons/reseller-seats/access` | ✅ |
 
-The Next.js routes under `src/app/api/custom-domains/**` run on the server. They call the Vercel REST API with `VERCEL_TOKEN` and `VERCEL_PROJECT_ID` to add, inspect and remove domains on the Vercel project.
+## 6. Billing (`/upgrade`) ✅
 
----
+Paddle.js checkout with `NEXT_PUBLIC_PADDLE_*` price ids; plan changes call `POST /cancle/subscription` first. Without `NEXT_PUBLIC_PADDLE_CLIENT_TOKEN`, paid buttons are disabled.
 
-## 6. Billing (`/upgrade`) ✅ (Paddle)
+## 7. Admin (`/admin`) ✅
 
-- Checkout opens **Paddle.js** in the browser with the price id from `NEXT_PUBLIC_PADDLE_*` ([`lib/paddle-config.ts`](../src/lib/paddle-config.ts)). There is no Rankoya API call to start a checkout. The backend learns about the purchase through Paddle's webhook.
-- Changing an existing paid plan calls `POST /cancle/subscription` first, then opens checkout.
-- If `NEXT_PUBLIC_PADDLE_CLIENT_TOKEN` is unset, paid buttons are disabled and a notice is shown.
-- **Test:** use `NEXT_PUBLIC_PADDLE_ENVIRONMENT=sandbox` and a Paddle test card, then sign in again so `authUser.subscriptions` reflects the new plan.
+`GET /admin` (stats, users with `page`/`search`), `POST /admin/users/add`, `/admin/users/update/details`, `/admin/users/update/password`, `/admin/users/update/subscriptions`, `/admin/addon/update`, `/admin/users/credits/add`, `/admin/users/credits/update`, `/activateUser`, `/deactivateUser`, `/admin/users/delete`, `POST /user/sendCampaign`, `GET /all/email/campaign`.
 
 ---
 
-## 7. Admin (`/admin`, admin role only)
+## 8. Endpoint coverage
 
-| Page / action | Endpoint |
+**Every frontend-callable operation in the contract now has a screen or action.** The only operations not called are the three the providers call directly:
+
+| Operation | Called by |
 |---|---|
-| **Statistics** | `GET /admin` (dashboard data) |
-| **User management**: list and search | `GET /admin?page=&search=` |
-| ↳ Add user | `POST /admin/users/add` |
-| ↳ Edit details | `POST /admin/users/update/details` |
-| ↳ Change password | `POST /admin/users/update/password` |
-| ↳ Plan / licence | `POST /admin/users/update/subscriptions` |
-| ↳ Add-ons | `POST /admin/addon/update` |
-| ↳ Credits | `POST /admin/users/credits/add`, `POST /admin/users/credits/update` |
-| ↳ Activate / deactivate | `POST /activateUser`, `POST /deactivateUser` `{ id }` |
-| ↳ Delete | `POST /admin/users/delete` `{ user_id }` |
-| **Marketing**: send campaign | `POST /user/sendCampaign` (multipart when there is an attachment) |
-| ↳ Campaign list | `GET /all/email/campaign` |
+| `GET /google/search-console/callback` | Google (redirects back to `/settings/search-console`) |
+| `GET /publishing/wix/callback` | Wix |
+| `POST /publishing/wix/webhook` | Wix |
 
-All admin endpoints are ✅ wired. The `/admin` route guard uses the cookie, and the backend enforces the role.
+## 9. Gaps (need a backend endpoint or change)
 
----
-
-## 8. Backend endpoints with no UI yet
-
-These are in `openapi.yaml`, and most already have a service wrapper, but no screen calls them:
-
-| Area | Endpoints | Service |
+| Gap | Effect in the UI | What the backend could add |
 |---|---|---|
-| Auth | `GET /me` | `services/auth.ts` |
-| Sites | `PATCH /sites/{site}/platform` | `services/sites.ts` |
-| Crawl | `GET crawl-runs/{run}/pages` | `services/crawler.ts` |
-| SERP | `GET serp/runs` | `services/serp.ts` |
-| Opportunities | `GET opportunities/{id}` | `services/opportunities.ts` |
-| Content | `GET content-plans`, `PATCH content-calendar/{item}/reschedule`, `/swap-keyword`, `/remove`; `GET articles/research`, `GET articles/research/{id}` | `content-planner.ts`, `article-research.ts` |
-| Money pages | `POST money-pages/analyze`, `GET money-pages`, `GET money-pages/{id}`, `GET …/recommendations` | `services/money-pages.ts` |
-| Authority | `POST authority/analyze`, `GET/PATCH authority/opportunities/{id}` | `services/authority.ts` |
-| Publishing | WordPress.com OAuth (`authorize`, `callback`, `complete`); Wix callback and webhook (backend only) | `services/publishing.ts` |
-| MCP | `GET /mcp/tools`, `POST /mcp/sites/{site}/call` | `services/mcp.ts` |
-| Free tools | `POST /free-tools/robots-txt`, `redirect-checker`, `meta-tags`, `broken-links`, `keyword-clustering`, `schema-generator` | `services/free-tools.ts` |
-
-## 9. UI with no backend yet (still mocked)
-
-- Password reset, email verification and Google sign-in
-- Profile details and password save
-- Saving the confirmed site profile from setup step 2b (written live from the crawl and the copilot, but there is no endpoint to store it)
-- Overview trend charts, share of voice over time, platform cards and activity feed
-- Rank history (position change and sparklines) and audit category scores
-- Notifications, usage meters and the job banner
-- Agent approvals and tasks
-- Telegram and Google Analytics connections, plus **Disconnect** for every provider
-- "Draft answer" and "Draft outreach" on Competitors, and "Ask for revisions" on articles
-- Support ticket and feedback forms
-- Known backend gap: **`GET /workspace` returns 404**. The workspace list comes from the login response until the controller ships.
+| `GET /workspace` returns 404 | Workspace list comes from the login response | Ship the workspace controller |
+| No `PATCH /sites/{site}` (or settings) | Setup description, audience, country and language aren't saved | `PATCH /sites/{site}` accepting `description`, `target_audience`, `country`, `language` |
+| No site-profile endpoint | Setup uses the copilot + crawled pages | `POST /sites/{site}/profile/generate` (ideally streamed) |
+| No core-topics field | Chosen topics are sent as seed keywords | Store core topics on the site or the topical map |
+| No "latest crawl run" | Run id is remembered in the browser | `GET /sites/{site}/crawl-runs` (list, newest first) |
+| No rank / visibility history | Rank change and history charts are empty; Overview trends come from the newest 100 results | Daily snapshots |
+| No delete for publishing connections | No Disconnect | `DELETE /sites/{site}/publishing/connections/{id}` |
+| No article reject / revise | Buttons removed | Status update, or a revise endpoint |
+| No profile / password update for yourself | Read-only | `PUT /me`, `PUT /me/password` |
+| No password reset, email codes, Google sign-in | Email to support / hidden | Auth endpoints |
+| No notifications, Telegram, Analytics, usage meters | Hidden / coming soon | Endpoints for each |
+| WordPress.com redirect URI | Must point to the frontend callback page | Config change |
 
 ---
 
-## 10. Suggested demo script (about 15 minutes)
+## 10. Suggested demo script (about 20 minutes)
 
-1. **Sign up** (`/register` + `/workspace/store`). You land on `/sites/new`.
-2. **Add a domain** (`POST /sites`; the crawl starts in the background).
-3. **Details**: the crawl finishes, then the copilot writes the description and audience from the crawled pages. Confirm each section. Topic discovery starts in the background.
-4. **Search Console**: Connect → Google consent → the property is picked automatically → sync. Or skip.
-5. **Core topics**: real clusters from crawl → keywords → topical map. Pick 5.
-6. **Billing** (continue on Free), then **Integration** (connect WordPress with an application password: create + test), then **Preferences**.
-7. **Done**: the content plan is generated, and you land on Overview.
-8. **Visibility**: generate prompts → run a scan (slow) → open a prompt to see each engine's answer.
-9. **Audit**: run the audit → open a canonical or meta-description issue → propose → apply → verify.
-10. **Actions**: find opportunities → move a card.
-11. **Content**: open a planned item → **Write it** (research + generate, slow) → edit → save → publish to WordPress.
-12. **Agent** (⌘J): ask "What should I fix first?"
-13. **Settings → Team**: add a member. **Admin** (admin account): find the user and add credits.
+1. **Sign up** (`/register` + `/workspace/store`), then you land on `/sites/new`.
+2. **Add a domain** (`POST /sites`; the crawl starts).
+3. **Details**: the description and audience appear in RankYak's structure once the crawl finishes. Confirm each section.
+4. **Search Console**: connect (or skip).
+5. **Core topics**: real clusters from the topical map builder. Pick 5.
+6. **Billing** (Free) → **Integration** (WordPress app password, or WordPress.com sign-in) → **Preferences** → **Done**.
+7. **Overview**: run a scan, and watch the platform cards, trend and share of voice fill with real numbers.
+8. **Site audit**: recrawl → audit runs on its own → open **Crawled pages** and a page's drawer → group by issue and expand to see every URL → propose → apply → verify a canonical or meta issue.
+9. **Topical map**: discover keywords with a few seeds → see clusters, coverage and target pages.
+10. **Content**: reschedule an item, change its keyword, open **Research briefs**, write and publish an article.
+11. **Money pages**: find money pages → open one for recommendations.
+12. **Authority**: analyze → fetch live metrics → find prospects from a competitor → update an opportunity's status.
+13. **Competitors**: write the answer for a question gap; find link prospects for a competitor.
+14. **SEO tools**: meta tags and broken links on the homepage; run an MCP tool.
+15. **Ask Rankoya** (⌘J): "What should I fix first?"
 
-**Before the demo:** the slow calls (scan, topics, article writing) can take minutes. Run them once beforehand on the demo site so the screens open already filled, and keep a second, fresh site for the live setup flow.
+**Before the demo:** the slow calls (crawl, scan, topics, article writing, money pages, authority) can each take minutes. Run them once on the demo site so the screens open already filled, and keep a fresh site for the live setup flow. Paid calls (live metrics, backlinks, prospects) bill DataForSEO, so check whether the backend is on the sandbox.

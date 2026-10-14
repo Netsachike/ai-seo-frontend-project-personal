@@ -26,6 +26,9 @@ const ENGINE_BY_VENDOR: Record<string, Engine> = {
   perplexity: "perplexity",
 };
 
+/** The assistants the backend tests through OpenRouter, in display order. */
+export const TESTED_ENGINES: Engine[] = ["chatgpt", "gemini", "perplexity", "claude"];
+
 export function engineOf(model: string | null | undefined): Engine | null {
   const vendor = model?.split("/")[0]?.toLowerCase() ?? "";
   return ENGINE_BY_VENDOR[vendor] ?? null;
@@ -133,7 +136,8 @@ export function buildVisibilityData(
 
   const positions = results.map((r) => r.mention_position).filter((p): p is number => p !== null);
   return {
-    score: overview.total_tests > 0 ? overview.visibility_score : null,
+    // Zero before the first test: live values only, no placeholders.
+    score: overview.visibility_score ?? 0,
     scoreDelta: 0,
     rank: null,
     brandCount: 0,

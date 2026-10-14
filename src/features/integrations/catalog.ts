@@ -6,6 +6,7 @@
 export const INTEGRATION_PROVIDERS = [
   "telegram",
   "wordpress",
+  "wordpressCom",
   "searchConsole",
   "analytics",
   "shopify",
@@ -17,9 +18,9 @@ export const INTEGRATION_PROVIDERS = [
 export type IntegrationProvider = (typeof INTEGRATION_PROVIDERS)[number];
 
 /**
- * oauth: Google consent (Search Console is the backend's redirect flow;
- * Analytics is still a mock popup). credentials: a publishing connection
- * created and tested through the backend. code: Telegram's chat link (mock).
+ * oauth: the backend's redirect flow (Search Console, WordPress.com).
+ * credentials: a publishing connection created and tested through the
+ * backend. code: Telegram's chat link (no endpoint yet, so it is "soon").
  */
 export type ConnectMethod = "oauth" | "credentials" | "code";
 
@@ -44,10 +45,12 @@ export type ProviderMeta = {
 };
 
 export const PROVIDERS: Record<IntegrationProvider, ProviderMeta> = {
-  telegram: { monogram: "TG", category: "messaging", method: "code", scope: "user", backend: false },
+  // No endpoints yet: shown as coming soon, never connected.
+  telegram: { monogram: "TG", category: "messaging", method: "code", scope: "user", backend: false, soon: true },
   wordpress: { monogram: "WP", category: "platforms", method: "credentials", scope: "brand", backend: true },
+  wordpressCom: { monogram: "WP", category: "platforms", method: "oauth", scope: "brand", backend: true },
   searchConsole: { monogram: "GSC", category: "analytics", method: "oauth", scope: "brand", backend: true },
-  analytics: { monogram: "GA", category: "analytics", method: "oauth", scope: "brand", backend: false },
+  analytics: { monogram: "GA", category: "analytics", method: "oauth", scope: "brand", backend: false, soon: true },
   shopify: { monogram: "SH", category: "platforms", method: "credentials", scope: "brand", backend: true },
   webflow: { monogram: "WF", category: "platforms", method: "credentials", scope: "brand", backend: true },
   wix: { monogram: "WX", category: "platforms", method: "credentials", scope: "brand", backend: true },
@@ -63,22 +66,3 @@ export function providersIn(category: IntegrationCategory): IntegrationProvider[
 
 export const isIntegrationProvider = (value: string): value is IntegrationProvider =>
   (INTEGRATION_PROVIDERS as readonly string[]).includes(value);
-
-/** postMessage type the OAuth popup sends its opener. Same on both sides. */
-export const INTEGRATION_CONNECTED_MESSAGE = "rankoya:integration-connected";
-
-export type IntegrationConnectedMessage = {
-  type: typeof INTEGRATION_CONNECTED_MESSAGE;
-  provider: IntegrationProvider;
-  workspaceId: string | null;
-  brand: string | null;
-  account?: { name: string; detail: string } | null;
-  error?: string | null;
-};
-
-/** URL the OAuth popup opens. The backend will redirect here after the provider's consent screen. */
-export function oauthSelectUrl(provider: IntegrationProvider, params: { workspaceId?: string | null; brand: string }) {
-  const search = new URLSearchParams({ brand: params.brand });
-  if (params.workspaceId) search.set("workspace_id", params.workspaceId);
-  return `/integrations/${provider}/select?${search.toString()}`;
-}

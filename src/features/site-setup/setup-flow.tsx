@@ -9,6 +9,7 @@ import { useTranslations } from "next-intl";
 import { SITE_SETUP_STEPS, type SiteSetupStep } from "@/types/types";
 import { useUiStore } from "@/lib/store/ui";
 import contentPlannerService from "@/services/content-planner";
+import keywordService from "@/services/keywords";
 import { useSite, useWorkspaces } from "@/features/workspace/hooks";
 import { siteSlug } from "@/features/sites/site-utils";
 import { Button } from "@/components/ui/button";
@@ -109,7 +110,20 @@ export function SetupFlow({ siteId: siteParam }: { siteId: string }) {
    */
   const finish = async () => {
     setBusy(true);
-    const preferences = useSetupStore.getState().drafts[site.id]?.preferences;
+    const draft = useSetupStore.getState().drafts[site.id];
+    const preferences = draft?.preferences;
+    // The backend has no field for core topics, so they go in as seed keywords the plan can draw on.
+    const coreTopics = (draft?.topicSuggestions ?? [])
+      .filter((topic) => draft?.coreTopics.includes(topic.id))
+      .map((topic) => topic.label.trim().slice(0, 200))
+      .filter((label) => label.length >= 2);
+    if (coreTopics.length > 0) {
+      try {
+        await keywordService.discover(site.id, { seed_keywords: coreTopics });
+      } catch {
+        // The plan still generates from the keywords the site already has.
+      }
+    }
     try {
       await contentPlannerService.generate(site.id, {
         month: thisMonth(),

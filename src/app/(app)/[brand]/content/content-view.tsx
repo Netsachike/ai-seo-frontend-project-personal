@@ -28,7 +28,7 @@ import { toast } from "sonner";
 import { dateLocale } from "@/lib/date-locale";
 import { getErrorMessage } from "@/lib/errors";
 import type { ArticleStatus, ArticleSummary } from "@/lib/mocks/ui-data-work";
-import { useContentMonth, useGeneratePlan } from "@/features/content/hooks";
+import { useContentMonth, useGeneratePlan, type CalendarEntry } from "@/features/content/hooks";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
@@ -41,8 +41,10 @@ import { brandHref } from "@/components/layout/nav";
 import { PageHeader } from "@/components/layout/page-header";
 import { PageSkeleton } from "@/components/layout/page-skeleton";
 import { useShell } from "@/components/layout/shell-context";
+import { CalendarItemMenu } from "./item-actions";
+import { BriefsPanel, PlansPanel } from "./planning-panels";
 
-const views = ["calendar", "list"] as const;
+const views = ["calendar", "list", "plans", "briefs"] as const;
 const legend: ArticleStatus[] = ["published", "scheduled", "needsApproval", "draft"];
 const dotClass: Record<ArticleStatus, string> = {
   published: "bg-success",
@@ -106,6 +108,8 @@ export function ContentView() {
                   <ListIcon className="size-4" />
                   {t("list")}
                 </TabsTrigger>
+                <TabsTrigger value="plans">{t("plansTab")}</TabsTrigger>
+                <TabsTrigger value="briefs">{t("briefsTab")}</TabsTrigger>
               </TabsList>
             </Tabs>
             <Button variant="primary" loading={generate.isPending} onClick={plan}>
@@ -118,7 +122,15 @@ export function ContentView() {
 
       {query.isError && <ErrorState onRetry={() => query.refetch()} />}
 
-      <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
+      {view === "plans" && <PlansPanel siteId={brand.id} />}
+      {view === "briefs" && <BriefsPanel siteId={brand.id} />}
+
+      <div
+        className={cn(
+          "grid items-start gap-4 xl:grid-cols-[minmax(0,1fr)_320px]",
+          (view === "plans" || view === "briefs") && "hidden",
+        )}
+      >
         <Card className="gap-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-1">
@@ -160,7 +172,7 @@ export function ContentView() {
           ) : view === "calendar" ? (
             <MonthGrid month={monthDate} articles={articles} brandSlug={brandSlug} />
           ) : (
-            <ArticleTable articles={articles} brandSlug={brandSlug} />
+            <ArticleTable articles={articles} brandSlug={brandSlug} siteId={brand.id} />
           )}
         </Card>
 
@@ -174,9 +186,10 @@ export function ContentView() {
               </div>
               <div className="flex flex-col gap-1">
                 <dd className="text-metric text-fg">
-                  {articles.length
-                    ? format.number(articles.reduce((s, a) => s + a.score, 0) / articles.length, "integer")
-                    : "—"}
+                  {format.number(
+                    articles.length ? articles.reduce((s, a) => s + a.score, 0) / articles.length : 0,
+                    "integer",
+                  )}
                 </dd>
                 <dt className="text-caption font-normal text-fg-3">{t("avgScore")}</dt>
               </div>
@@ -218,7 +231,7 @@ export function ContentView() {
 }
 
 /** Week start follows the UI locale (Sunday in en-US, Saturday in ar, Monday in de/fr). */
-function MonthGrid({ month, articles, brandSlug }: { month: Date; articles: ArticleSummary[]; brandSlug: string }) {
+function MonthGrid({ month, articles, brandSlug }: { month: Date; articles: CalendarEntry[]; brandSlug: string }) {
   const t = useTranslations("content");
   const format = useFormatter();
   const locale = useLocale();
@@ -301,11 +314,19 @@ function MonthGrid({ month, articles, brandSlug }: { month: Date; articles: Arti
   );
 }
 
-function ArticleTable({ articles, brandSlug }: { articles: ArticleSummary[]; brandSlug: string }) {
+function ArticleTable({
+  articles,
+  brandSlug,
+  siteId,
+}: {
+  articles: CalendarEntry[];
+  brandSlug: string;
+  siteId: number;
+}) {
   const t = useTranslations("content.table");
   const tContent = useTranslations("content");
   const format = useFormatter();
-  const columns = React.useMemo<DataColumn<ArticleSummary>[]>(
+  const columns = React.useMemo<DataColumn<CalendarEntry>[]>(
     () => [
       {
         accessorKey: "title",
@@ -334,8 +355,14 @@ function ArticleTable({ articles, brandSlug }: { articles: ArticleSummary[]; bra
       },
       { accessorKey: "score", header: t("score"), meta: { label: t("score"), numeric: true } },
       { accessorKey: "keyword", header: t("keyword"), meta: { label: t("keyword") } },
+      {
+        id: "actions",
+        header: () => <span className="sr-only">{t("actions")}</span>,
+        enableSorting: false,
+        cell: ({ row }) => <CalendarItemMenu siteId={siteId} entry={row.original} />,
+      },
     ],
-    [t, tContent, format, brandSlug],
+    [t, tContent, format, brandSlug, siteId],
   );
   return (
     <div className="-mx-5 -mb-5 border-t border-border">

@@ -1,5 +1,4 @@
 import type { Site } from "@/types/types";
-import { useSetupStore } from "./store";
 import { discoverTopics } from "./topics";
 
 /**
@@ -8,7 +7,7 @@ import { discoverTopics } from "./topics";
  */
 export const topicsQuery = (site: Pick<Site, "id">) => ({
   queryKey: ["site-setup", site.id, "topics"] as const,
-  queryFn: ({ signal }: { signal: AbortSignal }) =>
-    discoverTopics(site.id, useSetupStore.getState().drafts[site.id]?.crawlRunId ?? null, signal),
+  queryFn: ({ signal }: { signal: AbortSignal }) => discoverTopics(site.id, signal),
   staleTime: Infinity,
+  retry: false,
 });

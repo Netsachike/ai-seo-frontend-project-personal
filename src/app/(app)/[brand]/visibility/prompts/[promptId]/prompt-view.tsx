@@ -178,7 +178,8 @@ function AnswerCard({ answer, brandName }: { answer: EngineAnswer; brandName: st
   const tEngine = useTranslations("engines");
   const format = useFormatter();
   const name = tEngine(answer.engine);
-  const retryAt = new Date(Date.now() + 30 * 60 * 1000);
+  const now = useNow({ updateInterval: 60_000 });
+  const retryAt = new Date(now.getTime() + 30 * 60 * 1000);
 
   if (answer.status === "unreachable") {
     return (

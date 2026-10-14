@@ -20,6 +20,7 @@ import { getErrorMessage } from "@/lib/errors";
 import { useUiStore } from "@/lib/store/ui";
 import {
   fixStateOf,
+  severityBadge,
   toAuditIssue,
   useApplyFix,
   useIssue,
@@ -27,6 +28,7 @@ import {
   useUpdateIssueStatus,
   useVerifyFix,
 } from "@/features/audit/hooks";
+import { PreviewPageButton } from "@/components/crawl/page-inspector";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
@@ -36,7 +38,6 @@ import { OwnerChip } from "@/components/brand/owner-chip";
 import { brandHref } from "@/components/layout/nav";
 import { PageSkeleton } from "@/components/layout/page-skeleton";
 import { useShell } from "@/components/layout/shell-context";
-import { severityBadge } from "../audit-view";
 
 /** The proposal the backend stores on the issue (`metadata.fix`). */
 function proposedValue(metadata: Record<string, unknown> | null): string | null {
@@ -201,6 +202,11 @@ export function IssueView({ issueId }: { issueId: string }) {
           </ul>
           {raw.current_value && (
             <p className="text-caption font-normal text-fg-3">{tIssue("currentValue", { value: raw.current_value })}</p>
+          )}
+          {raw.crawl_page && (
+            <div>
+              <PreviewPageButton page={raw.crawl_page} label={tIssue("preview")} />
+            </div>
           )}
         </Card>
       </div>

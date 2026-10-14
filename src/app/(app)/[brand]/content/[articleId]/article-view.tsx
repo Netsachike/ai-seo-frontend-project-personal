@@ -9,14 +9,11 @@ import {
   SendIcon,
   ChevronRightIcon,
   CircleAlertIcon,
-  MessageSquareTextIcon,
-  XIcon,
 } from "lucide-react";
 import { useFormatter, useLocale, useNow, useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import type { ArticleWithRelations } from "@/types/types";
-import { fakeRequest } from "@/lib/auth/session";
 import { getErrorMessage } from "@/lib/errors";
 import {
   ITEM_PREFIX,
@@ -30,28 +27,10 @@ import {
 import { usePublishArticle, usePublishingConnections } from "@/features/publishing/hooks";
 import { siteLanguage } from "@/features/sites/site-utils";
 import { cn } from "@/lib/utils";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -138,7 +117,6 @@ function Editor({ raw }: { raw: ArticleWithRelations }) {
   const format = useFormatter();
   const locale = useLocale();
   const now = useNow({ updateInterval: 30_000 });
-  const router = useRouter();
   const { brand, brandSlug, me } = useShell();
   const contentLanguage = raw.language ?? (brand ? siteLanguage(brand) : "en");
   const save = useSaveArticle(brand?.id ?? 0, raw.id);
@@ -158,8 +136,6 @@ function Editor({ raw }: { raw: ArticleWithRelations }) {
   const [notify, setNotify] = React.useState(Boolean(me?.telegram?.connected));
   const [savedAt, setSavedAt] = React.useState(article.savedAt);
   const [words, setWords] = React.useState(article.words);
-  const [rejecting, setRejecting] = React.useState(false);
-  const [revising, setRevising] = React.useState(false);
   const saveTimer = React.useRef<ReturnType<typeof setTimeout>>(undefined);
   React.useEffect(() => () => clearTimeout(saveTimer.current), []);
 
@@ -236,14 +212,6 @@ function Editor({ raw }: { raw: ArticleWithRelations }) {
           </div>
           {editable && (
             <div className="flex flex-wrap gap-2">
-              <Button variant="ghost" onClick={() => setRejecting(true)}>
-                <XIcon />
-                {t("reject")}
-              </Button>
-              <Button variant="secondary" onClick={() => setRevising(true)}>
-                <MessageSquareTextIcon />
-                {t("revise")}
-              </Button>
               <Button variant="primary" disabled={blocked || !targetId} loading={publish.isPending} onClick={approve}>
                 <SendIcon />
                 {t("approvePublish")}
@@ -396,84 +364,6 @@ function Editor({ raw }: { raw: ArticleWithRelations }) {
           </Card>
         </aside>
       </div>
-
-      <AlertDialog open={rejecting} onOpenChange={setRejecting}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t("rejectTitle")}</AlertDialogTitle>
-            <AlertDialogDescription>{t("rejectDescription")}</AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>{t("keep")}</AlertDialogCancel>
-            <AlertDialogAction
-              className="bg-danger text-ink-fg hover:bg-danger-hover"
-              onClick={() => {
-                toast(t("rejectedToast"));
-                router.push(brandHref(brandSlug, "content"));
-              }}
-            >
-              {t("reject")}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      <ReviseDialog open={revising} onOpenChange={setRevising} />
     </div>
-  );
-}
-
-function ReviseDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
-  const t = useTranslations("editor");
-  const tCommon = useTranslations("common");
-  const [note, setNote] = React.useState("");
-  const [error, setError] = React.useState<string>();
-  const [sending, setSending] = React.useState(false);
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <form
-          noValidate
-          className="flex flex-col gap-6"
-          onSubmit={async (e) => {
-            e.preventDefault();
-            if (!note.trim()) return setError(t("reviseRequired"));
-            setSending(true);
-            await fakeRequest();
-            setSending(false);
-            setNote("");
-            onOpenChange(false);
-            toast.success(t("revisingToast"));
-          }}
-        >
-          <DialogHeader>
-            <DialogTitle>{t("reviseTitle")}</DialogTitle>
-            <DialogDescription>{t("reviseDescription")}</DialogDescription>
-          </DialogHeader>
-          <FormField label={t("reviseLabel")} error={error}>
-            {(props) => (
-              <Textarea
-                {...props}
-                rows={4}
-                value={note}
-                placeholder={t("revisePlaceholder")}
-                onChange={(e) => {
-                  setNote(e.target.value);
-                  setError(undefined);
-                }}
-              />
-            )}
-          </FormField>
-          <DialogFooter>
-            <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>
-              {tCommon("cancel")}
-            </Button>
-            <Button type="submit" variant="primary" loading={sending}>
-              {t("reviseSubmit")}
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
   );
 }

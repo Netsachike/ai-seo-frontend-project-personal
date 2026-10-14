@@ -1969,6 +1969,83 @@ export interface UpdateBacklinkPayload {
   metadata?: JsonObject;
 }
 
+/** Live backlink metrics from DataForSEO. Each call costs money. */
+export interface BacklinkSummary {
+  target: string;
+  backlinks: number | null;
+  referring_domains: number | null;
+  referring_pages: number | null;
+  rank: number | null;
+  backlinks_spam_score: number | null;
+  new_backlinks: number | null;
+  lost_backlinks: number | null;
+  provider: string;
+  /** True when the backend uses the DataForSEO sandbox (fake data) */
+  sandbox: boolean;
+  api_cost_usd: number | null;
+  retrieved_at: DateTime;
+}
+
+/** `GET /authority/backlinks/summary`, returned without an envelope. */
+export interface BacklinkSummaryResponse {
+  summary: BacklinkSummary;
+  profile: AuthorityProfile;
+}
+
+export interface BacklinkItem {
+  source_url: string | null;
+  source_domain: string | null;
+  source_title: string | null;
+  source_status_code: number | null;
+  target_url: string | null;
+  anchor: string | null;
+  dofollow: boolean | null;
+  attributes: string[];
+  backlink_rank: number | null;
+  domain_rank: number | null;
+  spam_score: number | null;
+  first_seen: string | null;
+  last_seen: string | null;
+  is_lost: boolean;
+  is_broken: boolean;
+}
+
+export interface BacklinkList {
+  target: string;
+  total_count: number | null;
+  items_count: number;
+  items: BacklinkItem[];
+  provider: string;
+  sandbox: boolean;
+  api_cost_usd: number | null;
+  retrieved_at: DateTime;
+}
+
+/** Paged with `limit` (1–100, default 20) and `offset` (0–20000). */
+export interface BacklinkListParams {
+  limit?: number;
+  offset?: number;
+}
+
+export interface BacklinkProspectsPayload {
+  /** Bare domain or URL */
+  competitor_domain: string;
+  /** Page on this site to pitch; defaults to the homepage */
+  target_url?: string;
+  /** 1–100, default 20 */
+  limit?: number;
+}
+
+export interface BacklinkProspectsResponse {
+  message: string;
+  competitor_domain: string;
+  target_url: string;
+  processed: number;
+  provider_total_count: number | null;
+  sandbox: boolean;
+  api_cost_usd: number | null;
+}
+
 // ── Copilot ──────────────────────────────────────────────────────────────
 
 export interface CopilotConversation {

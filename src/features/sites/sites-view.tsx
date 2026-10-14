@@ -172,7 +172,7 @@ function SiteRow({ site, workspaceId }: { site: Site; workspaceId: string }) {
 
       <div className="flex flex-col gap-1">
         <span className="num text-h2 text-fg">
-          {stats.visibility === null ? "—" : format.number(stats.visibility, "integer")}
+          {format.number(stats.visibility, "integer")}
         </span>
         <span className="text-small text-fg-3">{t("visibility")}</span>
       </div>

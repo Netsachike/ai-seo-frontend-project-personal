@@ -10,7 +10,6 @@ import { Logo } from "@/components/brand/logo";
 import { WorkspaceSwitcher } from "./context-switcher";
 import { Shortcut } from "./kbd";
 import { LanguageSwitcher } from "./language-switcher";
-import { NotificationsPopover } from "./notifications-popover";
 import { ProfileMenu } from "./profile-menu";
 import { useShell } from "./shell-context";
 import { ThemeToggle } from "./theme-toggle";
@@ -49,7 +48,8 @@ export function Topbar({ variant = "app" }: { variant?: "app" | "sites" }) {
 
       <LanguageSwitcher compact className="hidden md:flex" />
       <ThemeToggle className="hidden md:inline-flex" />
-      <NotificationsPopover />
+      {/* No notifications endpoint yet; restore when the backend ships one. */}
+      {/* <NotificationsPopover /> */}
 
       <Button
         variant="agent"

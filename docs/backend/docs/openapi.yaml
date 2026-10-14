@@ -12,6 +12,18 @@ info:
        `Authorization: Bearer <token>`
     3. Always send `Accept: application/json` so errors come back as JSON instead of HTML redirects.
 
+    ## CORS
+    Browser calls are allowed only from these origins (`config/cors.php`):
+    `https://app.rankoya.uk`, `http://localhost:3000`, `http://localhost:5173`, `http://127.0.0.1:3000`, `http://127.0.0.1:5173`.
+    Any other origin, including this Swagger page opened from `file://`, is blocked by the browser. Use one of those dev ports, or Postman.
+    `supports_credentials` is `true`.
+
+    ## Changelog
+    - **2026-10-14**: Authority endpoints now **require a Bearer token**. The site must also belong to one of the user's workspaces, otherwise **404**.
+      Added `GET /sites/{site}/authority/backlinks/summary`, `GET /sites/{site}/authority/backlinks` and `POST /sites/{site}/authority/backlink-prospects` (DataForSEO, can return **502**).
+      CORS is now restricted to an allow-list (see above).
+    - **2026-10-12**: Initial contract.
+
     ## Workspaces
     Every authenticated user has an *active workspace*. Site-scoped endpoints resolve it automatically from the token.
     - If the user has no workspace at all → **403** `{"message": "No workspace available."}`
@@ -2763,9 +2775,8 @@ paths:
       tags: [Authority]
       summary: Build the authority profile and backlink opportunities
       operationId: authorityAnalyze
-      security: []
       description: |
-        ⚠️ **No authentication middleware is applied to the Authority routes**, so they currently work without a token. Send the Bearer token anyway, because this is likely to be locked down.
+        Requires a Bearer token, and the site must belong to one of the user's workspaces (otherwise **404**).
         The response is **not** wrapped in `success` / `data`.
       parameters:
         - $ref: '#/components/parameters/SiteId'
@@ -2794,7 +2805,8 @@ paths:
                   opportunities:
                     type: array
                     items: { $ref: '#/components/schemas/BacklinkOpportunity' }
-        '404': { $ref: '#/components/responses/ModelNotFound' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '404': { $ref: '#/components/responses/SiteAccessNotFound' }
         '500': { $ref: '#/components/responses/ServerError' }
 
   /sites/{site}/authority/profile:
@@ -2802,8 +2814,7 @@ paths:
       tags: [Authority]
       summary: Get the authority profile
       operationId: authorityProfile
-      security: []
-      description: '⚠️ No auth middleware (see Analyze). `profile` is `null` until analyze has been run.'
+      description: '`profile` is `null` until `analyze` or `backlinks/summary` has run. Not wrapped in `success` / `data`.'
       parameters:
         - $ref: '#/components/parameters/SiteId'
       responses:
@@ -2817,7 +2828,8 @@ paths:
                   profile:
                     allOf: [{ $ref: '#/components/schemas/AuthorityProfile' }]
                     nullable: true
-        '404': { $ref: '#/components/responses/ModelNotFound' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '404': { $ref: '#/components/responses/SiteAccessNotFound' }
         '500': { $ref: '#/components/responses/ServerError' }
 
   /sites/{site}/authority/opportunities:
@@ -2825,8 +2837,7 @@ paths:
       tags: [Authority]
       summary: List backlink opportunities
       operationId: authorityOpportunities
-      security: []
-      description: '⚠️ No auth middleware. Returns a **bare Laravel paginator**, with no `success` key.'
+      description: Returns a **bare Laravel paginator** with no `success` key. Sorted by `opportunity_score` desc.
       parameters:
         - $ref: '#/components/parameters/SiteId'
         - $ref: '#/components/parameters/PerPage20'
@@ -2844,7 +2855,8 @@ paths:
                       data:
                         type: array
                         items: { $ref: '#/components/schemas/BacklinkOpportunity' }
-        '404': { $ref: '#/components/responses/ModelNotFound' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '404': { $ref: '#/components/responses/SiteAccessNotFound' }
         '500': { $ref: '#/components/responses/ServerError' }
 
   /sites/{site}/authority/opportunities/{opportunity}:
@@ -2858,7 +2870,6 @@ paths:
       tags: [Authority]
       summary: Get one backlink opportunity (with relations)
       operationId: authorityOpportunity
-      security: []
       responses:
         '200':
           description: Opportunity
@@ -2884,13 +2895,13 @@ paths:
                           keyword:
                             allOf: [{ $ref: '#/components/schemas/KeywordModel' }]
                             nullable: true
-        '404': { $ref: '#/components/responses/ModelNotFound' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '404': { $ref: '#/components/responses/SiteAccessNotFound' }
         '500': { $ref: '#/components/responses/ServerError' }
     patch:
       tags: [Authority]
       summary: Update a backlink opportunity
       operationId: authorityUpdateOpportunity
-      security: []
       description: Setting `status` to `acquired` also sets `completed_at`.
       requestBody:
         required: true
@@ -2913,9 +2924,156 @@ paths:
                 type: object
                 properties:
                   opportunity: { $ref: '#/components/schemas/BacklinkOpportunity' }
-        '404': { $ref: '#/components/responses/ModelNotFound' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '404': { $ref: '#/components/responses/SiteAccessNotFound' }
         '422': { $ref: '#/components/responses/ValidationError' }
         '500': { $ref: '#/components/responses/ServerError' }
+
+  /sites/{site}/authority/backlinks/summary:
+    get:
+      tags: [Authority]
+      summary: Fetch live backlink metrics (DataForSEO) and save them to the profile
+      operationId: authorityBacklinkSummary
+      description: |
+        Calls DataForSEO for the site's domain (or URL when there is no domain). Each call costs money (`api_cost_usd`).
+        Saves `external_backlink_count`, `referring_domains`, `evidence.backlink_summary` and `metadata.backlink_*` on the authority profile, and sets `provider` to `dataforseo`.
+        Response is **not** wrapped in `success` / `data`.
+      parameters:
+        - $ref: '#/components/parameters/SiteId'
+      responses:
+        '200':
+          description: Summary and updated profile
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  summary: { $ref: '#/components/schemas/BacklinkSummary' }
+                  profile: { $ref: '#/components/schemas/AuthorityProfile' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '404': { $ref: '#/components/responses/SiteAccessNotFound' }
+        '422': { $ref: '#/components/responses/SiteHasNoTarget' }
+        '500': { $ref: '#/components/responses/ServerError' }
+        '502':
+          description: DataForSEO is not configured or returned an error
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FrameworkError' }
+              example: { message: Unable to retrieve backlink metrics from the configured provider. }
+
+  /sites/{site}/authority/backlinks:
+    get:
+      tags: [Authority]
+      summary: List live backlinks pointing to the site (one per referring domain)
+      operationId: authorityBacklinks
+      description: Paged with `limit` + `offset` (no `page`). Use `backlinks.total_count` to build the pager. Each call costs money.
+      parameters:
+        - $ref: '#/components/parameters/SiteId'
+        - name: limit
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
+        - name: offset
+          in: query
+          schema: { type: integer, minimum: 0, maximum: 20000, default: 0 }
+      responses:
+        '200':
+          description: Backlinks
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  backlinks: { $ref: '#/components/schemas/BacklinkList' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '404': { $ref: '#/components/responses/SiteAccessNotFound' }
+        '422':
+          description: Invalid `limit`/`offset`, or the site has no domain/URL
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ValidationErrorBody' }
+              examples:
+                validation:
+                  value: { message: The limit field must not be greater than 100., errors: { limit: [The limit field must not be greater than 100.] } }
+                noTarget:
+                  value: { message: This site has no configured domain or URL., errors: { site: [This site has no configured domain or URL.] } }
+        '500': { $ref: '#/components/responses/ServerError' }
+        '502':
+          description: DataForSEO is not configured or returned an error
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FrameworkError' }
+              example: { message: Unable to retrieve backlinks from the configured provider. }
+
+  /sites/{site}/authority/backlink-prospects:
+    post:
+      tags: [Authority]
+      summary: Turn a competitor's backlinks into outreach prospects
+      operationId: authorityDiscoverBacklinkProspects
+      description: |
+        Fetches up to `limit` backlinks of `competitor_domain` and upserts each one as a `BacklinkOpportunity`
+        (`type = competitor_backlink_prospect`, `status = prospect`, `priority = medium`, `opportunity_score = 0`).
+        These are outreach candidates, **not** acquired links. Re-running for the same source and target updates the existing rows instead of duplicating them.
+        Afterwards, refresh `GET /sites/{site}/authority/opportunities` to show them.
+      parameters:
+        - $ref: '#/components/parameters/SiteId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [competitor_domain]
+              properties:
+                competitor_domain:
+                  type: string
+                  maxLength: 255
+                  description: Bare domain or URL (`competitor.com`, `https://competitor.com/blog`)
+                  example: competitor.com
+                target_url:
+                  type: string
+                  format: uri
+                  maxLength: 2048
+                  description: Page on **this** site (same host or a subdomain) to pitch. Defaults to the site's homepage.
+                  example: 'https://example.com/seo-audit'
+                limit: { type: integer, minimum: 1, maximum: 100, default: 20 }
+      responses:
+        '200':
+          description: Prospects processed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string, example: 'Competitor backlink prospects processed. These are outreach candidates, not acquired backlinks.' }
+                  competitor_domain: { type: string, example: competitor.com }
+                  target_url: { type: string, example: 'https://example.com' }
+                  processed: { type: integer, description: Rows created or updated, example: 18 }
+                  provider_total_count: { type: integer, nullable: true, example: 1240 }
+                  sandbox: { type: boolean, example: false }
+                  api_cost_usd: { type: number, nullable: true, example: 0.02 }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '404': { $ref: '#/components/responses/SiteAccessNotFound' }
+        '422':
+          description: Validation failed, target URL on another domain, or site has no domain/URL
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ValidationErrorBody' }
+              examples:
+                required:
+                  value: { message: The competitor domain field is required., errors: { competitor_domain: [The competitor domain field is required.] } }
+                badDomain:
+                  value: { message: The competitor domain field format is invalid., errors: { competitor_domain: [The competitor domain field format is invalid.] } }
+                foreignTarget:
+                  value: { message: The target URL must belong to this site., errors: { target_url: [The target URL must belong to this site.] } }
+                noTarget:
+                  value: { message: This site has no configured domain or URL., errors: { site: [This site has no configured domain or URL.] } }
+        '500': { $ref: '#/components/responses/ServerError' }
+        '502':
+          description: DataForSEO is not configured or returned an error
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FrameworkError' }
+              example: { message: Unable to retrieve competitor backlinks from the configured provider. }
 
   # ───────────────────────────── COPILOT ─────────────────────────────
   /sites/{site}/copilot/ask:
@@ -3590,6 +3748,20 @@ components:
         application/json:
           schema: { $ref: '#/components/schemas/FrameworkError' }
           example: { message: Server Error }
+    SiteAccessNotFound:
+      description: Site does not exist, or it is not in any of the user's workspaces (bare `abort(404)`, empty message)
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/FrameworkError' }
+          examples:
+            noAccess: { value: { message: '' } }
+            missing: { value: { message: 'No query results for model [App\Models\Site] 99' } }
+    SiteHasNoTarget:
+      description: The site has neither a domain nor a URL
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ValidationErrorBody' }
+          example: { message: This site has no configured domain or URL., errors: { site: [This site has no configured domain or URL.] } }
     CalendarItemResponse:
       description: Updated calendar item
       content:
@@ -4581,6 +4753,56 @@ components:
         completed_at: { type: string, format: date-time, nullable: true }
         created_at: { type: string, format: date-time }
         updated_at: { type: string, format: date-time }
+
+    BacklinkSummary:
+      type: object
+      description: Live backlink metrics from DataForSEO
+      properties:
+        target: { type: string, example: example.com }
+        backlinks: { type: integer, nullable: true, example: 1532 }
+        referring_domains: { type: integer, nullable: true, example: 214 }
+        referring_pages: { type: integer, nullable: true, example: 1290 }
+        rank: { type: number, nullable: true, example: 312 }
+        backlinks_spam_score: { type: number, nullable: true, example: 4 }
+        new_backlinks: { type: integer, nullable: true, example: 12 }
+        lost_backlinks: { type: integer, nullable: true, example: 3 }
+        provider: { type: string, example: dataforseo }
+        sandbox: { type: boolean, example: false, description: True when the backend is pointed at the DataForSEO sandbox (fake data) }
+        api_cost_usd: { type: number, nullable: true, example: 0.02 }
+        retrieved_at: { type: string, format: date-time }
+        raw: { type: object, additionalProperties: true, description: Untouched provider payload (for debugging only) }
+    BacklinkItem:
+      type: object
+      properties:
+        source_url: { type: string, nullable: true, example: 'https://blog.partner.com/best-seo-tools' }
+        source_domain: { type: string, nullable: true, example: blog.partner.com }
+        source_title: { type: string, nullable: true, example: Best SEO tools in 2026 }
+        source_status_code: { type: integer, nullable: true, example: 200 }
+        target_url: { type: string, nullable: true, example: 'https://example.com/' }
+        anchor: { type: string, nullable: true, example: Example Inc }
+        dofollow: { type: boolean, nullable: true, example: true }
+        attributes: { type: array, items: { type: string }, example: [] }
+        backlink_rank: { type: number, nullable: true, example: 41 }
+        domain_rank: { type: number, nullable: true, example: 58 }
+        spam_score: { type: number, nullable: true, example: 2 }
+        first_seen: { type: string, nullable: true, example: '2025-03-14 09:12:00 +00:00' }
+        last_seen: { type: string, nullable: true, example: '2026-10-10 18:40:00 +00:00' }
+        is_lost: { type: boolean, example: false }
+        is_broken: { type: boolean, example: false }
+        raw: { type: object, additionalProperties: true, description: Untouched provider item }
+    BacklinkList:
+      type: object
+      properties:
+        target: { type: string, example: example.com }
+        total_count: { type: integer, nullable: true, example: 214 }
+        items_count: { type: integer, example: 20 }
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/BacklinkItem' }
+        provider: { type: string, example: dataforseo }
+        sandbox: { type: boolean, example: false }
+        api_cost_usd: { type: number, nullable: true, example: 0.02 }
+        retrieved_at: { type: string, format: date-time }
 
     # ---- Copilot ----
     CopilotConversation:

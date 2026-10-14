@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import {
   ArrowRightIcon,
   CheckIcon,
@@ -21,12 +20,10 @@ import {
 import { useFormatter, useNow, useTranslations } from "next-intl";
 
 import type { Site } from "@/types/types";
-import { useFakeQuery } from "@/lib/fake-query";
-import { rankoyaActivity } from "@/lib/mocks/ui-data";
-import { platformGlance, type Platform, type PlatformGlance } from "@/lib/mocks/ui-data-overview";
 import { cn } from "@/lib/utils";
-import { DOMAIN_PATTERN, NEW_SITE_PATH } from "@/features/site-setup/steps";
-import { GROWTH_STEPS, useBrandSummary, useGrowthProgress, useRunAiScan } from "@/features/insights/hooks";
+import { NEW_SITE_PATH } from "@/features/site-setup/steps";
+import { GROWTH_STEPS, useGrowthProgress, useRunAiScan } from "@/features/insights/hooks";
+import { useOverview, type ActivityItem, type OverviewPlatform, type PlatformGlance } from "@/features/overview/hooks";
 import { useRange } from "@/features/insights/url-state";
 import { Button } from "@/components/ui/button";
 import { Card, CardAction, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -37,16 +34,14 @@ import { PlatformLogo, platformLogos } from "@/components/brand/platform-logo";
 import { AreaSpark } from "@/components/charts/area-spark";
 import { ShareOfVoice } from "@/components/charts/share-of-voice";
 import { VisibilityTrend } from "@/components/charts/visibility-trend";
-import { DomainInput, FormField } from "@/components/forms/form-field";
 import { brandHref } from "@/components/layout/nav";
 import { PageSkeleton } from "@/components/layout/page-skeleton";
 import { RangePicker } from "@/components/layout/range-picker";
 import { useShell } from "@/components/layout/shell-context";
 
 /** Accent per platform. Static class strings so Tailwind can see them. */
-const accent: Record<Platform, { tile: string; color: string; monogram: string }> = {
+const accent: Record<OverviewPlatform, { tile: string; color: string; monogram: string }> = {
   google: { tile: "bg-engine-google/12 text-engine-google", color: "var(--engine-google)", monogram: "G" },
-  maps: { tile: "bg-engine-maps/12 text-engine-maps", color: "var(--engine-maps)", monogram: "MAP" },
   chatgpt: { tile: "bg-engine-chatgpt/12 text-engine-chatgpt", color: "var(--engine-chatgpt)", monogram: "GPT" },
   claude: { tile: "bg-engine-claude/12 text-engine-claude", color: "var(--engine-claude)", monogram: "CLD" },
   gemini: { tile: "bg-engine-gemini/12 text-engine-gemini", color: "var(--engine-gemini)", monogram: "GEM" },
@@ -57,17 +52,22 @@ const accent: Record<Platform, { tile: string; color: string; monogram: string }
   },
 };
 
+/** Site setup for a new site, in the workspace this one belongs to. */
+export function useNewSiteHref() {
+  const { workspace } = useShell();
+  return workspace ? `${NEW_SITE_PATH}?workspace=${workspace.work_space_id}` : NEW_SITE_PATH;
+}
+
 export function OverviewView() {
   const t = useTranslations("overview");
   const { brand, me, brandSlug } = useShell();
-  const { range } = useRange();
-  const summary = useBrandSummary(brand?.id, range);
+  const { days } = useRange();
+  const overview = useOverview(brand, days);
   const scan = useRunAiScan(brand?.id ?? 0);
   const firstName = me?.name.split(" ")[0] ?? "";
 
-  if (!brand || summary.isPending) return <PageSkeleton />;
-  const data = summary.data;
-  const firstScan = data?.status === "first_scan_running" || data?.status === "no_data";
+  if (!brand || overview.isPending) return <PageSkeleton />;
+  const you = overview.trend[0];
 
   return (
     <div className="flex flex-col gap-6">
@@ -81,7 +81,7 @@ export function OverviewView() {
         <PromoBanner />
       </div>
 
-      {summary.isError && <ErrorState onRetry={() => summary.refetch()} />}
+      {overview.isError && <ErrorState onRetry={() => overview.refetch()} />}
 
       <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_280px]">
         <div className="@container flex min-w-0 flex-col gap-6">
@@ -107,7 +107,7 @@ export function OverviewView() {
                 </Button>
               </CardAction>
             </CardHeader>
-            <PlatformGrid brandId={String(brand.id)} />
+            <PlatformGrid items={overview.platforms} />
             <Link
               href={brandHref(brandSlug, "visibility")}
               className="inline-flex items-center gap-1.5 self-end text-small font-medium text-blue hover:underline"
@@ -117,42 +117,42 @@ export function OverviewView() {
             </Link>
           </Card>
 
-          <div className="grid gap-6 @min-[760px]:grid-cols-[minmax(0,1fr)_280px]">
-            <AddWebsiteCard />
-            <GrowthSteps />
+          <div className="grid gap-6 @min-[760px]:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]">
+            <Card>
+              <div className="flex flex-col gap-0.5">
+                <CardTitle>{t("trendTitle")}</CardTitle>
+                <CardDescription>{t("trendDescription")}</CardDescription>
+              </div>
+              {you.points.length > 0 ? (
+                <VisibilityTrend
+                  series={overview.trend}
+                  domain={[0, 100]}
+                  ariaLabel={t("trendAria", { from: you.points[0]?.value ?? 0, to: you.points.at(-1)?.value ?? 0 })}
+                />
+              ) : (
+                <p className="text-small text-fg-3">{t("noAnswers", { days })}</p>
+              )}
+            </Card>
+            <Card>
+              <div className="flex flex-col gap-0.5">
+                <CardTitle>{t("sovTitle")}</CardTitle>
+                <CardDescription>{t("sovDescription")}</CardDescription>
+              </div>
+              {overview.shareOfVoice.length > 0 ? (
+                <ShareOfVoice items={overview.shareOfVoice} />
+              ) : (
+                <p className="text-small text-fg-3">{t("noAnswers", { days })}</p>
+              )}
+            </Card>
           </div>
 
-          {data && !firstScan && (
-            <div className="grid gap-6 @min-[760px]:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]">
-              <Card>
-                <div className="flex flex-col gap-0.5">
-                  <CardTitle>{t("trendTitle")}</CardTitle>
-                  <CardDescription>{t("trendDescription")}</CardDescription>
-                </div>
-                <VisibilityTrend
-                  series={data.trend}
-                  domain={[20, 80]}
-                  ariaLabel={t("trendAria", {
-                    from: data.trend.find((s) => s.isYou)?.points[0]?.value ?? 0,
-                    to: data.trend.find((s) => s.isYou)?.points.at(-1)?.value ?? 0,
-                  })}
-                />
-              </Card>
-              <Card>
-                <div className="flex flex-col gap-0.5">
-                  <CardTitle>{t("sovTitle")}</CardTitle>
-                  <CardDescription>{t("sovDescription")}</CardDescription>
-                </div>
-                <ShareOfVoice items={data.shareOfVoice} />
-              </Card>
-            </div>
-          )}
+          <GrowthSteps />
         </div>
 
         <aside className="flex flex-col gap-6" aria-label={t("rail")}>
           <QuickActions />
           <NeedHelp />
-          <RecentActivity brandId={String(brand.id)} />
+          <RecentActivity items={overview.activity} pending={overview.activityPending} />
         </aside>
       </div>
     </div>
@@ -161,6 +161,7 @@ export function OverviewView() {
 
 function PromoBanner() {
   const t = useTranslations("overview.promo");
+  const newSite = useNewSiteHref();
   return (
     <section className="flex flex-col gap-4 rounded-lg border border-blue/15 bg-blue-bg p-5 sm:flex-row sm:items-center">
       <span aria-hidden className="grid size-11 shrink-0 place-items-center rounded-lg bg-ink text-ink-fg">
@@ -171,10 +172,10 @@ function PromoBanner() {
         <p className="text-small text-fg-2">{t("body")}</p>
       </div>
       <Button asChild variant="primary" className="shrink-0">
-        <a href="#add-website">
+        <Link href={newSite}>
           <PlusIcon />
           {t("cta")}
-        </a>
+        </Link>
       </Button>
     </section>
   );
@@ -241,20 +242,10 @@ function GettingStarted({ site }: { site: Site }) {
   );
 }
 
-function PlatformGrid({ brandId }: { brandId: string }) {
-  const query = useFakeQuery(["glance", brandId], () => platformGlance(brandId));
-  if (query.isPending)
-    return (
-      <div className="grid gap-3 @md:grid-cols-2 @2xl:grid-cols-3 @3xl:grid-cols-6">
-        {Array.from({ length: 6 }, (_, i) => (
-          <Skeleton key={i} className="h-[214px] rounded-lg" />
-        ))}
-      </div>
-    );
-  if (query.isError) return <ErrorState compact onRetry={() => query.refetch()} />;
+function PlatformGrid({ items }: { items: PlatformGlance[] }) {
   return (
-    <ul className="grid gap-3 @md:grid-cols-2 @2xl:grid-cols-3 @3xl:grid-cols-6">
-      {query.data.map((p) => (
+    <ul className="grid gap-3 @md:grid-cols-2 @2xl:grid-cols-3 @3xl:grid-cols-5">
+      {items.map((p) => (
         <li key={p.platform}>
           <PlatformCard item={p} />
         </li>
@@ -272,7 +263,7 @@ function PlatformCard({ item }: { item: PlatformGlance }) {
   const a = accent[item.platform];
   const name = tEngine(item.platform);
   const href =
-    item.platform === "google" || item.platform === "maps"
+    item.platform === "google"
       ? brandHref(brandSlug, "rankings")
       : brandHref(brandSlug, `visibility?engine=${item.platform}`);
 
@@ -303,78 +294,14 @@ function PlatformCard({ item }: { item: PlatformGlance }) {
         </span>
       </span>
       <span className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
-        {item.value === null ? (
-          <>
-            <span aria-hidden className="num text-[30px] leading-9 font-medium text-fg-3">
-              —
-            </span>
-            <span className="sr-only">{t("noData")}</span>
-          </>
-        ) : (
-          <>
-            <span className="num text-[30px] leading-9 font-medium tracking-[-0.02em] text-fg">
-              {format.number(item.value, "percent")}
-            </span>
-            <DeltaChip value={item.delta} unit="points" variant="text" />
-          </>
-        )}
+        <span className="num text-[30px] leading-9 font-medium tracking-[-0.02em] text-fg">
+          {format.number(item.value, "percent")}
+        </span>
+        <DeltaChip value={item.delta} unit="points" variant="text" />
       </span>
-      <span className="line-clamp-2 min-h-8 text-caption font-normal text-fg-3">
-        {item.value === null ? t("waiting") : t("versus", { days })}
-      </span>
+      <span className="line-clamp-2 min-h-8 text-caption font-normal text-fg-3">{t("versus", { days })}</span>
       <AreaSpark values={item.spark} color={a.color} className="mt-auto" />
     </Link>
-  );
-}
-
-/**
- * Adds another site: takes the domain and hands over to site setup, which
- * asks everything else (and drafts most of it from the site itself).
- */
-function AddWebsiteCard() {
-  const t = useTranslations("overview.add");
-  const router = useRouter();
-  const { workspace } = useShell();
-  const [domain, setDomain] = React.useState("");
-  const [error, setError] = React.useState<string>();
-
-  const submit = (event: React.FormEvent) => {
-    event.preventDefault();
-    if (!DOMAIN_PATTERN.test(domain)) return setError(t("errors.domain"));
-    const params = new URLSearchParams({ domain });
-    if (workspace) params.set("workspace", String(workspace.work_space_id));
-    router.push(`${NEW_SITE_PATH}?${params.toString()}`);
-  };
-
-  return (
-    <Card id="add-website" className="@container scroll-mt-20 gap-5">
-      <div className="flex flex-col gap-1">
-        <CardTitle className="text-h2">{t("title")}</CardTitle>
-        <CardDescription className="text-small">{t("description")}</CardDescription>
-      </div>
-      <form onSubmit={submit} noValidate className="flex flex-col gap-5">
-        <FormField label={t("url")} helper={t("urlHelper")} error={error}>
-          {(props) => (
-            <DomainInput
-              {...props}
-              value={domain}
-              onChange={(value) => {
-                setDomain(value);
-                setError(undefined);
-              }}
-              placeholder={t("urlPlaceholder")}
-            />
-          )}
-        </FormField>
-        <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-caption font-normal text-fg-3">{t("later")}</p>
-          <Button type="submit" variant="primary">
-            {t("submit")}
-            <ArrowRightIcon className="rtl:-scale-x-100" />
-          </Button>
-        </div>
-      </form>
-    </Card>
   );
 }
 
@@ -425,9 +352,10 @@ function GrowthSteps() {
 function QuickActions() {
   const t = useTranslations("overview.quick");
   const { brandSlug } = useShell();
+  const newSite = useNewSiteHref();
   const items: { key: "add" | "opportunities" | "content" | "audit"; icon: LucideIcon; tile: string; href: string }[] =
     [
-      { key: "add", icon: PlusIcon, tile: "bg-ink text-ink-fg", href: "#add-website" },
+      { key: "add", icon: PlusIcon, tile: "bg-ink text-ink-fg", href: newSite },
       {
         key: "opportunities",
         icon: LightbulbIcon,
@@ -488,22 +416,27 @@ function NeedHelp() {
   );
 }
 
-function RecentActivity({ brandId }: { brandId: string }) {
+const activityIcon: Record<ActivityItem["kind"], LucideIcon> = {
+  crawl: GlobeIcon,
+  test: SearchIcon,
+  article: FileTextIcon,
+  published: LightbulbIcon,
+};
+
+/** The latest real work on the site: crawls, AI scans, articles written and published. */
+function RecentActivity({ items, pending }: { items: ActivityItem[]; pending: boolean }) {
   const t = useTranslations("overview.activity");
   const format = useFormatter();
   const now = useNow({ updateInterval: 60_000 });
   const { brandSlug } = useShell();
-  const feed = useFakeQuery(["activity", brandId], () => rankoyaActivity(brandId));
-  const icons: LucideIcon[] = [GlobeIcon, SearchIcon, LightbulbIcon, FileTextIcon];
   return (
     <Card className="gap-3">
       <CardTitle className="text-h2">{t("title")}</CardTitle>
-      {feed.isPending && <Skeleton className="h-40" />}
-      {feed.isError && <ErrorState compact onRetry={() => feed.refetch()} />}
-      {feed.data?.length === 0 && <p className="text-small text-fg-3">{t("empty")}</p>}
+      {pending && <Skeleton className="h-40" />}
+      {!pending && items.length === 0 && <p className="text-small text-fg-3">{t("empty")}</p>}
       <ul className="flex flex-col gap-4">
-        {feed.data?.map((item, i) => {
-          const Icon = icons[i % icons.length];
+        {items.map((item) => {
+          const Icon = activityIcon[item.kind];
           return (
             <li key={item.id} className="flex items-start gap-3">
               <span
@@ -513,8 +446,10 @@ function RecentActivity({ brandId }: { brandId: string }) {
                 <Icon className="size-4" />
               </span>
               <span className="flex min-w-0 flex-1 flex-col">
-                <span className="text-small font-medium text-fg">{item.text}</span>
-                <span className="text-caption font-normal text-fg-3">{item.sub}</span>
+                <span className="text-small font-medium text-fg">{t(`kinds.${item.kind}`)}</span>
+                <span className="truncate text-caption font-normal text-fg-3">
+                  {item.kind === "test" ? t("answers", { count: Number(item.title) }) : item.title}
+                </span>
               </span>
               <time dateTime={item.at} className="shrink-0 text-caption font-normal text-fg-3">
                 {format.relativeTime(new Date(item.at), now)}
@@ -524,7 +459,7 @@ function RecentActivity({ brandId }: { brandId: string }) {
         })}
       </ul>
       <Link
-        href={brandHref(brandSlug, "agent")}
+        href={brandHref(brandSlug, "content")}
         className="inline-flex items-center gap-1.5 text-small font-medium text-blue hover:underline"
       >
         {t("all")}

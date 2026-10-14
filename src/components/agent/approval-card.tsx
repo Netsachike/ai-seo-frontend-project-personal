@@ -7,7 +7,6 @@ import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import type { Approval } from "@/lib/mocks/types";
-import { decideApproval } from "@/lib/mocks/store";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/brand/status-badge";
@@ -34,9 +33,11 @@ export function ApprovalCard({
   const current = decided?.id === approval.id ? decided : approval;
 
   const decide = useMutation({
-    mutationFn: (decision: "approve" | "reject") => decideApproval(approval.id, decision),
+    // The decision is recorded here; the screen's `onDecided` makes the real API call (propose fixes, move opportunities).
+    mutationFn: async (decision: "approve" | "reject") => ({
+      status: decision === "approve" ? ("approved" as const) : ("rejected" as const),
+    }),
     onSuccess: (result) => {
-      // Only the status comes back; the card keeps its own title and items.
       const next = { ...approval, status: result.status };
       setDecided(next);
       onDecided?.(next);

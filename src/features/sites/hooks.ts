@@ -10,8 +10,8 @@ export type SiteStats = {
   /** Clusters with a page that targets them */
   clustersCovered: number;
   clustersTotal: number;
-  /** 0–100, null before the first AI visibility test */
-  visibility: number | null;
+  /** 0–100; 0 before the first AI visibility test */
+  visibility: number;
 };
 
 /** Headline numbers for a site card: topical-map coverage and the AI visibility score. */
@@ -29,7 +29,7 @@ export function useSiteStats(siteId: number) {
   const stats: SiteStats = {
     clustersCovered: clusters.filter((cluster) => cluster.target_page_id !== null).length,
     clustersTotal: clusters.length,
-    visibility: visibility.data && visibility.data.total_tests > 0 ? visibility.data.visibility_score : null,
+    visibility: visibility.data?.visibility_score ?? 0,
   };
   return { stats, isPending: maps.isPending || visibility.isPending };
 }

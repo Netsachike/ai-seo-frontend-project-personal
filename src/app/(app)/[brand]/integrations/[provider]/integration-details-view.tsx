@@ -2,20 +2,16 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { ChevronLeftIcon, PlugIcon, PlusIcon, RefreshCwIcon, UnplugIcon } from "lucide-react";
+import { ChevronLeftIcon, PlugIcon, PlusIcon, RefreshCwIcon } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
 
 import { toast } from "@/lib/toast";
-import { fakeRequest } from "@/lib/auth/session";
 import { getErrorMessage } from "@/lib/errors";
 import { PROVIDERS, type IntegrationProvider } from "@/features/integrations/catalog";
 import { useProviderAccounts, type ProviderAccount } from "@/features/integrations/connections";
-import { useIntegrations } from "@/features/integrations/store";
-import { isPublishingPlatform } from "@/features/publishing/forms";
 import { useTestConnection } from "@/features/publishing/hooks";
 import { useSyncGsc } from "@/features/search-console/hooks";
 import { workspaceRole } from "@/features/workspace/hooks";
-import { ConfirmDialog } from "@/components/account/confirm-dialog";
 import { ConnectDialog } from "@/components/integrations/connect-dialog";
 import { EmptyState } from "@/components/brand/empty-state";
 import { IntegrationStatusBadge, IntegrationTile } from "@/components/brand/integration-row";
@@ -26,15 +22,14 @@ import { Card } from "@/components/ui/card";
 
 /**
  * Connected accounts for one provider. Publishing connections can be
- * re-tested and Search Console re-synced through the backend, which has no
- * endpoint to remove either; Analytics and Telegram (mock) can be disconnected.
+ * re-tested and Search Console re-synced through the backend. The backend has
+ * no endpoint to remove a connection, so there is no Disconnect here.
  */
 export function IntegrationDetailsView({ provider }: { provider: IntegrationProvider }) {
   const t = useTranslations("integrations");
   const format = useFormatter();
   const { brandSlug, brand, workspace } = useShell();
   const { accounts: byProvider } = useProviderAccounts(brand?.id, brandSlug);
-  const disconnectLocal = useIntegrations((s) => s.disconnect);
   const testConnection = useTestConnection(brand?.id ?? 0);
   const syncGsc = useSyncGsc(brand?.id ?? 0);
   const accounts = byProvider[provider];
@@ -45,19 +40,6 @@ export function IntegrationDetailsView({ provider }: { provider: IntegrationProv
   const canAddAnother = canConnect && provider !== "searchConsole" && !(meta.scope === "user" && accounts.length > 0);
 
   const [connecting, setConnecting] = React.useState(false);
-  const [toDisconnect, setToDisconnect] = React.useState<ProviderAccount | null>(null);
-  const [isDisconnecting, setIsDisconnecting] = React.useState(false);
-
-  async function handleDisconnect() {
-    if (!toDisconnect) return;
-    setIsDisconnecting(true);
-    await fakeRequest(700);
-    disconnectLocal(toDisconnect.id);
-    toast.success(t("toasts.disconnected", { name: toDisconnect.name }));
-    setToDisconnect(null);
-    setIsDisconnecting(false);
-  }
-
   function handleTest(account: ProviderAccount) {
     if (!account.connectionId) return;
     testConnection.mutate(account.connectionId, {
@@ -148,7 +130,7 @@ export function IntegrationDetailsView({ provider }: { provider: IntegrationProv
                 </div>
                 {canConnect && (
                   <div className="flex items-center gap-2">
-                    {isPublishingPlatform(provider) && (
+                    {account.connectionId !== undefined && (
                       <Button
                         size="sm"
                         loading={testConnection.isPending && testConnection.variables === account.connectionId}
@@ -162,17 +144,6 @@ export function IntegrationDetailsView({ provider }: { provider: IntegrationProv
                       <Button size="sm" loading={syncGsc.isPending} onClick={handleSync}>
                         <RefreshCwIcon />
                         {t("details.sync")}
-                      </Button>
-                    )}
-                    {!meta.backend && (
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="text-danger hover:bg-danger-bg hover:text-danger"
-                        onClick={() => setToDisconnect(account)}
-                      >
-                        <UnplugIcon />
-                        {t("details.disconnect")}
                       </Button>
                     )}
                   </div>
@@ -189,18 +160,6 @@ export function IntegrationDetailsView({ provider }: { provider: IntegrationProv
         brandSlug={brandSlug}
         workspaceId={workspace ? String(workspace.work_space_id) : null}
         onOpenChange={setConnecting}
-      />
-
-      <ConfirmDialog
-        open={Boolean(toDisconnect)}
-        onOpenChange={(open) => {
-          if (!open) setToDisconnect(null);
-        }}
-        title={t("details.disconnectTitle", { name })}
-        description={t(`providers.${provider}.disconnectBody`, { account: toDisconnect?.name ?? "" })}
-        confirmLabel={t("details.disconnect")}
-        isPending={isDisconnecting}
-        onConfirm={handleDisconnect}
       />
     </div>
   );

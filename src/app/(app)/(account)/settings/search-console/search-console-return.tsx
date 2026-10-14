@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 import { getErrorMessage } from "@/lib/errors";
+import { useMounted } from "@/lib/hooks/use-mounted";
 import {
   clearPendingGscConnect,
   matchingProperty,
@@ -27,11 +28,12 @@ import { Skeleton } from "@/components/ui/skeleton";
 export function SearchConsoleReturn() {
   const t = useTranslations("searchConsoleReturn");
   const params = useSearchParams();
-  const [pending, setPending] = React.useState<PendingGscConnect | null | undefined>(undefined);
-
-  React.useEffect(() => {
-    setPending(readPendingGscConnect());
-  }, []);
+  const mounted = useMounted();
+  // sessionStorage only exists in the browser: undefined until mounted.
+  const pending = React.useMemo<PendingGscConnect | null | undefined>(
+    () => (mounted ? readPendingGscConnect() : undefined),
+    [mounted],
+  );
 
   if (pending === undefined) return <Skeleton className="h-40 w-full max-w-xl rounded-xl" />;
 

@@ -8,11 +8,12 @@ import { toast } from "sonner";
 
 import type { Engine } from "@/types/types";
 import { getErrorMessage } from "@/lib/errors";
-import { displayEngines, type CitedSource, type EngineVisibility, type TrackedQuestion } from "@/lib/mocks/ui-data";
+import { type CitedSource, type EngineVisibility, type TrackedQuestion } from "@/lib/mocks/ui-data";
 import { cn } from "@/lib/utils";
 import { useRunAiScan } from "@/features/insights/hooks";
 import { useEngineFilter } from "@/features/insights/url-state";
 import { useGeneratePrompts, useVisibility } from "@/features/visibility/hooks";
+import { TESTED_ENGINES } from "@/features/visibility/model";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardAction, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -86,7 +87,7 @@ export function VisibilityView() {
       {data && data.score !== null && (
         <>
           <div role="group" aria-label={t("engineFilter")} className="flex flex-wrap gap-2">
-            {(["all", ...displayEngines] as const).map((e) => (
+            {(["all", ...TESTED_ENGINES] as const).map((e) => (
               <EngineChip key={e} engine={e} pressed={engine === e} onPressedChange={() => void setEngine(e)} />
             ))}
           </div>
@@ -197,7 +198,7 @@ function EngineDots({ mentionedBy, highlight }: { mentionedBy: Engine[]; highlig
   const tEngine = useTranslations("engines");
   return (
     <span className="inline-flex items-center gap-1.5" dir="ltr">
-      {displayEngines.map((e) => {
+      {TESTED_ENGINES.map((e) => {
         const on = mentionedBy.includes(e);
         return (
           <span

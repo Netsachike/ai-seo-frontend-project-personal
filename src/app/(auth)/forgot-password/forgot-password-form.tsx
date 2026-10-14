@@ -1,30 +1,39 @@
 "use client";
 
+import * as React from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { ArrowLeftIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-import { fakeRequest } from "@/lib/auth/session";
+import { PRODUCT } from "@/config/product";
+import { useBrandConfig } from "@/components/providers/brand-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { FormField } from "@/components/forms/form-field";
 import { AuthHeading } from "../auth-ui";
 
+/**
+ * The backend has no password-reset endpoint yet, so the request goes to
+ * support by email (the tenant's mailbox on a white-label domain).
+ */
 export function ForgotPasswordForm() {
   const t = useTranslations("auth.forgot");
   const tErr = useTranslations("auth.errors");
-  const router = useRouter();
+  const { brandConfig } = useBrandConfig();
+  const [sent, setSent] = React.useState(false);
   const schema = z.object({ email: z.email(tErr("emailInvalid")) });
   const form = useForm<z.infer<typeof schema>>({ resolver: zodResolver(schema), defaultValues: { email: "" } });
   const { errors, isSubmitting } = form.formState;
 
-  const onSubmit = form.handleSubmit(async ({ email }) => {
-    await fakeRequest();
-    router.push(`/verify?purpose=reset&email=${encodeURIComponent(email)}`);
+  const onSubmit = form.handleSubmit(({ email }) => {
+    const to = brandConfig.support_email ?? PRODUCT.supportEmail;
+    const subject = encodeURIComponent(t("mailSubject"));
+    const body = encodeURIComponent(t("mailBody", { email }));
+    window.location.assign(`mailto:${to}?subject=${subject}&body=${body}`);
+    setSent(true);
   });
 
   return (
@@ -48,6 +57,11 @@ export function ForgotPasswordForm() {
         <Button type="submit" variant="primary" size="lg" className="w-full" loading={isSubmitting}>
           {t("submit")}
         </Button>
+        {sent && (
+          <p role="status" className="rounded-md bg-blue-bg px-3 py-2.5 text-small text-blue-ink">
+            {t("sent")}
+          </p>
+        )}
       </form>
       <Link
         href="/sign-in"

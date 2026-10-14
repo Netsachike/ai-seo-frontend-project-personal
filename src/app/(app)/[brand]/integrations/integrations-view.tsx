@@ -6,8 +6,14 @@ import { ArrowUpRightIcon, PlusIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { parseAsStringLiteral, useQueryState } from "nuqs";
 
-import { engines, type Engine } from "@/types/types";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+
+import { PLATFORMS, type Platform, type Site } from "@/types/types";
+import { siteKeys } from "@/lib/api/query-keys";
+import { getErrorMessage } from "@/lib/errors";
 import { toast } from "@/lib/toast";
+import siteService from "@/services/sites";
+import { TESTED_ENGINES } from "@/features/visibility/model";
 import {
   INTEGRATION_CATEGORIES,
   PROVIDERS,
@@ -15,7 +21,6 @@ import {
   type IntegrationCategory,
   type IntegrationProvider,
 } from "@/features/integrations/catalog";
-import { useTrackedEngines } from "@/features/integrations/store";
 import { useProviderAccounts, type ProviderAccount } from "@/features/integrations/connections";
 import { workspaceRole } from "@/features/workspace/hooks";
 import { ConnectDialog } from "@/components/integrations/connect-dialog";
@@ -24,19 +29,18 @@ import { engineMonogram } from "@/components/brand/engine-icon";
 import { brandHref } from "@/components/layout/nav";
 import { PageHeader } from "@/components/layout/page-header";
 import { useShell } from "@/components/layout/shell-context";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
+import { Card, CardDescription, CardTitle } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-
-const NO_PAUSED: Engine[] = [];
 
 /** Every tool Rankoya can work with for this brand, split into tabs by what it's for. */
 export function IntegrationsView() {
   const t = useTranslations("integrations");
   const { brandSlug, brand, workspace } = useShell();
   const { accounts, isConnected } = useProviderAccounts(brand?.id, brandSlug);
-  const paused = useTrackedEngines((s) => s.paused[brandSlug] ?? NO_PAUSED);
   const [tab, setTab] = useQueryState("tab", parseAsStringLiteral(INTEGRATION_CATEGORIES).withDefault("ai"));
   const [connecting, setConnecting] = React.useState<IntegrationProvider | null>(null);
   // Viewers can see integrations but not change them.
@@ -44,7 +48,7 @@ export function IntegrationsView() {
 
   /** Active / total for each tab: engines being tracked, or providers with a connection. */
   const counts = (category: IntegrationCategory) => {
-    if (category === "ai") return { active: engines.length - paused.length, total: engines.length };
+    if (category === "ai") return { active: TESTED_ENGINES.length, total: TESTED_ENGINES.length };
     const providers = providersIn(category);
     const active = providers.filter(isConnected).length;
     return { active, total: providers.length };
@@ -53,6 +57,7 @@ export function IntegrationsView() {
   return (
     <div className="flex flex-col gap-6">
       <PageHeader title={t("title")} description={t("description")} />
+      {brand && <PlatformCard site={brand} canEdit={canConnect} />}
 
       <Tabs value={tab} onValueChange={(value) => setTab(value as IntegrationCategory)}>
         <TabsList aria-label={t("tabsLabel")}>
@@ -74,7 +79,7 @@ export function IntegrationsView() {
             <p className="max-w-[640px] text-small text-fg-2">{t(`tabIntro.${category}`)}</p>
             <ul className="grid gap-3 lg:grid-cols-2">
               {category === "ai" ? (
-                <EngineRows brandSlug={brandSlug} paused={paused} canEdit={canConnect} />
+                <EngineRows />
               ) : (
                 providersIn(category).map((provider) => (
                   <ProviderRow
@@ -105,52 +110,82 @@ export function IntegrationsView() {
   );
 }
 
-/** The AI engines Rankoya asks questions in. Switched on and off, not connected. */
-function EngineRows({ brandSlug, paused, canEdit }: { brandSlug: string; paused: Engine[]; canEdit: boolean }) {
+/** The AI assistants every visibility scan asks. The backend tests all of them; there is nothing to switch. */
+function EngineRows() {
   const t = useTranslations("integrations");
   const tEngine = useTranslations("engines");
-  const setTracked = useTrackedEngines((s) => s.setTracked);
-
-  return engines.map((engine) => {
-    const tracked = !paused.includes(engine);
-    const name = tEngine(engine);
-    const toggle = (
-      <Switch
-        checked={tracked}
-        disabled={!canEdit}
-        aria-label={t("trackToggle", { name })}
-        onCheckedChange={(next) => {
-          setTracked(brandSlug, engine, next);
-          toast.success(next ? t("toasts.trackingOn", { name }) : t("toasts.trackingOff", { name }));
-        }}
+  return TESTED_ENGINES.map((engine) => (
+    <li key={engine} className="flex">
+      <IntegrationRow
+        className="w-full"
+        monogram={engineMonogram[engine]}
+        logo={engine}
+        name={tEngine(engine)}
+        description={t(`engines.${engine}`)}
+        status="tracking"
       />
-    );
+    </li>
+  ));
+}
 
-    return (
-      <li key={engine} className="flex">
-        <IntegrationRow
-          className="w-full"
-          monogram={engineMonogram[engine]}
-          logo={engine}
-          name={name}
-          description={t(`engines.${engine}`)}
-          status={tracked ? "tracking" : "paused"}
-          action={
-            canEdit ? (
-              toggle
-            ) : (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <span tabIndex={0}>{toggle}</span>
-                </TooltipTrigger>
-                <TooltipContent>{t("viewerNote")}</TooltipContent>
-              </Tooltip>
-            )
-          }
-        />
-      </li>
-    );
+/** The CMS the site runs on: detected by the crawl, confirmed or changed here. */
+function PlatformCard({ site, canEdit }: { site: Site; canEdit: boolean }) {
+  const t = useTranslations("integrations.platform");
+  const queryClient = useQueryClient();
+  const current = (PLATFORMS as readonly string[]).includes(site.platform.name)
+    ? (site.platform.name as Platform)
+    : "unknown";
+  const [value, setValue] = React.useState<Platform>(current);
+  const save = useMutation({
+    mutationFn: (platform: Platform) => siteService.confirmPlatform(site.id, platform),
+    onSuccess: () => {
+      toast.success(t("saved"));
+      return queryClient.invalidateQueries({ queryKey: siteKeys.detail(site.id) });
+    },
+    onError: (error) => toast.error(getErrorMessage(error, t("failed"))),
   });
+  return (
+    <Card className="flex-row flex-wrap items-center justify-between gap-4">
+      <div className="flex min-w-0 flex-col gap-1">
+        <div className="flex flex-wrap items-center gap-2">
+          <CardTitle>{t("title")}</CardTitle>
+          <Badge variant={site.platform.detected ? "blue" : "success"}>
+            {site.platform.detected
+              ? site.platform.confidence !== null
+                ? t("detectedConfidence", {
+                    confidence: Math.round(site.platform.confidence * (site.platform.confidence <= 1 ? 100 : 1)),
+                  })
+                : t("detected")
+              : t("confirmed")}
+          </Badge>
+        </div>
+        <CardDescription>{t("body")}</CardDescription>
+      </div>
+      <div className="flex items-center gap-2">
+        <Select value={value} onValueChange={(v) => setValue(v as Platform)} disabled={!canEdit}>
+          <SelectTrigger aria-label={t("label")} className="w-48">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {PLATFORMS.map((platform) => (
+              <SelectItem key={platform} value={platform}>
+                {t(`names.${platform}`)}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Button
+          variant="primary"
+          size="sm"
+          disabled={!canEdit}
+          loading={save.isPending}
+          onClick={() => save.mutate(value)}
+        >
+          {site.platform.detected && value === current ? t("confirm") : t("save")}
+        </Button>
+      </div>
+    </Card>
+  );
 }
 
 function ProviderRow({

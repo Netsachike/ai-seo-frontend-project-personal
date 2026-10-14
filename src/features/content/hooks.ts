@@ -3,7 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { endOfMonth, format as formatDate, parse } from "date-fns";
 
-import type { ArticleWithRelations, ContentCalendarItem, UpdateArticlePayload } from "@/types/types";
+import type { ArticleWithRelations, ContentCalendarItem, ReschedulePayload, UpdateArticlePayload } from "@/types/types";
 import type { ArticleDetail, ArticleStatus, ArticleSummary } from "@/lib/mocks/ui-data-work";
 import { contentKeys } from "@/lib/api/query-keys";
 import { toNumber } from "@/services/api/helpers";
@@ -28,8 +28,13 @@ const scoreOf = (article: ArticleWithRelations) => {
   return Math.round(toNumber((analysis?.score ?? analysis?.overall_score) as string | number | undefined) ?? 0);
 };
 
-function summaryOf(item: ContentCalendarItem, article: ArticleWithRelations | undefined): ArticleSummary {
+/** A calendar entry: the shared summary plus the calendar item it comes from. */
+export type CalendarEntry = ArticleSummary & { itemId: number; keywordId: number | null };
+
+function summaryOf(item: ContentCalendarItem, article: ArticleWithRelations | undefined): CalendarEntry {
   return {
+    itemId: item.id,
+    keywordId: item.keyword_id,
     id: article ? String(article.id) : `${ITEM_PREFIX}${item.id}`,
     title: article?.title ?? item.title,
     status: article ? articleStatusOf(article.status) : "scheduled",
@@ -148,4 +153,59 @@ export function useWriteArticle(siteId: number) {
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: contentKeys.all(siteId) }),
   });
+}
+
+/** Past and current monthly plans, newest first. */
+export function useContentPlans(siteId: number, page: number) {
+  return useQuery({
+    queryKey: [...contentKeys.plans(siteId), page],
+    enabled: Boolean(siteId),
+    queryFn: async () => (await contentPlannerService.plans(siteId, { page })).data,
+    placeholderData: (previous) => previous,
+  });
+}
+
+/** Research briefs (SERP analysis, headings, questions) behind each article. */
+export function useResearchList(siteId: number, page: number) {
+  return useQuery({
+    queryKey: [...contentKeys.research(siteId), "list", page],
+    enabled: Boolean(siteId),
+    queryFn: async () => (await articleResearchService.list(siteId, { page, per_page: 20 })).data.research,
+    placeholderData: (previous) => previous,
+  });
+}
+
+export function useResearch(siteId: number, researchId: number | null) {
+  return useQuery({
+    queryKey: [...contentKeys.research(siteId), researchId],
+    enabled: Boolean(siteId && researchId),
+    queryFn: async () => (await articleResearchService.get(siteId, researchId as number)).data.research,
+  });
+}
+
+const useCalendarMutation = <T>(siteId: number, fn: (vars: T) => Promise<unknown>) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: fn,
+    onSettled: () => queryClient.invalidateQueries({ queryKey: contentKeys.all(siteId) }),
+  });
+};
+
+/** Moves a calendar item to another date (and optionally time). */
+export function useRescheduleItem(siteId: number) {
+  return useCalendarMutation(siteId, ({ itemId, payload }: { itemId: number; payload: ReschedulePayload }) =>
+    contentPlannerService.reschedule(siteId, itemId, payload),
+  );
+}
+
+/** Points a calendar item at a different keyword. */
+export function useSwapKeyword(siteId: number) {
+  return useCalendarMutation(siteId, ({ itemId, keywordId }: { itemId: number; keywordId: number }) =>
+    contentPlannerService.swapKeyword(siteId, itemId, keywordId),
+  );
+}
+
+/** Takes an item off the calendar (status `removed`). */
+export function useRemoveItem(siteId: number) {
+  return useCalendarMutation(siteId, (itemId: number) => contentPlannerService.remove(siteId, itemId));
 }

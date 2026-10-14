@@ -7,6 +7,7 @@ import { CheckIcon, StarIcon } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
 
 import type { Site } from "@/types/types";
+import { getErrorMessage } from "@/lib/errors";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -20,7 +21,8 @@ import { StepHeading } from "../step-heading";
 import { TopicMap } from "./topic-map";
 
 const MIN_LOADER_MS = 1500;
-const STAGES = [8000, 30000] as const;
+/** Subline changes at 8 s; Retry appears at 2 min, since keyword discovery and the map build are slow. */
+const STAGES = [8000, 120000] as const;
 
 /**
  * Step 4. Exactly five core topics anchor the topical map. Picks draw into
@@ -34,12 +36,13 @@ export function CoreTopicsStep({ site, onContinue }: { site: Site; onContinue: (
   const draft = useDraft(site.id);
   const topics = useQuery({
     ...topicsQuery(site),
-    initialData: draft.topicSuggestions ?? undefined,
+    // An empty list saved by an earlier version is ignored, so discovery runs again.
+    initialData: draft.topicSuggestions?.length ? draft.topicSuggestions : undefined,
   });
   const [selected, setSelected] = React.useState<string[]>(draft.coreTopics);
 
   React.useEffect(() => {
-    if (topics.data && !draft.topicSuggestions) patchDraft(site.id, { topicSuggestions: topics.data });
+    if (topics.data?.length && !draft.topicSuggestions?.length) patchDraft(site.id, { topicSuggestions: topics.data });
   }, [topics.data, draft.topicSuggestions, site.id]);
 
   // Prefetched during the interstitial: show the topics straight away, no loader.
@@ -82,6 +85,9 @@ export function CoreTopicsStep({ site, onContinue }: { site: Site; onContinue: (
           {topics.isError ? (
             <div className="flex flex-col items-start gap-3">
               <p className="text-body-lg text-fg">{t("error")}</p>
+              {getErrorMessage(topics.error, "") && (
+                <p className="text-small text-fg-2">{getErrorMessage(topics.error, "")}</p>
+              )}
               <Button variant="secondary" onClick={() => void topics.refetch()}>
                 {t("retry")}
               </Button>

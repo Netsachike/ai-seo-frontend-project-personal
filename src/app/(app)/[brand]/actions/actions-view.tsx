@@ -2,12 +2,24 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { ArrowRightIcon, CheckCheckIcon, CheckIcon, ListChecksIcon, ScanSearchIcon } from "lucide-react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useQuery } from "@tanstack/react-query";
+import {
+  ArrowRightIcon,
+  CheckCheckIcon,
+  CheckIcon,
+  Loader2Icon,
+  ListChecksIcon,
+  PanelRightOpenIcon,
+  ScanSearchIcon,
+} from "lucide-react";
+import { parseAsInteger, useQueryState } from "nuqs";
+import { useFormatter, useNow, useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import { getErrorMessage } from "@/lib/errors";
+import { opportunityKeys } from "@/lib/api/query-keys";
+import { toNumber } from "@/services/api/helpers";
+import opportunityService from "@/services/opportunities";
 import type { ActionCard, ActionColumn } from "@/lib/mocks/ui-data-work";
 import { useActionPlan, useAnalyzeOpportunities, useUpdateOpportunities } from "@/features/actions/hooks";
 import { cn } from "@/lib/utils";
@@ -23,7 +35,9 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Skeleton } from "@/components/ui/skeleton";
+import { DetailList } from "@/components/brand/detail-list";
 import { ApprovalCard } from "@/components/agent/approval-card";
 import { EmptyState } from "@/components/brand/empty-state";
 import { ErrorState } from "@/components/brand/error-state";
@@ -31,6 +45,7 @@ import { OwnerChip } from "@/components/brand/owner-chip";
 import { PageHeader } from "@/components/layout/page-header";
 import { PageSkeleton } from "@/components/layout/page-skeleton";
 import { useShell } from "@/components/layout/shell-context";
+import { OpportunityEditSheet } from "./opportunity-edit-sheet";
 
 const columns: ActionColumn[] = ["approval", "working", "yours", "done"];
 
@@ -44,6 +59,8 @@ export function ActionsView() {
   const [moves, setMoves] = React.useState<Record<string, ActionColumn | "removed">>({});
   const [confirming, setConfirming] = React.useState(false);
   const [approvingAll, setApprovingAll] = React.useState(false);
+  const [openId, setOpenId] = useQueryState("open", parseAsInteger);
+  const [editId, setEditId] = useQueryState("edit", parseAsInteger);
 
   if (query.isError) return <ErrorState onRetry={() => query.refetch()} />;
   if (!brand || !query.data) return <PageSkeleton kpis={0} panels={4} />;
@@ -129,7 +146,13 @@ export function ActionsView() {
                     <p className="px-1 py-6 text-center text-small text-fg-3">{t(`emptyColumn.${col}`)}</p>
                   )}
                   {list.map((card) => (
-                    <BoardCard key={card.id} card={card} onMove={move} />
+                    <BoardCard
+                      key={card.id}
+                      card={card}
+                      onMove={move}
+                      onOpen={() => void setOpenId(Number(card.id))}
+                      onEdit={() => void setEditId(Number(card.id))}
+                    />
                   ))}
                 </section>
               );
@@ -137,6 +160,9 @@ export function ActionsView() {
           </div>
         </>
       )}
+
+      <OpportunitySheet siteId={brand.id} id={openId} onClose={() => void setOpenId(null)} />
+      <OpportunityEditSheet siteId={brand.id} id={editId} onClose={() => void setEditId(null)} />
 
       <AlertDialog open={confirming} onOpenChange={setConfirming}>
         <AlertDialogContent>
@@ -211,16 +237,28 @@ function CardMeta({ card }: { card: ActionCard }) {
   );
 }
 
+function DetailsButton({ onOpen }: { onOpen: () => void }) {
+  const t = useTranslations("actions");
+  return (
+    <Button size="sm" variant="ghost" onClick={onOpen}>
+      <PanelRightOpenIcon />
+      {t("details")}
+    </Button>
+  );
+}
+
 function BoardCard({
   card,
   onMove,
+  onOpen,
+  onEdit,
 }: {
   card: ActionCard;
   onMove: (id: string, column: ActionColumn | "removed") => void;
+  onOpen: () => void;
+  onEdit: () => void;
 }) {
   const t = useTranslations("actions");
-  const format = useFormatter();
-  const router = useRouter();
 
   if (card.column === "approval") {
     return (
@@ -233,11 +271,12 @@ function BoardCard({
             items: card.items,
             channels: ["web", "telegram"],
           }}
-          onEdit={card.href ? () => router.push(card.href as string) : undefined}
+          onEdit={onEdit}
           onDecided={(a) => onMove(card.id, a.status === "approved" ? "working" : "removed")}
         />
-        <div className="px-1">
+        <div className="flex flex-wrap items-center justify-between gap-2 px-1">
           <CardMeta card={card} />
+          <DetailsButton onOpen={onOpen} />
         </div>
       </div>
     );
@@ -258,12 +297,10 @@ function BoardCard({
       </h3>
       <CardMeta card={card} />
       {card.column === "working" && (
-        <div className="flex flex-col gap-1.5">
-          <Progress value={(card.progress ?? 0.05) * 100} tone="ink" aria-label={card.title} />
-          <span className="num text-caption text-fg-3">
-            {t("progress", { percent: format.number(card.progress ?? 0.05, "percent") })}
-          </span>
-        </div>
+        <span className="flex items-center gap-1.5 text-caption text-fg-2">
+          <Loader2Icon aria-hidden className="size-3.5 animate-spin" />
+          {t("inProgress")}
+        </span>
       )}
       {card.column === "yours" && (
         <div className="flex flex-wrap gap-2">
@@ -288,6 +325,72 @@ function BoardCard({
           )}
         </div>
       )}
+      <div className="-mb-1 flex justify-end">
+        <DetailsButton onOpen={onOpen} />
+      </div>
     </article>
+  );
+}
+
+/** One opportunity in full: why it matters, what to do, its scores and evidence. */
+function OpportunitySheet({ siteId, id, onClose }: { siteId: number; id: number | null; onClose: () => void }) {
+  const t = useTranslations("actions.detail");
+  const format = useFormatter();
+  const now = useNow({ updateInterval: 60_000 });
+  const query = useQuery({
+    queryKey: opportunityKeys.detail(siteId, id ?? 0),
+    enabled: Boolean(id),
+    queryFn: async () => (await opportunityService.get(siteId, id as number)).data,
+  });
+  const o = query.data;
+  const evidence = o?.evidence ? Object.entries(o.evidence).filter(([, v]) => v !== null && typeof v !== "object") : [];
+  return (
+    <Sheet open={id !== null} onOpenChange={(open) => !open && onClose()}>
+      <SheetContent side="end" className="gap-0 overflow-y-auto data-[side=end]:max-w-[520px]">
+        <SheetHeader className="border-b border-border">
+          <SheetTitle>{o?.title ?? t("title")}</SheetTitle>
+          <SheetDescription>{o?.type.replaceAll("_", " ")}</SheetDescription>
+        </SheetHeader>
+        <div className="flex flex-col gap-6 p-5">
+          {query.isPending ? (
+            <Skeleton className="h-48" />
+          ) : query.isError ? (
+            <ErrorState compact onRetry={() => query.refetch()} />
+          ) : (
+            o && (
+              <>
+                {o.description && <p className="text-small text-fg-2">{o.description}</p>}
+                {o.recommended_action && (
+                  <div className="rounded-lg bg-blue-bg p-3 text-small text-blue-ink">
+                    <span className="font-semibold">{t("todo")}</span> {o.recommended_action}
+                  </div>
+                )}
+                <DetailList
+                  items={[
+                    { label: t("status.label"), value: t(`status.${o.status}`) },
+                    { label: t("priority"), value: o.priority },
+                    { label: t("impact"), value: Math.round(toNumber(o.impact_score) ?? 0) },
+                    { label: t("effort"), value: Math.round(toNumber(o.effort_score) ?? 0) },
+                    { label: t("score"), value: Math.round(toNumber(o.opportunity_score) ?? 0) },
+                    {
+                      label: t("detected"),
+                      value: o.detected_at ? format.relativeTime(new Date(o.detected_at), now) : null,
+                    },
+                  ]}
+                />
+                {evidence.length > 0 && (
+                  <section className="flex flex-col gap-2">
+                    <h3 className="text-small font-semibold text-fg">{t("evidence")}</h3>
+                    <DetailList
+                      items={evidence.map(([k, v]) => ({ label: k.replaceAll("_", " "), value: String(v) }))}
+                    />
+                  </section>
+                )}
+              </>
+            )
+          )}
+        </div>
+      </SheetContent>
+    </Sheet>
   );
 }

@@ -4,7 +4,12 @@ import type {
   AuthorityAnalyzeResponse,
   AuthorityProfile,
   BacklinkOpportunity,
+  BacklinkList,
+  BacklinkListParams,
   BacklinkOpportunityWithRelations,
+  BacklinkProspectsPayload,
+  BacklinkProspectsResponse,
+  BacklinkSummaryResponse,
   LaravelPaginator,
   PerPageParams,
   UpdateBacklinkPayload,
@@ -41,6 +46,31 @@ const authorityService = {
     const response = await api.get<{ opportunity: BacklinkOpportunityWithRelations }>(
       sitePath(siteId, `authority/opportunities/${opportunityId}`),
     );
+    return response.data;
+  },
+
+  /** Live backlink metrics (DataForSEO), also saved to the profile. Each call costs money. */
+  backlinkSummary: async (siteId: number) => {
+    const response = await api.get<BacklinkSummaryResponse>(sitePath(siteId, "authority/backlinks/summary"), {
+      timeout: LONG_REQUEST_TIMEOUT_MS,
+    });
+    return response.data;
+  },
+
+  /** Live backlinks, one per referring domain. Paged by `limit` + `offset`. Each call costs money. */
+  backlinks: async (siteId: number, params: BacklinkListParams = {}) => {
+    const response = await api.get<{ backlinks: BacklinkList }>(sitePath(siteId, "authority/backlinks"), {
+      params,
+      timeout: LONG_REQUEST_TIMEOUT_MS,
+    });
+    return response.data.backlinks;
+  },
+
+  /** Saves a competitor's backlinks as outreach prospects (`status = prospect`). */
+  backlinkProspects: async (siteId: number, payload: BacklinkProspectsPayload) => {
+    const response = await api.post<BacklinkProspectsResponse>(sitePath(siteId, "authority/backlink-prospects"), payload, {
+      timeout: LONG_REQUEST_TIMEOUT_MS,
+    });
     return response.data;
   },
 

@@ -45,6 +45,9 @@ export function useProviderAccounts(siteId: number | undefined, brandSlug: strin
       if (isPublishingPlatform(provider)) {
         return [provider, (publishing.data ?? []).filter((c) => c.platform === provider).map(publishingAccount)];
       }
+      if (provider === "wordpressCom") {
+        return [provider, (publishing.data ?? []).filter((c) => c.platform === "wordpress_com").map(publishingAccount)];
+      }
       if (provider === "searchConsole") {
         const connection = gsc.data?.connection;
         return [

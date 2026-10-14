@@ -1,60 +1,52 @@
 import type { CrawlPage, Site } from "@/types/types";
-import crawlerService from "@/services/crawler";
 import copilotService from "@/services/copilot";
 import { siteLanguage, siteMarket } from "@/features/sites/site-utils";
-import { patchDraft, useSetupStore } from "./store";
-import { sleep, waitForCrawl } from "./topics";
+import { abortable, crawledPages, isHomePage, sleep } from "./crawl";
 
 /**
- * The site profile on the details step, written from the site's first crawl.
- * The copilot writes each section from the crawled pages; when it fails or
- * answers with nothing, the section is assembled from the pages themselves.
+ * The site profile on the details step, written from the site's first crawl
+ * in RankYak's structure. The copilot writes each section from the crawled
+ * pages; when it fails or answers with nothing, the section is assembled from
+ * the pages themselves in the same structure.
  *
  * Output contract (the UI renders it as it arrives): markdown only, each
- * heading a plain line of its own, 3–6 one- or two-sentence bullets under it.
+ * heading a plain line of its own, bullets under it.
  */
 
 export type ProfileSection = "description" | "audience";
 type ProfileSite = Pick<Site, "id" | "name" | "domain" | "language" | "location">;
 
-/** How long to wait for the domain step's crawl run id before starting a crawl here. */
-const RUN_ID_WAIT_MS = 10_000;
 /** The copilot rejects longer questions. */
 const MAX_QUESTION_CHARS = 5000;
 /** Characters of page text sent for the homepage and for every other page. */
-const HOME_TEXT_CHARS = 1200;
-const PAGE_TEXT_CHARS = 220;
+const HOME_TEXT_CHARS = 900;
+const PAGE_TEXT_CHARS = 160;
 const MAX_PAGES = 12;
 
-const HEADINGS: Record<ProfileSection, readonly string[]> = {
-  description: ["Core Business", "Key Features", "Unique Value Proposition"],
-  audience: ["Primary Audience", "Key Characteristics", "Search Behaviour"],
+/** The RankYak structure each section follows, as given to the copilot. */
+const TEMPLATES: Record<ProfileSection, string> = {
+  description: `Core Business
+- What the business is and how it presents itself (its name, category and positioning).
+- What it does for customers and the outcome it aims for.
+- Who it is positioned for.
+Key Features
+- Feature name: one or two sentences on what it does. When the site states a figure, write "The site claims …".
+(4 to 6 feature bullets in this "Name: explanation" form)
+Unique Value Proposition
+- What sets it apart from alternatives (3 or 4 bullets). Mark testimonial or marketing figures as "testimonial claims, not independently verified".`,
+  audience: `Primary Audience
+- The roles and company types that buy or use it.
+- The teams or people with the specific need it solves.
+- The kinds of businesses or consumers it serves.
+Key Characteristics
+- Professional roles: the job titles that make or influence the decision.
+- Business needs: what they want to achieve.
+- Pain points: the problems that send them looking.
+- Buying behavior: how they evaluate and buy (trials, proof, security, price).
+- Company profile: the size and stage of company that fits.`,
 };
 
-const abortError = () => new DOMException("Aborted", "AbortError");
-
-/** Rejects as soon as `signal` aborts, without cancelling the shared work behind `promise`. */
-function abortable<T>(promise: Promise<T>, signal: AbortSignal): Promise<T> {
-  if (signal.aborted) return Promise.reject(abortError());
-  return new Promise<T>((resolve, reject) => {
-    const onAbort = () => reject(abortError());
-    signal.addEventListener("abort", onAbort, { once: true });
-    promise.then(resolve, reject).finally(() => signal.removeEventListener("abort", onAbort));
-  });
-}
-
-/** The crawl the domain step started (its id lands in the draft shortly after), or a new one. */
-async function firstCrawlRun(siteId: number) {
-  const started = Date.now();
-  while (Date.now() - started < RUN_ID_WAIT_MS) {
-    const runId = useSetupStore.getState().drafts[siteId]?.crawlRunId;
-    if (runId) return (await crawlerService.getRun(siteId, runId)).data;
-    await sleep(500);
-  }
-  const { data: run } = await crawlerService.start(siteId);
-  patchDraft(siteId, { crawlRunId: run.id });
-  return run;
-}
+const squash = (text: string) => text.replace(/\s+/g, " ").trim();
 
 const pathOf = (url: string) => {
   try {
@@ -63,45 +55,6 @@ const pathOf = (url: string) => {
     return url;
   }
 };
-
-const isHome = (page: CrawlPage) => pathOf(page.url).replace(/\/+$/, "") === "";
-
-/** Pages that loaded and have something to read, homepage first. */
-function readablePages(pages: CrawlPage[]) {
-  const ok = pages.filter(
-    (p) =>
-      !p.error_message &&
-      (p.status_code === null || (p.status_code >= 200 && p.status_code < 300)) &&
-      Boolean(p.title || p.meta_description || p.h1 || p.content_summary || p.content_text),
-  );
-  return [...ok.filter(isHome), ...ok.filter((p) => !isHome(p))];
-}
-
-/**
- * The first page of crawled pages, shared by both sections (and by retries)
- * so the crawl is waited on once. A failed or empty read is dropped so Retry
- * reads again.
- */
-const pagesBySite = new Map<number, Promise<CrawlPage[]>>();
-
-function crawledPages(siteId: number) {
-  let pending = pagesBySite.get(siteId);
-  if (!pending) {
-    pending = (async () => {
-      const run = await waitForCrawl(siteId, await firstCrawlRun(siteId));
-      const { data } = await crawlerService.listPages(siteId, run.id);
-      return readablePages(data);
-    })();
-    pagesBySite.set(siteId, pending);
-    pending.then(
-      (pages) => pages.length === 0 && pagesBySite.delete(siteId),
-      () => pagesBySite.delete(siteId),
-    );
-  }
-  return pending;
-}
-
-const squash = (text: string) => text.replace(/\s+/g, " ").trim();
 
 function pageDigest(page: CrawlPage, textChars: number) {
   const lines = [`URL: ${pathOf(page.url)}`];
@@ -114,19 +67,11 @@ function pageDigest(page: CrawlPage, textChars: number) {
   return lines.join("\n");
 }
 
-const languageName = (code: string) => {
+const displayName = (code: string, type: "language" | "region", fallback: string) => {
   try {
-    return new Intl.DisplayNames(["en"], { type: "language" }).of(code) ?? "English";
+    return new Intl.DisplayNames(["en"], { type }).of(code) ?? fallback;
   } catch {
-    return "English";
-  }
-};
-
-const countryName = (code: string) => {
-  try {
-    return new Intl.DisplayNames(["en"], { type: "region" }).of(code) ?? code;
-  } catch {
-    return code;
+    return fallback;
   }
 };
 
@@ -137,17 +82,16 @@ function profileQuestion(
   locale: string,
   description: string | null,
 ) {
-  const headings = HEADINGS[section].join(", ");
   const task =
     section === "description"
-      ? `Using only the crawled pages of ${site.domain} below, describe what this website's business is and what it offers.`
+      ? `Using only the crawled pages of ${site.domain} below, describe the business behind this website.`
       : `Using the confirmed description and the crawled pages of ${site.domain} below, describe who this website is for.`;
   const intro = [
     task,
-    `Reply in ${languageName(locale)}. Reply with markdown only, with no introduction or closing remarks.`,
-    `Use exactly these headings, translated into the reply language, each as a plain line of its own with no # or ** markers: ${headings}.`,
-    "Under each heading write 3 to 6 bullets of one or two sentences. State only what the pages support.",
-    section === "audience" && description ? `\nConfirmed description:\n${description.slice(0, 1200)}` : "",
+    `Reply in ${displayName(locale, "language", "English")}, with markdown only and no introduction or closing remarks.`,
+    "Follow this structure exactly. Each heading is a plain line of its own with no # or ** markers (translate headings and labels into the reply language). Every point is a bullet of one or two full sentences. State only what the pages support:",
+    TEMPLATES[section],
+    section === "audience" && description ? `\nConfirmed description:\n${description.slice(0, 900)}` : "",
     "\nCrawled pages:",
   ]
     .filter(Boolean)
@@ -190,51 +134,76 @@ async function askCopilot(
 }
 
 const bullets = (items: (string | null | undefined)[]) =>
-  [...new Set(items.filter((s): s is string => Boolean(s)).map(squash))].map((s) => `- ${s}`).join("\n");
+  [...new Set(items.filter((s): s is string => Boolean(s?.trim())).map(squash))].map((s) => `- ${s}`).join("\n");
 
-/** Without the copilot: the sections assembled from the crawled pages' own text. */
-function profileFromPages(site: ProfileSite, section: ProfileSection, pages: CrawlPage[]) {
-  const home = pages.find(isHome) ?? pages[0];
+const section = (heading: string, body: string) => (body ? `${heading}\n\n${body}` : "");
+
+const headingTexts = (page: CrawlPage) =>
+  (page.headings ?? [])
+    .map((h) => (typeof h.text === "string" ? squash(h.text) : ""))
+    .filter((h) => h.length > 3 && h !== page.h1);
+
+/** Without the copilot: the RankYak structure filled from the crawled pages' own text. */
+function profileFromPages(site: ProfileSite, key: ProfileSection, pages: CrawlPage[]) {
+  const home = pages.find(isHomePage) ?? pages[0];
   const others = pages.filter((p) => p !== home);
-  const offers = others.filter((p) => /service|product|category|pricing|solution/i.test(p.page_type ?? ""));
+  const offers = others.filter((p) => /service|product|category|pricing|solution|feature/i.test(p.page_type ?? ""));
+  const featurePages = (offers.length ? offers : others).filter((p) => p.title).slice(0, 6);
+  const name = home.title ? squash(home.title.split(/\s[|–—-]\s/)[0]) : site.name;
 
-  if (section === "description") {
-    const core = bullets([
-      home.title ? `${home.title} is the website at ${site.domain}.` : `${site.name} is the website at ${site.domain}.`,
-      home.meta_description,
-      home.h1 !== home.title ? home.h1 : null,
-      home.content_summary,
-    ]);
-    const keyPages = bullets(
-      (offers.length ? offers : others)
-        .filter((p) => p.title)
-        .slice(0, 6)
-        .map((p) => `${p.title}${p.meta_description ? `: ${p.meta_description}` : ""}`),
-    );
-    return [`Core Business\n\n${core}`, keyPages && `Key Pages\n\n${keyPages}`].filter(Boolean).join("\n\n");
+  if (key === "description") {
+    return [
+      section(
+        "Core Business",
+        bullets([
+          `${name} is the business behind ${site.domain}.`,
+          home.meta_description,
+          home.h1 !== home.title ? home.h1 : null,
+          home.content_summary,
+        ]),
+      ),
+      section(
+        "Key Features",
+        bullets(
+          featurePages.map((p) => `${squash(p.title!.split(/\s[|–—-]\s/)[0])}: ${p.meta_description ?? p.h1 ?? pathOf(p.url)}`),
+        ),
+      ),
+      section(
+        "Unique Value Proposition",
+        bullets(headingTexts(home).slice(0, 3).map((h) => `The homepage highlights: ${h}.`)),
+      ),
+    ]
+      .filter(Boolean)
+      .join("\n\n");
   }
 
-  const market = countryName(siteMarket(site));
-  const language = languageName(siteLanguage(site));
-  const primary = bullets([
-    offers.length
-      ? `People looking for ${offers
-          .slice(0, 4)
-          .map((p) => p.title)
-          .filter(Boolean)
-          .join(", ")}.`
-      : home.meta_description
-        ? `People looking for what the homepage offers: ${home.meta_description}`
-        : null,
-    `Visitors in ${market} who search in ${language}.`,
-  ]);
-  return `Primary Audience\n\n${primary}`;
+  const market = displayName(siteMarket(site), "region", siteMarket(site));
+  const language = displayName(siteLanguage(site), "language", "English");
+  const offerNames = featurePages.map((p) => squash(p.title!.split(/\s[|–—-]\s/)[0])).slice(0, 4);
+  return [
+    section(
+      "Primary Audience",
+      bullets([
+        offerNames.length ? `People looking for ${offerNames.join(", ")}.` : null,
+        home.meta_description ? `Visitors who need what the homepage offers: ${home.meta_description}` : null,
+        `Visitors in ${market} who search in ${language}.`,
+      ]),
+    ),
+    section(
+      "Key Characteristics",
+      bullets([
+        offerNames.length ? `Business needs: ${offerNames.join(", ")}.` : null,
+        `Company profile: customers in ${market}.`,
+      ]),
+    ),
+  ]
+    .filter(Boolean)
+    .join("\n\n");
 }
 
 /** Releases finished text in small bursts, so it writes itself in like a live answer. */
 async function* reveal(text: string, signal: AbortSignal) {
   for (let i = 0; i < text.length; i += 40) {
-    if (signal.aborted) throw abortError();
     yield text.slice(i, i + 40);
     await sleep(90, signal);
   }
@@ -247,7 +216,7 @@ async function* reveal(text: string, signal: AbortSignal) {
  */
 export async function* streamProfileSection(
   site: ProfileSite,
-  section: ProfileSection,
+  key: ProfileSection,
   { locale, description, signal }: { locale: string; description: string | null; signal: AbortSignal },
 ) {
   const pages = await abortable(crawledPages(site.id), signal);
@@ -255,11 +224,11 @@ export async function* streamProfileSection(
 
   let text = "";
   try {
-    text = await abortable(askCopilot(site, section, pages, locale, description), signal);
+    text = await abortable(askCopilot(site, key, pages, locale, description), signal);
   } catch (error) {
     if ((error as Error).name === "AbortError") throw error;
   }
-  if (!text) text = profileFromPages(site, section, pages);
+  if (!text) text = profileFromPages(site, key, pages);
 
   yield* reveal(text, signal);
 }

@@ -1,23 +1,40 @@
 "use client";
 
 import * as React from "react";
-import { CheckIcon, FilePenLineIcon, ListPlusIcon, MailIcon, ScanSearchIcon, UsersIcon } from "lucide-react";
-import { useFormatter, useTranslations } from "next-intl";
+import Link from "next/link";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  ArrowRightIcon,
+  CheckIcon,
+  FilePenLineIcon,
+  Link2Icon,
+  ListPlusIcon,
+  ScanSearchIcon,
+  UsersIcon,
+} from "lucide-react";
+import { useFormatter, useNow, useTranslations } from "next-intl";
 import { toast } from "sonner";
 
-import { fakeRequest } from "@/lib/auth/session";
 import { getErrorMessage } from "@/lib/errors";
+import { keywordKeys, serpKeys } from "@/lib/api/query-keys";
+import copilotService from "@/services/copilot";
+import keywordService from "@/services/keywords";
+import serpService from "@/services/serp";
+import { useDiscoverProspects } from "@/features/authority/hooks";
 import type { CompetitorRow, KeywordGap, LinkSite, QuestionGap } from "@/lib/mocks/ui-data";
 import { useCompetitors, useResearchCompetitors } from "@/features/competitors/hooks";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardAction, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { EmptyState } from "@/components/brand/empty-state";
 import { ErrorState } from "@/components/brand/error-state";
 import { OwnerChip } from "@/components/brand/owner-chip";
 import { colorize } from "@/components/charts/series-colors";
+import { Markdown } from "@/components/agent/markdown";
+import { brandHref } from "@/components/layout/nav";
 import { PageHeader } from "@/components/layout/page-header";
 import { PageSkeleton } from "@/components/layout/page-skeleton";
 import { useShell } from "@/components/layout/shell-context";
@@ -66,6 +83,7 @@ export function CompetitorsView() {
           <LinkSites sites={data.sites} />
         </>
       )}
+      <ResearchRuns siteId={brand.id} />
     </div>
   );
 }
@@ -88,6 +106,9 @@ function ComparisonTable({ rows }: { rows: CompetitorRow[] }) {
               <TableHead className="text-end">{t("position")}</TableHead>
               <TableHead className="text-end">{t("citations")}</TableHead>
               <TableHead className="text-end">{t("top10")}</TableHead>
+              <TableHead className="text-end">
+                <span className="sr-only">{t("actions")}</span>
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -113,6 +134,7 @@ function ComparisonTable({ rows }: { rows: CompetitorRow[] }) {
                 </TableCell>
                 <TableCell className="text-end num">{r.citations}</TableCell>
                 <TableCell className="text-end num">{r.top10}</TableCell>
+                <TableCell className="text-end">{!r.isYou && <ProspectButton domain={r.domain} />}</TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -125,12 +147,22 @@ function ComparisonTable({ rows }: { rows: CompetitorRow[] }) {
 function QuestionGaps({ gaps }: { gaps: QuestionGap[] }) {
   const t = useTranslations("competitors.questionGaps");
   const format = useFormatter();
-  const [drafting, setDrafting] = React.useState<Record<string, "busy" | "done">>({});
-  const draft = async (id: string) => {
-    setDrafting((s) => ({ ...s, [id]: "busy" }));
-    await fakeRequest(1200);
-    setDrafting((s) => ({ ...s, [id]: "done" }));
-    toast.success(t("drafted"));
+  const { brand } = useShell();
+  const [drafts, setDrafts] = React.useState<Record<string, string>>({});
+  const [open, setOpen] = React.useState<QuestionGap | null>(null);
+  const ask = useMutation({
+    mutationFn: async (gap: QuestionGap) => {
+      const response = await copilotService.ask(brand?.id ?? 0, {
+        question: t("prompt", { question: gap.question, competitors: gap.winners.map((w) => w.name).join(", ") }),
+      });
+      return { id: gap.id, answer: response.answer };
+    },
+    onSuccess: ({ id, answer }) => setDrafts((d) => ({ ...d, [id]: answer })),
+    onError: (error) => toast.error(getErrorMessage(error, t("draftFailed"))),
+  });
+  const draft = (gap: QuestionGap) => {
+    setOpen(gap);
+    if (!drafts[gap.id]) ask.mutate(gap);
   };
   return (
     <Card>
@@ -153,16 +185,28 @@ function QuestionGaps({ gaps }: { gaps: QuestionGap[] }) {
             <Button
               size="sm"
               variant="secondary"
-              loading={drafting[g.id] === "busy"}
-              disabled={drafting[g.id] === "done"}
-              onClick={() => draft(g.id)}
+              loading={ask.isPending && ask.variables?.id === g.id}
+              onClick={() => draft(g)}
             >
-              {drafting[g.id] === "done" ? <CheckIcon /> : <FilePenLineIcon />}
-              {drafting[g.id] === "done" ? t("draftReady") : t("write")}
+              {drafts[g.id] ? <CheckIcon /> : <FilePenLineIcon />}
+              {drafts[g.id] ? t("draftReady") : t("write")}
             </Button>
           </li>
         ))}
       </ul>
+      <Dialog open={open !== null} onOpenChange={(o) => !o && setOpen(null)}>
+        <DialogContent className="max-h-[85dvh] overflow-y-auto sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>{open?.question}</DialogTitle>
+            <DialogDescription>{t("draftDescription")}</DialogDescription>
+          </DialogHeader>
+          {open && drafts[open.id] ? (
+            <Markdown>{drafts[open.id]}</Markdown>
+          ) : (
+            <p className="text-small text-fg-2">{t("drafting")}</p>
+          )}
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }
@@ -170,7 +214,18 @@ function QuestionGaps({ gaps }: { gaps: QuestionGap[] }) {
 function KeywordGaps({ gaps }: { gaps: KeywordGap[] }) {
   const t = useTranslations("competitors.keywordGaps");
   const format = useFormatter();
+  const { brand } = useShell();
+  const queryClient = useQueryClient();
   const [added, setAdded] = React.useState<string[]>([]);
+  const add = useMutation({
+    mutationFn: (gap: KeywordGap) => keywordService.discover(brand?.id ?? 0, { seed_keywords: [gap.keyword] }),
+    onSuccess: (_result, gap) => {
+      setAdded((a) => [...a, gap.id]);
+      toast.success(t("added", { keyword: gap.keyword }));
+      return queryClient.invalidateQueries({ queryKey: keywordKeys.all(brand?.id ?? 0) });
+    },
+    onError: (error) => toast.error(getErrorMessage(error, t("addFailed"))),
+  });
   return (
     <Card>
       <div className="flex flex-col gap-0.5">
@@ -195,10 +250,8 @@ function KeywordGaps({ gaps }: { gaps: KeywordGap[] }) {
                 size="sm"
                 variant="ghost"
                 disabled={on}
-                onClick={() => {
-                  setAdded((a) => [...a, g.id]);
-                  toast.success(t("added", { keyword: g.keyword }));
-                }}
+                loading={add.isPending && add.variables?.id === g.id}
+                onClick={() => add.mutate(g)}
               >
                 {on ? <CheckIcon /> : <ListPlusIcon />}
                 {on ? t("inPlan") : t("addToPlan")}
@@ -213,7 +266,7 @@ function KeywordGaps({ gaps }: { gaps: KeywordGap[] }) {
 
 function LinkSites({ sites }: { sites: LinkSite[] }) {
   const t = useTranslations("competitors.sites");
-  const [state, setState] = React.useState<"idle" | "busy" | "done">("idle");
+  const { brandSlug } = useShell();
   return (
     <Card>
       <CardHeader>
@@ -225,23 +278,15 @@ function LinkSites({ sites }: { sites: LinkSite[] }) {
           <CardDescription>{t("description")}</CardDescription>
         </div>
         <CardAction>
-          <Button
-            variant="agent"
-            size="sm"
-            loading={state === "busy"}
-            disabled={state === "done"}
-            onClick={async () => {
-              setState("busy");
-              await fakeRequest(1500);
-              setState("done");
-              toast.success(t("drafted", { count: sites.length }));
-            }}
-          >
-            {state === "done" ? <CheckIcon /> : <MailIcon />}
-            {state === "done" ? t("draftedShort") : t("draftAll")}
+          <Button asChild variant="secondary" size="sm">
+            <Link href={brandHref(brandSlug, "authority")}>
+              {t("openAll")}
+              <ArrowRightIcon className="rtl:-scale-x-100" />
+            </Link>
           </Button>
         </CardAction>
       </CardHeader>
+      {sites.length === 0 && <p className="text-small text-fg-3">{t("empty")}</p>}
       <ul className="grid gap-3 md:grid-cols-2">
         {sites.map((s) => (
           <li key={s.id} className="flex flex-col gap-2 rounded-md border border-border p-4">
@@ -253,6 +298,72 @@ function LinkSites({ sites }: { sites: LinkSite[] }) {
             </div>
             <p className="text-small text-fg-2">{s.why}</p>
             <span className="num text-caption text-fg-3">{t("authority", { score: s.authority })}</span>
+          </li>
+        ))}
+      </ul>
+    </Card>
+  );
+}
+
+/** Turns this competitor's backlinks into outreach prospects on the Authority page. */
+function ProspectButton({ domain }: { domain: string }) {
+  const t = useTranslations("competitors.table");
+  const { brand } = useShell();
+  const discover = useDiscoverProspects(brand?.id ?? 0);
+  return (
+    <Button
+      size="sm"
+      variant="ghost"
+      loading={discover.isPending}
+      disabled={discover.isSuccess}
+      onClick={() =>
+        discover.mutate(
+          { competitor_domain: domain, limit: 20 },
+          {
+            onSuccess: (result) => toast.success(t("prospectsFound", { count: result.processed, domain })),
+            onError: (error) => toast.error(getErrorMessage(error, t("prospectsFailed"))),
+          },
+        )
+      }
+    >
+      {discover.isSuccess ? <CheckIcon /> : <Link2Icon />}
+      {discover.isSuccess ? t("prospectsAdded") : t("findProspects")}
+    </Button>
+  );
+}
+
+/** Every SERP research run: when it ran and what it found. */
+function ResearchRuns({ siteId }: { siteId: number }) {
+  const t = useTranslations("competitors.runs");
+  const format = useFormatter();
+  const now = useNow({ updateInterval: 60_000 });
+  const runs = useQuery({
+    queryKey: serpKeys.runs(siteId),
+    queryFn: async () => (await serpService.runs(siteId)).data,
+  });
+  if (!runs.data || runs.data.length === 0) return null;
+  return (
+    <Card className="gap-3">
+      <div className="flex flex-col gap-0.5">
+        <CardTitle>{t("title")}</CardTitle>
+        <CardDescription>{t("description")}</CardDescription>
+      </div>
+      <ul className="flex flex-col divide-y divide-border">
+        {runs.data.map((run) => (
+          <li key={run.id} className="flex flex-wrap items-center gap-3 py-2.5 text-small">
+            <Badge variant={run.status === "completed" ? "success" : run.status === "failed" ? "danger" : "blue"}>
+              {run.status}
+            </Badge>
+            <span className="min-w-0 flex-1 num text-fg">
+              {t("summary", {
+                processed: run.keywords_processed,
+                requested: run.keywords_requested,
+                results: run.results_found,
+              })}
+            </span>
+            <span className="text-caption font-normal text-fg-3">
+              {run.started_at ? format.relativeTime(new Date(run.started_at), now) : "—"}
+            </span>
           </li>
         ))}
       </ul>

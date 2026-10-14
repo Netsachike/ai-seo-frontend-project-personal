@@ -26,22 +26,8 @@ type IntegrationsState = {
   update: (id: string, patch: Partial<IntegrationConnection["account"]>) => void;
 };
 
-const seed: IntegrationConnection[] = [
-  {
-    id: "conn_tg",
-    provider: "telegram",
-    brandSlug: null,
-    account: { name: "@fvo_northwind", detail: "Rankoya agent chat" },
-    connectedAt: "2026-09-21T10:12:00Z",
-  },
-  {
-    id: "conn_gsc",
-    provider: "searchConsole",
-    brandSlug: "northwind-roasters",
-    account: { name: "sc-domain:northwindroasters.com", detail: "Domain property" },
-    connectedAt: "2026-09-22T08:40:00Z",
-  },
-];
+/** Connections for providers with no endpoint yet. Starts empty: no sample accounts. */
+const seed: IntegrationConnection[] = [];
 
 let counter = 0;
 

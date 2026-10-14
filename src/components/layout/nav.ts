@@ -1,11 +1,12 @@
 import {
   BriefcaseBusinessIcon,
-  ChartColumnIcon,
+  CircleDollarSignIcon,
   FileTextIcon,
   LayoutGridIcon,
+  Link2Icon,
   ListChecksIcon,
-  MegaphoneIcon,
   MessageCircleIcon,
+  NetworkIcon,
   PlugIcon,
   RadarIcon,
   ShieldCheckIcon,
@@ -13,6 +14,7 @@ import {
   StoreIcon,
   TrendingUpIcon,
   UsersIcon,
+  WrenchIcon,
   type LucideIcon,
 } from "lucide-react";
 
@@ -25,10 +27,14 @@ export type NavKey =
   | "competitors"
   | "audit"
   | "actions"
+  | "topics"
   | "content"
+  | "money"
+  | "authority"
   | "social"
   | "agent"
   | "integrations"
+  | "tools"
   | "reports"
   | "resellers"
   | "agency"
@@ -45,7 +51,12 @@ export type NavItem = {
 };
 export type NavGroup = { key: "insights" | "grow" | "workspace"; items: NavItem[] };
 
-/** Groups and order follow the sidebar mockup; Social is a P1 stub. */
+/**
+ * Groups follow the growth loop: see where you stand (Insights), act on it
+ * (Grow), and connect and run the tools (Workspace). Every brand screen is
+ * backed by live endpoints; Social and Reports have none yet, so they stay
+ * out of the sidebar until they do.
+ */
 export const navGroups: NavGroup[] = [
   {
     key: "insights",
@@ -61,16 +72,22 @@ export const navGroups: NavGroup[] = [
     key: "grow",
     items: [
       { key: "actions", icon: ListChecksIcon },
+      { key: "topics", icon: NetworkIcon },
       { key: "content", icon: FileTextIcon },
+      { key: "money", icon: CircleDollarSignIcon },
+      { key: "authority", icon: Link2Icon },
       { key: "agent", icon: MessageCircleIcon },
-      { key: "social", icon: MegaphoneIcon, soon: true },
+      // No endpoints yet; restore with MegaphoneIcon when the backend ships social publishing.
+      // { key: "social", icon: MegaphoneIcon, soon: true },
     ],
   },
   {
     key: "workspace",
     items: [
       { key: "integrations", icon: PlugIcon },
-      { key: "reports", icon: ChartColumnIcon },
+      { key: "tools", icon: WrenchIcon },
+      // No endpoints yet; restore with ChartColumnIcon when the backend ships reports.
+      // { key: "reports", icon: ChartColumnIcon },
       { key: "resellers", icon: StoreIcon, href: "/resellers", visible: canUseResellerConsole },
       { key: "agency", icon: BriefcaseBusinessIcon, href: "/agency", visible: canUseAgencyResources },
       { key: "settings", icon: SlidersHorizontalIcon, href: "/settings" },

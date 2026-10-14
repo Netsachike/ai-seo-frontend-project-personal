@@ -23,12 +23,8 @@ export const siteKeys = {
   scope: (siteId: number, module: string, ...rest: unknown[]) => [...siteKeys.detail(siteId), module, ...rest] as const,
 };
 
-export const crawlKeys = {
-  run: (siteId: number, runId: number) => siteKeys.scope(siteId, "crawl", runId),
-  pages: (siteId: number, runId: number, page: number) => siteKeys.scope(siteId, "crawl", runId, "pages", page),
-};
-
 export const keywordKeys = {
+  all: (siteId: number) => siteKeys.scope(siteId, "keywords"),
   list: (siteId: number, page = 1) => siteKeys.scope(siteId, "keywords", page),
 };
 
@@ -86,15 +82,26 @@ export const siteGuardKeys = {
   issue: (siteId: number, issueId: number) => siteKeys.scope(siteId, "site-guard", "issue", issueId),
 };
 
+export const crawlKeys = {
+  all: (siteId: number) => siteKeys.scope(siteId, "crawl"),
+  run: (siteId: number, runId: number) => siteKeys.scope(siteId, "crawl", "run", runId),
+  pages: (siteId: number, runId: number, page = 1) => siteKeys.scope(siteId, "crawl", "pages", runId, page),
+};
+
 export const moneyPageKeys = {
-  list: (siteId: number) => siteKeys.scope(siteId, "money-pages"),
+  all: (siteId: number) => siteKeys.scope(siteId, "money-pages"),
+  list: (siteId: number, page = 1) => siteKeys.scope(siteId, "money-pages", "list", page),
   detail: (siteId: number, id: number) => siteKeys.scope(siteId, "money-pages", id),
   recommendations: (siteId: number, id: number) => siteKeys.scope(siteId, "money-pages", id, "recommendations"),
 };
 
 export const authorityKeys = {
+  all: (siteId: number) => siteKeys.scope(siteId, "authority"),
   profile: (siteId: number) => siteKeys.scope(siteId, "authority", "profile"),
-  opportunities: (siteId: number) => siteKeys.scope(siteId, "authority", "opportunities"),
+  opportunities: (siteId: number, page = 1) => siteKeys.scope(siteId, "authority", "opportunities", page),
+  opportunity: (siteId: number, id: number) => siteKeys.scope(siteId, "authority", "opportunity", id),
+  backlinkSummary: (siteId: number) => siteKeys.scope(siteId, "authority", "backlinks", "summary"),
+  backlinks: (siteId: number, offset = 0) => siteKeys.scope(siteId, "authority", "backlinks", offset),
 };
 
 export const copilotKeys = {

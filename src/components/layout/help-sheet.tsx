@@ -5,7 +5,20 @@ import { BookOpenIcon, SquareArrowOutUpRightIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
-import { fakeRequest } from "@/lib/auth/session";
+import { PRODUCT } from "@/config/product";
+import { useBrandConfig } from "@/components/providers/brand-provider";
+
+/**
+ * No ticket endpoint yet: both forms open the user's email app with the
+ * message filled in, addressed to the tenant's support mailbox (or Rankoya's).
+ */
+function useSupportMail() {
+  const { brandConfig } = useBrandConfig();
+  const to = brandConfig.support_email ?? PRODUCT.supportEmail;
+  return (subject: string, body: string) => {
+    window.location.assign(`mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`);
+  };
+}
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -27,10 +40,10 @@ const DOCS = ["gettingStarted", "visibility", "approvals", "telegram"] as const;
 /** Docs links and a ticket form. A third-party widget can replace the form behind a flag later. */
 export function HelpSheet({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
   const t = useTranslations("shell.help");
+  const mail = useSupportMail();
   const [subject, setSubject] = React.useState("");
   const [message, setMessage] = React.useState("");
   const [errors, setErrors] = React.useState<{ subject?: string; message?: string }>({});
-  const [sending, setSending] = React.useState(false);
 
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -40,9 +53,7 @@ export function HelpSheet({ open, onOpenChange }: { open: boolean; onOpenChange:
     };
     setErrors(next);
     if (next.subject || next.message) return;
-    setSending(true);
-    await fakeRequest();
-    setSending(false);
+    mail(subject.trim(), message.trim());
     setSubject("");
     setMessage("");
     onOpenChange(false);
@@ -96,7 +107,7 @@ export function HelpSheet({ open, onOpenChange }: { open: boolean; onOpenChange:
                   />
                 )}
               </FormField>
-              <Button type="submit" variant="primary" loading={sending} className="self-start">
+              <Button type="submit" variant="primary" className="self-start">
                 {t("submit")}
               </Button>
             </form>
@@ -112,17 +123,15 @@ const FEEDBACK_TYPES = ["idea", "bug", "other"] as const;
 export function FeedbackDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
   const t = useTranslations("shell.feedback");
   const tCommon = useTranslations("common");
+  const mail = useSupportMail();
   const [type, setType] = React.useState<(typeof FEEDBACK_TYPES)[number]>("idea");
   const [message, setMessage] = React.useState("");
   const [error, setError] = React.useState<string>();
-  const [sending, setSending] = React.useState(false);
 
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
     if (!message.trim()) return setError(t("required"));
-    setSending(true);
-    await fakeRequest();
-    setSending(false);
+    mail(t("mailSubject", { type: t(`types.${type}`) }), message.trim());
     setMessage("");
     onOpenChange(false);
     toast.success(t("sent"));
@@ -169,7 +178,7 @@ export function FeedbackDialog({ open, onOpenChange }: { open: boolean; onOpenCh
             <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>
               {tCommon("cancel")}
             </Button>
-            <Button type="submit" variant="primary" loading={sending}>
+            <Button type="submit" variant="primary">
               {t("submit")}
             </Button>
           </DialogFooter>

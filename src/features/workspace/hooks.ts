@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -10,6 +11,7 @@ import { getSessionUserFromCookie, writeSessionUserCookie } from "@/lib/auth-ses
 import { getMe, getUsage } from "@/lib/mocks/store";
 import { meKeys, siteKeys, workspaceKeys } from "@/lib/api/query-keys";
 import { useUiStore } from "@/lib/store/ui";
+import authService from "@/services/auth";
 import siteService from "@/services/sites";
 import workspaceService from "@/services/workspaces";
 import { useSessionUser } from "@/features/account/use-session-user";
@@ -23,6 +25,7 @@ import { siteIdFromSlug, siteSlug } from "@/features/sites/site-utils";
  */
 export function useMe() {
   const session = useSessionUser();
+  useProfileRefresh(session);
   return useQuery({
     queryKey: meKeys.all,
     queryFn: getMe,
@@ -33,6 +36,8 @@ export function useMe() {
       id: session ? String(session.id) : "",
       name: session ? session.fullName || `${session.firstName} ${session.lastName}`.trim() || session.email : "",
       email: session?.email ?? "",
+      // No Telegram endpoint yet: never connected.
+      telegram: null,
     }),
   });
 }
@@ -69,6 +74,32 @@ export function useSite(siteId: number | undefined) {
     enabled: Boolean(siteId),
     queryFn: async () => (await siteService.get(siteId as number)).data,
   });
+}
+
+/**
+ * `GET /me` on load: confirms the token is still valid (a 401 signs the user
+ * out) and keeps the cookie's name and email in step with the backend.
+ */
+function useProfileRefresh(session: ReturnType<typeof useSessionUser>) {
+  const profile = useQuery({
+    queryKey: [...meKeys.all, "profile"],
+    enabled: Boolean(session),
+    staleTime: 5 * 60_000,
+    queryFn: async () => (await authService.me()).data,
+  });
+  React.useEffect(() => {
+    const user = profile.data;
+    if (!user || !session) return;
+    if (user.name === session.fullName && user.email === session.email) return;
+    const [firstName, ...rest] = user.name.trim().split(/s+/);
+    writeSessionUserCookie({
+      ...session,
+      fullName: user.name,
+      firstName: firstName ?? "",
+      lastName: rest.join(" "),
+      email: user.email,
+    });
+  }, [profile.data, session]);
 }
 
 /** Usage meters have no backend endpoint yet, so they stay on mock data. */

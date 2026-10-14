@@ -4,26 +4,15 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
-import type { Range, Site } from "@/types/types";
+import type { Site } from "@/types/types";
 import { getErrorMessage } from "@/lib/errors";
-import { getBrandSummary } from "@/lib/mocks/store";
-import { aiVisibilityKeys, opportunityKeys, overviewKeys, publishingKeys, topicalMapKeys } from "@/lib/api/query-keys";
+import { aiVisibilityKeys, opportunityKeys, publishingKeys, topicalMapKeys } from "@/lib/api/query-keys";
 import aiVisibilityService from "@/services/ai-visibility";
 import opportunityService from "@/services/opportunities";
 import publishingService from "@/services/publishing";
 import topicalMapService from "@/services/topical-maps";
 import { isGscReady, useGscOverview } from "@/features/search-console/hooks";
 import { usePublishingConnections } from "@/features/publishing/hooks";
-
-/** Trend lines, sparklines and share of voice over time. No history endpoint yet, so this stays on mock data. */
-export function useBrandSummary(siteId: number | undefined, range: Range) {
-  return useQuery({
-    queryKey: overviewKeys.summary(siteId ?? 0, range),
-    enabled: Boolean(siteId),
-    queryFn: () => getBrandSummary(siteId as number, range),
-    placeholderData: (previous) => previous,
-  });
-}
 
 /**
  * Runs an AI visibility test: the given prompts, or the latest active ones
