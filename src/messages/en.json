@@ -22,7 +22,26 @@
     "engineDown": "We couldn't reach {engine} this time. We'll retry at {time}; other engines are up to date.",
     "publishFailed": "We couldn't publish to {site}. Check the WordPress connection, then retry.",
     "genericError": "Something went wrong on our side. Try again, and if it keeps happening, tell us at {email}.",
-    "errorTitle": "We couldn't load this"
+    "errorTitle": "We couldn't load this",
+    "pipeline": {
+      "label": "Content pipeline",
+      "discover": {
+        "title": "Discover keywords",
+        "body": "From your pages and any seeds"
+      },
+      "analyze": {
+        "title": "Analyze",
+        "body": "Keeps the keywords worth targeting"
+      },
+      "research": {
+        "title": "Research",
+        "body": "Studies the search results for one keyword"
+      },
+      "write": {
+        "title": "Write the article",
+        "body": "From a completed research brief"
+      }
+    }
   },
   "engines": {
     "chatgpt": "ChatGPT",
@@ -416,8 +435,9 @@
         "competitors": "Competitors",
         "audit": "Site audit",
         "actions": "Action plan",
-        "topics": "Topical map",
-        "content": "Content",
+        "keywords": "Keywords",
+        "articles": "Articles",
+        "calendar": "Content calendar",
         "money": "Money pages",
         "authority": "Authority",
         "social": "Social",
@@ -1171,8 +1191,7 @@
       "helpPrompt": "Help me fix this audit issue: \"{title}\". Give me the exact steps for my setup.",
       "verified": "Fixed and verified on the live page.",
       "proposalTitle": "Proposed fix",
-      "proposalBody": "Nothing has been changed on your site. Get the package to apply it, then verify the live page.",
-      "getPackage": "Get deployment package",
+      "proposalBody": "Nothing has been changed on your site. Put this live using the steps below, then verify the live page.",
       "verify": "Verify on live site",
       "currentValue": "Now: {value}",
       "markInProgress": "Mark in progress",
@@ -1180,7 +1199,14 @@
       "markedInProgress": "Marked in progress.",
       "ignore": "Ignore issue",
       "ignored": "Issue ignored.",
-      "preview": "Preview the page"
+      "preview": "Preview the page",
+      "preparing": "Rankoya is writing the fix…",
+      "field": {
+        "canonical": "Canonical URL",
+        "meta_description": "Meta description"
+      },
+      "characters": "{count, plural, one {# character} other {# characters}}",
+      "instructionsTitle": "How to put it live"
     },
     "auditDone": "{count, plural, =0 {No new issues.} one {# new issue found.} other {# new issues found.}}",
     "auditFailed": "Couldn't run the audit. Crawl the site first, then try again.",
@@ -1393,8 +1419,86 @@
       "saveFailed": "Couldn't save the article. Try again."
     }
   },
+  "articles": {
+    "title": "Articles",
+    "description": "Everything Rankoya has written for you, and the research each article is written from.",
+    "researchKeyword": "Research a keyword",
+    "viewLabel": "Articles view",
+    "views": {
+      "articles": "Articles",
+      "research": "Research briefs"
+    },
+    "table": {
+      "caption": "Articles",
+      "title": "Title",
+      "keyword": "Keyword",
+      "status": "Status",
+      "statusValue": {
+        "generating": "Writing",
+        "draft": "Draft",
+        "publishing": "Publishing",
+        "published": "Published",
+        "failed": "Failed"
+      },
+      "words": "Words",
+      "updated": "Updated",
+      "total": "{count, plural, one {# article} other {# articles}}",
+      "emptyTitle": "No articles yet",
+      "emptyBody": "Research an accepted keyword, then write the article from the completed research.",
+      "emptyAction": "Go to keywords"
+    },
+    "research": {
+      "caption": "Research briefs",
+      "title": "Research brief",
+      "sheetDescription": "What Rankoya learned from the search results before writing.",
+      "keyword": "Keyword",
+      "untitled": "Untitled",
+      "intent": "Search intent",
+      "type": "Article type",
+      "words": "Target words",
+      "status": "Status",
+      "written": "“{title}” is ready to review.",
+      "error": "Error",
+      "summary": "Summary",
+      "headings": "Recommended headings",
+      "questions": "Questions people ask",
+      "topics": "Topics to cover",
+      "gaps": "Content gaps",
+      "entities": "Entities",
+      "searches": "Related searches",
+      "competitorPages": "Competing pages",
+      "internalLinks": "Internal link opportunities",
+      "citations": "Sources to cite",
+      "emptyTitle": "No research briefs yet",
+      "emptyBody": "Research an accepted keyword from the Keywords page, or with Research a keyword above.",
+      "preview": "Preview the existing page",
+      "researchId": "Research ID",
+      "actions": "Actions",
+      "write": "Write article",
+      "writing": "Writing…",
+      "writingNote": "Rankoya is writing the article. This can take a few minutes; keep this page open.",
+      "writeFailed": "Couldn't write the article. Check that the research is completed, then try again.",
+      "open": "Open article",
+      "retry": "Research again",
+      "retried": "Research ready for “{keyword}”.",
+      "retryFailed": "Couldn't research this keyword. Try again."
+    },
+    "researchDialog": {
+      "title": "Research a keyword",
+      "body": "Rankoya studies the search results for the keyword: intent, headings, questions and gaps. Once research is completed you can write the article.",
+      "keywordLabel": "Keyword",
+      "keywordPlaceholder": "Choose an accepted keyword",
+      "none": "No accepted keywords yet. Discover and analyze keywords first.",
+      "goKeywords": "Go to keywords",
+      "slow": "This can take a few minutes.",
+      "cancel": "Cancel",
+      "submit": "Start research",
+      "done": "Research ready. Write the article from it next.",
+      "failed": "Couldn't research this keyword. Try again."
+    }
+  },
   "content": {
-    "title": "Content",
+    "title": "Content calendar",
     "description": "Your plan for {month}: {count, plural, one {# article} other {# articles}}, {published} published, {waiting} waiting for you.",
     "descriptionEmpty": "Nothing planned for {month} yet.",
     "viewLabel": "View",
@@ -1432,7 +1536,6 @@
     },
     "planFailed": "Couldn't plan the month. Try again.",
     "plansTab": "Plans",
-    "briefsTab": "Research briefs",
     "itemActions": {
       "menu": "Actions for {title}",
       "reschedule": "Reschedule",
@@ -1468,35 +1571,6 @@
       "status": "Status",
       "emptyTitle": "No content plans yet",
       "emptyBody": "Generate a plan for a month from the calendar view."
-    },
-    "briefs": {
-      "caption": "Research briefs",
-      "title": "Research brief",
-      "sheetDescription": "What Rankoya learned from the search results before writing.",
-      "keyword": "Keyword",
-      "untitled": "Untitled",
-      "intent": "Search intent",
-      "type": "Article type",
-      "words": "Target words",
-      "status": "Status",
-      "article": "Article",
-      "written": "Written",
-      "notWritten": "Not written",
-      "error": "Error",
-      "openArticle": "Open the article: {title}",
-      "summary": "Summary",
-      "headings": "Recommended headings",
-      "questions": "Questions people ask",
-      "topics": "Topics to cover",
-      "gaps": "Content gaps",
-      "entities": "Entities",
-      "searches": "Related searches",
-      "competitorPages": "Competing pages",
-      "internalLinks": "Internal link opportunities",
-      "citations": "Sources to cite",
-      "emptyTitle": "No research briefs yet",
-      "emptyBody": "Rankoya researches a keyword when it writes an article from the calendar.",
-      "preview": "Preview the existing page"
     }
   },
   "editor": {
@@ -3171,65 +3245,94 @@
     "failedBody": "Google didn't finish connecting. Start again from Integrations or site setup.",
     "back": "Go back"
   },
-  "topics": {
-    "title": "Topical map",
-    "description": "The topics {domain} should own, grouped into clusters of keywords, and which page targets each one.",
-    "build": "Build map",
-    "rebuild": "Rebuild map",
-    "built": "Map rebuilt: {clusters} clusters from {keywords} keywords.",
-    "builtEmpty": "No usable keywords yet. Discover keywords first.",
-    "buildFailed": "Couldn't build the map. Try again.",
-    "emptyTitle": "No topical map yet",
-    "emptyBody": "Discover keywords from your pages, then Rankoya groups them into topic clusters.",
-    "coverage": "Coverage",
-    "stats": {
-      "clusters": "Clusters",
-      "keywords": "Keywords",
-      "mapped": "Mapped to a page",
-      "withPage": "Clusters with a page",
-      "withPageValue": "{covered} of {total}"
-    },
-    "viewLabel": "Topical map view",
+  "keywords": {
+    "title": "Keywords",
+    "description": "Every keyword {domain} could rank for. Analyze them to see which are accepted, then research an accepted keyword to write an article.",
+    "analyze": "Analyze keywords",
+    "analyzed": "Analysis done: {accepted} accepted, {rejected} rejected.",
+    "analyzeFailed": "Couldn't analyze the keywords. Try again.",
+    "viewLabel": "Keywords view",
     "views": {
-      "clusters": "Clusters",
-      "keywords": "All keywords"
+      "keywords": "Keywords",
+      "map": "Topical map"
     },
-    "mapLabel": "Topical map version",
-    "mapOption": "{name} · {date}",
-    "noClustersTitle": "No clusters in this map",
-    "noClustersBody": "Discover more keywords, then rebuild the map.",
-    "cluster": {
-      "moneyPage": "Money page",
-      "coverage": "Coverage",
-      "summary": "{keywords} keywords · {mapped} mapped · {volume} monthly searches",
-      "targetPage": "Target page",
-      "noPage": "No page targets this cluster yet.",
-      "planContent": "Plan content",
-      "keywords": "{count, plural, one {# keyword} other {# keywords}}"
-    },
-    "keywords": {
+    "table": {
       "caption": "Keywords",
       "keyword": "Keyword",
       "volume": "Volume",
       "difficulty": "Difficulty",
-      "cpc": "CPC",
       "opportunity": "Opportunity",
       "intent": "Intent",
       "cluster": "Cluster",
-      "quality": "Quality",
+      "quality": "Analysis",
       "total": "{count, plural, one {# keyword} other {# keywords}}",
       "emptyTitle": "No keywords yet",
-      "emptyBody": "Discover keywords to fill the map."
+      "qualityValue": {
+        "accepted": "Accepted",
+        "rejected": "Rejected",
+        "unanalyzed": "Not analyzed"
+      },
+      "emptyBody": "Discover keywords from your pages to get started.",
+      "filterLabel": "Show keywords",
+      "filter": {
+        "accepted": "Accepted",
+        "rejected": "Rejected",
+        "all": "All"
+      },
+      "emptyFilter": {
+        "accepted": "No accepted keywords on this page. Analyze the keywords, or check the next page.",
+        "rejected": "No rejected keywords on this page.",
+        "all": "No keywords on this page."
+      },
+      "unanalyzed": "{count, plural, one {# keyword hasn't} other {# keywords haven't}} been analyzed yet. Only accepted keywords can be researched.",
+      "analyzeNow": "Analyze now",
+      "actions": "Actions",
+      "research": "Research",
+      "researching": "Researching…",
+      "researchingNote": "Rankoya is reading the search results for this keyword. This can take a few minutes; keep this page open.",
+      "researched": "Research ready for “{keyword}”. Write the article from it next.",
+      "researchFailed": "Couldn't research this keyword. Try again."
+    },
+    "map": {
+      "build": "Build map",
+      "rebuild": "Rebuild map",
+      "built": "Map rebuilt: {clusters} clusters from {keywords} keywords.",
+      "builtEmpty": "No accepted keywords yet. Discover and analyze keywords first.",
+      "buildFailed": "Couldn't build the map. Try again.",
+      "emptyTitle": "No topical map yet",
+      "emptyBody": "Discover and analyze keywords, then build the map to group them into topic clusters.",
+      "discoverFirst": "Discover keywords",
+      "coverage": "Coverage",
+      "stats": {
+        "clusters": "Clusters",
+        "keywords": "Keywords",
+        "mapped": "Mapped to a page",
+        "withPage": "Clusters with a page",
+        "withPageValue": "{covered} of {total}"
+      },
+      "mapLabel": "Topical map version",
+      "mapOption": "{name} · {date}",
+      "noClustersTitle": "No clusters in this map",
+      "noClustersBody": "Discover more keywords, then rebuild the map.",
+      "cluster": {
+        "moneyPage": "Money page",
+        "coverage": "Coverage",
+        "summary": "{keywords} keywords · {mapped} mapped · {volume} monthly searches",
+        "targetPage": "Target page",
+        "noPage": "No page targets this cluster yet.",
+        "planContent": "Plan content",
+        "keywords": "{count, plural, one {# keyword} other {# keywords}}"
+      }
     },
     "grow": {
       "open": "Discover keywords",
       "title": "Discover keywords",
-      "body": "Rankoya reads your latest crawl for keywords, adds any seeds you list, scores and clusters them, then rebuilds the map. This can take a few minutes.",
+      "body": "Rankoya reads your latest crawl for keywords, adds any seeds you list, analyzes them (accepted or rejected), then rebuilds the topical map. This can take a few minutes.",
       "seedsLabel": "Seed keywords",
       "seedsPlaceholder": "One per line, or separated by commas (optional)",
       "hint": "{count, plural, =0 {No seeds: keywords come from your pages only.} one {# seed keyword} other {# seed keywords}}",
       "cancel": "Cancel",
-      "submit": "Discover and rebuild",
+      "submit": "Discover and analyze",
       "done": "{keywords} keywords found. The map now has {clusters} clusters.",
       "failed": "Couldn't discover keywords. Check that the site has been crawled, then try again."
     }

@@ -366,7 +366,7 @@ function QuickActions() {
         key: "content",
         icon: FileTextIcon,
         tile: "bg-engine-chatgpt/12 text-engine-chatgpt",
-        href: brandHref(brandSlug, "content"),
+        href: brandHref(brandSlug, "calendar"),
       },
       { key: "audit", icon: ShieldCheckIcon, tile: "bg-success-bg text-success", href: brandHref(brandSlug, "audit") },
     ];
@@ -459,7 +459,7 @@ function RecentActivity({ items, pending }: { items: ActivityItem[]; pending: bo
         })}
       </ul>
       <Link
-        href={brandHref(brandSlug, "content")}
+        href={brandHref(brandSlug, "calendar")}
         className="inline-flex items-center gap-1.5 text-small font-medium text-blue hover:underline"
       >
         {t("all")}

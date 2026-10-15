@@ -132,7 +132,7 @@ function ArticleForm({ siteId, articleId }: { siteId: number; articleId: number 
       siteId={siteId}
       article={query.data}
       lang={query.data.language ?? (brand ? siteLanguage(brand) : "en")}
-      fullEditorHref={brandHref(brandSlug, `content/${articleId}`)}
+      fullEditorHref={brandHref(brandSlug, `articles/${articleId}`)}
       labels={{ open: t("openFull") }}
     />
   );

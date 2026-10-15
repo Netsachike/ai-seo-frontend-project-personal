@@ -3,28 +3,19 @@
 import * as React from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import {
-  CheckIcon,
-  ChevronRightIcon,
-  EyeOffIcon,
-  MessageCircleIcon,
-  PackageIcon,
-  RadarIcon,
-  TimerIcon,
-} from "lucide-react";
+import { CheckIcon, ChevronRightIcon, EyeOffIcon, MessageCircleIcon, RadarIcon, TimerIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
-import type { FixDeploymentPackage, FixVerification } from "@/types/types";
+import type { FixVerification } from "@/types/types";
 import { getErrorMessage } from "@/lib/errors";
 import { useUiStore } from "@/lib/store/ui";
 import {
   fixStateOf,
   severityBadge,
   toAuditIssue,
-  useApplyFix,
+  useFixPackage,
   useIssue,
-  useProposeFixes,
   useUpdateIssueStatus,
   useVerifyFix,
 } from "@/features/audit/hooks";
@@ -32,21 +23,12 @@ import { PreviewPageButton } from "@/components/crawl/page-inspector";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
-import { ApprovalCard } from "@/components/agent/approval-card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorState } from "@/components/brand/error-state";
 import { OwnerChip } from "@/components/brand/owner-chip";
 import { brandHref } from "@/components/layout/nav";
 import { PageSkeleton } from "@/components/layout/page-skeleton";
 import { useShell } from "@/components/layout/shell-context";
-
-/** The proposal the backend stores on the issue (`metadata.fix`). */
-function proposedValue(metadata: Record<string, unknown> | null): string | null {
-  const fix = metadata?.fix;
-  if (fix && typeof fix === "object" && typeof (fix as Record<string, unknown>).proposed_value === "string") {
-    return (fix as Record<string, unknown>).proposed_value as string;
-  }
-  return null;
-}
 
 export function IssueView({ issueId }: { issueId: string }) {
   const t = useTranslations("audit");
@@ -54,11 +36,9 @@ export function IssueView({ issueId }: { issueId: string }) {
   const { brand, brandSlug } = useShell();
   const id = Number(issueId);
   const query = useIssue(brand?.id, id);
-  const propose = useProposeFixes(brand?.id ?? 0);
-  const apply = useApplyFix(brand?.id ?? 0, id);
+  const fix = useFixPackage(brand?.id, query.data);
   const verify = useVerifyFix(brand?.id ?? 0, id);
   const updateStatus = useUpdateIssueStatus(brand?.id ?? 0, id);
-  const [deployment, setDeployment] = React.useState<FixDeploymentPackage | null>(null);
   const [verification, setVerification] = React.useState<FixVerification | null>(null);
 
   if (!brand || query.isPending) return <PageSkeleton kpis={0} panels={1} />;
@@ -69,7 +49,6 @@ export function IssueView({ issueId }: { issueId: string }) {
   const raw = query.data;
   const issue = toAuditIssue(raw);
   const state = fixStateOf(raw);
-  const proposal = proposedValue(raw.metadata);
 
   const onError = (fallback: string) => (error: unknown) => toast.error(getErrorMessage(error, fallback));
 
@@ -101,70 +80,49 @@ export function IssueView({ issueId }: { issueId: string }) {
         </p>
       )}
 
-      {issue.owner === "rankoya" && state === "open" && (
-        <ApprovalCard
-          approval={{
-            id: `apr_fix_${issue.id}`,
-            title: issue.title,
-            status: "pending",
-            items: issue.affected,
-            channels: ["web", "telegram"],
-          }}
-          onDecided={(a) => {
-            if (a.status === "approved") {
-              propose.mutate([id], {
-                onSuccess: () => toast.success(t("proposed", { count: 1 })),
-                onError: onError(t("fixFailed")),
-              });
-            }
-          }}
-        />
-      )}
-
-      {issue.owner === "rankoya" && state === "proposed" && (
+      {issue.owner === "rankoya" && state !== "fixed" && (
         <Card>
-          <CardTitle>{tIssue("proposalTitle")}</CardTitle>
-          {proposal && (
-            <p dir="auto" className="rounded-md bg-surface-2 px-3 py-2 font-mono text-[13px] text-fg">
-              {proposal}
-            </p>
-          )}
-          <p className="text-small text-fg-2">{tIssue("proposalBody")}</p>
-          <div className="flex flex-wrap gap-2">
-            <Button
-              variant="secondary"
-              loading={apply.isPending}
-              onClick={() => apply.mutate(undefined, { onSuccess: setDeployment, onError: onError(t("fixFailed")) })}
-            >
-              <PackageIcon />
-              {tIssue("getPackage")}
-            </Button>
-            <Button
-              variant="primary"
-              loading={verify.isPending}
-              onClick={() =>
-                verify.mutate(undefined, {
-                  onSuccess: (result) => {
-                    setVerification(result);
-                    if (result.verified) toast.success(result.message);
-                  },
-                  onError: onError(t("fixFailed")),
-                })
-              }
-            >
-              <RadarIcon />
-              {tIssue("verify")}
-            </Button>
+          <div className="flex flex-col gap-0.5">
+            <CardTitle>{tIssue("proposalTitle")}</CardTitle>
+            <p className="text-small text-fg-2">{tIssue("proposalBody")}</p>
           </div>
-          {deployment && (
-            <div className="flex flex-col gap-2 rounded-md border border-border p-4">
-              <p className="text-small text-fg">{deployment.message}</p>
-              <ol className="flex list-decimal flex-col gap-1 ps-5 text-small text-fg-2">
-                {deployment.instructions.map((step) => (
-                  <li key={step}>{step}</li>
-                ))}
-              </ol>
-              {Object.entries(deployment.implementation_examples).map(([name, code]) => (
+          {fix.isPending ? (
+            <div role="status" className="flex flex-col gap-2">
+              <Skeleton className="h-10" />
+              <Skeleton className="h-24" />
+              <span className="text-caption font-normal text-fg-3">{tIssue("preparing")}</span>
+            </div>
+          ) : fix.isError ? (
+            <ErrorState compact onRetry={() => fix.refetch()} />
+          ) : (
+            <>
+              <div className="flex flex-col gap-1.5">
+                <span className="text-overline text-fg-3">
+                  {tIssue(`field.${fix.data.field}`)}
+                  {fix.data.character_count !== null && (
+                    <span className="num"> · {tIssue("characters", { count: fix.data.character_count })}</span>
+                  )}
+                </span>
+                <p dir="auto" className="rounded-md bg-surface-2 px-3 py-2 font-mono text-[13px] break-words text-fg">
+                  {fix.data.proposed_value}
+                </p>
+                {raw.current_value && (
+                  <p className="text-caption font-normal text-fg-3">
+                    {tIssue("currentValue", { value: raw.current_value })}
+                  </p>
+                )}
+              </div>
+              {fix.data.instructions.length > 0 && (
+                <div className="flex flex-col gap-1.5">
+                  <span className="text-overline text-fg-3">{tIssue("instructionsTitle")}</span>
+                  <ol className="flex list-decimal flex-col gap-1 ps-5 text-small text-fg-2">
+                    {fix.data.instructions.map((step) => (
+                      <li key={step}>{step}</li>
+                    ))}
+                  </ol>
+                </div>
+              )}
+              {Object.entries(fix.data.implementation_examples).map(([name, code]) => (
                 <div key={name} className="flex flex-col gap-1">
                   <span className="text-overline text-fg-3">{name}</span>
                   <pre dir="ltr" className="overflow-x-auto rounded-md bg-surface-2 p-3 font-mono text-[12px] text-fg">
@@ -172,12 +130,29 @@ export function IssueView({ issueId }: { issueId: string }) {
                   </pre>
                 </div>
               ))}
-            </div>
-          )}
-          {verification && !verification.verified && (
-            <p role="status" className="rounded-md bg-warning-bg px-3 py-2 text-small text-warning">
-              {verification.message}
-            </p>
+              <Button
+                variant="primary"
+                className="self-start"
+                loading={verify.isPending}
+                onClick={() =>
+                  verify.mutate(undefined, {
+                    onSuccess: (result) => {
+                      setVerification(result);
+                      if (result.verified) toast.success(result.message);
+                    },
+                    onError: onError(t("fixFailed")),
+                  })
+                }
+              >
+                <RadarIcon />
+                {tIssue("verify")}
+              </Button>
+              {verification && !verification.verified && (
+                <p role="status" className="rounded-md bg-warning-bg px-3 py-2 text-small text-warning">
+                  {verification.message}
+                </p>
+              )}
+            </>
           )}
         </Card>
       )}

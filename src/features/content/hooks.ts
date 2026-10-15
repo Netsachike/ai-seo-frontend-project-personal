@@ -15,6 +15,14 @@ import contentPlannerService from "@/services/content-planner";
 export const ITEM_PREFIX = "item-";
 export const isCalendarItemId = (id: string) => id.startsWith(ITEM_PREFIX);
 
+/** Badge colour for a raw research, plan or article status from the API. */
+export const statusVariant = (status: string) =>
+  status === "completed" || status === "active" || status === "published"
+    ? "success"
+    : status === "failed"
+      ? "danger"
+      : "neutral";
+
 export function articleStatusOf(status: string): ArticleStatus {
   if (status === "published") return "published";
   if (status === "publishing") return "scheduled";
@@ -152,6 +160,35 @@ export function useWriteArticle(siteId: number) {
       return (await articleService.generate(siteId, research.id)).data.article;
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: contentKeys.all(siteId) }),
+  });
+}
+
+/** Every article Rankoya has written for the site, 20 per page. */
+export function useArticlesPage(siteId: number, page: number) {
+  return useQuery({
+    queryKey: [...contentKeys.articles(siteId), "page", page],
+    enabled: Boolean(siteId),
+    queryFn: async () => (await articleService.list(siteId, { page, per_page: 20 })).data,
+    placeholderData: (previous) => previous,
+  });
+}
+
+/** Researches an accepted keyword (SERP and LLM, slow). Writing the article is a separate step. */
+export function useResearchKeyword(siteId: number) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (keywordId: number) =>
+      (await articleResearchService.researchKeyword(siteId, keywordId)).data.research,
+    onSettled: () => queryClient.invalidateQueries({ queryKey: contentKeys.research(siteId) }),
+  });
+}
+
+/** Writes (or rewrites) the article from a completed research brief. Slow. */
+export function useGenerateArticle(siteId: number) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (researchId: number) => (await articleService.generate(siteId, researchId)).data.article,
+    onSettled: () => queryClient.invalidateQueries({ queryKey: contentKeys.all(siteId) }),
   });
 }
 

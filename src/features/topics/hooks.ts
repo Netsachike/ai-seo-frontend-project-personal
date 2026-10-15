@@ -2,9 +2,19 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
+import type { Keyword } from "@/types/types";
 import { keywordKeys, topicalMapKeys } from "@/lib/api/query-keys";
 import keywordService from "@/services/keywords";
 import topicalMapService from "@/services/topical-maps";
+
+/**
+ * Where analysis left a keyword. Only `accepted` keywords can be researched;
+ * `null` means the keyword hasn't been analyzed yet.
+ */
+export function keywordQualityOf(keyword: Keyword): "accepted" | "rejected" | null {
+  const status = keyword.quality.status ?? keyword.status;
+  return status === "accepted" || status === "rejected" ? status : null;
+}
 
 /** Every topical map the site has, newest first, each with its clusters. */
 export function useTopicalMaps(siteId: number) {

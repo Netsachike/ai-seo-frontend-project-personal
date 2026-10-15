@@ -1,12 +1,13 @@
 import {
   BriefcaseBusinessIcon,
+  CalendarDaysIcon,
   CircleDollarSignIcon,
   FileTextIcon,
+  KeyRoundIcon,
   LayoutGridIcon,
   Link2Icon,
   ListChecksIcon,
   MessageCircleIcon,
-  NetworkIcon,
   PlugIcon,
   RadarIcon,
   ShieldCheckIcon,
@@ -27,8 +28,9 @@ export type NavKey =
   | "competitors"
   | "audit"
   | "actions"
-  | "topics"
-  | "content"
+  | "keywords"
+  | "articles"
+  | "calendar"
   | "money"
   | "authority"
   | "social"
@@ -53,7 +55,9 @@ export type NavGroup = { key: "insights" | "grow" | "workspace"; items: NavItem[
 
 /**
  * Groups follow the growth loop: see where you stand (Insights), act on it
- * (Grow), and connect and run the tools (Workspace). Every brand screen is
+ * (Grow), and connect and run the tools (Workspace). Keywords, Articles and
+ * Calendar follow the content pipeline in order: discover and analyze
+ * keywords, research one and write the article, then schedule it. Every brand screen is
  * backed by live endpoints; Social and Reports have none yet, so they stay
  * out of the sidebar until they do.
  */
@@ -72,8 +76,9 @@ export const navGroups: NavGroup[] = [
     key: "grow",
     items: [
       { key: "actions", icon: ListChecksIcon },
-      { key: "topics", icon: NetworkIcon },
-      { key: "content", icon: FileTextIcon },
+      { key: "keywords", icon: KeyRoundIcon },
+      { key: "articles", icon: FileTextIcon },
+      { key: "calendar", icon: CalendarDaysIcon },
       { key: "money", icon: CircleDollarSignIcon },
       { key: "authority", icon: Link2Icon },
       { key: "agent", icon: MessageCircleIcon },

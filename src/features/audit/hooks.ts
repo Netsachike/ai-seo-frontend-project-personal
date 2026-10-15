@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import type { SiteGuardIssue, SiteGuardIssueWithPage, Site } from "@/types/types";
 import type { AuditData, AuditIssue, Severity } from "@/lib/mocks/ui-data";
-import { authorityKeys, siteGuardKeys } from "@/lib/api/query-keys";
+import { authorityKeys, siteGuardKeys, siteKeys } from "@/lib/api/query-keys";
 import { toNumber } from "@/services/api/helpers";
 import authorityService from "@/services/authority";
 import siteGuardService from "@/services/site-guard";
@@ -231,11 +231,28 @@ export function useProposeFixes(siteId: number) {
   });
 }
 
-export function useApplyFix(siteId: number, issueId: number) {
+/**
+ * The fix for an issue Rankoya can write, ready to put live: the proposed
+ * value, the instructions and code examples. Proposes the fix first when the
+ * issue has none, then builds the deployment package. Neither call changes the
+ * live site, so this runs as soon as the issue opens; the user only verifies.
+ */
+export function useFixPackage(siteId: number | undefined, issue: SiteGuardIssue | undefined) {
   const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async () => (await siteGuardService.applyFix(siteId, issueId)).data,
-    onSettled: () => queryClient.invalidateQueries({ queryKey: siteGuardKeys.all(siteId) }),
+  return useQuery({
+    // Outside the issue key, so refreshing the issue doesn't rebuild the package.
+    queryKey: siteKeys.scope(siteId ?? 0, "site-guard-fix", issue?.id ?? 0),
+    enabled: Boolean(siteId && issue && isFixableByRankoya(issue) && fixStateOf(issue) !== "fixed"),
+    staleTime: Infinity,
+    retry: false,
+    queryFn: async () => {
+      const id = (issue as SiteGuardIssue).id;
+      if (fixStateOf(issue as SiteGuardIssue) === "open") {
+        await siteGuardService.proposeFix(siteId as number, id);
+        void queryClient.invalidateQueries({ queryKey: siteGuardKeys.all(siteId as number) });
+      }
+      return (await siteGuardService.applyFix(siteId as number, id)).data;
+    },
   });
 }
 

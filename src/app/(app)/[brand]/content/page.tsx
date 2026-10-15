@@ -1,12 +1,7 @@
-import { getTranslations } from "next-intl/server";
+import { redirect } from "next/navigation";
 
-import { ContentView } from "./content-view";
-
-export async function generateMetadata() {
-  const t = await getTranslations("shell.nav.items");
-  return { title: t("content") };
-}
-
-export default function Page() {
-  return <ContentView />;
+/** The content plan moved to the Content calendar page. */
+export default async function ContentRedirect({ params }: PageProps<"/[brand]/content">) {
+  const { brand } = await params;
+  redirect(`/${brand}/calendar`);
 }

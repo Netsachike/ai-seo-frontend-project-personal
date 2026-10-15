@@ -3,13 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { notFound, useRouter } from "next/navigation";
-import {
-  CheckIcon,
-  FilePenLineIcon,
-  SendIcon,
-  ChevronRightIcon,
-  CircleAlertIcon,
-} from "lucide-react";
+import { CheckIcon, FilePenLineIcon, SendIcon, ChevronRightIcon, CircleAlertIcon } from "lucide-react";
 import { useFormatter, useLocale, useNow, useTranslations } from "next-intl";
 import { toast } from "sonner";
 
@@ -99,7 +93,7 @@ function WriteFromCalendar({ itemId }: { itemId: number }) {
         onClick={() =>
           keywordId &&
           write.mutate(keywordId, {
-            onSuccess: (article) => router.replace(brandHref(brandSlug, `content/${article.id}`)),
+            onSuccess: (article) => router.replace(brandHref(brandSlug, `articles/${article.id}`)),
           })
         }
       >
@@ -113,7 +107,7 @@ function WriteFromCalendar({ itemId }: { itemId: number }) {
 function Editor({ raw }: { raw: ArticleWithRelations }) {
   const article = toArticleDetail(raw);
   const t = useTranslations("editor");
-  const tContent = useTranslations("content");
+  const tNav = useTranslations("shell.nav.items");
   const format = useFormatter();
   const locale = useLocale();
   const now = useNow({ updateInterval: 30_000 });
@@ -183,8 +177,8 @@ function Editor({ raw }: { raw: ArticleWithRelations }) {
     <div className="flex flex-col gap-6">
       <header className="flex flex-col gap-4">
         <nav aria-label={t("breadcrumb")} className="flex items-center gap-1.5 text-small text-fg-2">
-          <Link href={brandHref(brandSlug, "content")} className="hover:text-fg hover:underline">
-            {tContent("title")}
+          <Link href={brandHref(brandSlug, "articles")} className="hover:text-fg hover:underline">
+            {tNav("articles")}
           </Link>
           <ChevronRightIcon aria-hidden className="size-3.5 text-fg-3 rtl:-scale-x-100" />
           <span aria-current="page" className="truncate">

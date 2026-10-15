@@ -149,9 +149,11 @@ export function buildRankings(
 export function useRankings(siteId: number | undefined, device: Device, days: number) {
   const id = siteId ?? 0;
   const keywords = useQuery({
+    // Same key and cached shape as `useKeywordsPage` (the whole page); take the rows here.
     queryKey: keywordKeys.list(id),
     enabled: Boolean(siteId),
-    queryFn: async () => (await keywordService.list(id)).data,
+    queryFn: () => keywordService.list(id),
+    select: (page) => page.data,
   });
   const serp = useQuery({
     queryKey: serpKeys.results(id),

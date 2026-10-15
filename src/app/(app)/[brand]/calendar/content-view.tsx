@@ -42,9 +42,9 @@ import { PageHeader } from "@/components/layout/page-header";
 import { PageSkeleton } from "@/components/layout/page-skeleton";
 import { useShell } from "@/components/layout/shell-context";
 import { CalendarItemMenu } from "./item-actions";
-import { BriefsPanel, PlansPanel } from "./planning-panels";
+import { PlansPanel } from "./planning-panels";
 
-const views = ["calendar", "list", "plans", "briefs"] as const;
+const views = ["calendar", "list", "plans"] as const;
 const legend: ArticleStatus[] = ["published", "scheduled", "needsApproval", "draft"];
 const dotClass: Record<ArticleStatus, string> = {
   published: "bg-success",
@@ -109,7 +109,6 @@ export function ContentView() {
                   {t("list")}
                 </TabsTrigger>
                 <TabsTrigger value="plans">{t("plansTab")}</TabsTrigger>
-                <TabsTrigger value="briefs">{t("briefsTab")}</TabsTrigger>
               </TabsList>
             </Tabs>
             <Button variant="primary" loading={generate.isPending} onClick={plan}>
@@ -123,14 +122,8 @@ export function ContentView() {
       {query.isError && <ErrorState onRetry={() => query.refetch()} />}
 
       {view === "plans" && <PlansPanel siteId={brand.id} />}
-      {view === "briefs" && <BriefsPanel siteId={brand.id} />}
 
-      <div
-        className={cn(
-          "grid items-start gap-4 xl:grid-cols-[minmax(0,1fr)_320px]",
-          (view === "plans" || view === "briefs") && "hidden",
-        )}
-      >
+      <div className={cn("grid items-start gap-4 xl:grid-cols-[minmax(0,1fr)_320px]", view === "plans" && "hidden")}>
         <Card className="gap-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-1">
@@ -208,7 +201,7 @@ export function ContentView() {
                 {waiting.map((a) => (
                   <li key={a.id} className="flex flex-col gap-1">
                     <Link
-                      href={brandHref(brandSlug, `content/${a.id}`)}
+                      href={brandHref(brandSlug, `articles/${a.id}`)}
                       className="text-small font-medium text-fg hover:text-blue hover:underline"
                     >
                       {a.title}
@@ -280,7 +273,7 @@ function MonthGrid({ month, articles, brandSlug }: { month: Date; articles: Cale
                 {items.map((a) => (
                   <Link
                     key={a.id}
-                    href={brandHref(brandSlug, `content/${a.id}`)}
+                    href={brandHref(brandSlug, `articles/${a.id}`)}
                     title={`${a.title} · ${t(`status.${a.status}`)}`}
                     className="flex items-center gap-1.5 rounded-sm bg-surface-2 px-1.5 py-1 text-caption font-normal text-fg hover:bg-border"
                   >
@@ -299,7 +292,7 @@ function MonthGrid({ month, articles, brandSlug }: { month: Date; articles: Cale
       <ol className="flex flex-col divide-y divide-border md:hidden">
         {articles.map((a) => (
           <li key={a.id}>
-            <Link href={brandHref(brandSlug, `content/${a.id}`)} className="flex items-center gap-3 py-3">
+            <Link href={brandHref(brandSlug, `articles/${a.id}`)} className="flex items-center gap-3 py-3">
               <span className="w-12 shrink-0 num text-caption text-fg-2">
                 {format.dateTime(new Date(`${a.date}T09:00:00`), "short")}
               </span>
@@ -334,7 +327,7 @@ function ArticleTable({
         meta: { label: t("title"), pinned: true },
         cell: ({ row }) => (
           <Link
-            href={brandHref(brandSlug, `content/${row.original.id}`)}
+            href={brandHref(brandSlug, `articles/${row.original.id}`)}
             className="font-medium text-fg hover:text-blue hover:underline"
           >
             {row.original.title}

@@ -1,12 +1,7 @@
-import { getTranslations } from "next-intl/server";
+import { redirect } from "next/navigation";
 
-import { TopicsView } from "./topics-view";
-
-export async function generateMetadata() {
-  const t = await getTranslations("shell.nav.items");
-  return { title: t("topics") };
-}
-
-export default function TopicsPage() {
-  return <TopicsView />;
+/** The topical map moved into the Keywords page. */
+export default async function TopicsRedirect({ params }: PageProps<"/[brand]/topics">) {
+  const { brand } = await params;
+  redirect(`/${brand}/keywords?view=map`);
 }

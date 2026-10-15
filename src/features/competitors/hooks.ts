@@ -185,9 +185,11 @@ export function useCompetitors(site: Site | undefined) {
     queryFn: async () => (await serpService.results(id)).data.data,
   });
   const keywords = useQuery({
+    // Same key and cached shape as `useKeywordsPage` (the whole page); take the rows here.
     queryKey: keywordKeys.list(id),
     enabled,
-    queryFn: async () => (await keywordService.list(id)).data,
+    queryFn: () => keywordService.list(id),
+    select: (page) => page.data,
   });
   const prompts = useQuery({
     queryKey: aiVisibilityKeys.prompts(id),
