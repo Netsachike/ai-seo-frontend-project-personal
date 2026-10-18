@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import type { AllUserWorkspace } from "@/types/types";
+import { accountHref } from "@/features/account/routes";
 import { cn } from "@/lib/utils";
 import { useCreateWorkspace, useSwitchWorkspace, workspaceRole, workspaceTarget } from "@/features/workspace/hooks";
 import { Button } from "@/components/ui/button";
@@ -51,7 +52,6 @@ export function WorkspaceSwitcher({ className, full = false }: { className?: str
   const [open, setOpen] = React.useState(false);
   const [creating, setCreating] = React.useState(false);
   const router = useRouter();
-  const { brandSlug } = useShell();
   if (!workspace) return null;
   const name = workspace.workspace.name;
 
@@ -89,7 +89,7 @@ export function WorkspaceSwitcher({ className, full = false }: { className?: str
                 label: t("viewAllWorkspaces"),
                 onSelect: () => {
                   setOpen(false);
-                  router.push(brandSlug ? `/workspaces?from=${brandSlug}` : "/workspaces");
+                  router.push(accountHref.settings("workspaces"));
                 },
               },
               {

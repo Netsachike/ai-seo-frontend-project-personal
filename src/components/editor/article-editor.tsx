@@ -1,7 +1,10 @@
 "use client";
 
 import * as React from "react";
-import { EditorContent, useEditor, useEditorState, type Editor } from "@tiptap/react";
+import { EditorContent, Extension, useEditor, useEditorState, type Editor } from "@tiptap/react";
+import { Plugin } from "@tiptap/pm/state";
+import type { Node as PmNode } from "@tiptap/pm/model";
+import { Decoration, DecorationSet } from "@tiptap/pm/view";
 import StarterKit from "@tiptap/starter-kit";
 import {
   BoldIcon,
@@ -17,7 +20,45 @@ import {
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 
+import { internalLinkKey, isInternalHref } from "@/lib/internal-links";
 import { cn } from "@/lib/utils";
+
+/** Marks the body's on-site links (`[data-internal-link]`) so they stand out and can be scrolled to. */
+export const INTERNAL_LINK_ATTR = "data-internal-link";
+
+/**
+ * Decorates links to the site's own pages. Decorations only change what the
+ * editor shows, never the HTML that is saved or published.
+ */
+const InternalLinks = Extension.create<{ domain: string }>({
+  name: "internalLinks",
+  addOptions: () => ({ domain: "" }),
+  addProseMirrorPlugins() {
+    const { domain } = this.options;
+    const decorate = (doc: PmNode) => {
+      const decorations: Decoration[] = [];
+      doc.descendants((node, pos) => {
+        const href: unknown = node.marks.find((m) => m.type.name === "link")?.attrs.href;
+        if (node.isText && typeof href === "string" && isInternalHref(href, domain))
+          decorations.push(
+            Decoration.inline(pos, pos + node.nodeSize, {
+              class: "internal-link",
+              [INTERNAL_LINK_ATTR]: internalLinkKey(href, domain),
+            }),
+          );
+      });
+      return DecorationSet.create(doc, decorations);
+    };
+    const plugin: Plugin<DecorationSet> = new Plugin<DecorationSet>({
+      state: {
+        init: (_, state) => decorate(state.doc),
+        apply: (tr, old) => (tr.docChanged ? decorate(tr.doc) : old),
+      },
+      props: { decorations: (state) => plugin.getState(state) },
+    });
+    return [plugin];
+  },
+});
 import { Skeleton } from "@/components/ui/skeleton";
 
 /**
@@ -28,17 +69,28 @@ export function ArticleEditor({
   content,
   lang,
   label,
+  domain = "",
   onChange,
   className,
 }: {
   content: string;
   lang: string;
+  /** The site's domain, to tell its own pages from other sites. */
+  domain?: string;
   label: string;
   onChange?: (text: string, html: string) => void;
   className?: string;
 }) {
   const editor = useEditor({
-    extensions: [StarterKit.configure({ heading: { levels: [2, 3] }, link: false })],
+    extensions: [
+      StarterKit.configure({
+        heading: { levels: [2, 3] },
+        // Keep the body's links exactly as written: no autolinking, no added
+        // target/rel (an added nofollow would hurt internal links).
+        link: { openOnClick: false, autolink: false, HTMLAttributes: { target: null, rel: null, class: null } },
+      }),
+      InternalLinks.configure({ domain }),
+    ],
     content,
     immediatelyRender: false,
     editorProps: {

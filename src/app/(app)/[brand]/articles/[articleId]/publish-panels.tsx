@@ -1,10 +1,12 @@
 "use client";
 
-import { ExternalLinkIcon, Link2Icon } from "lucide-react";
+import { ExternalLinkIcon, Link2Icon, LocateFixedIcon } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
 
 import type { ArticleWithRelations, PublicationWithRelations } from "@/types/types";
 import { isManualPublication, publicationVariant } from "@/features/publishing/hooks";
+import { internalLinkKey, isInternalHref } from "@/lib/internal-links";
+import { INTERNAL_LINK_ATTR } from "@/components/editor/article-editor";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
@@ -170,12 +172,18 @@ const htmlToText = (html: string) =>
     .replace(/\n{3,}/g, "\n\n")
     .trim();
 
-export type InternalLink = { url: string; anchor: string | null };
-
-const bareHost = (host: string) => host.toLowerCase().replace(/^www\./, "");
+export type InternalLink = {
+  url: string;
+  anchor: string | null;
+  /** The page it points to, matching the editor's `data-internal-link`. */
+  key: string;
+  /** Whether the body links to it, so it can be found in the article. */
+  inArticle: boolean;
+};
+type RawLink = Pick<InternalLink, "url" | "anchor">;
 
 /** A link from the API's `internal_links`, whatever shape the item has. */
-function linkOf(item: unknown): InternalLink | null {
+function linkOf(item: unknown): RawLink | null {
   if (typeof item === "string") return item ? { url: item, anchor: null } : null;
   if (!item || typeof item !== "object") return null;
   const o = item as Record<string, unknown>;
@@ -185,29 +193,43 @@ function linkOf(item: unknown): InternalLink | null {
 }
 
 /** Links in the HTML that stay on the site: relative, or to the site's own host. */
-function linksInHtml(html: string, domain: string): InternalLink[] {
-  const links: InternalLink[] = [];
+function linksInHtml(html: string, domain: string): RawLink[] {
+  const links: RawLink[] = [];
   for (const match of html.matchAll(/<a\b[^>]*\bhref\s*=\s*["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi)) {
     const href = match[1].trim();
-    if (/^(#|mailto:|tel:|javascript:)/i.test(href)) continue;
-    if (/^https?:\/\//i.test(href) || href.startsWith("//")) {
-      try {
-        if (bareHost(new URL(href, "https://x").hostname) !== bareHost(domain)) continue;
-      } catch {
-        continue;
-      }
-    }
-    links.push({ url: href, anchor: match[2].replace(/<[^>]+>/g, "").trim() || null });
+    if (isInternalHref(href, domain))
+      links.push({ url: href, anchor: match[2].replace(/<[^>]+>/g, "").trim() || null });
   }
   return links;
 }
 
-/** The article's internal links: the backend's list, else the on-site links in its body. */
-export function internalLinksOf(article: ArticleWithRelations, domain: string): InternalLink[] {
-  const fromApi = (article.internal_links ?? []).map(linkOf).filter((l): l is InternalLink => l !== null);
-  const links = fromApi.length ? fromApi : linksInHtml(article.content ?? "", domain);
+/**
+ * The article's internal links: the backend's list, else the on-site links
+ * in the body. `html` is the live body, so edits show up straight away.
+ */
+export function internalLinksOf(article: ArticleWithRelations, html: string, domain: string): InternalLink[] {
+  const inBody = linksInHtml(html, domain);
+  const bodyKeys = new Set(inBody.map((l) => internalLinkKey(l.url, domain)));
+  const fromApi = (article.internal_links ?? []).map(linkOf).filter((l): l is RawLink => l !== null);
   const seen = new Set<string>();
-  return links.filter((l) => !seen.has(l.url) && Boolean(seen.add(l.url)));
+  return (fromApi.length ? fromApi : inBody).flatMap((l) => {
+    const key = internalLinkKey(l.url, domain);
+    if (seen.has(key)) return [];
+    seen.add(key);
+    return [{ ...l, key, inArticle: bodyKeys.has(key) }];
+  });
+}
+
+/** Scrolls the editor to the first place the body links to `key`, and highlights it briefly. */
+function locateInArticle(key: string) {
+  const target = [...document.querySelectorAll<HTMLElement>(`[${INTERNAL_LINK_ATTR}]`)].find(
+    (el) => el.getAttribute(INTERNAL_LINK_ATTR) === key,
+  );
+  if (!target) return;
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  target.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "center" });
+  target.classList.add("is-located");
+  window.setTimeout(() => target.classList.remove("is-located"), 1600);
 }
 
 /** Absolute URL for an internal link, so it opens on the live site. */
@@ -230,21 +252,35 @@ export function InternalLinksCard({ links, domain }: { links: InternalLink[]; do
           {links.map((link) => (
             <li key={link.url} className="flex items-start gap-2">
               <Link2Icon aria-hidden className="mt-0.5 size-3.5 shrink-0 text-fg-3" />
-              <span className="flex min-w-0 flex-col">
-                {link.anchor && (
-                  <span dir="auto" className="truncate text-small text-fg">
-                    {link.anchor}
+              <span className="flex min-w-0 flex-1 flex-col gap-1.5">
+                <span className="flex min-w-0 flex-col">
+                  {link.anchor && (
+                    <span dir="auto" className="truncate text-small text-fg">
+                      {link.anchor}
+                    </span>
+                  )}
+                  <span dir="ltr" className="truncate text-start font-mono text-[12px] text-fg-2">
+                    {link.key}
                   </span>
-                )}
-                <a
-                  href={absolute(link.url, domain)}
-                  target="_blank"
-                  rel="noreferrer"
-                  dir="ltr"
-                  className="truncate text-start font-mono text-[12px] text-blue hover:underline"
-                >
-                  {link.url.replace(/^https?:\/\/(www\.)?[^/]+/i, "") || "/"}
-                </a>
+                </span>
+                <span className="flex flex-wrap gap-1.5">
+                  <Button asChild size="sm" variant="secondary">
+                    <a href={absolute(link.url, domain)} target="_blank" rel="noreferrer">
+                      <ExternalLinkIcon />
+                      {t("viewLive")}
+                    </a>
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    disabled={!link.inArticle}
+                    title={link.inArticle ? undefined : t("notInBody")}
+                    onClick={() => locateInArticle(link.key)}
+                  >
+                    <LocateFixedIcon />
+                    {t("showInArticle")}
+                  </Button>
+                </span>
               </span>
             </li>
           ))}

@@ -143,13 +143,16 @@ function Editor({ raw }: { raw: ArticleWithRelations }) {
     latestPublication?.published_url ??
     (typeof raw.metadata?.published_url === "string" ? raw.metadata.published_url : null);
   const manualReady = latestPublication ? isManualPublication(latestPublication) : false;
-  const internalLinks = React.useMemo(() => internalLinksOf(raw, brand?.domain ?? ""), [raw, brand?.domain]);
   const targets = (connections.data ?? []).filter((c) => c.status === "active");
   const [target, setTarget] = React.useState<string>("");
   const targetId = target || (targets[0] ? String(targets[0].id) : "");
   const htmlRef = React.useRef(article.html);
   // The live body, for the copy-and-paste panel (the ref feeds the debounced save).
   const [html, setHtml] = React.useState(article.html);
+  const internalLinks = React.useMemo(
+    () => internalLinksOf(raw, html, brand?.domain ?? ""),
+    [raw, html, brand?.domain],
+  );
   const languages = new Intl.DisplayNames([locale], { type: "language" });
 
   const [status, setStatus] = React.useState(article.status);
@@ -316,6 +319,7 @@ function Editor({ raw }: { raw: ArticleWithRelations }) {
             content={article.html}
             lang={contentLanguage}
             label={t("bodyLabel")}
+            domain={brand?.domain ?? ""}
             onChange={(text, html) => {
               setBodyText(text);
               setWords(text.split(/\s+/).filter(Boolean).length);
