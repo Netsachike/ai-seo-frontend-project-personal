@@ -3,11 +3,19 @@
 import * as React from "react";
 import Link from "next/link";
 import { notFound, useRouter } from "next/navigation";
-import { CheckIcon, FilePenLineIcon, SendIcon, ChevronRightIcon, CircleAlertIcon } from "lucide-react";
+import {
+  CheckIcon,
+  ChevronRightIcon,
+  CircleAlertIcon,
+  ExternalLinkIcon,
+  FilePenLineIcon,
+  LoaderCircleIcon,
+  SendIcon,
+} from "lucide-react";
 import { useFormatter, useLocale, useNow, useTranslations } from "next-intl";
 import { toast } from "sonner";
 
-import type { ArticleWithRelations } from "@/types/types";
+import type { ArticleWithRelations, PublishingConnection } from "@/types/types";
 import { getErrorMessage } from "@/lib/errors";
 import {
   ITEM_PREFIX,
@@ -18,7 +26,12 @@ import {
   useSaveArticle,
   useWriteArticle,
 } from "@/features/content/hooks";
-import { usePublishArticle, usePublishingConnections } from "@/features/publishing/hooks";
+import {
+  isManualPublication,
+  useArticlePublications,
+  usePublishArticle,
+  usePublishingConnections,
+} from "@/features/publishing/hooks";
 import { siteLanguage } from "@/features/sites/site-utils";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
@@ -30,6 +43,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ErrorState } from "@/components/brand/error-state";
 import { RankoyaAvatar } from "@/components/brand/logo";
+import { PlatformLogo } from "@/components/brand/platform-logo";
 import { ScoreRing } from "@/components/brand/score-ring";
 import { StatusBadge } from "@/components/brand/status-badge";
 import { ArticleEditor } from "@/components/editor/article-editor";
@@ -38,8 +52,15 @@ import { SelectField } from "@/components/forms/select-field";
 import { brandHref } from "@/components/layout/nav";
 import { PageSkeleton } from "@/components/layout/page-skeleton";
 import { useShell } from "@/components/layout/shell-context";
+import { InternalLinksCard, ManualPublishCard, PublicationCard, internalLinksOf } from "./publish-panels";
+
+/** Where a connection publishes to, when the API tells us (Webflow and Shopify connections don't). */
+const connectionUrl = (c: PublishingConnection) =>
+  typeof c.config?.site_url === "string" ? c.config.site_url.replace(/^https?:\/\//, "").replace(/\/$/, "") : undefined;
 
 const META_MAX = 60;
+/** The backend refuses to publish an article that is still being written or failed to write. */
+const UNPUBLISHABLE = new Set(["generating", "publishing", "failed"]);
 /** `[PRICE]`, `[CUSTOMER NAME]`… left by Rankoya where it needs a fact from you. */
 const PLACEHOLDER = /\[[A-Z][A-Z0-9 _-]{1,30}\]/g;
 
@@ -116,10 +137,19 @@ function Editor({ raw }: { raw: ArticleWithRelations }) {
   const save = useSaveArticle(brand?.id ?? 0, raw.id);
   const connections = usePublishingConnections(brand?.id);
   const publish = usePublishArticle(brand?.id ?? 0, raw.id);
+  const publications = useArticlePublications(brand?.id, raw.id);
+  const latestPublication = publications.data?.[0];
+  const liveUrl =
+    latestPublication?.published_url ??
+    (typeof raw.metadata?.published_url === "string" ? raw.metadata.published_url : null);
+  const manualReady = latestPublication ? isManualPublication(latestPublication) : false;
+  const internalLinks = React.useMemo(() => internalLinksOf(raw, brand?.domain ?? ""), [raw, brand?.domain]);
   const targets = (connections.data ?? []).filter((c) => c.status === "active");
   const [target, setTarget] = React.useState<string>("");
   const targetId = target || (targets[0] ? String(targets[0].id) : "");
   const htmlRef = React.useRef(article.html);
+  // The live body, for the copy-and-paste panel (the ref feeds the debounced save).
+  const [html, setHtml] = React.useState(article.html);
   const languages = new Intl.DisplayNames([locale], { type: "language" });
 
   const [status, setStatus] = React.useState(article.status);
@@ -155,6 +185,7 @@ function Editor({ raw }: { raw: ArticleWithRelations }) {
   const placeholders = [...new Set(`${bodyText} ${shortAnswer} ${metaTitle}`.match(PLACEHOLDER) ?? [])];
   const blocked = placeholders.length > 0;
   const editable = status === "needsApproval" || status === "draft";
+  const publishable = editable && !UNPUBLISHABLE.has(raw.status);
   const passed = article.checklist.filter((c) => c.ok).length;
   const score = Math.round(article.score - (blocked ? 4 : 0));
 
@@ -165,6 +196,14 @@ function Editor({ raw }: { raw: ArticleWithRelations }) {
       { connection_id: Number(targetId), options: { status: "publish" } },
       {
         onSuccess: (response) => {
+          if (isManualPublication(response.data)) {
+            toast.success(t("manualToast"));
+            return;
+          }
+          if (response.data.status === "failed") {
+            toast.error(response.data.error_message ?? t("publishFailed"));
+            return;
+          }
           setStatus("published");
           toast.success(response.message ?? t("publishedToast"));
         },
@@ -204,16 +243,37 @@ function Editor({ raw }: { raw: ArticleWithRelations }) {
               })}
             </p>
           </div>
-          {editable && (
-            <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2">
+            {liveUrl && (
+              <Button asChild variant="secondary">
+                <a href={liveUrl} target="_blank" rel="noreferrer">
+                  <ExternalLinkIcon />
+                  {t("viewLive")}
+                </a>
+              </Button>
+            )}
+            {publishable && (
               <Button variant="primary" disabled={blocked || !targetId} loading={publish.isPending} onClick={approve}>
                 <SendIcon />
-                {t("approvePublish")}
+                {manualReady ? t("publishAgain") : t("approvePublish")}
               </Button>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </header>
+
+      {raw.status === "generating" && (
+        <p role="status" className="flex items-center gap-2.5 rounded-lg bg-blue-bg px-4 py-3 text-small text-fg">
+          <LoaderCircleIcon aria-hidden className="size-4 shrink-0 animate-spin text-blue" />
+          {t("generating")}
+        </p>
+      )}
+      {raw.status === "failed" && (
+        <p role="alert" className="flex items-start gap-2.5 rounded-lg bg-danger-bg px-4 py-3 text-small text-danger">
+          <CircleAlertIcon aria-hidden className="mt-0.5 size-4 shrink-0" />
+          {raw.error_message ?? t("generationFailed")}
+        </p>
+      )}
 
       {blocked && editable && (
         <div role="alert" className="flex items-start gap-2.5 rounded-lg bg-warning-bg px-4 py-3 text-small text-fg">
@@ -261,6 +321,7 @@ function Editor({ raw }: { raw: ArticleWithRelations }) {
               setWords(text.split(/\s+/).filter(Boolean).length);
               if (html !== htmlRef.current) {
                 htmlRef.current = html;
+                setHtml(html);
                 touch();
               }
             }}
@@ -268,6 +329,16 @@ function Editor({ raw }: { raw: ArticleWithRelations }) {
         </div>
 
         <aside className="flex flex-col gap-4">
+          {publications.data && <PublicationCard publications={publications.data} />}
+          {manualReady && (
+            <ManualPublishCard
+              title={article.title}
+              metaTitle={metaTitle}
+              metaDescription={shortAnswer}
+              slug={slug}
+              html={html}
+            />
+          )}
           <Card>
             <div className="flex items-center gap-4">
               <ScoreRing score={score} label={t("score")} size="sm" />
@@ -335,7 +406,18 @@ function Editor({ raw }: { raw: ArticleWithRelations }) {
                 label={t("target")}
                 value={targetId}
                 onChange={setTarget}
-                options={targets.map((c) => ({ value: String(c.id), label: c.name }))}
+                options={targets.map((c) => ({
+                  value: String(c.id),
+                  label: c.name,
+                  detail: connectionUrl(c),
+                  icon: (
+                    <PlatformLogo
+                      platform={c.platform === "wordpress_com" ? "wordpressCom" : c.platform}
+                      size={16}
+                      className="size-4 shrink-0 rounded-[3px]"
+                    />
+                  ),
+                }))}
               />
             ) : (
               <p className="text-small text-fg-2">
@@ -356,6 +438,8 @@ function Editor({ raw }: { raw: ArticleWithRelations }) {
               {t("notify")}
             </label>
           </Card>
+
+          <InternalLinksCard links={internalLinks} domain={brand?.domain ?? ""} />
         </aside>
       </div>
     </div>

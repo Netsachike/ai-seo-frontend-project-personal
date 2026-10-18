@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { CheckIcon, ChevronRightIcon, ListPlusIcon, RotateCwIcon, SparkleIcon } from "lucide-react";
+import { CheckIcon, ChevronDownIcon, ChevronRightIcon, ListPlusIcon, RotateCwIcon, SparkleIcon } from "lucide-react";
 import { useFormatter, useLocale, useNow, useTranslations } from "next-intl";
 import { toast } from "sonner";
 
@@ -12,10 +12,19 @@ import type { EngineAnswer } from "@/lib/mocks/ui-data";
 import { useUiStore } from "@/lib/store/ui";
 import { cn } from "@/lib/utils";
 import { useRunAiScan } from "@/features/insights/hooks";
+import { AI_TEST_MODELS, modelLabel } from "@/features/visibility/model";
 import { useQuestion } from "@/features/visibility/hooks";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { EngineIcon } from "@/components/brand/engine-icon";
 import { ErrorState } from "@/components/brand/error-state";
 import { OwnerChip } from "@/components/brand/owner-chip";
@@ -71,10 +80,28 @@ export function PromptView({ promptId }: { promptId: string }) {
             </div>
           </div>
           <div className="flex flex-wrap gap-2">
-            <Button variant="secondary" onClick={() => recheck.mutate()} loading={recheck.isPending}>
-              <RotateCwIcon />
-              {t("recheck")}
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="secondary" loading={recheck.isPending}>
+                  <RotateCwIcon />
+                  {recheck.isPending && recheck.current
+                    ? t("recheckRunning", { model: modelLabel(recheck.current) })
+                    : t("recheck")}
+                  <ChevronDownIcon />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onSelect={() => recheck.mutate()}>{t("recheckAll")}</DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuLabel>{t("recheckOne")}</DropdownMenuLabel>
+                {AI_TEST_MODELS.map((m) => (
+                  <DropdownMenuItem key={m.id} onSelect={() => recheck.mutate({ models: [m.id] })}>
+                    <EngineIcon engine={m.engine} />
+                    {m.label}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
             <Button
               variant="agent"
               onClick={() => useUiStore.getState().askRankoya(t("closeGapPrompt", { question: q.text }))}
@@ -88,10 +115,13 @@ export function PromptView({ promptId }: { promptId: string }) {
 
       <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-5">
         {data.answers.map((a) => (
-          <li key={a.engine} className="flex flex-col gap-2 rounded-lg border border-border bg-surface p-4 shadow-card">
+          <li
+            key={a.model ?? a.engine}
+            className="flex flex-col gap-2 rounded-lg border border-border bg-surface p-4 shadow-card"
+          >
             <span className="flex items-center gap-2 text-small font-medium text-fg">
               <EngineIcon engine={a.engine} />
-              <EngineLabel engine={a.engine} />
+              <span className="truncate">{a.model ? modelLabel(a.model) : <EngineLabel engine={a.engine} />}</span>
             </span>
             <AnswerState answer={a} />
           </li>
@@ -101,7 +131,7 @@ export function PromptView({ promptId }: { promptId: string }) {
       <div className="grid gap-4 xl:grid-cols-[minmax(0,8fr)_minmax(0,4fr)]">
         <div className="flex flex-col gap-4">
           {data.answers.map((a) => (
-            <AnswerCard key={a.engine} answer={a} brandName={brand.name} />
+            <AnswerCard key={a.model ?? a.engine} answer={a} brandName={brand.name} />
           ))}
         </div>
         <div className="flex flex-col gap-4">
@@ -177,7 +207,7 @@ function AnswerCard({ answer, brandName }: { answer: EngineAnswer; brandName: st
   const tShared = useTranslations("shared");
   const tEngine = useTranslations("engines");
   const format = useFormatter();
-  const name = tEngine(answer.engine);
+  const name = answer.model ? `${tEngine(answer.engine)} · ${modelLabel(answer.model)}` : tEngine(answer.engine);
   const now = useNow({ updateInterval: 60_000 });
   const retryAt = new Date(now.getTime() + 30 * 60 * 1000);
 

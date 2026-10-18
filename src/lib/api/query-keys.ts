@@ -73,6 +73,8 @@ export const publishingKeys = {
   all: (siteId: number) => siteKeys.scope(siteId, "publishing"),
   connections: (siteId: number) => siteKeys.scope(siteId, "publishing", "connections"),
   publications: (siteId: number, page = 1) => siteKeys.scope(siteId, "publishing", "publications", page),
+  /** The newest few pages of publications, scanned for one article's attempts. */
+  recent: (siteId: number) => siteKeys.scope(siteId, "publishing", "recent"),
 };
 
 export const siteGuardKeys = {

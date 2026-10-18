@@ -19,11 +19,22 @@ const usePrompts = (siteId: number) =>
     queryFn: async () => (await aiVisibilityService.prompts(siteId)).data,
   });
 
-/** The newest 100 results; enough for the latest answer per prompt and model. */
+/**
+ * Results come 100 per page, newest first. Five models answering every prompt
+ * fill a page quickly, so read up to 5 pages to find the latest answer per
+ * prompt and model.
+ */
+const MAX_RESULT_PAGES = 5;
 const useResults = (siteId: number) =>
   useQuery({
     queryKey: aiVisibilityKeys.results(siteId),
-    queryFn: async () => (await aiVisibilityService.results(siteId)).data.data,
+    queryFn: async () => {
+      const first = (await aiVisibilityService.results(siteId)).data;
+      const rows = [...first.data];
+      for (let page = 2; page <= Math.min(first.last_page, MAX_RESULT_PAGES); page++)
+        rows.push(...(await aiVisibilityService.results(siteId, { page })).data.data);
+      return rows;
+    },
   });
 
 /** Everything the AI visibility screen shows, built from the overview, prompts and results. */

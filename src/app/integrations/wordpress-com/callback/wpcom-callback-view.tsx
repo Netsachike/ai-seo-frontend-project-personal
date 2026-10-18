@@ -3,13 +3,16 @@
 import * as React from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 
 import { getErrorMessage } from "@/lib/errors";
 import { useMounted } from "@/lib/hooks/use-mounted";
 import { toast } from "@/lib/toast";
+import { publishingKeys } from "@/lib/api/query-keys";
 import publishingService from "@/services/publishing";
+import { ConnectionTestError } from "@/features/publishing/hooks";
+import { useSites, useWorkspaces } from "@/features/workspace/hooks";
 import {
   clearPendingWpcomConnect,
   readPendingWpcomConnect,
@@ -17,13 +20,19 @@ import {
 } from "@/features/publishing/wpcom";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SITES_PATH } from "@/features/site-setup/steps";
+
+/** A site's WordPress.com page, where a connection that failed its test can be tested again. */
+const detailsPath = (siteId: number) => `/${siteId}/integrations/wordpressCom`;
 
 /**
  * WordPress.com sends the browser here with `code` and `state`. This page
  * forwards them to the backend (step 2), lets the user pick a site, creates
- * the connection (step 3), tests it, and returns to where the user started.
+ * the connection (step 3), activates it by testing its id, and returns to
+ * where the user started. If the tab lost which Rankoya site was being
+ * connected (another tab, cleared storage), the user picks it here.
  */
 export function WpcomCallbackView() {
   const t = useTranslations("integrations.wpcom");
@@ -33,9 +42,17 @@ export function WpcomCallbackView() {
   const state = params.get("state");
   const mounted = useMounted();
   // Read after mount: sessionStorage only exists in the browser.
-  const pending = React.useMemo<PendingWpcomConnect | null>(() => (mounted ? readPendingWpcomConnect() : null), [mounted]);
+  const pending = React.useMemo<PendingWpcomConnect | null>(
+    () => (mounted ? readPendingWpcomConnect() : null),
+    [mounted],
+  );
   const [selected, setSelected] = React.useState<string | null>(null);
   const started = React.useRef(false);
+  const queryClient = useQueryClient();
+  const workspaces = useWorkspaces();
+  const sites = useSites(mounted && !pending ? workspaces.data?.active?.work_space_id : undefined);
+  const [fallbackSite, setFallbackSite] = React.useState<string>("");
+  const siteId = pending?.siteId ?? (fallbackSite ? Number(fallbackSite) : null);
 
   const authorize = useMutation({
     mutationFn: () => publishingService.wordpressComCallback({ code: code as string, state: state as string }),
@@ -50,24 +67,39 @@ export function WpcomCallbackView() {
     forward();
   }, [code, state, forward]);
 
-  const back = pending?.returnTo ?? SITES_PATH;
+  const back = pending?.returnTo ?? (siteId ? detailsPath(siteId) : SITES_PATH);
 
+  // Step 3, then activation by id. The pending key is single-use, so once the
+  // connection exists a failed test must not leave the user here: they land
+  // on the WordPress.com page and test it again from there.
   const complete = useMutation({
     mutationFn: async () => {
-      if (!pending || !authorize.data || !selected) throw new Error(t("failed"));
+      if (!siteId || !authorize.data || !selected) throw new Error(t("failed"));
       const site = authorize.data.sites.find((s) => s.id === selected);
-      const { data: connection } = await publishingService.wordpressComComplete(pending.siteId, {
+      const { data: connection } = await publishingService.wordpressComComplete(siteId, {
         pending_key: authorize.data.pending_key,
         wordpress_site_id: selected,
         name: site?.name ?? null,
       });
-      const { data: test } = await publishingService.testConnection(pending.siteId, connection.id);
-      return { name: site?.name ?? connection.name, test };
+      const name = site?.name ?? connection.name;
+      try {
+        const { data: test } = await publishingService.testConnection(siteId, connection.id);
+        if (!test.success) throw new ConnectionTestError(test.message);
+      } catch (error) {
+        const failure = error instanceof ConnectionTestError ? error.message : getErrorMessage(error, t("failed"));
+        return { name, siteId, failure };
+      }
+      return { name, siteId, failure: null };
     },
-    onSuccess: ({ name, test }) => {
-      if (test.success) toast.success(t("connected", { name }));
-      else toast.error(t("testFailed", { message: test.message }));
+    onSuccess: ({ name, siteId: id, failure }) => {
+      void queryClient.invalidateQueries({ queryKey: publishingKeys.all(id) });
       clearPendingWpcomConnect();
+      if (failure) {
+        toast.error(t("testFailed", { message: failure }));
+        router.replace(detailsPath(id));
+        return;
+      }
+      toast.success(t("connected", { name }));
       router.replace(back);
     },
   });
@@ -115,6 +147,25 @@ export function WpcomCallbackView() {
           </fieldset>
         )}
 
+        {mounted && !pending && authorize.data && authorize.data.sites.length > 0 && (
+          <div className="flex flex-col gap-1.5">
+            <span className="text-small font-medium text-fg">{t("rankoyaSite")}</span>
+            <Select value={fallbackSite} onValueChange={setFallbackSite}>
+              <SelectTrigger aria-label={t("rankoyaSite")} className="w-full">
+                <SelectValue placeholder={t("rankoyaSitePlaceholder")} />
+              </SelectTrigger>
+              <SelectContent>
+                {(sites.data ?? []).map((s) => (
+                  <SelectItem key={s.id} value={String(s.id)}>
+                    {s.domain}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <span className="text-caption font-normal text-fg-3">{t("rankoyaSiteHelp")}</span>
+          </div>
+        )}
+
         {complete.isError && (
           <p role="alert" className="rounded-md bg-danger-bg px-3 py-2.5 text-small text-danger">
             {getErrorMessage(complete.error, t("failed"))}
@@ -129,7 +180,7 @@ export function WpcomCallbackView() {
             <Button
               variant="primary"
               loading={complete.isPending}
-              disabled={!selected || !pending}
+              disabled={!selected || !siteId}
               onClick={() => complete.mutate()}
             >
               {t("connect")}

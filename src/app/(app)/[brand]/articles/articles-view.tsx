@@ -33,9 +33,10 @@ import { brandHref } from "@/components/layout/nav";
 import { PageHeader } from "@/components/layout/page-header";
 import { PageSkeleton } from "@/components/layout/page-skeleton";
 import { useShell } from "@/components/layout/shell-context";
+import { PublicationsPanel } from "./publications-panel";
 import { ResearchPanel } from "./research-panel";
 
-const views = ["articles", "research"] as const;
+const views = ["articles", "research", "publications"] as const;
 const knownStatuses = ["generating", "draft", "publishing", "published", "failed"] as const;
 const isKnownStatus = (status: string): status is (typeof knownStatuses)[number] =>
   (knownStatuses as readonly string[]).includes(status);
@@ -78,7 +79,13 @@ export function ArticlesView() {
         </TabsList>
       </Tabs>
 
-      {view === "research" ? <ResearchPanel siteId={brand.id} /> : <ArticlesTable siteId={brand.id} />}
+      {view === "research" ? (
+        <ResearchPanel siteId={brand.id} />
+      ) : view === "publications" ? (
+        <PublicationsPanel siteId={brand.id} />
+      ) : (
+        <ArticlesTable siteId={brand.id} />
+      )}
 
       <ResearchDialog siteId={brand.id} open={researchOpen} onOpenChange={setResearchOpen} />
     </div>
