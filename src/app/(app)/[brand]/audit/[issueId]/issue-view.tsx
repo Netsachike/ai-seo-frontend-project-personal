@@ -24,6 +24,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { CopyButton } from "@/components/brand/copy-button";
 import { ErrorState } from "@/components/brand/error-state";
 import { OwnerChip } from "@/components/brand/owner-chip";
 import { brandHref } from "@/components/layout/nav";
@@ -97,12 +98,15 @@ export function IssueView({ issueId }: { issueId: string }) {
           ) : (
             <>
               <div className="flex flex-col gap-1.5">
-                <span className="text-overline text-fg-3">
-                  {tIssue(`field.${fix.data.field}`)}
-                  {fix.data.character_count !== null && (
-                    <span className="num"> · {tIssue("characters", { count: fix.data.character_count })}</span>
-                  )}
-                </span>
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-overline text-fg-3">
+                    {tIssue(`field.${fix.data.field}`)}
+                    {fix.data.character_count !== null && (
+                      <span className="num"> · {tIssue("characters", { count: fix.data.character_count })}</span>
+                    )}
+                  </span>
+                  <CopyButton value={fix.data.proposed_value} />
+                </div>
                 <p dir="auto" className="rounded-md bg-surface-2 px-3 py-2 font-mono text-[13px] break-words text-fg">
                   {fix.data.proposed_value}
                 </p>
@@ -124,7 +128,10 @@ export function IssueView({ issueId }: { issueId: string }) {
               )}
               {Object.entries(fix.data.implementation_examples).map(([name, code]) => (
                 <div key={name} className="flex flex-col gap-1">
-                  <span className="text-overline text-fg-3">{name}</span>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-overline text-fg-3">{name}</span>
+                    <CopyButton value={code} label={tIssue("copyCode")} />
+                  </div>
                   <pre dir="ltr" className="overflow-x-auto rounded-md bg-surface-2 p-3 font-mono text-[12px] text-fg">
                     {code}
                   </pre>
@@ -154,6 +161,18 @@ export function IssueView({ issueId }: { issueId: string }) {
               )}
             </>
           )}
+        </Card>
+      )}
+
+      {issue.owner === "you" && state !== "fixed" && raw.recommended_value && (
+        <Card className="gap-2">
+          <div className="flex items-center justify-between gap-2">
+            <CardTitle>{tIssue("recommendedTitle")}</CardTitle>
+            <CopyButton value={raw.recommended_value} />
+          </div>
+          <p dir="auto" className="rounded-md bg-surface-2 px-3 py-2 font-mono text-[13px] break-words text-fg">
+            {raw.recommended_value}
+          </p>
         </Card>
       )}
 

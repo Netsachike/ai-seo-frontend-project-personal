@@ -1,15 +1,12 @@
 "use client";
 
 import * as React from "react";
-import Link from "next/link";
 import { ListPlusIcon, RadarIcon, ScanSearchIcon, SparklesIcon } from "lucide-react";
 import { useFormatter, useNow, useTranslations } from "next-intl";
 import { toast } from "sonner";
 
-import type { Engine } from "@/types/types";
 import { getErrorMessage } from "@/lib/errors";
-import { type CitedSource, type EngineVisibility, type TrackedQuestion } from "@/lib/mocks/ui-data";
-import { cn } from "@/lib/utils";
+import { type CitedSource, type EngineVisibility } from "@/lib/mocks/ui-data";
 import { useRunAiScan } from "@/features/insights/hooks";
 import { useEngineFilter } from "@/features/insights/url-state";
 import { useGeneratePrompts, useVisibility } from "@/features/visibility/hooks";
@@ -23,11 +20,10 @@ import { EngineChip } from "@/components/brand/engine-chip";
 import { EngineName } from "@/components/brand/engine-icon";
 import { ErrorState } from "@/components/brand/error-state";
 import { KpiCard } from "@/components/brand/kpi-card";
-import { RankCell } from "@/components/brand/rank-cell";
-import { brandHref } from "@/components/layout/nav";
 import { PageHeader } from "@/components/layout/page-header";
 import { PageSkeleton } from "@/components/layout/page-skeleton";
 import { useShell } from "@/components/layout/shell-context";
+import { QuestionTests } from "./question-tests";
 
 export function VisibilityView() {
   const t = useTranslations("visibility");
@@ -48,7 +44,21 @@ export function VisibilityView() {
 
   if (!brand || query.isPending) return <PageSkeleton />;
   const data = query.data;
-  const selected = engine === "all" ? undefined : data?.engines.find((e) => e.engine === engine);
+  // One engine can have several models (Perplexity Sonar and Sonar Deep Research): combine them.
+  const engineRows = engine === "all" ? [] : (data?.engines.filter((e) => e.engine === engine) ?? []);
+  const selected = engineRows.length ? combine(engineRows) : undefined;
+  const position = selected ? selected.avgPosition : (data?.avgPosition ?? null);
+  const testAll = () => scan.mutate();
+  const questionTests = data && (
+    <QuestionTests
+      questions={data.questions}
+      lastTested={data.lastTested ?? {}}
+      scan={scan}
+      highlight={selected?.engine}
+      generating={generate.isPending}
+      onGenerate={generateQuestions}
+    />
+  );
 
   return (
     <div className="flex flex-col gap-6">
@@ -61,15 +71,21 @@ export function VisibilityView() {
               <SparklesIcon />
               {t("generateQuestions")}
             </Button>
-            <Button variant="primary" loading={scan.isPending} onClick={() => scan.mutate()}>
+            <Button
+              variant="primary"
+              loading={scan.isPending && !scan.variables}
+              disabled={scan.isPending}
+              onClick={testAll}
+            >
               <ScanSearchIcon />
-              {t("runTest")}
+              {t("test.all")}
             </Button>
           </>
         }
       />
 
       {query.isError && <ErrorState onRetry={() => query.refetch()} />}
+
       {data && data.score === null && (
         <EmptyState
           icon={RadarIcon}
@@ -77,12 +93,13 @@ export function VisibilityView() {
           title={t("emptyTitle")}
           description={t("emptyDescription")}
           action={
-            <Button variant="secondary" size="sm" loading={scan.isPending} onClick={() => scan.mutate()}>
-              {t("runTest")}
+            <Button variant="secondary" size="sm" loading={scan.isPending} onClick={testAll}>
+              {t("test.all")}
             </Button>
           }
         />
       )}
+      {data && data.score === null && questionTests}
 
       {data && data.score !== null && (
         <>
@@ -95,9 +112,13 @@ export function VisibilityView() {
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             <KpiCard
               label={t("kpis.score")}
-              value={data.score}
+              value={selected?.score ?? data.score}
               format={(v) => format.number(v, "integer")}
-              note={t("kpis.scoreNoteTests", { count: data.answers })}
+              note={
+                selected
+                  ? t("kpis.engineNote", { engine: tEngine(selected.engine) })
+                  : t("kpis.scoreNoteTests", { count: data.answers })
+              }
             />
             <KpiCard
               label={tKpi("mentionRate.label")}
@@ -111,20 +132,22 @@ export function VisibilityView() {
             />
             <KpiCard
               label={t("kpis.position")}
-              value={selected?.avgPosition ?? data.avgPosition}
-              format={(v) => tKpi("avgAiPosition.value", { value: format.number(v, "decimal") })}
-              note={tKpi("avgAiPosition.note")}
+              value={position ?? 0}
+              format={(v) =>
+                position === null ? "—" : tKpi("avgAiPosition.value", { value: format.number(v, "decimal") })
+              }
+              note={position === null ? t("kpis.positionNone") : tKpi("avgAiPosition.note")}
             />
             <KpiCard
               label={t("kpis.tests")}
-              value={data.answers}
+              value={data.totalTests ?? data.answers}
               format={(v) => format.number(v, "integer")}
-              note={t("kpis.testsNote", { prompts: data.questions.length })}
+              note={t("kpis.testsNoteModels", { prompts: data.questions.length, models: data.engines.length })}
             />
           </div>
 
-          <EngineTable rows={selected ? [selected] : data.engines} checkedAt={data.checkedAt} />
-          <QuestionsTable rows={data.questions} highlight={selected?.engine} />
+          <EngineTable rows={engineRows.length ? engineRows : data.engines} checkedAt={data.checkedAt} />
+          {questionTests}
           <SourcesCard sources={data.sources} />
         </>
       )}
@@ -140,10 +163,33 @@ function EngineTable({ rows, checkedAt }: { rows: EngineVisibility[]; checkedAt:
   const columns = React.useMemo<DataColumn<EngineVisibility>[]>(
     () => [
       {
-        accessorKey: "engine",
-        header: t("engine"),
-        meta: { label: t("engine"), pinned: true },
-        cell: ({ row }) => <EngineName engine={row.original.engine} className="font-medium" />,
+        id: "model",
+        accessorFn: (r) => r.model ?? r.engine,
+        header: t("model"),
+        meta: { label: t("model"), pinned: true },
+        cell: ({ row }) => (
+          <span className="flex flex-col">
+            <EngineName engine={row.original.engine} className="font-medium" />
+            {row.original.model && (
+              <span dir="ltr" className="text-start font-mono text-[12px] text-fg-3">
+                {row.original.model}
+              </span>
+            )}
+          </span>
+        ),
+      },
+      {
+        id: "answers",
+        accessorFn: (r) => r.answers ?? 0,
+        header: t("answers"),
+        meta: { label: t("answers"), numeric: true },
+      },
+      {
+        id: "score",
+        accessorFn: (r) => r.score ?? 0,
+        header: t("score"),
+        meta: { label: t("score"), numeric: true },
+        cell: ({ getValue }) => format.number(getValue() as number, "integer"),
       },
       {
         accessorKey: "mentionRate",
@@ -164,8 +210,12 @@ function EngineTable({ rows, checkedAt }: { rows: EngineVisibility[]; checkedAt:
       {
         accessorKey: "avgPosition",
         header: t("position"),
+        sortUndefined: "last",
         meta: { label: t("position"), numeric: true },
-        cell: ({ row }) => tKpi("avgAiPosition.value", { value: format.number(row.original.avgPosition, "decimal") }),
+        cell: ({ row }) =>
+          row.original.avgPosition === null
+            ? "—"
+            : tKpi("avgAiPosition.value", { value: format.number(row.original.avgPosition, "decimal") }),
       },
       { accessorKey: "citations", header: t("citations"), meta: { label: t("citations"), numeric: true } },
     ],
@@ -178,7 +228,7 @@ function EngineTable({ rows, checkedAt }: { rows: EngineVisibility[]; checkedAt:
         data={rows}
         columns={columns}
         minWidth={680}
-        getRowId={(r) => r.engine}
+        getRowId={(r) => r.model ?? r.engine}
         csvFilename="visibility-by-engine.csv"
         toolbar={
           <div className="flex flex-col">
@@ -193,83 +243,21 @@ function EngineTable({ rows, checkedAt }: { rows: EngineVisibility[]; checkedAt:
   );
 }
 
-function EngineDots({ mentionedBy, highlight }: { mentionedBy: Engine[]; highlight?: Engine }) {
-  const t = useTranslations("visibility.questions");
-  const tEngine = useTranslations("engines");
-  return (
-    <span className="inline-flex items-center gap-1.5" dir="ltr">
-      {TESTED_ENGINES.map((e) => {
-        const on = mentionedBy.includes(e);
-        return (
-          <span
-            key={e}
-            title={`${tEngine(e)}: ${on ? t("mentioned") : t("notMentioned")}`}
-            className={cn(
-              "size-2.5 rounded-full border",
-              on ? "border-chart-you bg-chart-you" : "border-border-strong bg-transparent",
-              highlight && highlight !== e && "opacity-30",
-            )}
-          />
-        );
-      })}
-      <span className="sr-only">{t("dotsLabel", { count: mentionedBy.length })}</span>
-    </span>
-  );
-}
-
-function QuestionsTable({ rows, highlight }: { rows: TrackedQuestion[]; highlight?: Engine }) {
-  const t = useTranslations("visibility.questions");
-  const { brandSlug } = useShell();
-  const columns = React.useMemo<DataColumn<TrackedQuestion>[]>(
-    () => [
-      {
-        accessorKey: "text",
-        header: t("question"),
-        meta: { label: t("question"), pinned: true },
-        cell: ({ row }) => (
-          <Link
-            href={brandHref(brandSlug, `visibility/prompts/${row.original.id}`)}
-            className="font-medium text-fg hover:text-blue hover:underline"
-          >
-            {row.original.text}
-          </Link>
-        ),
-      },
-      {
-        id: "engines",
-        accessorFn: (r) => r.mentionedBy.length,
-        header: t("engines"),
-        meta: { label: t("engines"), csv: (r) => (r as TrackedQuestion).mentionedBy.length },
-        cell: ({ row }) => <EngineDots mentionedBy={row.original.mentionedBy} highlight={highlight} />,
-      },
-      {
-        accessorKey: "rank",
-        header: t("rank"),
-        sortUndefined: "last",
-        meta: { label: t("rank"), numeric: true },
-        cell: ({ row }) => <RankCell position={row.original.rank} />,
-      },
-      { accessorKey: "topCompetitor", header: t("competitor"), meta: { label: t("competitor") } },
-    ],
-    [t, brandSlug, highlight],
-  );
-  return (
-    <Card className="gap-0 p-0">
-      <DataTable
-        caption={t("title")}
-        data={rows}
-        columns={columns}
-        getRowId={(r) => r.id}
-        csvFilename="tracked-questions.csv"
-        toolbar={
-          <div className="flex flex-col">
-            <h2 className="text-h3">{t("title")}</h2>
-            <span className="text-caption font-normal text-fg-3">{t("legend")}</span>
-          </div>
-        }
-      />
-    </Card>
-  );
+/** Several models of one engine as one: answer-weighted score and mention rate. */
+function combine(rows: EngineVisibility[]): EngineVisibility {
+  const answers = rows.reduce((sum, r) => sum + (r.answers ?? 0), 0);
+  const weighted = (pick: (r: EngineVisibility) => number) =>
+    answers ? rows.reduce((sum, r) => sum + pick(r) * (r.answers ?? 0), 0) / answers : 0;
+  const positions = rows.map((r) => r.avgPosition).filter((p): p is number => p !== null);
+  return {
+    ...rows[0],
+    model: undefined,
+    answers,
+    score: weighted((r) => r.score ?? 0),
+    mentionRate: weighted((r) => r.mentionRate),
+    avgPosition: positions.length ? positions.reduce((a, b) => a + b, 0) / positions.length : null,
+    citations: rows.reduce((sum, r) => sum + r.citations, 0),
+  };
 }
 
 function SourcesCard({ sources }: { sources: CitedSource[] }) {

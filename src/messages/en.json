@@ -41,6 +41,12 @@
         "title": "Write the article",
         "body": "From a completed research brief"
       }
+    },
+    "copy": {
+      "label": "Copy",
+      "copied": "Copied",
+      "done": "Copied to clipboard.",
+      "failed": "Couldn't copy. Select the text and copy it manually."
     }
   },
   "engines": {
@@ -739,7 +745,8 @@
       "finished": "Done: {title}",
       "job_scan": {
         "started": "Scan started. Results update as each engine answers.",
-        "done": "Scan finished. Your numbers are up to date."
+        "done": "Scan finished. Your numbers are up to date.",
+        "partial": "Some models didn’t answer: {models}. Try them again on their own."
       },
       "job_audit": {
         "started": "Audit started. Rankoya is checking every page.",
@@ -749,7 +756,8 @@
         "started": "Rankoya is making the approved fixes.",
         "done": "Fixes are live. Rankoya will recheck them tomorrow."
       },
-      "failed": "The check didn't finish. Try again."
+      "failed": "The check didn't finish. Try again.",
+      "noPrompts": "No questions to test. Discover and analyze keywords first, then generate questions."
     }
   },
   "overview": {
@@ -888,7 +896,7 @@
     "addQuestions": "Add questions",
     "engineFilter": "Filter by engine",
     "emptyTitle": "No answers to show yet",
-    "emptyDescription": "Nothing here yet. Your first scan finishes in about 3 minutes.",
+    "emptyDescription": "Run a test to ask your questions to each AI model. Results show here as each model answers.",
     "kpis": {
       "score": "Visibility score",
       "scoreNote": "{rank, selectordinal, one {#st} two {#nd} few {#rd} other {#th}} of {count} tracked brands",
@@ -896,12 +904,14 @@
       "position": "Avg. position",
       "sentiment": "Positive sentiment",
       "sentimentNote": "Of answers that mention you",
-      "scoreNoteTests": "From {count, plural, one {# answer} other {# answers}}",
+      "scoreNoteTests": "From the latest {count, plural, one {# answer} other {# answers}}",
       "tests": "Answers checked",
-      "testsNote": "Across {prompts, plural, one {# question} other {# questions}}"
+      "testsNote": "Across {prompts, plural, one {# question} other {# questions}}",
+      "positionNone": "No answer mentions you yet",
+      "testsNoteModels": "{prompts, plural, one {# question} other {# questions}} · {models, plural, one {# model} other {# models}} with answers"
     },
     "byEngine": {
-      "title": "By engine",
+      "title": "By model",
       "checked": "Last checked {when}",
       "engine": "Engine",
       "mentionRate": "Mention rate",
@@ -913,18 +923,35 @@
         "positive": "Positive",
         "neutral": "Neutral",
         "negative": "Negative"
-      }
+      },
+      "model": "Model",
+      "answers": "Answers",
+      "score": "Score"
     },
     "questions": {
       "title": "Questions you track",
-      "legend": "Filled dot = that engine mentions you. Order: ChatGPT, Gemini, Perplexity, Claude, AI Overviews.",
+      "legend": "Pick questions and a model, or test one question from its row. A ticked, coloured icon means that engine mentions you; a grey one means it doesn’t.",
       "question": "Question",
       "engines": "Engines",
       "rank": "Your rank",
       "competitor": "Top competitor",
       "mentioned": "mentions you",
       "notMentioned": "doesn't mention you",
-      "dotsLabel": "Mentioned by {count} of 5 engines"
+      "dotsLabel": "Mentioned by {count} of 5 engines",
+      "select": "Select",
+      "selectAll": "Select all questions",
+      "selectOne": "Select “{question}”",
+      "tested": "Models tested",
+      "testedCount": "{count} of {total}",
+      "lastTested": "Last tested",
+      "never": "Not tested yet",
+      "test": "Test",
+      "testOne": "Test “{question}”",
+      "scopeAll": "{count, plural, one {the question} other {all # questions}}",
+      "scopeSelected": "{count, plural, one {# question} other {# questions}}",
+      "emptyTitle": "No questions yet",
+      "emptyBody": "Rankoya writes the questions your buyers ask AI assistants from your keywords. Generate them, then test.",
+      "generate": "Generate questions"
     },
     "sources": {
       "title": "Sources AI engines cite",
@@ -962,9 +989,18 @@
       }
     },
     "generateQuestions": "Generate questions",
-    "runTest": "Run test",
     "generated": "{count, plural, =0 {No new questions.} one {# question added.} other {# questions added.}}",
-    "generateFailed": "Couldn't generate questions. Add keywords first, then try again."
+    "generateFailed": "Couldn't generate questions. Add keywords first, then try again.",
+    "test": {
+      "running": "Testing {model}… keep this page open.",
+      "all": "Test all models",
+      "last": "Tested {when}",
+      "never": "Not tested yet",
+      "allModels": "All models",
+      "oneModel": "One model",
+      "modelLabel": "Model to test",
+      "run": "Test {scope} on {model}"
+    }
   },
   "prompt": {
     "metaTitle": "Question",
@@ -997,7 +1033,10 @@
     "historyDescription": "Out of 5, last 8 weeks",
     "historyAria": "Engines mentioning you went from {first} to {last} out of 5 over {weeks} weeks.",
     "weeksAgo": "{weeks} weeks ago",
-    "thisWeek": "This week"
+    "thisWeek": "This week",
+    "recheckAll": "All models",
+    "recheckOne": "One model",
+    "recheckRunning": "Testing {model}…"
   },
   "rankings": {
     "title": "Google rankings",
@@ -1206,7 +1245,9 @@
         "meta_description": "Meta description"
       },
       "characters": "{count, plural, one {# character} other {# characters}}",
-      "instructionsTitle": "How to put it live"
+      "instructionsTitle": "How to put it live",
+      "copyCode": "Copy code",
+      "recommendedTitle": "Recommended value"
     },
     "auditDone": "{count, plural, =0 {No new issues.} one {# new issue found.} other {# new issues found.}}",
     "auditFailed": "Couldn't run the audit. Crawl the site first, then try again.",
@@ -1426,7 +1467,8 @@
     "viewLabel": "Articles view",
     "views": {
       "articles": "Articles",
-      "research": "Research briefs"
+      "research": "Research briefs",
+      "publications": "Publishing history"
     },
     "table": {
       "caption": "Articles",
@@ -1495,6 +1537,17 @@
       "submit": "Start research",
       "done": "Research ready. Write the article from it next.",
       "failed": "Couldn't research this keyword. Try again."
+    },
+    "publications": {
+      "caption": "Publishing history",
+      "article": "Article",
+      "status": "Status",
+      "connection": "Published to",
+      "url": "Live URL",
+      "when": "When",
+      "total": "{count, plural, one {# attempt} other {# attempts}}",
+      "emptyTitle": "Nothing published yet",
+      "emptyBody": "Open an article and publish it to a connected site. Every attempt shows up here."
     }
   },
   "content": {
@@ -1644,7 +1697,47 @@
     "noTarget": "Connect a publishing platform first.",
     "noTargetHelp": "No publishing platform is connected. <link>Connect one</link> to publish from here.",
     "publishedToast": "Published.",
-    "publishFailed": "Couldn't publish. Check the connection and try again."
+    "publishFailed": "Couldn't publish. Check the connection and try again.",
+    "viewLive": "View live article",
+    "publishAgain": "Publish again",
+    "manualToast": "Ready to paste. Nothing was published: copy it into your site from the panel on the right.",
+    "generating": "Rankoya is still writing this article. You can publish it once it's done.",
+    "generationFailed": "Writing this article failed. Research the keyword again, then write it again.",
+    "publication": {
+      "title": "Live article",
+      "open": "Open",
+      "copyUrl": "Copy URL",
+      "noUrl": "Published, but your site didn't send back a URL.",
+      "manualNoUrl": "Prepared for manual publishing. Paste it into your site; it isn't live until you do.",
+      "failedNoUrl": "The last publish attempt failed, so nothing went live.",
+      "via": "Via {connection} · {date}",
+      "history": "Earlier attempts ({count})",
+      "status": {
+        "published": "Published",
+        "ready_for_manual_publish": "Ready to paste",
+        "failed": "Failed",
+        "publishing": "Publishing",
+        "pending": "Pending"
+      }
+    },
+    "manual": {
+      "title": "Paste into your site",
+      "body": "Your connection is manual, so Rankoya didn't publish anything. Copy each part into a new post.",
+      "fields": {
+        "title": "Title",
+        "metaTitle": "Meta title",
+        "metaDescription": "Meta description",
+        "slug": "URL slug"
+      },
+      "copyField": "Copy {field}",
+      "copyHtml": "Copy article HTML",
+      "copyText": "Copy as plain text"
+    },
+    "internalLinks": {
+      "title": "Internal links",
+      "count": "{count, plural, one {# link} other {# links}}",
+      "none": "This article doesn't link to any other page on your site yet."
+    }
   },
   "agentPage": {
     "title": "Ask Rankoya",
@@ -2672,7 +2765,7 @@
       "popupBlocked": "The sign-in window was blocked. Allow pop-ups for this site and try again.",
       "wordpressRequired": "Site address, username and application password are all required.",
       "passwordRequired": "Enter the new application password.",
-      "testFailed": "Connected, but the test failed: {message}",
+      "testFailed": "Saved, but activating it failed: {message}. Fix the details and connect again, or submit the same details to retry.",
       "connectFailed": "Couldn't connect. Check the details and try again.",
       "fieldsRequired": "Fill in every field.",
       "syncFailed": "Couldn't pull Search Console data. Try again."
@@ -2834,11 +2927,14 @@
       "choose": "Choose the site Rankoya should publish to.",
       "connect": "Connect this site",
       "connected": "{name} connected. Rankoya tested the connection.",
-      "testFailed": "Connected, but the test failed: {message}. You can test it again from Integrations.",
+      "testFailed": "Connected, but activating it failed: {message}. Test it again from this page.",
       "failed": "WordPress.com sign-in didn't finish. Start again from Integrations.",
       "noSites": "No WordPress.com sites were found on this account.",
       "missing": "This page needs the code WordPress.com sends back. Start the connection from Integrations.",
-      "back": "Back to Integrations"
+      "back": "Back to Integrations",
+      "rankoyaSite": "Connect it to",
+      "rankoyaSitePlaceholder": "Choose a Rankoya site",
+      "rankoyaSiteHelp": "This tab lost which site you were connecting, so pick it again."
     },
     "platform": {
       "title": "Website platform",

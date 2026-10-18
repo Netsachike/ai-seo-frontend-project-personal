@@ -104,8 +104,15 @@ export type Sentiment = "positive" | "neutral" | "negative";
 
 export type EngineVisibility = {
   engine: Engine;
+  /** The model that answered (e.g. "perplexity/sonar"); one engine can have several. */
+  model?: string;
+  /** Latest answers from this model, one per question. */
+  answers?: number;
+  /** Average visibility score of those answers, 0–100. */
+  score?: number;
   mentionRate: number;
-  avgPosition: number;
+  /** Null when no answer mentions you. */
+  avgPosition: number | null;
   citations: number;
   sentiment: Sentiment;
   change: number;
@@ -118,6 +125,10 @@ export type TrackedQuestion = {
   mentionedBy: Engine[];
   rank: number | null;
   topCompetitor: string;
+  /** Models with an answer to this question (OpenRouter ids). */
+  testedModels?: string[];
+  /** When any model last answered it. */
+  lastTested?: string | null;
   intent: "commercial" | "informational" | "comparison";
 };
 
@@ -133,11 +144,16 @@ export type VisibilityData = {
   mentionDelta: number;
   answers: number;
   mentioned: number;
-  avgPosition: number;
+  /** Null when no answer mentions you. */
+  avgPosition: number | null;
   positionDelta: number;
   positiveSentiment: number;
   sentimentDelta: number;
   checkedAt: string;
+  /** Every answer ever recorded, across all runs. */
+  totalTests?: number;
+  /** When each model last answered, by model id. */
+  lastTested?: Record<string, string>;
   engines: EngineVisibility[];
   questions: TrackedQuestion[];
   sources: CitedSource[];
@@ -286,6 +302,8 @@ export function visibilityData(brandId: string): VisibilityData {
 
 export type EngineAnswer = {
   engine: Engine;
+  /** The model that answered (e.g. "perplexity/sonar"). */
+  model?: string;
   position: number | null;
   listed: number;
   /** Answer text; the brand name is highlighted wherever it appears. */

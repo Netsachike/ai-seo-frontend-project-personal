@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
@@ -13,29 +14,69 @@ import publishingService from "@/services/publishing";
 import topicalMapService from "@/services/topical-maps";
 import { isGscReady, useGscOverview } from "@/features/search-console/hooks";
 import { usePublishingConnections } from "@/features/publishing/hooks";
+import { AI_TEST_MODELS, AI_TEST_PROVIDER, modelLabel } from "@/features/visibility/model";
+
+/** The test endpoint accepts at most 100 prompts per request. */
+const MAX_TEST_PROMPTS = 100;
+
+/** What to test: some models (default all) on some prompts (default the hook's, else every active one). */
+export type AiScanInput = { models?: string[]; promptIds?: number[] };
 
 /**
- * Runs an AI visibility test: the given prompts, or the latest active ones
- * (generating them from keywords first when there are none). Synchronous on
- * the backend, so this can take a while.
+ * Runs AI visibility tests through OpenRouter, one request per model (the
+ * endpoint takes a single model). Sends the given prompts, or every active
+ * prompt (generating them from keywords first when there are none).
+ * `mutate()` tests every model in turn; `mutate({ models: [model] })` tests
+ * one, and `promptIds` narrows it to chosen questions. `current` is the
+ * model being tested. Each request is synchronous and slow.
  */
 export function useRunAiScan(siteId: number, promptIds?: number[]) {
   const t = useTranslations("insights.jobs");
   const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async () => {
-      if (promptIds?.length) return (await aiVisibilityService.test(siteId, { prompt_ids: promptIds })).data;
-      const { data: prompts } = await aiVisibilityService.prompts(siteId);
-      if (prompts.length === 0) await aiVisibilityService.generatePrompts(siteId);
-      return (await aiVisibilityService.test(siteId)).data;
+  const [current, setCurrent] = React.useState<string | null>(null);
+  const mutation = useMutation({
+    mutationFn: async (input: AiScanInput | void) => {
+      const models = input?.models?.length ? input.models : AI_TEST_MODELS.map((m) => m.id);
+      let ids = input?.promptIds?.length ? input.promptIds : (promptIds ?? []);
+      if (ids.length === 0) {
+        let { data: prompts } = await aiVisibilityService.prompts(siteId);
+        if (prompts.length === 0) {
+          await aiVisibilityService.generatePrompts(siteId);
+          prompts = (await aiVisibilityService.prompts(siteId)).data;
+        }
+        ids = prompts.slice(0, MAX_TEST_PROMPTS).map((p) => p.id);
+      }
+      if (ids.length === 0) throw new Error(t("noPrompts"));
+
+      const failed: string[] = [];
+      for (const model of models) {
+        setCurrent(model);
+        try {
+          await aiVisibilityService.test(siteId, {
+            prompt_ids: ids,
+            limit: ids.length,
+            provider: AI_TEST_PROVIDER,
+            model,
+          });
+        } catch (error) {
+          if (models.length === 1) throw error;
+          failed.push(model);
+        }
+        // Each model's answers show as soon as they land.
+        await queryClient.invalidateQueries({ queryKey: aiVisibilityKeys.all(siteId) });
+      }
+      if (failed.length === models.length) throw new Error(t("failed"));
+      return { failed };
     },
     onMutate: () => toast(t("job_scan.started")),
-    onSuccess: () => {
-      toast.success(t("job_scan.done"));
-      return queryClient.invalidateQueries({ queryKey: aiVisibilityKeys.all(siteId) });
-    },
+    onSuccess: ({ failed }) =>
+      failed.length
+        ? toast.warning(t("job_scan.partial", { models: failed.map(modelLabel).join(", ") }))
+        : toast.success(t("job_scan.done")),
     onError: (error) => toast.error(getErrorMessage(error, t("failed"))),
+    onSettled: () => setCurrent(null),
   });
+  return { ...mutation, current };
 }
 
 export const GROWTH_STEPS = ["connect", "analyze", "discover", "optimize", "publish", "measure"] as const;
