@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 import { getErrorMessage } from "@/lib/errors";
+import { useSite } from "@/features/workspace/hooks";
 import { useMounted } from "@/lib/hooks/use-mounted";
 import {
   clearPendingGscConnect,
@@ -21,9 +22,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 /**
  * Where the backend's Google callback sends the browser
- * (`?connected=1`). Picks the Search Console property for the site that
- * started the flow (the domain match is chosen for you), starts a sync, then
- * returns to where the flow began.
+ * (`?connected={siteId}`). Lists the site's properties, saves the one that
+ * matches its domain (or the one the user picks), syncs it, then returns to
+ * where the flow began.
  */
 export function SearchConsoleReturn() {
   const t = useTranslations("searchConsoleReturn");
@@ -35,9 +36,12 @@ export function SearchConsoleReturn() {
     [mounted],
   );
 
+  const connected = params.get("connected");
+  const siteId = connected && /^\d+$/.test(connected) ? Number(connected) : null;
+
   if (pending === undefined) return <Skeleton className="h-40 w-full max-w-xl rounded-xl" />;
 
-  if (params.get("connected") !== "1" || !pending) {
+  if (!siteId) {
     return (
       <Panel title={t("failedTitle")} body={t("failedBody")}>
         <Button asChild variant="primary">
@@ -47,7 +51,29 @@ export function SearchConsoleReturn() {
     );
   }
 
-  return <ChooseProperty pending={pending} />;
+  // The URL names the site Google connected; this tab's record only adds where to go back to.
+  if (pending?.siteId === siteId) return <ChooseProperty pending={pending} />;
+  return <FromSite siteId={siteId} />;
+}
+
+/** No record of the flow in this tab: the domain comes from the site, and the user returns to its Search Console page. */
+function FromSite({ siteId }: { siteId: number }) {
+  const t = useTranslations("searchConsoleReturn");
+  const site = useSite(siteId);
+
+  if (site.isPending) return <Skeleton className="h-40 w-full max-w-xl rounded-xl" />;
+  if (site.isError) {
+    return (
+      <Panel title={t("failedTitle")} body={getErrorMessage(site.error, t("failedBody"))}>
+        <Button asChild variant="primary">
+          <Link href="/sites">{t("back")}</Link>
+        </Button>
+      </Panel>
+    );
+  }
+  return (
+    <ChooseProperty pending={{ siteId, domain: site.data.domain, returnTo: `/${siteId}/integrations/searchConsole` }} />
+  );
 }
 
 function ChooseProperty({ pending }: { pending: PendingGscConnect }) {
