@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl";
 import type { Site } from "@/types/types";
 import { getErrorMessage } from "@/lib/errors";
 import { isGscReady, startGscConnect, useGscOverview } from "@/features/search-console/hooks";
+import { GscPropertyPicker } from "@/features/search-console/gsc-property-picker";
 import { PlatformLogo } from "@/components/brand/platform-logo";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -17,8 +18,9 @@ import { setupPath } from "../steps";
 /**
  * Step 3. Optional but recommended: real queries and impressions sharpen
  * keyword research. Connect sends the browser to Google; the backend's
- * callback returns to /settings/search-console, which picks the property
- * matching the domain and comes back here.
+ * callback returns via /settings/search-console straight back here, where
+ * the user picks the property for this domain (or is told to add it to
+ * Search Console first).
  */
 export function GscStep({ site, onContinue }: { site: Site; onContinue: (skipped: boolean) => void }) {
   const t = useTranslations("siteSetup.gsc");
@@ -28,6 +30,8 @@ export function GscStep({ site, onContinue }: { site: Site; onContinue: (skipped
   const [error, setError] = React.useState<string | null>(null);
   const connection = overview.data?.connection;
   const connected = isGscReady(connection);
+  // Signed in with Google, but no property chosen yet.
+  const choosing = Boolean(connection) && !connection?.property;
   const property = connection?.property ?? `sc-domain:${site.domain}`;
 
   React.useEffect(() => {
@@ -80,17 +84,24 @@ export function GscStep({ site, onContinue }: { site: Site; onContinue: (skipped
                 <CheckIcon aria-hidden className="size-3.5" />
                 {t("connected", { property })}
               </span>
+            ) : choosing ? (
+              <span className="flex items-center gap-1 text-success">
+                <CheckIcon aria-hidden className="size-3.5" />
+                {t("signedIn")}
+              </span>
             ) : (
               t("notConnected")
             )}
           </span>
         </div>
-        {!connected && (
+        {!connected && !choosing && (
           <Button variant="primary" loading={connecting} onClick={connect}>
             {t("connect")}
           </Button>
         )}
       </div>
+
+      {choosing && <GscPropertyPicker siteId={site.id} domain={site.domain} />}
 
       {error && (
         <p role="alert" className="text-small text-danger">

@@ -18,11 +18,11 @@ import {
 import { useFormatter, useTranslations } from "next-intl";
 
 import { cn } from "@/lib/utils";
-import { canUseAgencyResources } from "@/lib/plan-core";
+// import { canUseAgencyResources } from "@/lib/plan-core"; (plan gate off for now)
 import { PRODUCT } from "@/config/product";
 import { accountHref } from "@/features/account/routes";
 import { useSessionUser } from "@/features/account/use-session-user";
-import { LockedState } from "@/components/account/locked-state";
+// import { LockedState } from "@/components/account/locked-state"; (plan gate off for now)
 import { PageHeader } from "@/components/layout/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -88,10 +88,11 @@ const categoryTone: Record<Category, string> = {
 
 /** Agency resource kit: admins, or an active Agency or Enterprise plan. */
 export function AgencyView() {
-  const t = useTranslations("account.agency");
+  // const t = useTranslations("account.agency"); (used by the plan gate below)
   const session = useSessionUser();
   if (session === undefined) return <Skeleton className="h-96" />;
-  if (!canUseAgencyResources(session)) return <LockedState title={t("lockedTitle")} body={t("lockedBody")} />;
+  // Plan gate off for now (open to every plan) until it is switched back on.
+  // if (!canUseAgencyResources(session)) return <LockedState title={t("lockedTitle")} body={t("lockedBody")} />;
   return <AgencyKit />;
 }
 

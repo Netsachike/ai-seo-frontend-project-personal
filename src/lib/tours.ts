@@ -8,10 +8,10 @@ import authService from "@/services/auth";
  *
  * Behaviour, chosen on purpose (see the Flowcasta plan, §2.4): a brand-new
  * user sees each page's tour once, the first time they open that page.
- * Finishing a tour (Done) silences it for good in this browser; closing it
- * early silences it for this browser session. Either also tells the server
- * (`PATCH /user/tour-completed`) so another browser doesn't start them again.
- * Turning a page's Tour switch on in the profile menu replays it any time.
+ * Finishing or closing it means it doesn't start by itself again. Either also
+ * tells the server (`PATCH /user/tour-completed`) so another browser doesn't
+ * start them again, once that endpoint exists. Turning the Tour switch on in
+ * the profile menu replays the page's tour any time.
  */
 
 export type TourId =
@@ -88,18 +88,24 @@ export function getTourForPath(pathname: string): TourDefinition | null {
 }
 
 // ── State ────────────────────────────────────────────────────────────────
-
-const KEY = {
-  enabled: "rankoya:tour:enabled",
-  isNew: "rankoya:tour:new",
-  finished: (id: TourId) => `rankoya:tour:finished:${id}`,
-  dismissed: (id: TourId) => `rankoya:tour:dismissed:${id}`,
-};
+//
+// Until `PATCH /user/tour-completed` exists, this browser is the record:
+// every flag lives in localStorage, under the signed-in user's id, so it
+// survives reloads and sign-outs and never leaks to another account.
+// - Done or closed on a page: that page's tour never starts by itself again.
+// - The profile menu's switch: off stops tours starting anywhere; on replays
+//   this page's tour now.
 
 export const TOUR_TOGGLE_EVENT = "rankoya:tour-toggle";
 export type TourToggleDetail = { action: "start" | "stop" };
 
-const local = {
+const userKey = () => getSessionUserFromCookie()?.id ?? "anon";
+const KEY = {
+  enabled: () => `rankoya:tour:${userKey()}:enabled`,
+  done: (id: TourId) => `rankoya:tour:${userKey()}:done:${id}`,
+};
+
+const store = {
   get: (k: string) => {
     try {
       return window.localStorage.getItem(k);
@@ -122,29 +128,6 @@ const local = {
     }
   },
 };
-const session = {
-  get: (k: string) => {
-    try {
-      return window.sessionStorage.getItem(k);
-    } catch {
-      return null;
-    }
-  },
-  set: (k: string, v: string) => {
-    try {
-      window.sessionStorage.setItem(k, v);
-    } catch {
-      // Storage blocked.
-    }
-  },
-  remove: (k: string) => {
-    try {
-      window.sessionStorage.removeItem(k);
-    } catch {
-      // Nothing to clear.
-    }
-  },
-};
 
 const sameDay = (iso: string) => {
   const d = new Date(iso);
@@ -152,33 +135,27 @@ const sameDay = (iso: string) => {
   return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth() && d.getDate() === now.getDate();
 };
 
-/**
- * Not finished a tour yet and joined today. Remembered for the session the
- * first time it's true, so finishing one page's tour (which tells the
- * server) doesn't stop the other pages' tours from showing once.
- */
+/** Joined today and the server hasn't recorded a finished tour. */
 export function isBrandNewUser(): boolean {
-  if (local.get(KEY.isNew) === "1") return true;
   const user = getSessionUserFromCookie();
-  const isNew = Boolean(user && !user.tour_completed && user.date_joined && sameDay(user.date_joined));
-  if (isNew) local.set(KEY.isNew, "1");
-  return isNew;
+  return Boolean(user && !user.tour_completed && user.date_joined && sameDay(user.date_joined));
 }
 
-/** The switch in the profile menu, if the user has touched it; otherwise on for brand-new users only. */
+/** The switch, once the user has used it; before that, on for brand-new users only. */
 export function isTourEnabled(): boolean {
-  const v = local.get(KEY.enabled);
+  const v = store.get(KEY.enabled());
   if (v === "1") return true;
   if (v === "0") return false;
   return isBrandNewUser();
 }
 
-export const isTourFinished = (id: TourId) => local.get(KEY.finished(id)) === "1";
-export const isTourDismissed = (id: TourId) => session.get(KEY.dismissed(id)) === "1";
+/** Finished or closed on this page before. */
+export const isTourDone = (id: TourId) => store.get(KEY.done(id)) === "1";
 
-/** Whether this tour should start on its page. */
-export const shouldShowTour = (id: TourId) => isTourEnabled() && !isTourFinished(id) && !isTourDismissed(id);
+/** Whether this tour should start by itself on its page. */
+export const shouldShowTour = (id: TourId) => isTourEnabled() && !isTourDone(id);
 
+/** The switch's state on this page: tours are on and this one hasn't been seen. */
 export function isTourOnForPath(pathname: string): boolean {
   const tour = getTourForPath(pathname);
   return Boolean(tour && shouldShowTour(tour.id));
@@ -187,17 +164,14 @@ export function isTourOnForPath(pathname: string): boolean {
 const emit = (action: TourToggleDetail["action"]) =>
   window.dispatchEvent(new CustomEvent<TourToggleDetail>(TOUR_TOGGLE_EVENT, { detail: { action } }));
 
-/** The profile menu's switch: on replays this page's tour now, off stops it. */
+/** The profile menu's switch. On: tours back on, and this page's plays now. Off: no tours start anywhere. */
 export function setTourOnForPath(pathname: string, on: boolean) {
   const tour = getTourForPath(pathname);
-  if (!tour) return;
-  if (on) {
-    local.set(KEY.enabled, "1");
-    local.remove(KEY.finished(tour.id));
-    session.remove(KEY.dismissed(tour.id));
+  store.set(KEY.enabled(), on ? "1" : "0");
+  if (on && tour) {
+    store.remove(KEY.done(tour.id));
     emit("start");
   } else {
-    session.set(KEY.dismissed(tour.id), "1");
     emit("stop");
   }
 }
@@ -210,25 +184,30 @@ function markTourCompletedOnServer() {
   void authService.markTourCompleted().catch(() => {});
 }
 
+/** Done on the last step. */
 export function finishTour(id: TourId) {
-  local.set(KEY.finished(id), "1");
+  store.set(KEY.done(id), "1");
   emit("stop");
   markTourCompletedOnServer();
 }
 
+/** Closed early (X, Close, Esc, clicking outside): remembered the same way, so it doesn't come back. */
 export function dismissTour(id: TourId) {
-  session.set(KEY.dismissed(id), "1");
+  store.set(KEY.done(id), "1");
   emit("stop");
   markTourCompletedOnServer();
 }
 
-/** At sign-in and sign-out, so one account's tour flags never carry over to the next. */
+/** Flags from the first version, which weren't per user. Safe to call any time. */
 export function clearTourState() {
   if (typeof window === "undefined") return;
-  local.remove(KEY.enabled);
-  local.remove(KEY.isNew);
+  for (const k of ["rankoya:tour:enabled", "rankoya:tour:new"]) store.remove(k);
   for (const id of ALL_TOUR_IDS) {
-    local.remove(KEY.finished(id));
-    session.remove(KEY.dismissed(id));
+    store.remove(`rankoya:tour:finished:${id}`);
+    try {
+      window.sessionStorage.removeItem(`rankoya:tour:dismissed:${id}`);
+    } catch {
+      // Nothing to clear.
+    }
   }
 }

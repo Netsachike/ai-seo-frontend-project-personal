@@ -99,6 +99,16 @@ export function useShopifyBlogs(siteId: number | undefined, connectionId: number
   });
 }
 
+/** Saves the blog Shopify articles go to on the connection, then refreshes the connections. */
+export function useSelectShopifyBlog(siteId: number, connectionId: number) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (payload: { blog_id: string; blog_name: string }) =>
+      (await publishingService.selectShopifyBlog(siteId, connectionId, payload)).data,
+    onSettled: () => queryClient.invalidateQueries({ queryKey: publishingKeys.connections(siteId) }),
+  });
+}
+
 /** How a publish goes out: live on the site, or saved as a draft there to review first. */
 export type PublishMode = "publish" | "draft";
 

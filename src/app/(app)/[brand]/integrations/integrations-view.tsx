@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { ArrowUpRightIcon, PlusIcon } from "lucide-react";
+import { ArrowUpRightIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { parseAsStringLiteral, useQueryState } from "nuqs";
 
@@ -206,12 +206,19 @@ function ProviderRow({
   const connected = accounts.length > 0;
   const status = meta.soon ? "comingSoon" : connected ? "connected" : "notConnected";
 
+  // One connection per platform per site for now, so a connected platform shows Manage only.
+  // A platform whose only connection failed its test offers Reconnect instead.
+  const working = accounts.some((a) => !a.status || a.status === "active");
   const connectButton = (
-    <Button size="sm" variant={connected ? "secondary" : "primary"} disabled={!canConnect} onClick={onConnect}>
-      {connected ? <PlusIcon /> : null}
-      {connected ? t("addAnother") : t("connect")}
+    <Button size="sm" variant="primary" disabled={!canConnect} onClick={onConnect}>
+      {connected ? t("reconnect") : t("connect")}
     </Button>
   );
+  // Kept for when several connections per platform come back:
+  // <Button size="sm" variant={connected ? "secondary" : "primary"} disabled={!canConnect} onClick={onConnect}>
+  //   {connected ? <PlusIcon /> : null}
+  //   {connected ? t("addAnother") : t("connect")}
+  // </Button>
 
   return (
     <li className="flex">
@@ -240,7 +247,7 @@ function ProviderRow({
                   </Link>
                 </Button>
               )}
-              {meta.scope === "user" && connected ? null : canConnect ? (
+              {working || (meta.scope === "user" && connected) ? null : canConnect ? (
                 connectButton
               ) : (
                 <Tooltip>

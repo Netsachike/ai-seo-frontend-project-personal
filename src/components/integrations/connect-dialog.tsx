@@ -12,10 +12,12 @@ import { PROVIDERS, type IntegrationProvider } from "@/features/integrations/cat
 import { PUBLISHING_FIELDS, connectionPayload, isPublishingPlatform } from "@/features/publishing/forms";
 import { ConnectionTestError, useCreateConnection } from "@/features/publishing/hooks";
 import { startWpcomConnect } from "@/features/publishing/wpcom";
+import { ShopifyBlogPicker } from "@/features/publishing/shopify-blog-picker";
 import { startGscConnect } from "@/features/search-console/hooks";
 import { DomainInput, FormField } from "@/components/forms/form-field";
 import { PasswordInput } from "@/components/forms/password-input";
 import { IntegrationTile } from "@/components/brand/integration-row";
+import { ConnectGuide } from "./connect-guide";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -52,6 +54,8 @@ export function ConnectDialog({
   const [isWaiting, setIsWaiting] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [values, setValues] = React.useState<Record<string, string>>({});
+  // Shopify: once connected, the blog articles go to is chosen before closing.
+  const [shopifyConnection, setShopifyConnection] = React.useState<number | null>(null);
 
   const meta = provider ? PROVIDERS[provider] : null;
   const name = provider ? t(`providers.${provider}.name`) : "";
@@ -64,6 +68,7 @@ export function ConnectDialog({
     setError(null);
     setIsWaiting(false);
     setValues({});
+    setShopifyConnection(null);
   }
 
   /** Both OAuth providers leave the app for the provider's consent screen and come back to finish. */
@@ -91,10 +96,11 @@ export function ConnectDialog({
     }
     setError(null);
     createConnection.mutate(connectionPayload(provider, `${name} · ${site.domain}`, values), {
-      onSuccess: () => {
+      onSuccess: (connectionId) => {
         toast.success(t("toasts.connected", { name }));
         onConnected?.(provider);
-        onOpenChange(false);
+        if (provider === "shopify") setShopifyConnection(connectionId);
+        else onOpenChange(false);
       },
       onError: (err) => {
         // A failed test keeps the connection (status `error`) so it can be retried from its details page.
@@ -109,7 +115,7 @@ export function ConnectDialog({
 
   return (
     <Dialog open={Boolean(provider)} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[520px]">
+      <DialogContent className="max-h-[90dvh] max-w-[560px] overflow-y-auto">
         {provider && meta && (
           <>
             <DialogHeader className="flex-row items-center gap-3">
@@ -129,7 +135,21 @@ export function ConnectDialog({
               ))}
             </ul>
 
-            {meta.method === "credentials" && (
+            {shopifyConnection !== null && site && (
+              <div className="flex flex-col gap-2 rounded-md border border-success bg-success-bg/40 p-4">
+                <p className="text-small font-semibold text-fg">{t("shopifyBlogs.chooseTitle")}</p>
+                <p className="text-small text-fg-2">{t("shopifyBlogs.chooseBody")}</p>
+                <ShopifyBlogPicker
+                  siteId={site.id}
+                  connectionId={shopifyConnection}
+                  onSaved={() => onOpenChange(false)}
+                />
+              </div>
+            )}
+
+            {shopifyConnection === null && <ConnectGuide provider={provider} />}
+
+            {meta.method === "credentials" && shopifyConnection === null && (
               <form
                 id="connect-credentials"
                 className="flex flex-col gap-4"
@@ -196,7 +216,7 @@ export function ConnectDialog({
                   {t("continueWith", { name })}
                 </Button>
               )}
-              {meta.method === "credentials" && (
+              {meta.method === "credentials" && shopifyConnection === null && (
                 <Button type="submit" form="connect-credentials" variant="primary" loading={createConnection.isPending}>
                   {t("connect")}
                 </Button>
