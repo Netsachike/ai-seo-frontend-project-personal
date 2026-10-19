@@ -7,9 +7,9 @@ import { searchConsoleKeys } from "@/lib/api/query-keys";
 import searchConsoleService from "@/services/search-console";
 
 /**
- * Google sends the browser back to `{FRONTEND_URL}/settings/search-console?connected=1`
- * with no site in the URL, so the site and where to return are kept here
- * across the redirect.
+ * Google sends the browser back to `{FRONTEND_URL}/settings/search-console?connected={siteId}`.
+ * The site's domain and where to return are kept here across the redirect;
+ * without them (another tab, cleared storage) they are rebuilt from the site.
  */
 const PENDING_KEY = "rankoya:gsc-pending";
 export const GSC_RETURN_PATH = "/settings/search-console";

@@ -9,7 +9,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: t("metaTitle") };
 }
 
-/** The backend's Google OAuth callback redirects here (`FRONTEND_URL/settings/search-console?connected=1`). */
+/** The backend's Google OAuth callback redirects here (`FRONTEND_URL/settings/search-console?connected={siteId}`). */
 export default function SearchConsoleReturnPage() {
   return (
     <Suspense>
