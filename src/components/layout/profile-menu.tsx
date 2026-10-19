@@ -1,10 +1,11 @@
 "use client";
 
 import * as React from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   BuildingIcon,
+  CircleHelpIcon,
   CreditCardIcon,
   ShieldIcon,
   SparklesIcon,
@@ -20,6 +21,8 @@ import { useLocale, useTranslations } from "next-intl";
 
 import { enabledLocales, localeMeta, type Locale } from "@/i18n/config";
 import { endSession } from "@/lib/auth/session";
+import { getTourForPath, isTourOnForPath, setTourOnForPath, TOUR_TOGGLE_EVENT } from "@/lib/tours";
+import { GOOGLE_LANGUAGES, googleLanguage, readGoogleLanguage } from "@/features/translate/google-translate";
 import { getActivePlan, isAdminSession } from "@/lib/plan-core";
 import { useProfileImage } from "@/lib/profile-image";
 import { accountHref } from "@/features/account/routes";
@@ -33,6 +36,7 @@ import {
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
   DropdownMenuSeparator,
@@ -43,6 +47,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Switch } from "@/components/ui/switch";
 import { UserAvatar } from "./avatars";
+import { useLanguageChoice } from "./language-switcher";
 import { useShell } from "./shell-context";
 
 export function useSignOut() {
@@ -67,9 +72,27 @@ export function ProfileMenu() {
   const session = useSessionUser();
   const profileImage = useProfileImage();
   const plan = getActivePlan(session?.subscriptions);
-  const { resolvedTheme, setTheme, setLocale } = usePreferences();
+  const { resolvedTheme, setTheme } = usePreferences();
   const signOut = useSignOut();
   const darkSwitchId = React.useId();
+  const tourSwitchId = React.useId();
+  const pathname = usePathname();
+  const hasTour = getTourForPath(pathname) !== null;
+  const tourOn = React.useSyncExternalStore(
+    (onChange) => {
+      window.addEventListener(TOUR_TOGGLE_EVENT, onChange);
+      return () => window.removeEventListener(TOUR_TOGGLE_EVENT, onChange);
+    },
+    () => isTourOnForPath(pathname),
+    () => false,
+  );
+  const chooseLanguage = useLanguageChoice();
+  const google = React.useSyncExternalStore(
+    () => () => {},
+    () => readGoogleLanguage(),
+    () => null,
+  );
+  const languageValue = google ? `g:${google}` : locale;
 
   if (!me || !workspace) return <UserAvatar name="" size={32} className="opacity-40" />;
 
@@ -148,12 +171,19 @@ export function ProfileMenu() {
             <DropdownMenuSubTrigger>
               <LanguagesIcon />
               <span className="flex-1">{t("language")}</span>
-              <span lang={locale} className="text-caption font-normal text-fg-3">
-                {localeMeta[locale].native}
+              <span lang={google ?? locale} translate="no" className="notranslate text-caption font-normal text-fg-3">
+                {googleLanguage(google)?.native ?? localeMeta[locale].native}
               </span>
             </DropdownMenuSubTrigger>
-            <DropdownMenuSubContent className="w-56">
-              <DropdownMenuRadioGroup value={locale} onValueChange={(v) => setLocale(v as Locale)}>
+            <DropdownMenuSubContent translate="no" className="notranslate max-h-80 w-60 overflow-y-auto">
+              <DropdownMenuRadioGroup
+                value={languageValue}
+                onValueChange={(v) =>
+                  chooseLanguage(
+                    v.startsWith("g:") ? { kind: "google", code: v.slice(2) } : { kind: "locale", locale: v as Locale },
+                  )
+                }
+              >
                 {enabledLocales.map((l) => (
                   <DropdownMenuRadioItem key={l} value={l} className="min-h-11">
                     <span className="flex flex-col">
@@ -162,9 +192,35 @@ export function ProfileMenu() {
                     </span>
                   </DropdownMenuRadioItem>
                 ))}
+                <DropdownMenuSeparator />
+                <DropdownMenuLabel className="text-caption font-normal text-fg-3">
+                  {t("machineLanguages")}
+                </DropdownMenuLabel>
+                {GOOGLE_LANGUAGES.map((l) => (
+                  <DropdownMenuRadioItem key={l.code} value={`g:${l.code}`} className="min-h-11">
+                    <span className="flex flex-col">
+                      <span lang={l.code}>{l.native}</span>
+                      <span className="text-caption font-normal text-fg-3">{l.english}</span>
+                    </span>
+                  </DropdownMenuRadioItem>
+                ))}
               </DropdownMenuRadioGroup>
             </DropdownMenuSubContent>
           </DropdownMenuSub>
+          {hasTour && (
+            // Closes the menu on select, so it doesn't cover what the tour points at.
+            <DropdownMenuItem
+              role="menuitemcheckbox"
+              aria-checked={tourOn}
+              onSelect={() => setTourOnForPath(pathname, !tourOn)}
+            >
+              <CircleHelpIcon />
+              <label htmlFor={tourSwitchId} className="flex-1">
+                {t("tour")}
+              </label>
+              <Switch id={tourSwitchId} checked={tourOn} tabIndex={-1} aria-hidden className="pointer-events-none" />
+            </DropdownMenuItem>
+          )}
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>

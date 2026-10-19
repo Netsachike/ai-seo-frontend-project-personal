@@ -3,10 +3,12 @@
 import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ChevronRightIcon, EllipsisIcon, PlusIcon, SettingsIcon, UsersIcon } from "lucide-react";
+import { ChevronRightIcon, EllipsisIcon, PlusIcon, SettingsIcon, Trash2Icon, UsersIcon } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
+import { toast } from "sonner";
 
 import type { Site } from "@/types/types";
+import { getErrorMessage } from "@/lib/errors";
 import { useUiStore } from "@/lib/store/ui";
 import { accountHref } from "@/features/account/routes";
 import { useSessionUser } from "@/features/account/use-session-user";
@@ -15,18 +17,19 @@ import { NEW_SITE_PATH, setupPath, stepNumber, TOTAL_STEPS } from "@/features/si
 import { useSites } from "@/features/workspace/hooks";
 import { useShell } from "@/components/layout/shell-context";
 import { SiteFavicon } from "@/components/layout/site-favicon";
+import { ConfirmDialog } from "@/components/account/confirm-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { faviconFor, siteSlug } from "./site-utils";
-import { useSiteStats } from "./hooks";
+import { useDeleteSite, useSiteStats } from "./hooks";
 
 /**
  * Where every session starts: pick the site to work on. Nothing else in the
@@ -38,6 +41,7 @@ export function SitesView() {
   const session = useSessionUser();
   const { workspace } = useShell();
   const sites = useSites(workspace?.work_space_id);
+  const [deleting, setDeleting] = React.useState<Site | null>(null);
 
   return (
     <div className="flex flex-col gap-10">
@@ -60,28 +64,32 @@ export function SitesView() {
           ) : (
             <Skeleton className="h-7 w-40" />
           )}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" aria-label={t("workspaceMenu")}>
-                <EllipsisIcon />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuItem onSelect={() => router.push(NEW_SITE_PATH)}>
+          <div className="flex shrink-0 items-center gap-1">
+            {/* At the top, so it stays in view however many sites there are. */}
+            <Button asChild variant="primary">
+              <Link href={NEW_SITE_PATH}>
                 <PlusIcon />
                 {t("addSite")}
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onSelect={() => router.push(accountHref.settings("workspaces"))}>
-                <SettingsIcon />
-                {t("workspaceSettings")}
-              </DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => router.push(accountHref.settings("team-members"))}>
-                <UsersIcon />
-                {t("teamMembers")}
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+              </Link>
+            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" aria-label={t("workspaceMenu")}>
+                  <EllipsisIcon />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuItem onSelect={() => router.push(accountHref.settings("workspaces"))}>
+                  <SettingsIcon />
+                  {t("workspaceSettings")}
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => router.push(accountHref.settings("team-members"))}>
+                  <UsersIcon />
+                  {t("teamMembers")}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
 
         {sites.isPending ? (
@@ -103,33 +111,92 @@ export function SitesView() {
           <ul className="flex flex-col gap-3">
             {sites.data.map((site) => (
               <li key={site.id}>
-                <SiteRow site={site} workspaceId={String(workspace?.work_space_id ?? "")} />
+                <SiteRow
+                  site={site}
+                  workspaceId={String(workspace?.work_space_id ?? "")}
+                  onDelete={() => setDeleting(site)}
+                />
               </li>
             ))}
-            <li>
-              <Link
-                href={NEW_SITE_PATH}
-                className="flex min-h-20 items-center gap-4 rounded-xl border border-dashed border-border-strong px-6 py-5 text-fg-2 transition-colors hover:border-fg-3 hover:bg-surface hover:text-fg"
-              >
-                <span className="grid size-11 place-items-center rounded-lg bg-surface text-fg">
-                  <PlusIcon aria-hidden className="size-5" />
-                </span>
-                <span className="flex flex-col">
-                  <span className="text-h3 text-fg">{t("addSite")}</span>
-                  <span className="text-small text-fg-3">
-                    {sites.data.length === 0 ? t("emptyBody") : t("addSiteBody")}
+            {sites.data.length === 0 && (
+              <li>
+                <Link
+                  href={NEW_SITE_PATH}
+                  className="flex min-h-20 items-center gap-4 rounded-xl border border-dashed border-border-strong px-6 py-5 text-fg-2 transition-colors hover:border-fg-3 hover:bg-surface hover:text-fg"
+                >
+                  <span className="grid size-11 place-items-center rounded-lg bg-surface text-fg">
+                    <PlusIcon aria-hidden className="size-5" />
                   </span>
-                </span>
-              </Link>
-            </li>
+                  <span className="flex flex-col">
+                    <span className="text-h3 text-fg">{t("addSite")}</span>
+                    <span className="text-small text-fg-3">{t("emptyBody")}</span>
+                  </span>
+                </Link>
+              </li>
+            )}
           </ul>
         )}
       </section>
+      <DeleteSiteDialog site={deleting} onClose={() => setDeleting(null)} />
     </div>
   );
 }
 
-function SiteRow({ site, workspaceId }: { site: Site; workspaceId: string }) {
+/** Deleting is permanent, so the user types the domain to confirm. */
+function DeleteSiteDialog({ site, onClose }: { site: Site | null; onClose: () => void }) {
+  const t = useTranslations("sites.delete");
+  const remove = useDeleteSite();
+  const [typed, setTyped] = React.useState("");
+  const inputId = React.useId();
+  const matches = Boolean(site) && typed.trim().toLowerCase() === site?.domain.toLowerCase();
+
+  return (
+    <ConfirmDialog
+      open={site !== null}
+      onOpenChange={(open) => {
+        if (open) return;
+        setTyped("");
+        onClose();
+      }}
+      title={t("title", { name: site?.name ?? "" })}
+      description={t("body")}
+      confirmLabel={t("confirm")}
+      confirmDisabled={!matches}
+      isPending={remove.isPending}
+      onConfirm={() => {
+        if (!site || !matches) return;
+        remove.mutate(site, {
+          onSuccess: () => {
+            toast.success(t("done", { name: site.name }));
+            setTyped("");
+            onClose();
+          },
+          onError: (error) => toast.error(getErrorMessage(error, t("failed"))),
+        });
+      }}
+    >
+      <div className="flex flex-col gap-1.5">
+        <label htmlFor={inputId} className="text-small text-fg-2">
+          {t.rich("typeToConfirm", {
+            domain: site?.domain ?? "",
+            mono: (chunks) => <span className="font-mono font-medium text-fg">{chunks}</span>,
+          })}
+        </label>
+        <Input
+          id={inputId}
+          value={typed}
+          onChange={(e) => setTyped(e.target.value)}
+          autoComplete="off"
+          dir="ltr"
+          className="text-start font-mono"
+          placeholder={site?.domain}
+        />
+      </div>
+    </ConfirmDialog>
+  );
+}
+
+function SiteRow({ site, workspaceId, onDelete }: { site: Site; workspaceId: string; onDelete: () => void }) {
   const t = useTranslations("sites");
   const format = useFormatter();
   const setupStep = useSetupStep(site.id);
@@ -138,56 +205,75 @@ function SiteRow({ site, workspaceId }: { site: Site; workspaceId: string }) {
   const href = setupStep ? setupPath(site.id, setupStep) : `/${siteSlug(site)}/overview`;
 
   return (
-    <Link
-      href={href}
-      onClick={() => {
-        const ui = useUiStore.getState();
-        ui.setWorkspace(workspaceId);
-        if (!inSetup) ui.setBrand(siteSlug(site));
-      }}
-      className="group grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-5 rounded-xl border border-border bg-surface p-5 shadow-card transition-[border-color,box-shadow] duration-150 hover:border-border-strong hover:shadow-raised sm:p-6 md:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,1fr)_auto]"
-    >
-      <div className="flex min-w-0 items-center gap-4">
-        <SiteFavicon src={faviconFor(site.domain)} name={site.name} size={48} />
-        <span className="flex min-w-0 flex-col">
-          <span className="truncate text-h2 text-fg">{site.name}</span>
-          <span dir="ltr" className="truncate text-start text-small text-fg-3">
-            {site.domain}
+    <div className="relative">
+      <Link
+        href={href}
+        onClick={() => {
+          const ui = useUiStore.getState();
+          ui.setWorkspace(workspaceId);
+          if (!inSetup) ui.setBrand(siteSlug(site));
+        }}
+        className="group grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-5 rounded-xl border border-border bg-surface p-5 shadow-card transition-[border-color,box-shadow] duration-150 hover:border-border-strong hover:shadow-raised sm:p-6 md:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,1fr)_auto]"
+      >
+        <div className="flex min-w-0 items-center gap-4">
+          <SiteFavicon src={faviconFor(site.domain)} name={site.name} size={48} />
+          <span className="flex min-w-0 flex-col">
+            <span className="truncate text-h2 text-fg">{site.name}</span>
+            <span dir="ltr" className="truncate text-start text-small text-fg-3">
+              {site.domain}
+            </span>
           </span>
-        </span>
-      </div>
+        </div>
 
-      <ChevronRightIcon
-        aria-hidden
-        className="size-5 text-fg-3 transition-transform group-hover:translate-x-0.5 md:order-last rtl:-scale-x-100 rtl:group-hover:-translate-x-0.5"
-      />
+        <ChevronRightIcon
+          aria-hidden
+          className="size-5 text-fg-3 transition-transform group-hover:translate-x-0.5 md:order-last rtl:-scale-x-100 rtl:group-hover:-translate-x-0.5"
+        />
 
-      <div className="flex flex-col gap-0.5">
-        <span className="num text-h2 text-fg">
-          {stats.clustersCovered}
-          <span className="text-small font-normal text-fg-3"> / {stats.clustersTotal}</span>
-        </span>
-        <span className="text-small text-fg-3">{t("clusters")}</span>
-      </div>
+        <div className="flex flex-col gap-0.5">
+          <span className="num text-h2 text-fg">
+            {stats.clustersCovered}
+            <span className="text-small font-normal text-fg-3"> / {stats.clustersTotal}</span>
+          </span>
+          <span className="text-small text-fg-3">{t("clusters")}</span>
+        </div>
 
-      <div className="flex flex-col gap-1">
-        <span className="num text-h2 text-fg">
-          {format.number(stats.visibility, "integer")}
-        </span>
-        <span className="text-small text-fg-3">{t("visibility")}</span>
-      </div>
+        <div className="flex flex-col gap-1">
+          <span className="num text-h2 text-fg">{format.number(stats.visibility, "integer")}</span>
+          <span className="text-small text-fg-3">{t("visibility")}</span>
+        </div>
 
-      <div className="col-span-full -mt-1">
-        {inSetup && setupStep ? (
-          <Badge variant="warning" shape="pill">
-            {t("setupIncomplete", { step: stepNumber(setupStep), total: TOTAL_STEPS })}
-          </Badge>
-        ) : (
-          <Badge variant="success" shape="pill">
-            {t("active")}
-          </Badge>
-        )}
-      </div>
-    </Link>
+        <div className="col-span-full -mt-1">
+          {inSetup && setupStep ? (
+            <Badge variant="warning" shape="pill">
+              {t("setupIncomplete", { step: stepNumber(setupStep), total: TOTAL_STEPS })}
+            </Badge>
+          ) : (
+            <Badge variant="success" shape="pill">
+              {t("active")}
+            </Badge>
+          )}
+        </div>
+      </Link>
+      {/* Outside the link so opening the menu doesn't open the site. */}
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            aria-label={t("siteMenu", { name: site.name })}
+            className="absolute end-4 bottom-4 sm:end-5 sm:bottom-5"
+          >
+            <EllipsisIcon />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-48">
+          <DropdownMenuItem variant="destructive" onSelect={onDelete}>
+            <Trash2Icon />
+            {t("delete.menu")}
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
   );
 }

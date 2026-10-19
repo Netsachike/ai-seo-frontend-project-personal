@@ -10,6 +10,7 @@ import type {
   PublishArticlePayload,
   PublishingConnection,
   PublishingTestResult,
+  ShopifyBlog,
   WordpressComAuthorizeResponse,
   WordpressComCallbackResponse,
   WordpressComCompletePayload,
@@ -48,6 +49,17 @@ const publishingService = {
     const response = await api.post<ApiSuccess<Publication & { article: Article; connection: PublishingConnection }>>(
       sitePath(siteId, `publishing/articles/${articleId}/publish`),
       payload,
+    );
+    return response.data;
+  },
+
+  /**
+   * The blogs in a Shopify store (up to 100), for picking where articles go.
+   * Shopify API connections only; a bad token comes back as 422 with Shopify's message.
+   */
+  shopifyBlogs: async (siteId: number, connectionId: number) => {
+    const response = await api.get<ApiSuccess<ShopifyBlog[]>>(
+      sitePath(siteId, `publishing/connections/${connectionId}/shopify-blogs`),
     );
     return response.data;
   },

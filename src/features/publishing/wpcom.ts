@@ -1,11 +1,13 @@
 import publishingService from "@/services/publishing";
 
 /**
- * WordPress.com OAuth. The backend's redirect URI must point at this page,
- * which forwards `code` and `state` to the backend and lets the user pick
- * the WordPress.com site. The site and where to return are kept across the
- * redirect.
+ * WordPress.com OAuth. After consent the backend redirects to
+ * `/settings/wordpress-com?connected=pending&pending_key=…`, where the user
+ * picks the WordPress.com site. The Rankoya site and where to return are kept
+ * across the redirect. The older `/integrations/wordpress-com/callback`
+ * page (WordPress.com's `code` + `state`) still works.
  */
+export const WPCOM_RETURN_PATH = "/settings/wordpress-com";
 export const WPCOM_CALLBACK_PATH = "/integrations/wordpress-com/callback";
 const PENDING_KEY = "rankoya:wpcom-pending";
 

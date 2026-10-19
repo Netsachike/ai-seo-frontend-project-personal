@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ArrowLeftRightIcon, PanelLeftCloseIcon, PanelLeftOpenIcon, StarIcon } from "lucide-react";
+import { ArrowLeftRightIcon, PanelLeftCloseIcon, PanelLeftOpenIcon, SparklesIcon } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 
 import { dirFor } from "@/i18n/config";
@@ -154,7 +154,7 @@ export function SidebarSite({
   );
 
   return (
-    <div className={className}>
+    <div data-tour="site-card" className={className}>
       {collapsed ? (
         <Tooltip>
           <TooltipTrigger asChild>{link}</TooltipTrigger>
@@ -190,7 +190,7 @@ export function SidebarNav({
   }, [active, items.length]);
 
   return (
-    <nav ref={navRef} aria-label={t("label")} className={className}>
+    <nav ref={navRef} aria-label={t("label")} data-tour="sidebar-nav" className={className}>
       <ul className="flex flex-col gap-1">
         {items.map((item) => (
           <li key={item.key}>
@@ -297,7 +297,8 @@ export function SidebarFooter({ collapsed = false, onNavigate }: { collapsed?: b
   }
 
   return (
-    <div className="flex flex-col gap-3 p-3">
+    <div className="flex flex-col gap-3 border-t border-nav-border p-3">
+      {/* Upgrade card, kept for later: an Upgrade button in the profile row replaces it for now.
       {session !== undefined && upsell && (
         <section className="flex flex-col gap-3 rounded-lg border border-nav-border bg-nav-card p-4">
           <div className="flex items-center gap-2">
@@ -311,25 +312,40 @@ export function SidebarFooter({ collapsed = false, onNavigate }: { collapsed?: b
             </Link>
           </Button>
         </section>
-      )}
+      )} */}
 
-      <Link
-        href={profileHref}
-        onClick={onNavigate}
-        className="flex items-center gap-2.5 rounded-md px-1.5 py-1.5 hover:bg-nav-hover"
-      >
-        <span className="relative">
-          <UserAvatar name={me.name} src={me.avatarUrl} />
-          <TelegramDot on={telegramOn} className="absolute -end-0.5 -bottom-0.5" />
-        </span>
-        <span className="flex min-w-0 flex-1 flex-col">
-          <span className="truncate text-small font-medium text-white" title={me.name}>
-            {me.name}
+      <div className="flex items-center gap-1.5">
+        <Link
+          href={profileHref}
+          onClick={onNavigate}
+          className="flex min-w-0 flex-1 items-center gap-2.5 rounded-md px-1.5 py-1.5 hover:bg-nav-hover"
+        >
+          <span className="relative">
+            <UserAvatar name={me.name} src={me.avatarUrl} />
+            <TelegramDot on={telegramOn} className="absolute -end-0.5 -bottom-0.5" />
           </span>
-          <span className="truncate text-caption font-normal text-nav-muted">{userLine}</span>
-        </span>
-        <span className="sr-only">{telegramOn ? t("telegramOn") : t("telegramOff")}</span>
-      </Link>
+          <span className="flex min-w-0 flex-1 flex-col">
+            <span className="truncate text-small font-medium text-white" title={me.name}>
+              {me.name}
+            </span>
+            <span className="truncate text-caption font-normal text-nav-muted">{userLine}</span>
+          </span>
+          <span className="sr-only">{telegramOn ? t("telegramOn") : t("telegramOff")}</span>
+        </Link>
+        {session !== undefined && upsell && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button asChild variant="agent" size="sm" className="shrink-0 px-2.5">
+                <Link href={accountHref.upgrade()} onClick={onNavigate}>
+                  <SparklesIcon />
+                  {t("upgradeShort")}
+                </Link>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side={side}>{t("upgradeTitle", { plan: tPlan(`${upsell}.label`) })}</TooltipContent>
+          </Tooltip>
+        )}
+      </div>
     </div>
   );
 }

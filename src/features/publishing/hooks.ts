@@ -88,6 +88,20 @@ export function usePublishArticle(siteId: number, articleId: number) {
   });
 }
 
+/** The blogs in a connected Shopify store. Shopify needs one picked to publish an article. */
+export function useShopifyBlogs(siteId: number | undefined, connectionId: number | undefined) {
+  return useQuery({
+    queryKey: publishingKeys.shopifyBlogs(siteId ?? 0, connectionId ?? 0),
+    enabled: Boolean(siteId && connectionId),
+    queryFn: async () => (await publishingService.shopifyBlogs(siteId as number, connectionId as number)).data,
+    staleTime: 5 * 60_000,
+    retry: false,
+  });
+}
+
+/** How a publish goes out: live on the site, or saved as a draft there to review first. */
+export type PublishMode = "publish" | "draft";
+
 /** One page of the publishing history (25 per page, newest first). */
 export function usePublicationsPage(siteId: number | undefined, page: number) {
   return useQuery({

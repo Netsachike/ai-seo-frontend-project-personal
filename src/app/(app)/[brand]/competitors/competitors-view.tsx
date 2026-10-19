@@ -6,6 +6,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowRightIcon,
   CheckIcon,
+  ExternalLinkIcon,
   FilePenLineIcon,
   Link2Icon,
   ListPlusIcon,
@@ -29,6 +30,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardAction, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { EmptyState } from "@/components/brand/empty-state";
 import { ErrorState } from "@/components/brand/error-state";
 import { OwnerChip } from "@/components/brand/owner-chip";
@@ -75,6 +77,7 @@ export function CompetitorsView() {
       )}
       {data && data.rows.length > 0 && (
         <>
+          <PageGuide />
           <ComparisonTable rows={data.rows} />
           <div className="grid gap-4 xl:grid-cols-2">
             <QuestionGaps gaps={data.questionGaps} />
@@ -88,6 +91,31 @@ export function CompetitorsView() {
   );
 }
 
+/** What each part of the page is for, so the numbers and buttons make sense at a glance. */
+function PageGuide() {
+  const t = useTranslations("competitors.guide");
+  const items = ["compare", "gaps", "links"] as const;
+  return (
+    <section
+      aria-label={t("label")}
+      data-tour="competitors-guide"
+      className="grid gap-3 rounded-xl border border-border bg-surface-2/60 p-4 md:grid-cols-3"
+    >
+      {items.map((key, i) => (
+        <div key={key} className="flex gap-3">
+          <span className="grid size-6 shrink-0 place-items-center rounded-full bg-surface num text-caption font-semibold text-fg">
+            {i + 1}
+          </span>
+          <div className="flex flex-col gap-0.5">
+            <h2 className="text-small font-semibold text-fg">{t(`${key}.title`)}</h2>
+            <p className="text-small text-fg-2">{t(`${key}.body`)}</p>
+          </div>
+        </div>
+      ))}
+    </section>
+  );
+}
+
 function ComparisonTable({ rows }: { rows: CompetitorRow[] }) {
   const t = useTranslations("competitors.table");
   const tKpi = useTranslations("kpi");
@@ -95,17 +123,26 @@ function ComparisonTable({ rows }: { rows: CompetitorRow[] }) {
   const colored = colorize(rows);
   return (
     <Card className="gap-0 overflow-hidden p-0">
+      <div className="flex flex-col gap-0.5 border-b border-border px-5 py-4">
+        <CardTitle>{t("title")}</CardTitle>
+        <CardDescription>{t("description")}</CardDescription>
+      </div>
       <div className="overflow-x-auto">
-        <Table className="min-w-[720px]">
+        <Table className="min-w-[860px]">
           <caption className="sr-only">{t("caption")}</caption>
           <TableHeader>
             <TableRow>
               <TableHead>{t("brand")}</TableHead>
-              <TableHead className="text-end">{t("score")}</TableHead>
-              <TableHead className="text-end">{t("share")}</TableHead>
-              <TableHead className="text-end">{t("position")}</TableHead>
-              <TableHead className="text-end">{t("citations")}</TableHead>
-              <TableHead className="text-end">{t("top10")}</TableHead>
+              {(["score", "share", "position", "citations", "top10"] as const).map((key) => (
+                <TableHead key={key} className="text-end">
+                  <Tooltip>
+                    <TooltipTrigger className="cursor-help underline decoration-dotted underline-offset-4">
+                      {t(key)}
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-64">{t(`help.${key}`)}</TooltipContent>
+                  </Tooltip>
+                </TableHead>
+              ))}
               <TableHead className="text-end">
                 <span className="sr-only">{t("actions")}</span>
               </TableHead>
@@ -134,7 +171,19 @@ function ComparisonTable({ rows }: { rows: CompetitorRow[] }) {
                 </TableCell>
                 <TableCell className="text-end num">{r.citations}</TableCell>
                 <TableCell className="text-end num">{r.top10}</TableCell>
-                <TableCell className="text-end">{!r.isYou && <ProspectButton domain={r.domain} />}</TableCell>
+                <TableCell className="text-end">
+                  {!r.isYou && (
+                    <span className="inline-flex items-center justify-end gap-1">
+                      <Button asChild size="sm" variant="ghost">
+                        <a href={`https://${r.domain}`} target="_blank" rel="noreferrer">
+                          <ExternalLinkIcon />
+                          {t("visit")}
+                        </a>
+                      </Button>
+                      <ProspectButton domain={r.domain} />
+                    </span>
+                  )}
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -308,27 +357,41 @@ function LinkSites({ sites }: { sites: LinkSite[] }) {
 /** Turns this competitor's backlinks into outreach prospects on the Authority page. */
 function ProspectButton({ domain }: { domain: string }) {
   const t = useTranslations("competitors.table");
-  const { brand } = useShell();
+  const { brand, brandSlug } = useShell();
   const discover = useDiscoverProspects(brand?.id ?? 0);
+  if (discover.isSuccess) {
+    return (
+      <Button asChild size="sm" variant="ghost">
+        <Link href={brandHref(brandSlug, "authority")}>
+          <CheckIcon />
+          {t("prospectsAdded")}
+        </Link>
+      </Button>
+    );
+  }
   return (
-    <Button
-      size="sm"
-      variant="ghost"
-      loading={discover.isPending}
-      disabled={discover.isSuccess}
-      onClick={() =>
-        discover.mutate(
-          { competitor_domain: domain, limit: 20 },
-          {
-            onSuccess: (result) => toast.success(t("prospectsFound", { count: result.processed, domain })),
-            onError: (error) => toast.error(getErrorMessage(error, t("prospectsFailed"))),
-          },
-        )
-      }
-    >
-      {discover.isSuccess ? <CheckIcon /> : <Link2Icon />}
-      {discover.isSuccess ? t("prospectsAdded") : t("findProspects")}
-    </Button>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button
+          size="sm"
+          variant="secondary"
+          loading={discover.isPending}
+          onClick={() =>
+            discover.mutate(
+              { competitor_domain: domain, limit: 20 },
+              {
+                onSuccess: (result) => toast.success(t("prospectsFound", { count: result.processed, domain })),
+                onError: (error) => toast.error(getErrorMessage(error, t("prospectsFailed"))),
+              },
+            )
+          }
+        >
+          <Link2Icon />
+          {t("findProspects")}
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent className="max-w-72">{t("findProspectsHelp", { domain })}</TooltipContent>
+    </Tooltip>
   );
 }
 

@@ -55,7 +55,7 @@ export function DoneStep({ site, finishing, onFinish }: { site: Site; finishing:
           : "",
     },
     { key: "searchConsole", done: Boolean(draft.gsc), value: draft.gsc?.siteUrl ?? t("rows.skipped") },
-    { key: "topics", done: topicLabels.length > 0, value: topicLabels.join(", ") },
+    { key: "topics", done: topicLabels.length > 0, value: topicLabels.join(", ") || t("rows.topicsSkipped") },
     {
       key: "publishing",
       done: Boolean(platform),

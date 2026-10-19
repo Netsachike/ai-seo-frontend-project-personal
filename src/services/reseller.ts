@@ -32,7 +32,7 @@ const resellerService = {
 
   updateReseller: async (payload: UpdateResellerPayload): Promise<UpdateResellerResponse> => {
     try {
-      const response = await api.post<UpdateResellerResponse>("/reseller/update/details", payload);
+      const response = await api.post<UpdateResellerResponse>("/reseller/update", payload);
       return response.data;
     } catch (error) {
       throw error;

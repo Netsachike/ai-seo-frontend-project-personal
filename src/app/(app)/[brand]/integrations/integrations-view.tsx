@@ -60,7 +60,7 @@ export function IntegrationsView() {
       {brand && <PlatformCard site={brand} canEdit={canConnect} />}
 
       <Tabs value={tab} onValueChange={(value) => setTab(value as IntegrationCategory)}>
-        <TabsList aria-label={t("tabsLabel")}>
+        <TabsList aria-label={t("tabsLabel")} data-tour="integrations-list">
           {INTEGRATION_CATEGORIES.map((category) => {
             const { active, total } = counts(category);
             return (

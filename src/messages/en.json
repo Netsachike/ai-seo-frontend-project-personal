@@ -109,7 +109,7 @@
   },
   "charts": {
     "noValue": "—",
-    "shareAria": "Share of voice: {summary}"
+    "shareAria": "Share of AI mentions: {summary}"
   },
   "approval": {
     "approve": "Approve",
@@ -449,7 +449,7 @@
         "social": "Social",
         "agent": "Ask Rankoya",
         "integrations": "Integrations",
-        "tools": "SEO tools",
+        "tools": "Free SEO tools",
         "reports": "Reports",
         "settings": "Settings",
         "resellers": "Resellers",
@@ -472,7 +472,8 @@
       "upgradeBody": "Get more insights, higher limits and advanced AI features.",
       "viewPlans": "View plans",
       "telegramOn": "Telegram connected",
-      "changeSite": "Change site. Current site: {name}"
+      "changeSite": "Change site. Current site: {name}",
+      "upgradeShort": "Upgrade"
     },
     "topbar": {
       "openNav": "Open navigation",
@@ -508,7 +509,9 @@
       "trigger": "Language: {language}. Change language",
       "search": "Search languages",
       "empty": "No language matches.",
-      "heading": "Interface language"
+      "heading": "Fully translated",
+      "machineHeading": "More languages",
+      "machineNote": "Translated automatically by Google, so some wording may be off."
     },
     "theme": {
       "toLight": "Switch to light mode",
@@ -545,7 +548,9 @@
       "signOut": "Sign out",
       "workspaces": "Workspaces",
       "upgrade": "Upgrade plan",
-      "admin": "Admin console"
+      "admin": "Admin console",
+      "tour": "Page tour",
+      "machineLanguages": "More languages (translated by Google)"
     },
     "command": {
       "title": "Command menu",
@@ -631,7 +636,7 @@
         "rankings": {
           "kicker": "Rankings and competitors",
           "title": "Know who outranks you, and why.",
-          "description": "Google positions and AI share of voice side by side, every week."
+          "description": "Your Google positions and how often AI names you, side by side, every week."
         },
         "agent": {
           "kicker": "Your SEO agent",
@@ -644,7 +649,7 @@
       "metaTitle": "Sign in",
       "title": "Welcome back",
       "description": "Sign in to see how your brand ranks today.",
-      "email": "Work email",
+      "email": "Email",
       "password": "Password",
       "forgot": "Forgot password?",
       "submit": "Sign in",
@@ -655,7 +660,7 @@
       "title": "Be the answer",
       "description": "Track your brand in Google, ChatGPT, Claude, Gemini and Perplexity, and let an agent do the work.",
       "name": "Full name",
-      "email": "Work email",
+      "email": "Email",
       "password": "Password",
       "workspace": "Company or team name",
       "workspaceHelper": "This becomes your first workspace. You can rename it later.",
@@ -666,14 +671,17 @@
     },
     "forgot": {
       "metaTitle": "Reset password",
-      "title": "Reset your password",
-      "description": "Enter your work email. We'll email support to reset your password and reply to you there.",
-      "email": "Work email",
-      "submit": "Email support",
+      "title": "Forgot your password?",
+      "description": "Enter the email you sign in with and we'll send you a link to choose a new password.",
+      "email": "Email",
+      "submit": "Send reset link",
+      "sending": "Sending…",
       "back": "Back to sign in",
-      "sent": "Your email app opened with the request. Send it, and support will reply to this address.",
-      "mailSubject": "Password reset request",
-      "mailBody": "Please reset the password for my account: {email}"
+      "sentTitle": "Check your inbox",
+      "sentBody": "We sent a reset link to <strong>{email}</strong>.",
+      "sentHelp": "Open the link in the email to choose a new password. If it isn't there in a few minutes, check your spam folder or send it again.",
+      "resend": "Send the link again",
+      "resent": "Reset link sent again."
     },
     "verify": {
       "metaTitle": "Enter code",
@@ -703,6 +711,24 @@
       "apiUnavailable": "Sign-in isn't available: this app isn't connected to the Rankoya server.",
       "generic": "Something went wrong. Try again.",
       "googleUnavailable": "Google sign-in isn't available yet. Use your email and password."
+    },
+    "reset": {
+      "metaTitle": "Choose a new password",
+      "title": "Choose a new password",
+      "description": "Pick a password you don't use anywhere else. You'll sign in with it from now on.",
+      "email": "Email",
+      "password": "New password",
+      "confirm": "Confirm new password",
+      "passwordRequired": "Enter and confirm your new password.",
+      "mismatch": "The passwords don't match.",
+      "submit": "Save new password",
+      "failed": "We couldn't reset your password. The link may have expired or already been used.",
+      "requestNew": "Request a new link",
+      "invalidTitle": "This reset link doesn't work",
+      "invalidBody": "The link is incomplete or has expired. Request a new one and use the latest email.",
+      "doneTitle": "Password reset",
+      "doneBody": "You can now sign in with your new password.",
+      "continue": "Continue to sign in"
     }
   },
   "autopilot": {
@@ -762,7 +788,7 @@
   },
   "overview": {
     "greeting": "{part, select, morning {Good morning} afternoon {Good afternoon} other {Good evening}}, {name}",
-    "description": "Here's how {brand} showed up in Google and AI answers this month.",
+    "description": "How easy {brand} is to find on Google and in AI answers this month, and what to do next.",
     "export": "Export report",
     "exportStarted": "Your report is being prepared. We'll email you the PDF.",
     "runScan": "Run new scan",
@@ -776,7 +802,7 @@
     "trendTitle": "Visibility vs competitors",
     "trendDescription": "Share of AI answers that mention you, daily",
     "trendAria": "Your AI visibility score moved from {from} to {to} over the selected range.",
-    "sovTitle": "Share of voice",
+    "sovTitle": "Share of AI mentions",
     "sovDescription": "Who AI answers mention, in the selected range",
     "actions": {
       "title": "Next best actions",
@@ -882,7 +908,7 @@
       "all": "Open content",
       "answers": "{count, plural, one {# AI answer in range} other {# AI answers in range}}",
       "kinds": {
-        "crawl": "Site crawled",
+        "crawl": "Site scanned",
         "test": "AI visibility scan",
         "article": "Article written",
         "published": "Article published"
@@ -892,11 +918,11 @@
   },
   "visibility": {
     "title": "AI visibility",
-    "description": "How often AI engines mention and cite you, and where you rank in their answers. {count} questions, rechecked daily.",
+    "description": "When people ask ChatGPT, Gemini, Claude or Perplexity about what you sell, do they recommend you? Tracking {count} questions your customers ask.",
     "addQuestions": "Add questions",
     "engineFilter": "Filter by engine",
     "emptyTitle": "No answers to show yet",
-    "emptyDescription": "Run a test to ask your questions to each AI model. Results show here as each model answers.",
+    "emptyDescription": "Run a test and Rankoya asks each AI assistant your questions. You'll see who they recommend, and whether it's you.",
     "kpis": {
       "score": "Visibility score",
       "scoreNote": "{rank, selectordinal, one {#st} two {#nd} few {#rd} other {#th}} of {count} tracked brands",
@@ -1040,13 +1066,13 @@
   },
   "rankings": {
     "title": "Google rankings",
-    "description": "Daily positions for {count} tracked keywords.",
+    "description": "Where you appear on Google for the {count} searches you track. Page one (top 10) is where the clicks are.",
     "device": "Device",
     "desktop": "Desktop",
     "mobile": "Mobile",
     "addKeywords": "Add keywords",
     "emptyTitle": "No keywords tracked yet",
-    "emptyDescription": "Add the keywords your customers search for and Rankoya checks them in Google every day.",
+    "emptyDescription": "Add the searches your customers type into Google. Rankoya checks where you appear every day.",
     "stats": {
       "avg": "Avg. position",
       "top3": "Top 3",
@@ -1094,29 +1120,40 @@
   },
   "competitors": {
     "title": "Competitors",
-    "insight": "{leader} leads AI answers by {lead} points. Most of the gap is comparison and gift questions.",
-    "descriptionEmpty": "Compare your visibility with up to 5 competitors.",
+    "insight": "{leader} is mentioned most in AI answers right now, {lead} points ahead of the next brand.",
+    "descriptionEmpty": "See who you compete with in Google and AI answers, and what they do that you don't.",
     "add": "Add competitor",
     "emptyTitle": "No comparison yet",
-    "emptyDescription": "Nothing here yet. Your first scan finishes in about 3 minutes.",
+    "emptyDescription": "Click Research competitors. Rankoya looks at who ranks for your keywords and who AI assistants mention, and lists them here.",
     "table": {
       "caption": "Your brand compared with tracked competitors",
       "brand": "Brand",
       "you": "{name} (you)",
       "score": "AI visibility",
-      "share": "Share of voice",
+      "share": "Share of mentions",
       "position": "Avg. AI position",
       "citations": "Citations",
       "top10": "Google top 10",
       "actions": "Actions",
       "findProspects": "Find link prospects",
-      "prospectsAdded": "Prospects added",
-      "prospectsFound": "{count, plural, one {# link prospect from {domain} added to Authority.} other {# link prospects from {domain} added to Authority.}}",
-      "prospectsFailed": "Couldn't fetch this competitor's backlinks. Try again."
+      "prospectsAdded": "See prospects",
+      "prospectsFound": "{count, plural, =0 {No new link prospects found for {domain}.} one {# website that links to {domain} was added to Authority.} other {# websites that link to {domain} were added to Authority.}}",
+      "prospectsFailed": "Couldn't fetch this competitor's backlinks. Try again.",
+      "title": "You vs. your competitors",
+      "description": "How often each brand shows up in Google and AI answers. Higher is better, except average AI position, where lower is better.",
+      "visit": "Visit site",
+      "findProspectsHelp": "Looks up websites that link to {domain} and adds them to your Authority page as people to contact for a link.",
+      "help": {
+        "score": "A 0 to 100 score for how often and how prominently AI assistants mention the brand.",
+        "share": "Of all brand mentions in AI answers to your questions, the share that went to this brand.",
+        "position": "Where the brand usually appears in an AI answer's list. 1 means it's named first.",
+        "citations": "How many times AI answers linked to this brand's website as a source.",
+        "top10": "How many of your tracked keywords this brand ranks on page one of Google for."
+      }
     },
     "questionGaps": {
       "title": "Questions they win, you don't",
-      "description": "Competitors mentioned, you absent, in 2 or more engines",
+      "description": "Questions where AI assistants name a competitor but not you, in two or more assistants.",
       "winner": "{name} in {engines} engines",
       "write": "Write answer page",
       "draftReady": "Draft in Content",
@@ -1128,7 +1165,7 @@
     },
     "keywordGaps": {
       "title": "Keywords they rank for, you don't",
-      "description": "Google top 10 for a competitor, outside the top 50 for you",
+      "description": "Searches where a competitor is on Google's first page and you're not in the top 50.",
       "who": "{name} #{position}",
       "volume": "{volume}/mo",
       "addToPlan": "Add to keywords",
@@ -1137,8 +1174,8 @@
       "addFailed": "Couldn't add the keyword. Try again."
     },
     "sites": {
-      "title": "Where competitors get cited and linked",
-      "description": "Rankoya can't earn these links for you, but it drafts the pitch for each one.",
+      "title": "Websites that link to your competitors",
+      "description": "Each of these links to a competitor, so they may link to you too. Open them in Authority to track who you have contacted and which links you have won.",
       "draftAll": "Draft all outreach emails",
       "draftedShort": "Emails drafted",
       "drafted": "Rankoya drafted {count} outreach emails. They're in your action plan under You need to do.",
@@ -1149,8 +1186,8 @@
         "submission": "Submission",
         "community": "Community"
       },
-      "openAll": "Open link opportunities",
-      "empty": "No link opportunities yet. Find prospects from a competitor in the table above."
+      "openAll": "Open in Authority",
+      "empty": "Nothing here yet. Click Find link prospects next to a competitor in the table above."
     },
     "addDialog": {
       "title": "Add competitor",
@@ -1167,14 +1204,29 @@
     "researchFailed": "Couldn't run the research. Try again.",
     "runs": {
       "title": "Research history",
-      "description": "Each SERP research run and what it found",
+      "description": "Each competitor search Rankoya ran, and what it found",
       "summary": "{processed} of {requested} keywords researched · {results} results"
+    },
+    "guide": {
+      "label": "How to use this page",
+      "compare": {
+        "title": "See where you stand",
+        "body": "The table puts your site next to each competitor in Google and in AI answers. Hover a column name to see what it means."
+      },
+      "gaps": {
+        "title": "Close the gaps",
+        "body": "Below it are the questions and keywords competitors win and you don't. Write an answer page or add the keyword in one click."
+      },
+      "links": {
+        "title": "Get the links they have",
+        "body": "Find link prospects lists the websites that link to a competitor. Those sites are likely to link to you too, so Rankoya adds them to your Authority page as sites to contact."
+      }
     }
   },
   "audit": {
     "title": "Site audit",
-    "description": "SEO and AI readiness for {domain}. {pages} pages checked {when}.",
-    "descriptionEmpty": "SEO and AI readiness for {domain}.",
+    "description": "Problems that stop Google and AI assistants from finding or trusting {domain}. {pages} pages checked {when}.",
+    "descriptionEmpty": "Problems that stop Google and AI assistants from finding or trusting {domain}.",
     "run": "Run audit",
     "auditRunning": "Auditing every page",
     "fixRunning": "Rankoya is fixing the approved issues",
@@ -1183,8 +1235,8 @@
     "fixItem": "{title} ({pages} pages)",
     "approveTitle": "Approve these changes",
     "approveDescription": "These change your live site. Rankoya only starts after you approve, here or on Telegram.",
-    "emptyTitle": "No audit yet",
-    "emptyDescription": "Crawl the site, then run the audit to see SEO health, AI readiness and every issue by page.",
+    "emptyTitle": "Your site hasn't been checked yet",
+    "emptyDescription": "Click Scan site. Rankoya reads every page like Google does, then lists what to fix, most important first.",
     "seoHealth": "SEO health",
     "aiReadiness": "AI readiness",
     "categoriesTitle": "Scores by category",
@@ -1203,7 +1255,7 @@
       "warning": "Warnings {count}",
       "notice": "Notices {count}"
     },
-    "rankoyaCan": "{count, plural, =0 {Rankoya can't write fixes for these yet.} one {Rankoya can write a fix for # of these (canonical tags and meta descriptions).} other {Rankoya can write fixes for # of these (canonical tags and meta descriptions).}}",
+    "rankoyaCan": "{count, plural, =0 {Rankoya can't fix these for you yet, but each one shows you how.} one {Rankoya can fix # of these for you (page links and descriptions). You approve first.} other {Rankoya can fix # of these for you (page links and descriptions). You approve first.}}",
     "severity": {
       "critical": "Critical",
       "warning": "Warning",
@@ -1241,7 +1293,7 @@
       "preview": "Preview the page",
       "preparing": "Rankoya is writing the fix…",
       "field": {
-        "canonical": "Canonical URL",
+        "canonical": "Main page address (canonical)",
         "meta_description": "Meta description"
       },
       "characters": "{count, plural, one {# character} other {# characters}}",
@@ -1250,7 +1302,7 @@
       "recommendedTitle": "Recommended value"
     },
     "auditDone": "{count, plural, =0 {No new issues.} one {# new issue found.} other {# new issues found.}}",
-    "auditFailed": "Couldn't run the audit. Crawl the site first, then try again.",
+    "auditFailed": "Couldn't check the site. Scan it first, then try again.",
     "proposed": "{count, plural, one {Fix ready to deploy.} other {# fixes ready to deploy.}}",
     "fixFailed": "That didn't work. Try again.",
     "fixReady": "Fix ready",
@@ -1260,8 +1312,9 @@
     "currentValue": "Now: {value}",
     "viewLabel": "Audit view",
     "views": {
-      "issues": "Issues",
-      "pages": "Crawled pages"
+      "issues": "Issues to fix",
+      "money": "Money pages",
+      "pages": "All pages"
     },
     "statusLabel": "Filter by status",
     "statusFilter": {
@@ -1280,19 +1333,19 @@
     "noneTitle": "Nothing here",
     "noneBody": "No issues match these filters.",
     "stats": {
-      "pages": "Pages crawled",
+      "pages": "Pages checked",
       "open": "Open issues",
       "resolved": "Fixed and verified",
       "fixable": "Rankoya can fix"
     },
     "crawl": {
-      "title": "Latest crawl",
-      "recrawl": "Recrawl site",
-      "running": "Crawling",
-      "started": "Crawl started. Rankoya audits the site when it finishes.",
-      "startFailed": "Couldn't start the crawl. Try again.",
-      "done": "{count, plural, one {Crawl finished: # page read.} other {Crawl finished: # pages read.}}",
-      "failed": "The crawl failed. Check that the site is online, then try again.",
+      "title": "Latest scan",
+      "recrawl": "Scan site",
+      "running": "Scanning…",
+      "started": "Scan started. Rankoya checks the site for problems as soon as it finishes.",
+      "startFailed": "Couldn't start the scan. Try again.",
+      "done": "{count, plural, one {Scan finished: # page read.} other {Scan finished: # pages read.}}",
+      "failed": "The scan didn't finish. Check that your site is online, then try again.",
       "status": {
         "pending": "Queued",
         "running": "Crawling",
@@ -1301,7 +1354,7 @@
       },
       "startedAt": "Started {when}",
       "finishedAt": "Finished {when}",
-      "progressLabel": "Crawl progress",
+      "progressLabel": "Scan progress",
       "summary": "{crawled} pages read · {discovered} found · {failed} failed"
     },
     "page": {
@@ -1314,7 +1367,7 @@
       "meta": "Meta description",
       "metaLength": "Meta length",
       "h1": "H1",
-      "canonical": "Canonical",
+      "canonical": "Main address (canonical)",
       "indexable": "Indexable",
       "schema": "Structured data",
       "yes": "Yes",
@@ -1336,7 +1389,7 @@
       "viewLabel": "Page view",
       "views": {
         "live": "Live page",
-        "crawled": "As crawled",
+        "crawled": "As Rankoya read it",
         "details": "Details"
       },
       "deviceLabel": "Preview size",
@@ -1344,12 +1397,12 @@
       "mobile": "Mobile",
       "reload": "Reload preview",
       "previewTitle": "Preview of {page}",
-      "liveHint": "The live page as visitors see it. If it stays blank, the site blocks previews: switch to As crawled or open it in a new tab.",
+      "liveHint": "The live page as visitors see it. If it stays blank, your site blocks previews: switch to As Rankoya read it, or open it in a new tab.",
       "liveHintNoCrawl": "The live page as visitors see it. If it stays blank, the site blocks previews: open it in a new tab.",
-      "crawledHint": "The HTML Rankoya's crawler read, shown without scripts. Images and styles load from your site."
+      "crawledHint": "The page as Rankoya read it, without scripts. Images and styles load from your site."
     },
     "crawledPages": {
-      "caption": "Crawled pages",
+      "caption": "All pages",
       "page": "Page",
       "noTitle": "No title",
       "status": "Status",
@@ -1363,22 +1416,22 @@
       "yes": "Yes",
       "no": "No",
       "total": "{count, plural, one {# page} other {# pages}}",
-      "noCrawlTitle": "No crawl yet",
+      "noCrawlTitle": "No scan yet",
       "noCrawlBody": "Recrawl the site to see every page Rankoya can read.",
-      "emptyTitle": "No pages in this crawl",
-      "emptyBody": "The crawler couldn't read any page. Check that the site is online, then recrawl."
+      "emptyTitle": "No pages in this scan",
+      "emptyBody": "Rankoya couldn't read any page. Check that the site is online, then scan again."
     }
   },
   "actions": {
     "title": "Action plan",
-    "description": "What to do next, ranked by impact. Rankoya handles its part; the rest is yours.",
+    "description": "What to do next, most valuable first. Rankoya does its part; the rest is listed for you.",
     "approveAll": "Approve all {count} from Rankoya",
     "approvedAll": "Approved {count, plural, one {# change} other {# changes}}. Rankoya is on it.",
     "confirmTitle": "Approve {count, plural, one {# change} other {# changes}} from Rankoya?",
     "confirmDescription": "These change your live site. Rankoya starts right away and tells you when each one is live.",
     "cancel": "Cancel",
     "emptyTitle": "No actions yet",
-    "emptyDescription": "Nothing here yet. Your first scan finishes in about 3 minutes, then Rankoya builds your plan.",
+    "emptyDescription": "Nothing here yet. Scan your site and test your AI visibility, and Rankoya builds your plan from what it finds.",
     "projected": "Projected AI visibility: <strong>{current}</strong> → <strong>{projected}</strong> when this plan is done",
     "projectedAria": "Visibility score {current} now, {projected} projected",
     "gain": "+{points} pts",
@@ -1397,7 +1450,7 @@
     "areas": {
       "content": "Content",
       "technical": "Technical",
-      "schema": "Schema",
+      "schema": "Rich results",
       "outreach": "Outreach"
     },
     "impact": {
@@ -1462,7 +1515,7 @@
   },
   "articles": {
     "title": "Articles",
-    "description": "Everything Rankoya has written for you, and the research each article is written from.",
+    "description": "Articles Rankoya wrote for you, the research behind each one, and where they're published.",
     "researchKeyword": "Research a keyword",
     "viewLabel": "Articles view",
     "views": {
@@ -1569,7 +1622,7 @@
       "draft": "Draft"
     },
     "emptyTitle": "Nothing planned for {month}",
-    "emptyDescription": "Ask Rankoya to plan the month. It picks topics from questions you miss and keywords close to page one.",
+    "emptyDescription": "Ask Rankoya to plan the month. It picks articles from questions AI assistants don't mention you for, and searches you're close to winning.",
     "thisMonth": "This month",
     "articlesPlanned": "Articles planned",
     "avgScore": "Avg. content score",
@@ -1740,11 +1793,28 @@
       "viewLive": "View live",
       "showInArticle": "Show in article",
       "notInBody": "The article body doesn't link to this page."
+    },
+    "sendDraft": "Send as draft",
+    "draftToast": "Saved as a draft on {connection}. Review it there and publish when you're ready.",
+    "mode": {
+      "label": "Publish as",
+      "publish": "Live",
+      "draft": "Draft",
+      "publishHelp": "Goes live on your site straight away.",
+      "draftHelp": "Saved on your site as a draft, so you can check it there before it goes live."
+    },
+    "shopify": {
+      "blog": "Shopify blog",
+      "blogHelp": "The blog in your store this article is added to.",
+      "loading": "Loading your store's blogs…",
+      "failed": "We couldn't load your Shopify blogs. Check the connection on the Integrations page.",
+      "none": "This store has no blogs yet. Create one in Shopify (Online Store › Blog posts), then come back.",
+      "pickBlog": "Choose the Shopify blog to publish to."
     }
   },
   "agentPage": {
     "title": "Ask Rankoya",
-    "description": "Ask about rankings, competitors or content. Same conversation as Telegram.",
+    "description": "Ask anything about your site: what to fix, what to write, how you compare. Same conversation as on Telegram.",
     "suggestions": {
       "week": "How did we do this week?",
       "gained": "Who gained on us?",
@@ -1755,7 +1825,7 @@
       "rankings": "Check rankings in Google and 5 AI engines",
       "compare": "Compare you with competitors",
       "write": "Write, optimize and publish articles",
-      "fix": "Fix meta tags and schema on your site",
+      "fix": "Fix page titles, descriptions and rich-results code on your site",
       "outreach": "Draft outreach for backlinks you send"
     },
     "telegramTitle": "Telegram",
@@ -1845,18 +1915,24 @@
         "email": "Email address",
         "save": "Save changes",
         "saved": "Profile updated.",
-        "readOnly": "Your name and email come from your account. Contact support to change them."
+        "readOnly": "Your name and email come from your account. Contact support to change them.",
+        "description": "The name your team sees on comments, approvals and reports.",
+        "firstName": "First name",
+        "lastName": "Last name",
+        "emailHelp": "Your sign-in email can't be changed here. Contact support if you need to.",
+        "failed": "We couldn't save your name. Try again."
       },
       "password": {
         "title": "Change password",
-        "description": "Use at least 8 characters with an uppercase letter, a number and a symbol.",
+        "description": "Use at least 8 characters. You'll stay signed in on this device.",
         "new": "New password",
         "confirm": "Confirm new password",
         "mismatch": "Passwords don't match.",
         "submit": "Update password",
-        "tooWeak": "Use a stronger password and make sure both fields match.",
+        "tooWeak": "We couldn't update your password. Use a stronger one and make sure both fields match.",
         "updated": "Password updated.",
-        "unavailable": "Changing your password here isn't available yet. Contact support and we'll reset it for you."
+        "unavailable": "Changing your password here isn't available yet. Contact support and we'll reset it for you.",
+        "tooShort": "Use at least 8 characters."
       }
     },
     "demo": {
@@ -2250,7 +2326,7 @@
       "features": {
         "aiVisibility": "AI visibility in ChatGPT, Claude, Gemini, Perplexity and AI Overviews",
         "rankings": "Google rankings by keyword and device",
-        "competitors": "Competitor share of voice",
+        "competitors": "Compare how often AI names you vs. competitors",
         "audit": "Site audit with approved fixes",
         "agentArticles": "Articles drafted by Rankoya, published after you approve",
         "telegram": "Approvals on Telegram",
@@ -2724,7 +2800,7 @@
   },
   "integrations": {
     "title": "Integrations",
-    "description": "Choose the AI engines Rankoya tracks, and connect the tools it publishes to, measures with and talks through.",
+    "description": "Connect your website so Rankoya can publish for you, and Google so it can use your real search data. Each connection takes a couple of minutes.",
     "tabsLabel": "Integration categories",
     "tabs": {
       "ai": "AI engines",
@@ -2937,7 +3013,10 @@
       "back": "Back to Integrations",
       "rankoyaSite": "Connect it to",
       "rankoyaSitePlaceholder": "Choose a Rankoya site",
-      "rankoyaSiteHelp": "This tab lost which site you were connecting, so pick it again."
+      "rankoyaSiteHelp": "This tab lost which site you were connecting, so pick it again.",
+      "confirm": "Rankoya will publish to this WordPress.com site.",
+      "siteId": "WordPress.com site {id}",
+      "noSiteList": "WordPress.com signed you in, but the site list didn't come back with it, so there's nothing to pick yet. This is a server issue on our side. Start again from Integrations in a few minutes."
     },
     "platform": {
       "title": "Website platform",
@@ -2964,6 +3043,14 @@
         "custom": "Custom",
         "unknown": "Not sure"
       }
+    },
+    "shopifyBlogs": {
+      "title": "{count, plural, one {# blog in this store} other {# blogs in this store}}",
+      "help": "You choose which blog each article goes to when you publish it.",
+      "loading": "Loading the store's blogs…",
+      "failed": "We couldn't load this store's blogs. Test the connection, or reconnect with a new access token.",
+      "none": "This store has no blogs yet. Create one in Shopify (Online Store › Blog posts) so Rankoya can publish there.",
+      "path": "/blogs/{handle}"
     }
   },
   "legal": {
@@ -2977,7 +3064,8 @@
       "privacy": "Privacy",
       "refunds": "Refunds",
       "signIn": "Sign in"
-    }
+    },
+    "backToLogin": "Back to login"
   },
   "sites": {
     "metaTitle": "Sites",
@@ -2995,7 +3083,17 @@
     "clusters": "keyword clusters covered",
     "visibility": "AI visibility",
     "setupIncomplete": "Setup incomplete · step {step} of {total}",
-    "active": "Active"
+    "active": "Active",
+    "siteMenu": "Options for {name}",
+    "delete": {
+      "menu": "Delete site",
+      "title": "Delete {name}?",
+      "body": "This permanently deletes the site and everything Rankoya has for it: audits, keywords, articles, rankings, AI visibility results and connected integrations. It can't be undone. Your live website isn't touched.",
+      "typeToConfirm": "Type <mono>{domain}</mono> to confirm.",
+      "confirm": "Delete site",
+      "done": "{name} was deleted.",
+      "failed": "We couldn't delete the site. Try again."
+    }
   },
   "siteSetup": {
     "shell": {
@@ -3114,7 +3212,11 @@
       "recommended": "Recommended",
       "volume": "{volume} searches a month",
       "footnote": "You can change your topics and their keywords later.",
-      "continue": "Continue"
+      "continue": "Continue",
+      "skip": "Skip for now",
+      "skipHelp": "You can pick topics and find keywords later from the Keywords page.",
+      "emptyTitle": "No topics found for your site yet",
+      "emptyBody": "This happens with new or very small sites, or when the site couldn't be read yet. Skip for now and Rankoya will find keywords once there's more to work with."
     },
     "billing": {
       "title": "Your growth plan is ready",
@@ -3220,7 +3322,7 @@
         "webhook": {
           "name": "Webhook or API",
           "detail": "For custom sites and Next.js",
-          "help": "Rankoya sends each approved article as JSON to this HTTPS endpoint."
+          "help": "For custom sites: Rankoya sends each approved article to a web address your developer gives you."
         },
         "shopify": {
           "name": "Shopify",
@@ -3250,7 +3352,7 @@
       },
       "fields": {
         "siteUrl": "Site URL",
-        "endpoint": "Endpoint URL",
+        "endpoint": "Web address to send articles to",
         "username": "Username",
         "appPassword": "Application password",
         "appPasswordHelper": "Not your login password"
@@ -3327,7 +3429,8 @@
         },
         "scheduleValue": "{count, plural, one {# article} other {# articles}} a week, {mode}",
         "doneLabel": "Done",
-        "skippedLabel": "Skipped"
+        "skippedLabel": "Skipped",
+        "topicsSkipped": "Skipped. Pick topics and find keywords later on the Keywords page."
       },
       "later": "You can change any of this later in the site's settings.",
       "cta": "Go to dashboard"
@@ -3346,7 +3449,7 @@
   },
   "keywords": {
     "title": "Keywords",
-    "description": "Every keyword {domain} could rank for. Analyze them to see which are accepted, then research an accepted keyword to write an article.",
+    "description": "The searches {domain} could win. Rankoya checks which are worth it, then researches one and writes the article for you.",
     "analyze": "Analyze keywords",
     "analyzed": "Analysis done: {accepted} accepted, {rejected} rejected.",
     "analyzeFailed": "Couldn't analyze the keywords. Try again.",
@@ -3426,28 +3529,28 @@
     "grow": {
       "open": "Discover keywords",
       "title": "Discover keywords",
-      "body": "Rankoya reads your latest crawl for keywords, adds any seeds you list, analyzes them (accepted or rejected), then rebuilds the topical map. This can take a few minutes.",
+      "body": "Rankoya looks at your pages for searches you could win, adds any you type in, checks which are worth targeting, then groups them into topics. This can take a few minutes.",
       "seedsLabel": "Seed keywords",
       "seedsPlaceholder": "One per line, or separated by commas (optional)",
       "hint": "{count, plural, =0 {No seeds: keywords come from your pages only.} one {# seed keyword} other {# seed keywords}}",
       "cancel": "Cancel",
       "submit": "Discover and analyze",
       "done": "{keywords} keywords found. The map now has {clusters} clusters.",
-      "failed": "Couldn't discover keywords. Check that the site has been crawled, then try again."
+      "failed": "Couldn't find keywords. Scan your site on the Site audit page first, then try again."
     }
   },
   "money": {
     "title": "Money pages",
-    "description": "The pages on {domain} that bring in revenue, ranked by commercial score, with what to improve on each.",
+    "description": "The pages on {domain} that make you money (services, products, pricing), with what would help each one rank and sell better.",
     "analyze": "Find money pages",
     "reanalyze": "Analyze again",
     "analyzed": "{count, plural, =0 {No money pages found.} one {# money page found.} other {# money pages found.}}",
-    "analyzeFailed": "Couldn't analyze the pages. Crawl the site first, then try again.",
+    "analyzeFailed": "Couldn't find your money pages. Scan the site first on the Issues tab, then try again.",
     "caption": "Money pages",
     "untitled": "Untitled page",
     "total": "{count, plural, one {# page} other {# pages}}",
     "emptyTitle": "No money pages yet",
-    "emptyBody": "Rankoya looks through your crawled pages for services, products and pricing pages.",
+    "emptyBody": "Rankoya looks through your scanned pages for service, product and pricing pages.",
     "columns": {
       "page": "Page",
       "score": "Commercial score",
@@ -3483,35 +3586,39 @@
   },
   "authority": {
     "title": "Authority",
-    "description": "How much the web trusts {domain}: backlinks, referring domains and the links worth earning. Analyzed {when}.",
-    "descriptionEmpty": "How much the web trusts {domain}: backlinks, referring domains and the links worth earning.",
+    "description": "How much other websites trust {domain}, measured by who links to it, and the links worth going after next. Analyzed {when}.",
+    "descriptionEmpty": "How much other websites trust {domain}, measured by who links to it, and the links worth going after next.",
     "analyze": "Analyze authority",
     "reanalyze": "Analyze again",
     "analyzed": "{count, plural, =0 {Analysis done. No new link opportunities.} one {Analysis done. # link opportunity found.} other {Analysis done. # link opportunities found.}}",
     "analyzeFailed": "Couldn't analyze authority. Try again.",
     "cancel": "Cancel",
-    "sandbox": "Sandbox data",
+    "sandbox": "Test data",
     "scores": {
       "readiness": "Authority readiness",
       "internal": "Internal authority",
-      "external": "External authority"
+      "external": "External authority",
+      "readinessHelp": "How ready your site is to earn links, from 0 to 100."
     },
     "stats": {
-      "backlinks": "Backlinks",
-      "domains": "Referring domains",
+      "backlinks": "Links to your site",
+      "domains": "Sites linking to you",
       "gap": "Gap to competitors",
       "gapHint": "Higher means competitors are further ahead",
       "rank": "Domain rank",
-      "provider": "Source: {provider}"
+      "provider": "Source: {provider}",
+      "domainsHelp": "Different websites with at least one link to you",
+      "backlinksHelp": "All links pointing to your site",
+      "gapHelp": "Higher means competitors have more trusted links than you"
     },
     "live": {
-      "title": "Live backlink metrics",
-      "body": "Fetched from DataForSEO and saved to your profile. Each fetch is a paid call.",
-      "fetch": "Fetch live metrics",
-      "refresh": "Refresh metrics",
-      "failed": "Couldn't fetch backlink metrics. The provider may not be configured.",
-      "confirmTitle": "Fetch live backlink metrics?",
-      "confirmBody": "This calls DataForSEO for your domain and is billed per call.",
+      "title": "Up-to-date link numbers",
+      "body": "Pulls the latest count of sites linking to you and saves it. Each refresh uses a paid lookup.",
+      "fetch": "Refresh link numbers",
+      "refresh": "Refresh link numbers",
+      "failed": "Couldn't get your link numbers right now. Try again later.",
+      "confirmTitle": "Refresh your link numbers?",
+      "confirmBody": "This runs a paid lookup of every site that links to your domain.",
       "meta": "From {provider}, {when}. Cost: ${cost}",
       "metrics": {
         "backlinks": "Backlinks",
@@ -3525,16 +3632,16 @@
     },
     "viewLabel": "Authority view",
     "views": {
-      "opportunities": "Link opportunities",
-      "backlinks": "Live backlinks"
+      "board": "Outreach board",
+      "backlinks": "Sites linking to you"
     },
     "status": {
-      "open": "Open",
-      "researching": "Researching",
-      "prospect": "Prospect",
-      "outreach": "Outreach",
-      "acquired": "Acquired",
-      "rejected": "Rejected"
+      "open": "New",
+      "researching": "Checking",
+      "prospect": "Worth contacting",
+      "outreach": "Contacted",
+      "acquired": "Link won",
+      "rejected": "Not a fit"
     },
     "priority": {
       "high": "High",
@@ -3547,7 +3654,7 @@
       "statusSaved": "Marked as {status}.",
       "statusFailed": "Couldn't update the status. Try again.",
       "emptyTitle": "No link opportunities yet",
-      "emptyBody": "Analyze authority, or turn a competitor's backlinks into prospects.",
+      "emptyBody": "Analyze authority, or find the sites that link to a competitor from the Competitors page.",
       "findProspects": "Find prospects",
       "columns": {
         "title": "Opportunity",
@@ -3569,30 +3676,30 @@
       "keyword": "Keyword",
       "moneyPage": "Money page",
       "mark": {
-        "outreach": "Mark as outreach",
-        "acquired": "Mark as acquired",
-        "rejected": "Reject"
+        "outreach": "Mark contacted",
+        "acquired": "Mark link won",
+        "rejected": "Not a fit"
       },
       "preview": "Preview your page"
     },
     "backlinks": {
       "caption": "Live backlinks",
       "total": "{count, plural, one {# referring domain} other {# referring domains}}",
-      "sandbox": "Sandbox data",
+      "sandbox": "Test data",
       "loadTitle": "See who links to you",
-      "loadBody": "Loads your live backlinks from DataForSEO, one per referring domain. Each page is a paid call.",
+      "loadBody": "Lists the websites that link to you, one per site. Each page of results uses a paid lookup.",
       "load": "Load backlinks",
       "emptyTitle": "No backlinks found",
-      "emptyBody": "The provider has no backlinks on record for this domain yet.",
-      "dofollow": "Dofollow",
-      "nofollow": "Nofollow",
+      "emptyBody": "No links to your site have been found yet. That's normal for new sites.",
+      "dofollow": "Counts for ranking",
+      "nofollow": "Doesn't count for ranking",
       "lost": "Lost",
       "broken": "Broken",
       "live": "Live",
       "columns": {
         "source": "Linking site",
         "anchor": "Anchor",
-        "follow": "Type",
+        "follow": "Counts for ranking?",
         "domainRank": "Domain rank",
         "spam": "Spam score",
         "state": "State",
@@ -3608,32 +3715,71 @@
       "target": "Page to pitch (optional)",
       "targetPlaceholder": "https://yoursite.com/page (defaults to your homepage)",
       "limit": "How many prospects (1–100)",
-      "cost": "This calls DataForSEO and is billed per call.",
+      "cost": "This runs a paid lookup of the sites that link to that competitor.",
       "cancel": "Cancel",
       "submit": "Find prospects",
       "done": "{count, plural, one {# prospect from {domain} added.} other {# prospects from {domain} added.}}",
       "failed": "Couldn't fetch the competitor's backlinks. Check the domain, then try again."
+    },
+    "summary": {
+      "title": "How much the web trusts you",
+      "body": "Google trusts sites that other trusted sites link to. More good sites linking to you means better rankings.",
+      "more": "More link numbers",
+      "updated": "Updated {when}"
+    },
+    "board": {
+      "intro": "Each card is a website that could link to you. Contact the site, then move the card along. Click a card for what to say and which of your pages to suggest.",
+      "columns": {
+        "toContact": {
+          "title": "To contact",
+          "body": "Worth asking for a link. Start with high priority.",
+          "empty": "Nothing to contact yet. Find prospects from a competitor, or analyze again."
+        },
+        "contacted": {
+          "title": "Contacted",
+          "body": "You've reached out and are waiting to hear back.",
+          "empty": "Mark a site as contacted once you've emailed it."
+        },
+        "won": {
+          "title": "Link won",
+          "body": "These sites now link to you.",
+          "empty": "Links you win show here."
+        }
+      },
+      "markContacted": "Mark contacted",
+      "markWon": "Link won",
+      "backToContact": "Back to To contact",
+      "notWonYet": "Not live yet",
+      "notAFit": "Not a fit",
+      "restore": "Restore",
+      "archived": "{count, plural, one {# not a fit} other {# not a fit}}",
+      "moved": "Moved to {status}.",
+      "moveFailed": "Couldn't move it. Try again.",
+      "capped": "Showing the top {shown} of {total} opportunities.",
+      "emptyTitle": "No link opportunities yet",
+      "emptyBody": "Find the websites that link to a competitor, and Rankoya lists them here as sites to contact. Analyze authority to find more.",
+      "findProspects": "Find prospects"
     }
   },
   "tools": {
-    "title": "SEO tools",
-    "description": "Quick checks on any URL, keyword clustering, schema markup, and the agent tools Rankoya uses on your site.",
+    "title": "Free SEO tools",
+    "description": "Quick, free checks you can run on any page, yours or a competitor's. They only read pages and never change your site. Pick a tool, paste a link and see what Google and AI assistants see.",
     "label": "Tools",
     "url": "URL",
     "urlPlaceholder": "https://example.com/page",
     "run": "Run check",
     "tabs": {
-      "meta": "Meta tags",
+      "meta": "Page titles & descriptions",
       "redirects": "Redirects",
       "broken": "Broken links",
       "robots": "Robots.txt",
-      "clustering": "Keyword clustering",
-      "schema": "Schema markup",
-      "agent": "Agent tools"
+      "clustering": "Group keywords",
+      "schema": "Rich results code",
+      "agent": "Advanced: assistant tools"
     },
     "meta": {
-      "title": "Meta tag checker",
-      "body": "Reads a page's title, description, canonical, robots, headings and social tags, and checks each one.",
+      "title": "Page title and description check",
+      "body": "Shows the title, description and headings Google reads on a page, and flags anything missing or too long.",
       "failed": "Couldn't read that page. Check the URL, then try again.",
       "status": "Status",
       "titleTag": "Title",
@@ -3645,32 +3791,38 @@
       "h1": "H1",
       "lang": "Language",
       "missing": "Missing",
-      "openGraph": "Open Graph"
+      "openGraph": "Open Graph",
+      "why": "The title and description are what people see in Google before they click. Clear ones get more clicks.",
+      "when": "You've published a page, changed its wording, or a page gets seen but rarely clicked."
     },
     "redirects": {
-      "title": "Redirect checker",
-      "body": "Follows a URL hop by hop and shows every redirect, status code and response time.",
+      "title": "Redirect check",
+      "body": "Follows a link step by step and shows every place it sends visitors, and how long each step takes.",
       "failed": "Couldn't check that URL. Try again.",
       "summary": "{count, plural, one {# redirect to {url}} other {# redirects to {url}}}",
       "noRedirect": "No redirect. The URL answers with status {status}.",
       "loop": "Redirect loop",
       "tooMany": "Too many redirects",
-      "ms": "{value} ms"
+      "ms": "{value} ms",
+      "why": "Long chains of redirects slow pages down and can lose the ranking a page has earned.",
+      "when": "You've moved a page, changed your domain, or a link lands somewhere unexpected."
     },
     "broken": {
-      "title": "Broken link checker",
-      "body": "Checks up to 100 links on a page and lists the ones that fail.",
+      "title": "Broken link check",
+      "body": "Checks up to 100 links on a page and lists the ones that lead nowhere.",
       "failed": "Couldn't check that page. Try again.",
       "summary": "{found} links checked: {broken} broken · {internal} internal · {external} external",
       "none": "No broken links found.",
       "error": "Error",
       "anchor": "Anchor: {text}",
       "internal": "Internal",
-      "external": "External"
+      "external": "External",
+      "why": "Links that lead to error pages frustrate visitors and tell Google the page isn't looked after.",
+      "when": "Before a page goes live, and every few months on your most visited pages."
     },
     "robots": {
-      "title": "Robots.txt checker",
-      "body": "Fetches robots.txt for a site and shows its rules and sitemaps.",
+      "title": "Robots.txt check",
+      "body": "Shows the rules your site gives search engines and AI crawlers about which pages they may read, and where your sitemap is.",
       "failed": "Couldn't fetch robots.txt. Try again.",
       "found": "Found",
       "status": "Status",
@@ -3678,21 +3830,25 @@
       "groups": "Rule groups",
       "none": "None",
       "yes": "Yes",
-      "no": "No"
+      "no": "No",
+      "why": "One wrong rule here can hide your whole site from Google or from AI assistants.",
+      "when": "Your pages aren't showing up in Google, or you've just launched or rebuilt the site."
     },
     "clustering": {
-      "title": "Keyword clustering",
-      "body": "Groups a list of keywords into topics, so each cluster can become one page.",
+      "title": "Group keywords into topics",
+      "body": "Paste a list of searches and Rankoya groups the ones that mean the same thing, so each group can become one page.",
       "keywords": "Keywords",
       "placeholder": "One per line, or separated by commas",
       "count": "{count, plural, one {# keyword} other {# keywords}}",
       "run": "Cluster keywords",
       "failed": "Couldn't cluster these keywords. Try again.",
-      "summary": "{clusters} clusters · {unclustered} keywords left unclustered"
+      "summary": "{clusters} clusters · {unclustered} keywords left unclustered",
+      "why": "One strong page per topic ranks better than several thin pages competing with each other.",
+      "when": "You have a long list of keyword ideas and want to plan which pages to write."
     },
     "schema": {
-      "title": "Schema markup generator",
-      "body": "Creates JSON-LD structured data to paste into a page's HTML.",
+      "title": "Rich results code",
+      "body": "Creates the small piece of code (structured data) that helps Google and AI assistants understand what a page is about.",
       "type": "Schema type",
       "types": {
         "organization": "Organization",
@@ -3712,18 +3868,191 @@
       "failed": "Couldn't generate the markup. Check the fields, then try again.",
       "output": "JSON-LD",
       "copy": "Copy script tag",
-      "copied": "Copied"
+      "copied": "Copied",
+      "why": "It can earn star ratings, FAQs and other extras in Google, and makes your details easier for AI answers to quote.",
+      "when": "You're publishing a product, service, article or FAQ page. Paste the code into the page's HTML."
     },
     "agent": {
-      "title": "Agent tools (MCP)",
-      "body": "The tools Ask Rankoya calls behind the scenes, runnable by hand against this site.",
+      "title": "Advanced: the assistant's tools",
+      "body": "The same tools Ask Rankoya uses behind the scenes, which you can run by hand against this site. Most people never need this.",
       "tool": "Tool",
       "arguments": "Arguments",
       "required": "Required",
       "json": "Arguments (JSON)",
       "badJson": "That isn't valid JSON.",
       "run": "Run tool",
-      "failed": "The tool call failed. Check the arguments, then try again."
+      "failed": "The tool call failed. Check the arguments, then try again.",
+      "why": "Useful for checking exactly what the assistant sees, or for developers connecting Rankoya to other software.",
+      "when": "Support asks you to run one, or you're building an integration."
+    },
+    "whyLabel": "Why it matters",
+    "whenLabel": "Use it when"
+  },
+  "searchConsole": {
+    "title": "Google search performance",
+    "description": "Real numbers from Google Search Console for {property}, over the last synced period.",
+    "notConnectedBody": "Connect Google Search Console to see how many people find your site on Google, what they search for and which pages they land on.",
+    "connect": "Connect Search Console",
+    "sync": "Sync now",
+    "synced": "{rows, plural, =0 {Synced. No new search data yet.} one {Synced # row of search data.} other {Synced # rows of search data.}}",
+    "syncFailed": "We couldn't sync Search Console. Try again in a moment.",
+    "lastSynced": "Updated {when}",
+    "firstSync": "Pulling your first batch of Google data. This can take a minute.",
+    "noQueries": "No searches recorded yet. New sites can take a few days to show up in Search Console. Sync again later.",
+    "topQueries": "Top searches that bring people to your site",
+    "stats": {
+      "clicks": "Clicks",
+      "clicksHelp": "Visits from Google search",
+      "impressions": "Impressions",
+      "impressionsHelp": "Times your site appeared in results",
+      "ctr": "Click rate",
+      "ctrHelp": "Share of impressions that became clicks",
+      "position": "Average position",
+      "positionHelp": "Where you usually appear. 1 is the top."
+    },
+    "columns": {
+      "query": "Search",
+      "page": "Landing page",
+      "clicks": "Clicks",
+      "impressions": "Impressions",
+      "position": "Position"
+    }
+  },
+  "tour": {
+    "progress": "{current} of {total}",
+    "next": "Next",
+    "back": "Back",
+    "done": "Done",
+    "close": "Close",
+    "overview": {
+      "site": {
+        "title": "The site you're working on",
+        "body": "Everything in Rankoya is about this site. Click here to switch to another site or add a new one."
+      },
+      "nav": {
+        "title": "Everything in one list",
+        "body": "Check how you're doing, connect your site, fix what's holding it back and grow, in that order from top to bottom."
+      },
+      "header": {
+        "title": "Your SEO at a glance",
+        "body": "How visible you are in Google and AI answers right now, and what changed recently."
+      },
+      "actions": {
+        "title": "Quick actions",
+        "body": "Change the date range or run a fresh check from here."
+      },
+      "assistant": {
+        "title": "Ask Rankoya anything",
+        "body": "Your SEO assistant knows your site's data. Ask it what to fix first, or to write something for you."
+      },
+      "language": {
+        "title": "Pick your language",
+        "body": "Use Rankoya in your language. Some languages are translated automatically by Google."
+      },
+      "profile": {
+        "title": "Your account",
+        "body": "Settings, billing, your team, and this tour if you want to see it again."
+      }
+    },
+    "visibility": {
+      "header": {
+        "title": "Do AI assistants mention you?",
+        "body": "See how often ChatGPT, Gemini, Claude and Perplexity name your brand when people ask questions you should own."
+      },
+      "actions": {
+        "title": "Run a new test",
+        "body": "Test again any time to see whether your changes moved the needle."
+      },
+      "questions": {
+        "title": "Test the questions that matter",
+        "body": "These are the questions your customers ask. Test all of them, a few, or one, on every assistant or just one."
+      }
+    },
+    "rankings": {
+      "header": {
+        "title": "Where you rank on Google",
+        "body": "Your positions for the keywords you track, and how they're changing."
+      },
+      "actions": {
+        "title": "Track more keywords",
+        "body": "Add the searches you want to win. Rankoya checks them for you."
+      },
+      "gsc": {
+        "title": "Real Google numbers",
+        "body": "Clicks, impressions and the searches that bring people in, straight from Google Search Console."
+      }
+    },
+    "integrations": {
+      "header": {
+        "title": "Connect your tools",
+        "body": "Connect your website so Rankoya can publish articles, and Google so it can read your real search data."
+      },
+      "actions": {
+        "title": "Your connections",
+        "body": "Everything you've connected, and its status."
+      },
+      "list": {
+        "title": "Browse by type",
+        "body": "Publishing platforms, Google tools and notifications are grouped here."
+      }
+    },
+    "competitors": {
+      "header": {
+        "title": "Know your competitors",
+        "body": "Who you compete with in Google and in AI answers."
+      },
+      "actions": {
+        "title": "Find competitors",
+        "body": "Rankoya looks at who ranks for your keywords and who AI assistants mention."
+      },
+      "guide": {
+        "title": "How to read this page",
+        "body": "Compare yourself first, then close the gaps, then go after the links your competitors have."
+      }
+    },
+    "audit": {
+      "header": {
+        "title": "Your site's health check",
+        "body": "Problems that stop Google and AI assistants from reading or trusting your site, sorted by how much they matter."
+      },
+      "actions": {
+        "title": "Check again, fix in bulk",
+        "body": "Re-scan your site, or let Rankoya fix everything it can in one go. You approve first."
+      },
+      "tabs": {
+        "title": "Issues, money pages and pages",
+        "body": "Fix issues, see the pages that make you money, and look at every page Rankoya read."
+      }
+    },
+    "keywords": {
+      "header": {
+        "title": "The searches you can win",
+        "body": "Keywords worth targeting, grouped into topics on your topical map."
+      },
+      "actions": {
+        "title": "Find more keywords",
+        "body": "Discover new keywords and build your topical map from here."
+      }
+    },
+    "articles": {
+      "header": {
+        "title": "Articles that bring visitors",
+        "body": "Research a keyword, let Rankoya write the article, review it and publish to your site."
+      },
+      "actions": {
+        "title": "Start a new article",
+        "body": "Pick a keyword and Rankoya researches and writes it for you."
+      }
+    },
+    "authority": {
+      "header": {
+        "title": "How much the web trusts you",
+        "body": "Sites that link to you make Google trust you more. See your links and the ones worth going after."
+      },
+      "actions": {
+        "title": "Check your authority",
+        "body": "Run an analysis to see your links and find new link opportunities."
+      }
     }
   }
 }

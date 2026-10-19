@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { FormField } from "@/components/forms/form-field";
 import { PasswordInput } from "@/components/forms/password-input";
-import { AuthHeading, FormAlert, GoogleButton, OrDivider } from "../auth-ui";
+import { AuthHeading, FormAlert } from "../auth-ui";
 
 export function SignInForm({ next }: { next: string }) {
   const t = useTranslations("auth.signIn");
@@ -51,8 +51,10 @@ export function SignInForm({ next }: { next: string }) {
   return (
     <div className="flex flex-col gap-6">
       <AuthHeading title={t("title")} description={t("description")} />
+      {/* Google sign-in and sign-up are off for now: accounts are created on the backend.
       <GoogleButton />
       <OrDivider />
+      */}
       <form onSubmit={onSubmit} noValidate className="flex flex-col gap-5">
         {error && <FormAlert>{error}</FormAlert>}
         <FormField label={t("email")} error={errors.email?.message}>
@@ -85,6 +87,7 @@ export function SignInForm({ next }: { next: string }) {
           {t("submit")}
         </Button>
       </form>
+      {/* Sign-up is off for now: accounts are created on the backend.
       <p className="text-center text-body text-fg-2">
         {t.rich("noAccount", {
           link: (chunks) => (
@@ -94,6 +97,7 @@ export function SignInForm({ next }: { next: string }) {
           ),
         })}
       </p>
+      */}
     </div>
   );
 }

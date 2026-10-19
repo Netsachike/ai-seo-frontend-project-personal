@@ -4,7 +4,7 @@ This folder is listed in `.gitignore`, so nothing here is committed.
 
 | File | Purpose |
 |---|---|
-| `openapi.yaml` | OpenAPI 3.0.3 spec covering all 90 operations. Source of truth. |
+| `openapi.yaml` | OpenAPI 3.0.3 spec covering all 126 operations. Source of truth. |
 | `index.html` | Swagger UI viewer with the spec embedded. Open it by double-clicking. |
 | `build-viewer.cjs` | Rebuilds `index.html` after you edit `openapi.yaml`. |
 
