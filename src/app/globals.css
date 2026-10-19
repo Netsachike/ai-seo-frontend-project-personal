@@ -488,6 +488,21 @@
   background-color: var(--signal);
   color: var(--signal-ink);
 }
+.rankoya-editor a {
+  color: var(--blue);
+}
+/* Links to the site's own pages: underlined so they are easy to spot. */
+.rankoya-editor .internal-link {
+  text-decoration: underline;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 3px;
+  border-radius: 2px;
+  transition: background-color 600ms;
+}
+.rankoya-editor .internal-link.is-located {
+  background-color: var(--blue-bg);
+  transition: none;
+}
 .rankoya-editor .placeholder-token {
   background: var(--warning-bg);
   color: var(--warning);

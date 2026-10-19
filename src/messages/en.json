@@ -1736,7 +1736,10 @@
     "internalLinks": {
       "title": "Internal links",
       "count": "{count, plural, one {# link} other {# links}}",
-      "none": "This article doesn't link to any other page on your site yet."
+      "none": "This article doesn't link to any other page on your site yet.",
+      "viewLive": "View live",
+      "showInArticle": "Show in article",
+      "notInBody": "The article body doesn't link to this page."
     }
   },
   "agentPage": {
