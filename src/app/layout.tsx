@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { cookies, headers } from "next/headers";
+import Script from "next/script";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getTranslations } from "next-intl/server";
 
@@ -8,8 +9,28 @@ import { isDefaultAppHost } from "@/config/brand";
 import { DEFAULT_THEME, THEME_COOKIE, isThemePreference } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 import { Providers } from "@/components/providers";
+import { GoogleTranslateHost } from "@/components/layout/google-translate-host";
 import { geistMono, geistSans, localeFont } from "./fonts";
 import "./globals.css";
+
+/**
+ * Google Translate swaps text nodes React still holds; without this, React's
+ * next removeChild/insertBefore throws and the page goes blank.
+ */
+const TRANSLATE_POLYFILL = `
+  if (typeof Node === 'function' && Node.prototype) {
+    const originalRemoveChild = Node.prototype.removeChild;
+    Node.prototype.removeChild = function (child) {
+      if (child.parentNode !== this) return child;
+      return originalRemoveChild.apply(this, arguments);
+    };
+    const originalInsertBefore = Node.prototype.insertBefore;
+    Node.prototype.insertBefore = function (newNode, referenceNode) {
+      if (referenceNode && referenceNode.parentNode !== this) return newNode;
+      return originalInsertBefore.apply(this, arguments);
+    };
+  }
+`;
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("meta");
@@ -43,6 +64,14 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       style={script ? ({ "--font-locale": script.family } as React.CSSProperties) : undefined}
     >
       <body className="min-h-dvh">
+        {/*
+          Google Translate swaps text nodes React still holds; without this,
+          React's next removeChild/insertBefore throws and the page goes blank.
+        */}
+        <Script id="google-translate-polyfill" strategy="beforeInteractive">
+          {TRANSLATE_POLYFILL}
+        </Script>
+        <GoogleTranslateHost />
         <NextIntlClientProvider>
           <Providers
             locale={locale}

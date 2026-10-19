@@ -30,6 +30,7 @@ export function ConfirmDialog({
   confirmLabel,
   cancelLabel,
   isPending = false,
+  confirmDisabled = false,
   onConfirm,
   tone = "danger",
 }: {
@@ -41,6 +42,8 @@ export function ConfirmDialog({
   confirmLabel: string;
   cancelLabel?: string;
   isPending?: boolean;
+  /** Keeps the confirm button off, e.g. until the user types what they are deleting. */
+  confirmDisabled?: boolean;
   onConfirm: () => void | Promise<void>;
   tone?: "danger" | "primary";
 }) {
@@ -67,6 +70,7 @@ export function ConfirmDialog({
           <Button
             variant={tone === "danger" ? "destructive" : "primary"}
             loading={isPending}
+            disabled={confirmDisabled}
             onClick={() => void onConfirm()}
           >
             {confirmLabel}

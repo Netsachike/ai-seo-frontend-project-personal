@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 
+import type { WordpressComCallbackResponse, WordpressComSite } from "@/types/types";
 import { getErrorMessage } from "@/lib/errors";
 import { useMounted } from "@/lib/hooks/use-mounted";
 import { toast } from "@/lib/toast";
@@ -28,11 +29,47 @@ import { SITES_PATH } from "@/features/site-setup/steps";
 const detailsPath = (siteId: number) => `/${siteId}/integrations/wordpressCom`;
 
 /**
- * WordPress.com sends the browser here with `code` and `state`. This page
- * forwards them to the backend (step 2), lets the user pick a site, creates
- * the connection (step 3), activates it by testing its id, and returns to
- * where the user started. If the tab lost which Rankoya site was being
- * connected (another tab, cleared storage), the user picks it here.
+ * The WordPress.com sites the backend put on the redirect: `sites` as JSON
+ * (`[{ id, name, url }]`), or just their ids in `sites_id` (comma-separated).
+ */
+function sitesFromUrl(params: URLSearchParams): WordpressComSite[] {
+  const raw = params.get("sites");
+  if (raw) {
+    try {
+      const list: unknown = JSON.parse(raw);
+      if (Array.isArray(list))
+        return list.flatMap((s) =>
+          s && typeof s === "object" && "id" in s
+            ? [
+                {
+                  id: String((s as { id: unknown }).id),
+                  name: String((s as { name?: unknown }).name ?? ""),
+                  url: String((s as { url?: unknown }).url ?? ""),
+                },
+              ]
+            : [],
+        );
+    } catch {
+      // Not JSON: fall through to the ids.
+    }
+  }
+  return (params.get("sites_id") ?? "")
+    .split(",")
+    .map((id) => id.trim())
+    .filter((id) => id && id !== "undefined" && id !== "null")
+    .map((id) => ({ id, name: "", url: "" }));
+}
+
+/**
+ * The end of the WordPress.com sign-in. It arrives in one of two ways:
+ * - the backend's redirect to `/settings/wordpress-com?connected=pending&pending_key=…`
+ *   with the sites on the URL (the live flow);
+ * - WordPress.com's own redirect with `code` and `state`, which this page
+ *   forwards to the backend to get the same pending key and sites.
+ * Then the user picks a site, the connection is created (step 3) and
+ * activated by testing its id, and the user returns to where they started.
+ * If the tab lost which Rankoya site was being connected (another tab,
+ * cleared storage), the user picks it here.
  */
 export function WpcomCallbackView() {
   const t = useTranslations("integrations.wpcom");
@@ -40,13 +77,23 @@ export function WpcomCallbackView() {
   const params = useSearchParams();
   const code = params.get("code");
   const state = params.get("state");
+  const pendingKey = params.get("pending_key");
+  const fromRedirect = React.useMemo<WordpressComCallbackResponse | null>(
+    () =>
+      pendingKey
+        ? { success: true, message: "", pending_key: pendingKey, sites: sitesFromUrl(params), expires_in: 600 }
+        : null,
+    [pendingKey, params],
+  );
   const mounted = useMounted();
   // Read after mount: sessionStorage only exists in the browser.
   const pending = React.useMemo<PendingWpcomConnect | null>(
     () => (mounted ? readPendingWpcomConnect() : null),
     [mounted],
   );
-  const [selected, setSelected] = React.useState<string | null>(null);
+  const [picked, setSelected] = React.useState<string | null>(null);
+  // The live flow names the sites up front, so the first is chosen until the user picks another.
+  const selected = picked ?? fromRedirect?.sites[0]?.id ?? null;
   const started = React.useRef(false);
   const queryClient = useQueryClient();
   const workspaces = useWorkspaces();
@@ -62,10 +109,13 @@ export function WpcomCallbackView() {
   const { mutate: forward } = authorize;
   React.useEffect(() => {
     // The state is single-use, so it is forwarded exactly once.
-    if (!code || !state || started.current) return;
+    if (fromRedirect || !code || !state || started.current) return;
     started.current = true;
     forward();
-  }, [code, state, forward]);
+  }, [fromRedirect, code, state, forward]);
+
+  const authorized = fromRedirect ?? authorize.data ?? null;
+  const siteLabel = (site: WordpressComSite) => site.name || t("siteId", { id: site.id });
 
   const back = pending?.returnTo ?? (siteId ? detailsPath(siteId) : SITES_PATH);
 
@@ -74,14 +124,14 @@ export function WpcomCallbackView() {
   // on the WordPress.com page and test it again from there.
   const complete = useMutation({
     mutationFn: async () => {
-      if (!siteId || !authorize.data || !selected) throw new Error(t("failed"));
-      const site = authorize.data.sites.find((s) => s.id === selected);
+      if (!siteId || !authorized || !selected) throw new Error(t("failed"));
+      const site = authorized.sites.find((s) => s.id === selected);
       const { data: connection } = await publishingService.wordpressComComplete(siteId, {
-        pending_key: authorize.data.pending_key,
+        pending_key: authorized.pending_key,
         wordpress_site_id: selected,
-        name: site?.name ?? null,
+        name: site?.name || null,
       });
-      const name = site?.name ?? connection.name;
+      const name = site?.name || connection.name;
       try {
         const { data: test } = await publishingService.testConnection(siteId, connection.id);
         if (!test.success) throw new ConnectionTestError(test.message);
@@ -104,90 +154,102 @@ export function WpcomCallbackView() {
     },
   });
 
-  const error =
-    !code || !state ? t("missing") : authorize.isError ? getErrorMessage(authorize.error, t("failed")) : null;
+  const error = fromRedirect
+    ? null
+    : !code || !state
+      ? t("missing")
+      : authorize.isError
+        ? getErrorMessage(authorize.error, t("failed"))
+        : null;
+  const sitesFound = Boolean(authorized && authorized.sites.length > 0);
 
   return (
-    <main className="grid min-h-dvh place-items-center bg-bg p-4">
-      <Card className="w-full max-w-md gap-5">
-        <div className="flex flex-col gap-1">
-          <CardTitle>{t("title")}</CardTitle>
-          <CardDescription>{authorize.data ? t("choose") : (error ?? t("loading"))}</CardDescription>
-        </div>
+    <Card className="w-full max-w-md gap-5">
+      <div className="flex flex-col gap-1">
+        <CardTitle>{t("title")}</CardTitle>
+        <CardDescription>
+          {authorized ? (authorized.sites.length > 1 ? t("choose") : t("confirm")) : (error ?? t("loading"))}
+        </CardDescription>
+      </div>
 
-        {authorize.isPending && <Skeleton className="h-24" />}
+      {authorize.isPending && <Skeleton className="h-24" />}
 
-        {authorize.data && authorize.data.sites.length === 0 && <p className="text-small text-fg-2">{t("noSites")}</p>}
+      {authorized && authorized.sites.length === 0 && (
+        <p className="text-small text-fg-2">{fromRedirect ? t("noSiteList") : t("noSites")}</p>
+      )}
 
-        {authorize.data && authorize.data.sites.length > 0 && (
-          <fieldset className="flex flex-col gap-2">
-            <legend className="sr-only">{t("choose")}</legend>
-            {authorize.data.sites.map((site) => (
-              <label
-                key={site.id}
-                className={
-                  site.id === selected
-                    ? "flex cursor-pointer items-start gap-3 rounded-lg border border-blue bg-blue-bg p-3"
-                    : "flex cursor-pointer items-start gap-3 rounded-lg border border-border p-3 hover:border-border-strong"
-                }
-              >
-                <input
-                  type="radio"
-                  name="wpcom-site"
-                  className="mt-1"
-                  checked={site.id === selected}
-                  onChange={() => setSelected(site.id)}
-                />
-                <span className="flex min-w-0 flex-col">
-                  <span className="text-small font-medium text-fg">{site.name}</span>
-                  <span className="truncate text-caption font-normal text-fg-3">{site.url}</span>
-                </span>
-              </label>
-            ))}
-          </fieldset>
-        )}
-
-        {mounted && !pending && authorize.data && authorize.data.sites.length > 0 && (
-          <div className="flex flex-col gap-1.5">
-            <span className="text-small font-medium text-fg">{t("rankoyaSite")}</span>
-            <Select value={fallbackSite} onValueChange={setFallbackSite}>
-              <SelectTrigger aria-label={t("rankoyaSite")} className="w-full">
-                <SelectValue placeholder={t("rankoyaSitePlaceholder")} />
-              </SelectTrigger>
-              <SelectContent>
-                {(sites.data ?? []).map((s) => (
-                  <SelectItem key={s.id} value={String(s.id)}>
-                    {s.domain}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <span className="text-caption font-normal text-fg-3">{t("rankoyaSiteHelp")}</span>
-          </div>
-        )}
-
-        {complete.isError && (
-          <p role="alert" className="rounded-md bg-danger-bg px-3 py-2.5 text-small text-danger">
-            {getErrorMessage(complete.error, t("failed"))}
-          </p>
-        )}
-
-        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-          <Button asChild variant="secondary">
-            <Link href={back}>{t("back")}</Link>
-          </Button>
-          {authorize.data && authorize.data.sites.length > 0 && (
-            <Button
-              variant="primary"
-              loading={complete.isPending}
-              disabled={!selected || !siteId}
-              onClick={() => complete.mutate()}
+      {authorized && sitesFound && (
+        <fieldset className="flex flex-col gap-2">
+          <legend className="sr-only">{t("choose")}</legend>
+          {authorized.sites.map((site) => (
+            <label
+              key={site.id}
+              className={
+                site.id === selected
+                  ? "flex cursor-pointer items-start gap-3 rounded-lg border border-blue bg-blue-bg p-3"
+                  : "flex cursor-pointer items-start gap-3 rounded-lg border border-border p-3 hover:border-border-strong"
+              }
             >
-              {t("connect")}
-            </Button>
-          )}
+              <input
+                type="radio"
+                name="wpcom-site"
+                className="mt-1"
+                checked={site.id === selected}
+                onChange={() => setSelected(site.id)}
+              />
+              <span className="flex min-w-0 flex-col">
+                <span className="text-small font-medium text-fg">{siteLabel(site)}</span>
+                {site.url && (
+                  <span dir="ltr" className="truncate text-start text-caption font-normal text-fg-3">
+                    {site.url}
+                  </span>
+                )}
+              </span>
+            </label>
+          ))}
+        </fieldset>
+      )}
+
+      {mounted && !pending && sitesFound && (
+        <div className="flex flex-col gap-1.5">
+          <span className="text-small font-medium text-fg">{t("rankoyaSite")}</span>
+          <Select value={fallbackSite} onValueChange={setFallbackSite}>
+            <SelectTrigger aria-label={t("rankoyaSite")} className="w-full">
+              <SelectValue placeholder={t("rankoyaSitePlaceholder")} />
+            </SelectTrigger>
+            <SelectContent>
+              {(sites.data ?? []).map((s) => (
+                <SelectItem key={s.id} value={String(s.id)}>
+                  {s.domain}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <span className="text-caption font-normal text-fg-3">{t("rankoyaSiteHelp")}</span>
         </div>
-      </Card>
-    </main>
+      )}
+
+      {complete.isError && (
+        <p role="alert" className="rounded-md bg-danger-bg px-3 py-2.5 text-small text-danger">
+          {getErrorMessage(complete.error, t("failed"))}
+        </p>
+      )}
+
+      <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+        <Button asChild variant="secondary">
+          <Link href={back}>{t("back")}</Link>
+        </Button>
+        {sitesFound && (
+          <Button
+            variant="primary"
+            loading={complete.isPending}
+            disabled={!selected || !siteId}
+            onClick={() => complete.mutate()}
+          >
+            {t("connect")}
+          </Button>
+        )}
+      </div>
+    </Card>
   );
 }

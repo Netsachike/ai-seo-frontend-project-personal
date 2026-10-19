@@ -63,6 +63,7 @@ export function Topbar({ variant = "app" }: { variant?: "app" | "sites" }) {
       </Button>
       <Button
         variant="agent"
+        data-tour="ask-rankoya"
         className="hidden h-9 ps-3 pe-2.5 sm:inline-flex"
         aria-expanded={agentOpen}
         onClick={() => setAgentOpen(!agentOpen)}
@@ -72,7 +73,7 @@ export function Topbar({ variant = "app" }: { variant?: "app" | "sites" }) {
         <Shortcut letter="J" className="opacity-70" />
       </Button>
 
-      <div className="ms-1">
+      <div data-tour="profile-menu" className="ms-1">
         <ProfileMenu />
       </div>
     </header>

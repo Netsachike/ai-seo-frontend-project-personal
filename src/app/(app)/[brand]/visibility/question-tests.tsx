@@ -209,7 +209,7 @@ export function QuestionTests({
     : t("scopeAll", { count: questions.length });
 
   return (
-    <Card className="gap-0 p-0">
+    <Card data-tour="question-tests" className="gap-0 p-0">
       {questions.length === 0 ? (
         <EmptyState
           icon={MessageSquareTextIcon}

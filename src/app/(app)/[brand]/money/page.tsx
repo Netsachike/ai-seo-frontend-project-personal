@@ -1,12 +1,9 @@
-import { getTranslations } from "next-intl/server";
+import { redirect } from "next/navigation";
 
-import { MoneyView } from "./money-view";
+import { brandHref } from "@/components/layout/nav";
 
-export async function generateMetadata() {
-  const t = await getTranslations("shell.nav.items");
-  return { title: t("money") };
-}
-
-export default function MoneyPagesPage() {
-  return <MoneyView />;
+/** Money pages are a tab on Site audit now; old links land there. */
+export default async function MoneyPagesPage({ params }: PageProps<"/[brand]/money">) {
+  const { brand } = await params;
+  redirect(brandHref(brand, "audit?view=money"));
 }

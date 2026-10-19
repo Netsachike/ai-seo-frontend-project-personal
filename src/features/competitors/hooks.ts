@@ -154,6 +154,7 @@ const LINK_KINDS: Record<string, LinkSite["kind"]> = {
 };
 
 function linkSites(opportunities: BacklinkOpportunity[]): LinkSite[] {
+  if (!Array.isArray(opportunities)) return [];
   return opportunities
     .filter((o) => o.status !== "rejected" && o.status !== "acquired")
     .slice(0, 8)
@@ -202,7 +203,9 @@ export function useCompetitors(site: Site | undefined) {
     queryFn: async () => (await aiVisibilityService.results(id)).data.data,
   });
   const authority = useQuery({
-    queryKey: authorityKeys.opportunities(id),
+    // Its own key: the Authority page caches whole paginator pages under `opportunities(id, page)`,
+    // and sharing page 1 handed this hook a paginator instead of a list.
+    queryKey: [...authorityKeys.opportunities(id), "competitors-top"],
     enabled,
     queryFn: async () => (await authorityService.opportunities(id, { per_page: 20 })).data,
   });

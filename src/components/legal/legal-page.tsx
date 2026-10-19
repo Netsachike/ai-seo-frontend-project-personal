@@ -2,7 +2,6 @@ import * as React from "react";
 import Link from "next/link";
 import { getFormatter, getTranslations } from "next-intl/server";
 
-import { PRODUCT } from "@/config/product";
 import type { LegalDocument } from "@/content/legal";
 import { Logo } from "@/components/brand/logo";
 import { Button } from "@/components/ui/button";
@@ -58,11 +57,8 @@ export async function LegalPage({ document }: { document: LegalDocument }) {
                 </Link>
               </Button>
             ))}
-            <Button asChild size="sm" variant="ghost">
-              <Link href="/sign-in">{t("links.signIn")}</Link>
-            </Button>
             <Button asChild size="sm" variant="primary">
-              <a href={PRODUCT.marketingUrl}>{t("backHome")}</a>
+              <Link href="/sign-in">{t("backToLogin")}</Link>
             </Button>
           </nav>
         </div>

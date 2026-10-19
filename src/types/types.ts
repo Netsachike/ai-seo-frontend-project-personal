@@ -455,7 +455,8 @@ export interface ActivateWorkspaceResponse {
 // get all workspaces route: GET /workspace
 export interface GetAllWorkspacesResponse {
   status: string;
-  currentWorkspace: Workspace[];
+  /** The contract documents one workspace (or null); older responses sent a one-item list. */
+  currentWorkspace: Workspace | Workspace[] | null;
   userWorkspaces: AllUserWorkspace[];
 }
 
@@ -801,6 +802,33 @@ export interface PrioritySummary {
 export interface LoginPayload {
   email: string;
   password: string;
+}
+
+// FORGOT / RESET PASSWORD TYPES (same names as Flowcasta, which shares this backend contract)
+
+/** `POST /password/forgot` */
+export interface forgotPasswordPayload {
+  email: string;
+}
+
+export interface forgotPasswordResponse {
+  success: boolean;
+  /** "Reset link sent to your email" */
+  message: string;
+}
+
+/** `POST /password/reset`. `password_confirmation` is validated against `password`. */
+export interface resetPasswordPayload {
+  email: string;
+  token: string;
+  password: string;
+  password_confirmation: string;
+}
+
+export interface resetPasswordResponse {
+  success: boolean;
+  /** "password reset successful" */
+  message: string;
 }
 
 export interface RegisterPayload {
@@ -1681,6 +1709,14 @@ export interface Publication {
 export interface PublicationWithRelations extends Publication {
   article: Article;
   connection: PublishingConnection;
+}
+
+/** A blog in a connected Shopify store. `id` is what publishing takes as `blog_id`. */
+export interface ShopifyBlog {
+  /** e.g. `gid://shopify/Blog/123456789` */
+  id: string;
+  title: string;
+  handle: string;
 }
 
 export interface PublishArticlePayload {

@@ -12,6 +12,8 @@ export const PRODUCT = {
   jurisdiction: "England and Wales",
   appUrl: "https://app.rankoya.uk/",
   marketingUrl: "https://rankoya.uk/",
+  /** Where the logo on the sign-in pages leads. */
+  landingUrl: "https://app.rankoya.uk/",
   supportEmail: "support@rankoya.uk",
   agencyEmail: "agency@rankoya.uk",
 } as const;

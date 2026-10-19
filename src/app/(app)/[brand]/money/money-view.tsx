@@ -26,8 +26,6 @@ import { DetailList } from "@/components/brand/detail-list";
 import { EmptyState } from "@/components/brand/empty-state";
 import { ErrorState } from "@/components/brand/error-state";
 import { Pager } from "@/components/brand/pager";
-import { PageHeader } from "@/components/layout/page-header";
-import { PageSkeleton } from "@/components/layout/page-skeleton";
 import { useShell } from "@/components/layout/shell-context";
 
 const pathOf = (url: string) => {
@@ -60,17 +58,18 @@ const itemText = (value: unknown): string => {
 };
 
 /**
- * Money pages: the pages that bring in revenue (services, products, pricing),
- * ranked by commercial score, each with Rankoya's recommendations to make it
- * rank and convert better.
+ * Money pages, shown as a tab on Site audit: the pages that bring in revenue
+ * (services, products, pricing), ranked by commercial score, each with
+ * Rankoya's recommendations to make it rank and convert better.
  */
-export function MoneyView() {
+export function MoneyPanel() {
   const t = useTranslations("money");
   const format = useFormatter();
   const now = useNow({ updateInterval: 60_000 });
   const { brand } = useShell();
   const siteId = brand?.id ?? 0;
-  const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
+  // `mpage`: Site audit's issue list already uses `page`.
+  const [page, setPage] = useQueryState("mpage", parseAsInteger.withDefault(1));
   const [openId, setOpenId] = useQueryState("open", parseAsInteger);
   const query = useMoneyPages(siteId, page);
   const analyze = useAnalyzeMoneyPages(siteId);
@@ -177,21 +176,18 @@ export function MoneyView() {
     [t, format, now, setOpenId],
   );
 
-  if (!brand) return <PageSkeleton kpis={0} panels={1} />;
+  if (!brand) return <Skeleton className="h-64" />;
   const rows = query.data?.data ?? [];
 
   return (
-    <div className="flex flex-col gap-6">
-      <PageHeader
-        title={t("title")}
-        description={t("description", { domain: brand.domain })}
-        actions={
-          <Button variant="primary" onClick={run} loading={analyze.isPending}>
-            <ScanSearchIcon />
-            {rows.length ? t("reanalyze") : t("analyze")}
-          </Button>
-        }
-      />
+    <div className="flex flex-col gap-4">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <p className="max-w-2xl text-small text-fg-2">{t("description", { domain: brand.domain })}</p>
+        <Button variant="secondary" onClick={run} loading={analyze.isPending}>
+          <ScanSearchIcon />
+          {rows.length ? t("reanalyze") : t("analyze")}
+        </Button>
+      </div>
       {query.isError ? (
         <ErrorState onRetry={() => query.refetch()} />
       ) : (

@@ -33,6 +33,14 @@ info:
     `supports_credentials` is `true`.
 
     ## Changelog
+    - **2026-10-20**: Added `DELETE /sites/{site}` (permanent, cascades to all site data).
+      The WordPress.com OAuth callback now redirects to `{FRONTEND_URL}/settings/wordpress-com?connected=pending&pending_key=…` instead of returning JSON. ⚠️ It currently fails with 500, see that endpoint.
+    - **2026-10-19**: Added **Workspaces** (6), **Account** (3), **Team** (5), **Reseller** (6) and **Admin** (14) endpoints. These use the `status` envelope (see below).
+      Added `GET /sites/{site}/publishing/connections/{connection}/shopify-blogs`.
+      `POST /sites/{site}/keywords/discover` now also returns a `dataforseo` block.
+      The Search Console callback now redirects with `?connected={site_id}`, and the OAuth link is valid for 15 minutes.
+      `PUT /sites/{site}/articles/{article}` now rewrites internal links in `content` and updates `internal_links`.
+      Copilot can answer business-profile questions (`focus: business_profile`).
     - **2026-10-14**: Authority endpoints now **require a Bearer token**. The site must also belong to one of the user's workspaces, otherwise **404**.
       Added `GET /sites/{site}/authority/backlinks/summary`, `GET /sites/{site}/authority/backlinks` and `POST /sites/{site}/authority/backlink-prospects` (DataForSEO, can return **502**).
       CORS is now restricted to an allow-list (see above).
@@ -52,6 +60,9 @@ info:
     | Standard error | `{ "success": false, "message": string, "errors"?: object }` | Controller-handled errors |
     | Laravel framework error | `{ "message": string, "errors"?: object }` | 401, 404 (model not found), 422 (validation), 500 |
     | Raw / resource | API Resource (`{ "data": ... }`) or bare object | Sites, Crawler, Keywords list, Authority, Copilot, Money Page recommendations |
+    | Status envelope | `{ "status": "success" \| "error", "message"?: string, "errors"?: object, ...named keys }` (no `data` key; payload uses keys like `user`, `workspace`, `users`) | Workspaces, Account, Team, Reseller, Admin |
+
+    ⚠️ In the Status family, a few endpoints return `status` as a **boolean** (`true`/`false`) instead of a string: `POST /workspaces/{workspace}`, `POST /cancle/subscription` and `POST /user/sendCampaign`.
 
     ## Pagination
     Two pagination formats exist:
@@ -121,6 +132,16 @@ tags:
     description: Conversational SEO assistant
   - name: MCP
     description: Model Context Protocol tool bridge
+  - name: Workspaces
+    description: List, create, switch and manage workspaces
+  - name: Account
+    description: The logged-in user's own name, password and subscription
+  - name: Team
+    description: Team members and their workspace access
+  - name: Reseller
+    description: Client accounts created by a reseller
+  - name: Admin
+    description: Platform administration. Requires role admin or support.
   - name: Free Tools
     description: Public, unauthenticated SEO utilities
 
@@ -341,6 +362,33 @@ paths:
               example: { message: No active workspace found. }
         '500': { $ref: '#/components/responses/ServerError' }
 
+    delete:
+      tags: [Sites]
+      summary: Permanently delete a site and all its data
+      operationId: deleteSite
+      description: |
+        ⚠️ **Irreversible hard delete.** The database cascades to every child table: settings, crawl runs and pages, keywords, topical maps, Search Console data, SERP data, AI visibility, opportunities, content plans and calendar, research, articles, publishing connections and publications, Site Guard issues, money pages, authority data, and Copilot conversations.
+        Ask the user to confirm before calling this. Afterwards, remove the site from local state and switch away from it if it was selected.
+      parameters:
+        - $ref: '#/components/parameters/SiteId'
+      responses:
+        '200':
+          description: Deleted
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SuccessEnvelope' }
+              example: { success: true, message: Site deleted successfully. }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/NoWorkspaceAvailable' }
+        '404':
+          description: Site does not exist or is not in the active workspace
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FrameworkError' }
+              example: { message: 'No query results for model [App\Models\Site].' }
+        '422': { $ref: '#/components/responses/NoActiveWorkspace' }
+        '500': { $ref: '#/components/responses/ServerError' }
+
   /sites/{site}/platform:
     patch:
       tags: [Sites]
@@ -510,6 +558,14 @@ paths:
                       keywords_discovered: { type: integer, example: 214 }
                       seed_keywords_processed: { type: integer, example: 2 }
                       pages_analyzed: { type: integer, example: 48 }
+                      dataforseo:
+                        type: object
+                        description: DataForSEO keyword suggestions for up to 5 of the `seed_keywords`. All zeros when no seeds were sent.
+                        properties:
+                          suggestions_received: { type: integer, example: 20 }
+                          suggestions_saved: { type: integer, example: 17 }
+                          provider: { type: string, example: dataforseo }
+                          sandbox: { type: boolean, example: false, description: True when using the DataForSEO sandbox (test data) }
         '401': { $ref: '#/components/responses/Unauthenticated' }
         '403': { $ref: '#/components/responses/NoWorkspaceAvailable' }
         '404': { $ref: '#/components/responses/SiteNotFound' }
@@ -720,7 +776,9 @@ paths:
       operationId: gscConnect
       description: |
         Redirect the browser to `data.authorization_url`. After consent Google calls `GET /google/search-console/callback`,
-        which redirects the browser to `{FRONTEND_URL}/settings/search-console?connected=1`.
+        which redirects the browser to `{FRONTEND_URL}/settings/search-console?connected={site_id}`.
+        `connected` holds the ID of the site that was connected, so read it to know which site to refresh. The authorization link expires after **15 minutes**.
+        `FRONTEND_URL` defaults to `http://localhost:3000`.
         Then call `GET /properties` and `POST /property`.
       parameters:
         - $ref: '#/components/parameters/SiteId'
@@ -763,10 +821,10 @@ paths:
           schema: { type: string }
       responses:
         '302':
-          description: Success. Redirects to `{FRONTEND_URL}/settings/search-console?connected=1`
+          description: Success. Redirects to `{FRONTEND_URL}/settings/search-console?connected={site_id}`
           headers:
             Location:
-              schema: { type: string, example: https://app.example.com/settings/search-console?connected=1 }
+              schema: { type: string, example: 'https://app.example.com/settings/search-console?connected=1' }
         '400':
           description: Invalid or expired state
           content:
@@ -1850,6 +1908,8 @@ paths:
       description: |
         Send at least one field. When `title` changes and `slug` is omitted, the slug is regenerated.
         Articles with status `published` or `publishing` cannot be edited.
+        When `content` is sent and the article has research, the backend rewrites internal links in the HTML and replaces `internal_links`.
+        Re-render the editor from the returned `article.content` rather than from what you sent.
       requestBody:
         required: true
         content:
@@ -1938,7 +1998,7 @@ paths:
         | Platform | Required keys |
         |---|---|
         | wordpress | `credentials.site_url`, `credentials.username`, `credentials.application_password` |
-        | shopify | `credentials.store_domain` (`*.myshopify.com`), `credentials.access_token` |
+        | shopify | `credentials.store_domain` (`*.myshopify.com`), `credentials.access_token`. Publishing also needs `config.blog_id` or `options.blog_id`, which you can get from `GET .../shopify-blogs`. |
         | webflow | `credentials.access_token`, `config.collection_id` |
         | wix | `credentials.access_token`, `credentials.site_id` |
         | ghost | `credentials.admin_api_key`, `config.site_url` |
@@ -2128,6 +2188,57 @@ paths:
                   value: { success: false, message: No active workspace found. }
         '500': { $ref: '#/components/responses/ServerError' }
 
+  /sites/{site}/publishing/connections/{connection}/shopify-blogs:
+    get:
+      tags: [Publishing]
+      summary: List blogs in a connected Shopify store
+      operationId: listShopifyBlogs
+      description: |
+        Use this to let the user pick a blog. Shopify publishing needs a `blog_id`, either saved in the connection `config.blog_id` or sent as `options.blog_id` when publishing.
+        Works only for Shopify connections with `method = api`.
+      parameters:
+        - $ref: '#/components/parameters/SiteId'
+        - name: connection
+          in: path
+          required: true
+          schema: { type: integer, example: 4 }
+      responses:
+        '200':
+          description: Blogs (up to 100)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id: { type: string, example: 'gid://shopify/Blog/123456789', description: Pass this as blog_id }
+                        title: { type: string, example: News }
+                        handle: { type: string, example: news }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '404':
+          description: Connection missing, on another site, or not a Shopify API connection
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/ErrorEnvelope'
+                  - $ref: '#/components/schemas/FrameworkError'
+              examples:
+                notShopify: { value: { success: false, message: Shopify connection does not belong to this site. } }
+                missing: { value: { message: 'No query results for model [App\Modules\Publishing\Models\PublishingConnection] 4' } }
+        '422':
+          description: Shopify API error (message from Shopify)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorEnvelope' }
+              example: { success: false, message: 'Shopify GraphQL request failed: [API] Invalid API key or access token' }
+        '500': { $ref: '#/components/responses/ServerError' }
+
   /sites/{site}/publishing/publications:
     get:
       tags: [Publishing]
@@ -2171,8 +2282,8 @@ paths:
       description: |
         **Flow**
         1. Call this endpoint and redirect the browser to `authorization_url` (valid for 10 minutes).
-        2. WordPress.com redirects to `GET /publishing/wordpress-com/callback`, which returns `pending_key` + `sites`.
-        3. Let the user pick a site, then call `POST /sites/{site}/publishing/wordpress-com/complete`.
+        2. WordPress.com redirects to `GET /publishing/wordpress-com/callback`, which redirects the browser to `{FRONTEND_URL}/settings/wordpress-com?connected=pending&pending_key=…` (⚠️ currently returns 500, see the callback).
+        3. On that page, call `POST /sites/{site}/publishing/wordpress-com/complete` with `pending_key` and the chosen `wordpress_site_id`.
       parameters:
         - $ref: '#/components/parameters/SiteId'
       responses:
@@ -2262,7 +2373,14 @@ paths:
       summary: WordPress.com OAuth redirect target (step 2 of 3)
       operationId: wpcomCallback
       security: []
-      description: Returns JSON rather than a redirect. If the front end hosts the redirect page, forward `code` and `state` here and read `pending_key` and `sites`.
+      description: |
+        WordPress.com sends the browser here after consent. On success the backend now **redirects the browser** (302) to the frontend instead of returning JSON:
+        `{FRONTEND_URL}/settings/wordpress-com?connected=pending&pending_key=<key>&sites_id=<…>`
+        The `/settings/wordpress-com` page should read `pending_key` from the query string and call `POST /sites/{site}/publishing/wordpress-com/complete` within 10 minutes.
+
+        ⚠️ **Currently broken after a successful token exchange.** The redirect builds `sites_id` from `$sites->id`, but `$sites` is a list of sites, not one site. That throws, the generic handler catches it, and the browser gets **500** `An unexpected error occurred during WordPress.com authorization.` (as JSON, not a redirect).
+        ⚠️ The site list is no longer returned anywhere, so the frontend has no way to show which WordPress.com site to pick for `wordpress_site_id` in `/complete`. The backend needs to either put the site list on the redirect or add an endpoint that returns it for a `pending_key`.
+        Error cases (400/403/500/502) still return JSON.
       parameters:
         - name: code
           in: query
@@ -2273,25 +2391,13 @@ paths:
           required: true
           schema: { type: string }
       responses:
-        '200':
-          description: Authorized. Choose a site and call `/complete` within 10 minutes.
-          content:
-            application/json:
+        '302':
+          description: Intended success. Redirects to the frontend settings page (not reachable until the bug above is fixed).
+          headers:
+            Location:
               schema:
-                type: object
-                properties:
-                  success: { type: boolean, example: true }
-                  message: { type: string, example: WordPress.com authorization succeeded. Select the site to connect. }
-                  pending_key: { type: string, example: 3sK9...64chars }
-                  sites:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        id: { type: string, example: '123456789' }
-                        name: { type: string, example: My Blog }
-                        url: { type: string, example: 'https://myblog.wordpress.com' }
-                  expires_in: { type: integer, example: 600 }
+                type: string
+                example: 'https://app.rankoya.uk/settings/wordpress-com?connected=pending&pending_key=3sK9...64chars&sites_id=123456789'
         '400':
           description: Missing code or state
           content:
@@ -3126,7 +3232,7 @@ paths:
                   actions:
                     type: array
                     items: { type: object, additionalProperties: true }
-                  focus: { type: string, nullable: true, example: money_pages }
+                  focus: { type: string, nullable: true, example: money_pages, description: 'Detected topic of the question. business_profile is used for "describe my website/business" questions.' }
                   provider: { type: string, example: openrouter }
                   model: { type: string, example: anthropic/claude-sonnet-4.5 }
                   usage:
@@ -3616,6 +3722,1204 @@ paths:
         '422': { $ref: '#/components/responses/FreeToolError' }
         '500': { $ref: '#/components/responses/ServerError' }
 
+  # ───────────────────────────── WORKSPACES ─────────────────────────────
+  /workspace:
+    get:
+      tags: [Workspaces]
+      summary: Current workspace and every workspace the user can access
+      operationId: listWorkspaces
+      description: 'Uses the `status` envelope (`"status": "success"`), not `success: true`.'
+      responses:
+        '200':
+          description: Workspaces
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: success }
+                  currentWorkspace:
+                    allOf: [{ $ref: '#/components/schemas/WorkSpace' }]
+                    nullable: true
+                  userWorkspaces:
+                    type: array
+                    items:
+                      allOf:
+                        - $ref: '#/components/schemas/UserWorkSpace'
+                        - type: object
+                          properties:
+                            workspace: { $ref: '#/components/schemas/WorkSpace' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/NoWorkspaceAvailable' }
+        '500':
+          description: Unexpected error
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StatusEnvelope' }
+              example: { status: error, message: Something went wrong. Please try again later. }
+
+  /workspace/store:
+    post:
+      tags: [Workspaces]
+      summary: Create a workspace
+      operationId: createWorkspace
+      description: |
+        Send `multipart/form-data` when uploading a `logo` (stored on S3). Otherwise JSON is fine.
+        When `is_default` is true, the user's other workspaces lose their default flag.
+        The new workspace is **not** activated. Call `POST /workspaces/{workspace}` to switch to it.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateWorkspaceRequest' }
+          multipart/form-data:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/CreateWorkspaceRequest'
+                - type: object
+                  properties:
+                    logo: { type: string, format: binary, description: 'jpg/jpeg/png, max 2 MB' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: success }
+                  workspace: { $ref: '#/components/schemas/WorkSpace' }
+                  message: { type: string, example: Workspace created successfully }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/NoWorkspaceAvailable' }
+        '422':
+          description: Validation failed (framework format)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ValidationErrorBody' }
+              example: { message: The slug has already been taken., errors: { slug: [The slug has already been taken.] } }
+        '500': { $ref: '#/components/responses/ServerError' }
+
+  /workspace/update:
+    post:
+      tags: [Workspaces]
+      summary: Rename a workspace or change its slug/default flag
+      operationId: updateWorkspace
+      description: ⚠️ The backend does not check that the caller owns the workspace `id`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [id, name, slug]
+              properties:
+                id: { type: integer, example: 3 }
+                name: { type: string, maxLength: 255, example: Client A }
+                slug: { type: string, maxLength: 255, example: client-a, description: Unique across all workspaces }
+                is_default: { type: boolean, nullable: true }
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: success }
+                  workspace: { $ref: '#/components/schemas/WorkSpace' }
+                  message: { type: string, example: Workspace updated successfully }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '422': { $ref: '#/components/responses/StatusValidationError' }
+        '500': { $ref: '#/components/responses/ServerError' }
+
+  /workspace/delete:
+    post:
+      tags: [Workspaces]
+      summary: Delete a workspace
+      operationId: deleteWorkspace
+      description: |
+        ⚠️ **Currently broken.** After validation passes, the controller calls `$this->featureService`, which is never set, so every valid request returns **500**.
+        Intended behavior: only the owner can delete, at least one workspace must remain (**400**), and the active/default flags move to another workspace.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [id]
+              properties:
+                id: { type: integer, example: 3 }
+      responses:
+        '200':
+          description: Deleted (intended, not reachable today)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StatusEnvelope' }
+              example: { status: success, message: Workspace deleted successfully }
+        '400':
+          description: Last remaining workspace
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StatusEnvelope' }
+              example: { status: error, message: You must have at least one workspace. }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403':
+          description: No permission, or the caller is not the owner
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StatusEnvelope' }
+              examples:
+                permission: { value: { status: error, message: You do not have permission to delete this workspace. } }
+                owner: { value: { status: error, message: Unauthorized workspace access. } }
+        '422': { $ref: '#/components/responses/ValidationError' }
+        '500': { $ref: '#/components/responses/ServerError' }
+
+  /workspaces/{workspace}:
+    post:
+      tags: [Workspaces]
+      summary: Switch the active workspace
+      operationId: activateWorkspace
+      description: |
+        Every site-scoped endpoint uses the active workspace, so refetch sites and other data after switching.
+        Note that `status` is a **boolean** here, not a string.
+      parameters:
+        - name: workspace
+          in: path
+          required: true
+          schema: { type: integer, example: 3 }
+      responses:
+        '200':
+          description: Activated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: boolean, example: true }
+                  message: { type: string, example: Workspace activated }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403':
+          description: User has no access to that workspace
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: boolean, example: false }
+                  message: { type: string, example: You do not have access to this workspace }
+        '500': { $ref: '#/components/responses/ServerError' }
+
+  /workspace/openai-key:
+    post:
+      tags: [Workspaces]
+      summary: Save an OpenAI API key on the active workspace (stored encrypted)
+      operationId: saveWorkspaceOpenAiKey
+      description: ⚠️ **Currently broken.** The `work_spaces.openai_api_key_encrypted` column has no migration, so a valid request returns **500** until that column is added.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [openai_api_key]
+              properties:
+                openai_api_key: { type: string, minLength: 10, example: sk-proj-xxxxxxxxxxxx }
+      responses:
+        '200':
+          description: Saved
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StatusEnvelope' }
+              example: { status: success, message: OpenAI API key saved successfully }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/NoWorkspaceAvailable' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+        '500': { $ref: '#/components/responses/ServerError' }
+
+  # ───────────────────────────── ACCOUNT ─────────────────────────────
+  /user/update-name:
+    post:
+      tags: [Account]
+      summary: Change the logged-in user's name
+      operationId: updateMyName
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [first_name, last_name]
+              properties:
+                first_name: { type: string, maxLength: 255, example: Jane }
+                last_name: { type: string, maxLength: 255, example: Doe }
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: success }
+                  message: { type: string, example: Name updated successfully }
+                  user: { $ref: '#/components/schemas/LoginUser' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '422': { $ref: '#/components/responses/StatusValidationError' }
+        '500': { $ref: '#/components/responses/ServerError' }
+
+  /user/update-password:
+    post:
+      tags: [Account]
+      summary: Change the logged-in user's password
+      operationId: updateMyPassword
+      description: Existing tokens stay valid. The current password is **not** required.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [password, password_confirmation]
+              properties:
+                password: { type: string, format: password, minLength: 8 }
+                password_confirmation: { type: string, format: password }
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StatusEnvelope' }
+              example: { status: success, message: Password updated successfully }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '422': { $ref: '#/components/responses/StatusValidationError' }
+        '500': { $ref: '#/components/responses/ServerError' }
+
+  /cancle/subscription:
+    post:
+      tags: [Account]
+      summary: Cancel a Paddle subscription immediately
+      operationId: cancelSubscription
+      description: |
+        Note the misspelled path (`cancle`), which is how the route is defined.
+        ⚠️ **Currently broken, and it calls Paddle before failing.** The Paddle cancel request is sent first. The controller then looks up `paddle_subscription_id` on the `subscription_models` table, which has no such column (it exists only on the addons table), so the request returns **500** *after* Paddle has already cancelled the subscription.
+        ⚠️ The backend does not check that the subscription belongs to the caller.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [subscriptionId]
+              properties:
+                subscriptionId: { type: string, example: sub_01h8x9y2z3 }
+      responses:
+        '200':
+          description: Cancelled (intended). `status` is a boolean here.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: boolean, example: true }
+                  message: { type: string, example: Subscription cancelled successfully }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '500': { $ref: '#/components/responses/ServerError' }
+
+  # ───────────────────────────── TEAM ─────────────────────────────
+  /team:
+    get:
+      tags: [Team]
+      summary: List team members and the workspace owner's workspaces
+      operationId: listTeam
+      description: Use `workspaces` to build the `user_access` checkboxes when adding or editing a member.
+      responses:
+        '200':
+          description: Team
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: success }
+                  currentWorkspace: { $ref: '#/components/schemas/WorkSpace' }
+                  workspaces:
+                    type: array
+                    items: { $ref: '#/components/schemas/WorkSpace' }
+                  users:
+                    type: array
+                    items: { $ref: '#/components/schemas/LoginUser' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/NoWorkspaceAvailable' }
+        '500': { $ref: '#/components/responses/ServerError' }
+
+  /team/add:
+    post:
+      tags: [Team]
+      summary: Add a team member
+      operationId: addTeamMember
+      description: |
+        Permission rules:
+        - `client_member` callers cannot add anyone (**403**).
+        - `team_member` callers can add only `client_member` users (**403** otherwise).
+        - At least one `user_access[].has_access = true` is required unless `role = admin_team_member`, which gets every listed workspace.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/TeamMemberInput'
+                - type: object
+                  required: [password]
+                  properties:
+                    password: { type: string, format: password, minLength: 8 }
+            example:
+              first_name: Sam
+              last_name: Lee
+              email: sam@example.com
+              password: secret123
+              role: team_member
+              user_access:
+                - { id: 1, has_access: true }
+                - { id: 3, has_access: false }
+      responses:
+        '201':
+          description: Added
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: success }
+                  message: { type: string, example: User added to team successfully }
+                  user: { $ref: '#/components/schemas/LoginUser' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403':
+          description: Role does not allow this
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StatusEnvelope' }
+              examples:
+                client: { value: { status: error, message: You do not have permission to add team members. } }
+                teamMember: { value: { status: error, message: You can only add client members. } }
+        '422':
+          description: Validation failed, or no workspace access granted
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StatusEnvelope' }
+              examples:
+                validation: { value: { status: error, message: Validation failed, errors: { email: [The email has already been taken.] } } }
+                noAccess: { value: { status: error, message: You must grant access to at least one workspace. } }
+        '500': { $ref: '#/components/responses/ServerError' }
+
+  /team/update:
+    post:
+      tags: [Team]
+      summary: Update a team member (details, role, workspace access, optional password)
+      operationId: updateTeamMember
+      description: Workspaces sent with `has_access false` are removed from the member. Workspaces you don't send are left unchanged.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/TeamMemberInput'
+                - type: object
+                  required: [id]
+                  properties:
+                    id: { type: integer, example: 12 }
+                    password: { type: string, format: password, minLength: 6, nullable: true }
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: success }
+                  message: { type: string, example: User details updated successfully }
+                  user: { $ref: '#/components/schemas/LoginUser' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403':
+          description: Not allowed for the caller's role
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StatusEnvelope' }
+              examples:
+                notCreator: { value: { status: error, message: You can only update users you have created. } }
+                client: { value: { status: error, message: You do not have permission to update this user. } }
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StatusEnvelope' }
+              example: { status: error, message: User not found. }
+        '422': { $ref: '#/components/responses/StatusValidationError' }
+        '500': { $ref: '#/components/responses/StatusServerError' }
+
+  /team/update/password:
+    post:
+      tags: [Team]
+      summary: Set a team member's password
+      operationId: updateTeamMemberPassword
+      description: Allowed only when the target user's `edit_access` is true for the caller.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [id, password, password_confirmation]
+              properties:
+                id: { type: integer, example: 12 }
+                password: { type: string, format: password, minLength: 6 }
+                password_confirmation: { type: string, format: password }
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: success }
+                  message: { type: string, example: Password updated successfully. }
+                  user: { $ref: '#/components/schemas/LoginUser' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403':
+          description: No edit access
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StatusEnvelope' }
+              example: { status: error, message: You do not have permission to update this password. }
+        '422':
+          description: Validation failed
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StatusEnvelope' }
+              example: { status: error, message: Validation failed., errors: { password: [The password field confirmation does not match.] } }
+        '500': { $ref: '#/components/responses/StatusServerError' }
+
+  /team/delete:
+    delete:
+      tags: [Team]
+      summary: Delete a team member
+      operationId: deleteTeamMember
+      description: |
+        Send `id` in the JSON body (DELETE with body) or as `?id=`.
+        Only the member's creator (`parent_id`) can delete them, and `team_member` callers can delete only `client_member` users.
+        ⚠️ Validation errors (missing or unknown `id`) are caught by a generic handler and come back as **500** instead of 422.
+        ⚠️ Success returns **201** instead of 200.
+      parameters:
+        - name: id
+          in: query
+          required: false
+          schema: { type: integer, example: 12 }
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id: { type: integer, example: 12 }
+      responses:
+        '201':
+          description: Deleted
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StatusEnvelope' }
+              example: { status: success, message: User deleted successfully }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403':
+          description: Not allowed
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StatusEnvelope' }
+              examples:
+                notCreator: { value: { status: error, message: You can only delete users you have created. } }
+                role: { value: { status: error, message: You do not have enough permissions to complete request. } }
+        '500':
+          description: Unexpected error, including validation failure
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StatusEnvelope' }
+              example: { status: error, message: Unable to complete request. }
+
+  # ───────────────────────────── RESELLER ─────────────────────────────
+  /reseller:
+    get:
+      tags: [Reseller]
+      summary: List accounts created by the current reseller
+      operationId: listResellerAccounts
+      description: Not paginated. The counts are computed from the same list.
+      responses:
+        '200':
+          description: Accounts
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: success }
+                  page: { type: string, example: reseller }
+                  workspace: { $ref: '#/components/schemas/WorkSpace' }
+                  users:
+                    type: array
+                    items: { $ref: '#/components/schemas/LoginUser' }
+                  sumOfUsers: { type: integer, example: 14 }
+                  sumOfUsersToday: { type: integer, example: 1 }
+                  sumOfUsersThisWeek: { type: integer, example: 3 }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '500':
+          description: Unexpected error
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StatusEnvelope' }
+              example: { status: error, message: Unable to fetch resellers. }
+
+  /reseller/add:
+    post:
+      tags: [Reseller]
+      summary: Create a client account under the reseller
+      operationId: addResellerAccount
+      description: Creates the user (role `member`), a default workspace, and a lifetime `professional` subscription.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [first_name, last_name, email, password, is_active]
+              properties:
+                first_name: { type: string, maxLength: 255 }
+                last_name: { type: string, maxLength: 255 }
+                email: { type: string, format: email, maxLength: 255 }
+                password: { type: string, format: password, minLength: 6 }
+                is_active: { type: boolean }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: success }
+                  message: { type: string, example: Reseller account created successfully }
+                  user: { $ref: '#/components/schemas/LoginUser' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '422': { $ref: '#/components/responses/StatusValidationError' }
+        '500': { $ref: '#/components/responses/StatusServerError' }
+
+  /reseller/update:
+    post:
+      tags: [Reseller]
+      summary: Update a reseller-created account
+      operationId: updateResellerAccount
+      description: ⚠️ Success returns **201** instead of 200.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [id, first_name, last_name, email, is_active]
+              properties:
+                id: { type: integer, example: 40 }
+                first_name: { type: string, maxLength: 255 }
+                last_name: { type: string, maxLength: 255 }
+                email: { type: string, format: email }
+                is_active: { type: boolean }
+      responses:
+        '201':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: success }
+                  message: { type: string, example: Reseller account updated successfully }
+                  user: { $ref: '#/components/schemas/LoginUser' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '404':
+          description: Not one of this reseller's accounts
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StatusEnvelope' }
+              example: { status: error, message: User not found or access denied }
+        '422':
+          description: Validation failed or email taken
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StatusEnvelope' }
+              examples:
+                validation: { value: { status: error, message: Validation failed, errors: { email: [The email field is required.] } } }
+                taken: { value: { status: error, message: Email already taken } }
+        '500': { $ref: '#/components/responses/StatusServerError' }
+
+  /reseller/update/password:
+    post:
+      tags: [Reseller]
+      summary: Set the password of a reseller-created account
+      operationId: updateResellerPassword
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [id, password, password_confirmation]
+              properties:
+                id: { type: integer, example: 40 }
+                password: { type: string, format: password, minLength: 6 }
+                password_confirmation: { type: string, format: password }
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StatusEnvelope' }
+              example: { status: success, message: User password updated successfully }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '404':
+          description: Not one of this reseller's accounts
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StatusEnvelope' }
+              example: { status: error, message: User not found or access denied }
+        '422': { $ref: '#/components/responses/StatusValidationError' }
+        '500': { $ref: '#/components/responses/StatusServerError' }
+
+  /reseller/update/subscriptions:
+    post:
+      tags: [Reseller]
+      summary: Update a reseller account's subscriptions (not implemented)
+      operationId: updateResellerSubscriptions
+      description: ⚠️ **Broken.** The route points to `ResellerController::updateSubscriptions`, which does not exist, so it always returns **500**.
+      responses:
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '500': { $ref: '#/components/responses/ServerError' }
+
+  /reseller/delete:
+    delete:
+      tags: [Reseller]
+      summary: Delete a reseller-created account (not working)
+      operationId: deleteResellerAccount
+      description: |
+        ⚠️ **Broken.** The controller type-hints `App\Http\Requests\DeleteResellerRequest`, which does not exist, so every call returns **500**.
+        Intended input is `id` (body or query), with a 404 when the account isn't the reseller's.
+      parameters:
+        - name: id
+          in: query
+          required: false
+          schema: { type: integer, example: 40 }
+      responses:
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '500': { $ref: '#/components/responses/ServerError' }
+
+  # ───────────────────────────── ADMIN ─────────────────────────────
+  /admin:
+    get:
+      tags: [Admin]
+      summary: List all users with signup stats
+      operationId: adminListUsers
+      description: Requires role `admin` or `support` (all Admin endpoints).
+      parameters:
+        - $ref: '#/components/parameters/PerPage20'
+        - $ref: '#/components/parameters/Page'
+      responses:
+        '200':
+          description: Users
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: success }
+                  stats:
+                    type: object
+                    properties:
+                      total_users: { type: integer, example: 1520 }
+                      users_today: { type: integer, example: 12 }
+                      users_this_week: { type: integer, example: 64 }
+                  users:
+                    allOf:
+                      - $ref: '#/components/schemas/LaravelPaginator'
+                      - type: object
+                        properties:
+                          data:
+                            type: array
+                            items: { $ref: '#/components/schemas/LoginUser' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/AdminForbidden' }
+        '500': { $ref: '#/components/responses/ServerError' }
+
+  /admin/users/add:
+    post:
+      tags: [Admin]
+      summary: Create a user with a plan
+      operationId: adminAddUser
+      description: |
+        Creates the user, a default workspace, and a subscription for `plan`.
+        ⚠️ `password` is not validated. If it's omitted, the account is created with a hash of an empty value and the user can't log in until an admin sets a password.
+        ⚠️ `role` and `is_active` are read but not validated (defaults `member` and `false`).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, first_name, last_name, plan]
+              properties:
+                email: { type: string, format: email }
+                first_name: { type: string }
+                last_name: { type: string }
+                password: { type: string, format: password, description: 'Not validated, but needed for login' }
+                role: { type: string, default: member }
+                is_active: { type: boolean, default: false }
+                plan: { $ref: '#/components/schemas/PlanEnum' }
+                billing_type: { type: string, enum: [monthly, yearly, lifetime], default: lifetime }
+                end_date: { type: string, nullable: true }
+                addons: { $ref: '#/components/schemas/AddonsInput' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: success }
+                  message: { type: string, example: User created successfully }
+                  user: { $ref: '#/components/schemas/LoginUser' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/AdminForbidden' }
+        '422': { $ref: '#/components/responses/StatusValidationError' }
+        '500': { $ref: '#/components/responses/StatusServerError' }
+
+  /admin/users/update/details:
+    post:
+      tags: [Admin]
+      summary: Update a user's details, plan and add-ons
+      operationId: adminUpdateUserDetails
+      description: '`role` is ignored for `client_member`, `team_member` and `admin_team_member` users.'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [id, last_name, email, is_active, role]
+              properties:
+                id: { type: integer, example: 40 }
+                first_name: { type: string, nullable: true }
+                last_name: { type: string }
+                email: { type: string, format: email }
+                is_active: { type: boolean }
+                role: { type: string, example: member }
+                plan: { $ref: '#/components/schemas/PlanEnum' }
+                billing_type: { type: string, enum: [monthly, yearly, lifetime] }
+                addons: { $ref: '#/components/schemas/AddonsInput' }
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: success }
+                  message: { type: string, example: User updated successfully }
+                  user: { $ref: '#/components/schemas/LoginUser' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/AdminForbidden' }
+        '422':
+          description: Validation failed (note that there is **no** `message`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StatusEnvelope' }
+              example: { status: error, errors: { email: [The email has already been taken.] } }
+        '500': { $ref: '#/components/responses/StatusServerError' }
+
+  /admin/users/update/subscriptions:
+    post:
+      tags: [Admin]
+      summary: Replace a user's main subscription and add-ons (not working)
+      operationId: adminUpdateUserSubscriptions
+      description: |
+        ⚠️ **Broken.** Internally it calls `updateAddons()` with the wrong arguments (that name is also the `/admin/addon/update` route handler). This throws a `TypeError`, which the `catch (\Exception)` doesn't catch, so a valid request returns **500** `{"message": "Server Error"}` and the transaction rolls back.
+        Use `/admin/users/update/details` (plan + addons) or `/admin/addon/update` instead.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [user_id, subscriptions]
+              properties:
+                user_id: { type: integer }
+                subscriptions:
+                  type: object
+                  properties:
+                    front_end:
+                      type: object
+                      properties:
+                        id: { type: integer, nullable: true }
+                        status: { type: boolean }
+      responses:
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/AdminForbidden' }
+        '422':
+          description: Validation failed
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StatusEnvelope' }
+              example: { status: error, errors: { user_id: [The selected user id is invalid.] } }
+        '500': { $ref: '#/components/responses/ServerError' }
+
+  /admin/addon/update:
+    post:
+      tags: [Admin]
+      summary: Create or update a user's subscription add-ons
+      operationId: adminUpdateAddons
+      description: No validation. `addons` **must** be an object, otherwise **500**.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [user_id, addons]
+              properties:
+                user_id: { type: integer, example: 40 }
+                addons: { $ref: '#/components/schemas/AddonsInput' }
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StatusEnvelope' }
+              example: { status: success, message: Addons updated successfully }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/AdminForbidden' }
+        '404':
+          description: User or subscription missing
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StatusEnvelope' }
+              examples:
+                user: { value: { status: error, message: User not found } }
+                subscription: { value: { status: error, message: Subscription not found for this user } }
+        '500': { $ref: '#/components/responses/ServerError' }
+
+  /admin/users/update/password:
+    post:
+      tags: [Admin]
+      summary: Set any user's password
+      operationId: adminUpdateUserPassword
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [user_id, password, password_confirmation]
+              properties:
+                user_id: { type: integer, example: 40 }
+                password: { type: string, format: password, minLength: 6 }
+                password_confirmation: { type: string, format: password }
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StatusEnvelope' }
+              example: { status: success, message: User password updated successfully }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/AdminForbidden' }
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StatusEnvelope' }
+              example: { status: error, message: User not found }
+        '422':
+          description: Validation failed
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StatusEnvelope' }
+              example: { status: error, message: Invalid input, errors: { password: [The password field confirmation does not match.] } }
+        '500': { $ref: '#/components/responses/StatusServerError' }
+
+  /admin/users/delete:
+    post:
+      tags: [Admin]
+      summary: Delete a user and everything they own
+      operationId: adminDeleteUser
+      description: Only role `admin` (not `support`). Also deletes subscriptions, add-ons, workspaces and child users.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [user_id]
+              properties:
+                user_id: { type: integer, example: 40 }
+      responses:
+        '200':
+          description: Deleted
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StatusEnvelope' }
+              example: { status: success, message: User and related data deleted successfully }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403':
+          description: Not an admin
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/StatusEnvelope'
+                  - $ref: '#/components/schemas/FrameworkError'
+              examples:
+                support: { value: { status: error, message: You do not have permission to delete users. } }
+                middleware: { value: { message: Unauthorized. Admin or Support only. } }
+        '422':
+          description: Validation failed
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StatusEnvelope' }
+              example: { status: error, message: Invalid request, errors: { user_id: [The selected user id is invalid.] } }
+        '500': { $ref: '#/components/responses/StatusServerError' }
+
+  /deactivateUser:
+    post:
+      tags: [Admin]
+      summary: Deactivate a user
+      operationId: adminDeactivateUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [id]
+              properties:
+                id: { type: integer, example: 40 }
+      responses:
+        '200':
+          description: Deactivated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: success }
+                  message: { type: string, example: User was deactivated successfully }
+                  user:
+                    type: object
+                    properties:
+                      id: { type: integer, example: 40 }
+                      email: { type: string, example: user@example.com }
+                      is_active: { type: boolean, example: false }
+        '400':
+          description: Tried to deactivate yourself
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StatusEnvelope' }
+              example: { status: error, message: You cannot deactivate your own account }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/AdminForbidden' }
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StatusEnvelope' }
+              example: { status: error, message: User not found }
+        '500': { $ref: '#/components/responses/ServerError' }
+
+  /activateUser:
+    post:
+      tags: [Admin]
+      summary: Reactivate a user
+      operationId: adminActivateUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [id]
+              properties:
+                id: { type: integer, example: 40 }
+      responses:
+        '200':
+          description: Activated
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StatusEnvelope' }
+              example: { status: success, message: User activated successfully }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/AdminForbidden' }
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FrameworkError' }
+              example: { message: 'No query results for model [App\Models\User] 40' }
+        '500': { $ref: '#/components/responses/ServerError' }
+
+  /user/add-tokens:
+    post:
+      tags: [Admin]
+      summary: Add AI tokens to a user's balance (not working)
+      operationId: adminAddTokens
+      description: ⚠️ **Broken.** `App\Services\TokenBillingService` does not exist, so a valid request returns **500**.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [id, amount]
+              properties:
+                id: { type: integer, example: 40 }
+                amount: { type: number, minimum: 0.01, example: 500 }
+      responses:
+        '200':
+          description: Intended response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: success }
+                  message: { type: string, example: 500 tokens added }
+                  new_balance: { type: number, example: 1500 }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/AdminForbidden' }
+        '404': { $ref: '#/components/responses/ModelNotFound' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+        '500': { $ref: '#/components/responses/ServerError' }
+
+  /user/update-tokens:
+    post:
+      tags: [Admin]
+      summary: Set a user's AI token balance (not working)
+      operationId: adminUpdateTokens
+      description: ⚠️ **Broken.** `App\Services\TokenBillingService` does not exist, so a valid request returns **500**.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [id, amount]
+              properties:
+                id: { type: integer, example: 40 }
+                amount: { type: number, minimum: 0, example: 1000 }
+      responses:
+        '200':
+          description: Intended response (`new_balance` is a formatted string)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: success }
+                  message: { type: string, example: Balance updated successfully. }
+                  new_balance: { type: string, example: '1,000.00' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/AdminForbidden' }
+        '404': { $ref: '#/components/responses/ModelNotFound' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+        '500': { $ref: '#/components/responses/ServerError' }
+
+  /user/sendCampaign:
+    post:
+      tags: [Admin]
+      summary: Send an email campaign (not working)
+      operationId: adminSendCampaign
+      description: ⚠️ **Broken.** `App\Services\CampaignService` does not exist, so every call returns **500** (the error happens before validation runs).
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [name, subject, type, content]
+              properties:
+                name: { type: string }
+                subject: { type: string }
+                type: { type: string, enum: [individual, bulk, bulk_import] }
+                content: { type: string, description: Email body }
+                file: { type: string, format: binary, description: '.txt list of emails, required when type = bulk_import' }
+      responses:
+        '200':
+          description: Intended response (`status` is a boolean)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: boolean, example: true }
+                  campaign_id: { type: integer, example: 7 }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/AdminForbidden' }
+        '500': { $ref: '#/components/responses/ServerError' }
+
+  /campaign/status/{id}:
+    get:
+      tags: [Admin]
+      summary: Campaign progress (not working)
+      operationId: adminCampaignStatus
+      description: ⚠️ **Broken.** `App\Models\CampaignEmail` does not exist, so every call returns **500**.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer, example: 7 }
+      responses:
+        '200':
+          description: Intended response (no envelope)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total: { type: integer, example: 1000 }
+                  sent: { type: integer, example: 640 }
+                  failed: { type: integer, example: 3 }
+                  status: { type: string, example: sending }
+                  percentage: { type: number, example: 64 }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/AdminForbidden' }
+        '500': { $ref: '#/components/responses/ServerError' }
+
+  /all/email/campaign:
+    get:
+      tags: [Admin]
+      summary: List email campaigns, 10 per page (not working)
+      operationId: adminListCampaigns
+      description: ⚠️ **Broken.** `App\Models\CampaignEmail` does not exist, so every call returns **500**. When fixed it returns a bare Laravel paginator.
+      parameters:
+        - $ref: '#/components/parameters/Page'
+      responses:
+        '200':
+          description: Intended response
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/LaravelPaginator' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/AdminForbidden' }
+        '500': { $ref: '#/components/responses/ServerError' }
+
 components:
   securitySchemes:
     bearerAuth:
@@ -3776,6 +5080,28 @@ components:
         application/json:
           schema: { $ref: '#/components/schemas/ValidationErrorBody' }
           example: { message: This site has no configured domain or URL., errors: { site: [This site has no configured domain or URL.] } }
+    StatusValidationError:
+      description: Validation failed (`status` envelope used by the account, team, reseller and admin modules)
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/StatusEnvelope' }
+          example:
+            status: error
+            message: Validation failed
+            errors:
+              email: [The email has already been taken.]
+    StatusServerError:
+      description: Unexpected error caught by the controller
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/StatusEnvelope' }
+          example: { status: error, message: Unable to complete request }
+    AdminForbidden:
+      description: Logged in, but role is not admin or support
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/FrameworkError' }
+          example: { message: Unauthorized. Admin or Support only. }
     CalendarItemResponse:
       description: Updated calendar item
       content:
@@ -4817,6 +6143,82 @@ components:
         sandbox: { type: boolean, example: false }
         api_cost_usd: { type: number, nullable: true, example: 0.02 }
         retrieved_at: { type: string, format: date-time }
+
+    # ---- Workspaces, team, admin ----
+    StatusEnvelope:
+      type: object
+      description: Envelope used by the account, workspace, team, reseller and admin modules
+      additionalProperties: true
+      properties:
+        status: { type: string, enum: [success, error] }
+        message: { type: string }
+        errors:
+          type: object
+          additionalProperties: { type: array, items: { type: string } }
+    WorkSpace:
+      type: object
+      properties:
+        id: { type: integer, example: 3 }
+        name: { type: string, example: Client A }
+        description: { type: string, nullable: true }
+        logo: { type: string, nullable: true, example: 'https://bucket.s3.amazonaws.com/Vg/images/logo.png' }
+        user_id: { type: integer, description: Owner }
+        slug: { type: string, example: client-a }
+        is_default: { type: boolean }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+    UserWorkSpace:
+      type: object
+      description: Membership of a user in a workspace
+      properties:
+        id: { type: integer }
+        user_id: { type: integer }
+        work_space_id: { type: integer }
+        role: { type: string, example: super_admin, description: 'super_admin, admin or manager' }
+        is_active: { type: boolean, description: True for the workspace currently in use }
+        user_role: { nullable: true }
+        user_count: { type: integer, nullable: true }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+    CreateWorkspaceRequest:
+      type: object
+      required: [name, slug]
+      properties:
+        name: { type: string, maxLength: 255, example: Client A }
+        slug: { type: string, maxLength: 255, example: client-a, description: Unique across all workspaces }
+        is_default: { type: boolean, nullable: true }
+    TeamMemberInput:
+      type: object
+      required: [first_name, last_name, email, role, user_access]
+      properties:
+        first_name: { type: string, maxLength: 100 }
+        last_name: { type: string, maxLength: 100 }
+        email: { type: string, format: email }
+        role: { type: string, enum: [admin_team_member, team_member, client_member] }
+        user_access:
+          type: array
+          items:
+            type: object
+            required: [id, has_access]
+            properties:
+              id: { type: integer, description: Workspace ID }
+              has_access: { type: boolean }
+    PlanEnum:
+      type: string
+      enum: [free, professional, agency, enterprise, reseller]
+    AddonsInput:
+      type: object
+      nullable: true
+      description: Keyed by add-on name
+      additionalProperties:
+        type: object
+        properties:
+          status: { type: boolean, default: true }
+          type: { type: string, default: lifetime }
+          limit: { type: integer, nullable: true }
+          start_date: { type: string, nullable: true }
+          end_date: { type: string, nullable: true }
+      example: { ai_credits: { status: true, type: monthly, limit: 5000 } }
 
     # ---- Copilot ----
     CopilotConversation:

@@ -9,8 +9,9 @@ import { toast } from "@/lib/toast";
 import { getErrorMessage } from "@/lib/errors";
 import { PROVIDERS, type IntegrationProvider } from "@/features/integrations/catalog";
 import { useProviderAccounts, type ProviderAccount } from "@/features/integrations/connections";
-import { useTestConnection } from "@/features/publishing/hooks";
+import { useShopifyBlogs, useTestConnection } from "@/features/publishing/hooks";
 import { useSyncGsc } from "@/features/search-console/hooks";
+import { GscPerformanceCard } from "@/features/search-console/gsc-performance";
 import { workspaceRole } from "@/features/workspace/hooks";
 import { ConnectDialog } from "@/components/integrations/connect-dialog";
 import { EmptyState } from "@/components/brand/empty-state";
@@ -25,6 +26,29 @@ import { Card } from "@/components/ui/card";
  * re-tested and Search Console re-synced through the backend. The backend has
  * no endpoint to remove a connection, so there is no Disconnect here.
  */
+/** The store's blogs: where Shopify articles go. The blog is picked on each article when publishing. */
+function ShopifyBlogs({ siteId, connectionId }: { siteId: number | undefined; connectionId: number }) {
+  const t = useTranslations("integrations.shopifyBlogs");
+  const blogs = useShopifyBlogs(siteId, connectionId);
+  if (blogs.isPending) return <span className="text-caption font-normal text-fg-3">{t("loading")}</span>;
+  if (blogs.isError)
+    return <p className="text-caption font-normal text-danger">{getErrorMessage(blogs.error, t("failed"))}</p>;
+  if (blogs.data.length === 0) return <p className="text-caption font-normal text-warning">{t("none")}</p>;
+  return (
+    <div className="mt-2 flex flex-col gap-1">
+      <span className="text-overline text-fg-3">{t("title", { count: blogs.data.length })}</span>
+      <ul className="flex flex-wrap gap-1.5">
+        {blogs.data.map((b) => (
+          <li key={b.id} className="rounded-full border border-border px-2.5 py-0.5 text-caption text-fg-2">
+            {b.title} <span className="font-mono text-fg-3">{t("path", { handle: b.handle })}</span>
+          </li>
+        ))}
+      </ul>
+      <span className="text-caption font-normal text-fg-3">{t("help")}</span>
+    </div>
+  );
+}
+
 export function IntegrationDetailsView({ provider }: { provider: IntegrationProvider }) {
   const t = useTranslations("integrations");
   const format = useFormatter();
@@ -127,6 +151,9 @@ export function IntegrationDetailsView({ provider }: { provider: IntegrationProv
                   {account.lastError && account.status !== "active" && (
                     <p className="text-caption font-normal text-danger">{account.lastError}</p>
                   )}
+                  {provider === "shopify" && account.status === "active" && account.connectionId !== undefined && (
+                    <ShopifyBlogs siteId={brand?.id} connectionId={account.connectionId} />
+                  )}
                 </div>
                 {canConnect && (
                   <div className="flex items-center gap-2">
@@ -152,6 +179,10 @@ export function IntegrationDetailsView({ provider }: { provider: IntegrationProv
             </li>
           ))}
         </ul>
+      )}
+
+      {provider === "searchConsole" && brand && accounts.length > 0 && (
+        <GscPerformanceCard siteId={brand.id} connectHref={brandHref(brandSlug, "integrations/searchConsole")} />
       )}
 
       <ConnectDialog

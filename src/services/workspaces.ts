@@ -53,8 +53,8 @@ const workspaceService = {
       const response = await api.get<GetAllWorkspacesResponse>("/workspace");
       return response.data;
     } catch (error) {
-      // TEMPORARY: no workspace controller on the backend yet (404). Serve the
-      // workspaces the login response carried. Remove once the endpoint is live.
+      // Safety net from before the workspace endpoints shipped: on a 404 (an
+      // older backend), serve the workspaces the login response carried.
       if (error instanceof AxiosError && error.response?.status === 404) {
         const login = readLoginWorkspaces();
         if (login) {

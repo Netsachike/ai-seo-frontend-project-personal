@@ -31,6 +31,8 @@ import {
   useArticlePublications,
   usePublishArticle,
   usePublishingConnections,
+  useShopifyBlogs,
+  type PublishMode,
 } from "@/features/publishing/hooks";
 import { siteLanguage } from "@/features/sites/site-utils";
 import { cn } from "@/lib/utils";
@@ -40,6 +42,7 @@ import { Card, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { ErrorState } from "@/components/brand/error-state";
 import { RankoyaAvatar } from "@/components/brand/logo";
@@ -146,6 +149,15 @@ function Editor({ raw }: { raw: ArticleWithRelations }) {
   const targets = (connections.data ?? []).filter((c) => c.status === "active");
   const [target, setTarget] = React.useState<string>("");
   const targetId = target || (targets[0] ? String(targets[0].id) : "");
+  const targetConnection = targets.find((c) => String(c.id) === targetId);
+  const isManualTarget = targetConnection?.method === "manual";
+  const [mode, setMode] = React.useState<PublishMode>("publish");
+  // Shopify publishes into one of the store's blogs.
+  const isShopify = targetConnection?.platform === "shopify" && !isManualTarget;
+  const shopifyBlogs = useShopifyBlogs(brand?.id, isShopify ? targetConnection?.id : undefined);
+  const [blogChoice, setBlogChoice] = React.useState<string>("");
+  const savedBlog = typeof targetConnection?.config?.blog_id === "string" ? targetConnection.config.blog_id : "";
+  const blogId = blogChoice || savedBlog || shopifyBlogs.data?.[0]?.id || "";
   const htmlRef = React.useRef(article.html);
   // The live body, for the copy-and-paste panel (the ref feeds the debounced save).
   const [html, setHtml] = React.useState(article.html);
@@ -195,8 +207,13 @@ function Editor({ raw }: { raw: ArticleWithRelations }) {
   /** Publishes now through the chosen connection (a manual connection prepares a copy-and-paste version). */
   const approve = () => {
     if (!targetId) return toast.error(t("noTarget"));
+    if (isShopify && !blogId) return toast.error(t("shopify.pickBlog"));
+    const asDraft = mode === "draft" && !isManualTarget;
     publish.mutate(
-      { connection_id: Number(targetId), options: { status: "publish" } },
+      {
+        connection_id: Number(targetId),
+        options: { status: asDraft ? "draft" : "publish", ...(isShopify ? { blog_id: blogId } : {}) },
+      },
       {
         onSuccess: (response) => {
           if (isManualPublication(response.data)) {
@@ -205,6 +222,10 @@ function Editor({ raw }: { raw: ArticleWithRelations }) {
           }
           if (response.data.status === "failed") {
             toast.error(response.data.error_message ?? t("publishFailed"));
+            return;
+          }
+          if (asDraft) {
+            toast.success(t("draftToast", { connection: targetConnection?.name ?? "" }));
             return;
           }
           setStatus("published");
@@ -258,7 +279,11 @@ function Editor({ raw }: { raw: ArticleWithRelations }) {
             {publishable && (
               <Button variant="primary" disabled={blocked || !targetId} loading={publish.isPending} onClick={approve}>
                 <SendIcon />
-                {manualReady ? t("publishAgain") : t("approvePublish")}
+                {manualReady
+                  ? t("publishAgain")
+                  : mode === "draft" && !isManualTarget
+                    ? t("sendDraft")
+                    : t("approvePublish")}
               </Button>
             )}
           </div>
@@ -436,6 +461,49 @@ function Editor({ raw }: { raw: ArticleWithRelations }) {
                   ),
                 })}
               </p>
+            )}
+            {isShopify && (
+              <div className="flex flex-col gap-1.5">
+                {shopifyBlogs.isPending ? (
+                  <span className="text-caption font-normal text-fg-3">{t("shopify.loading")}</span>
+                ) : shopifyBlogs.isError ? (
+                  <p role="alert" className="text-caption font-normal text-danger">
+                    {getErrorMessage(shopifyBlogs.error, t("shopify.failed"))}
+                  </p>
+                ) : shopifyBlogs.data.length === 0 ? (
+                  <p className="text-caption font-normal text-warning">{t("shopify.none")}</p>
+                ) : (
+                  <SelectField
+                    label={t("shopify.blog")}
+                    helper={t("shopify.blogHelp")}
+                    value={blogId}
+                    onChange={setBlogChoice}
+                    options={shopifyBlogs.data.map((b) => ({
+                      value: b.id,
+                      label: b.title,
+                      detail: `/blogs/${b.handle}`,
+                    }))}
+                  />
+                )}
+              </div>
+            )}
+            {targets.length > 0 && !isManualTarget && (
+              <div className="flex flex-col gap-1.5">
+                <span className="text-small font-medium text-fg">{t("mode.label")}</span>
+                <Tabs value={mode} onValueChange={(v) => setMode(v as PublishMode)}>
+                  <TabsList variant="segmented" aria-label={t("mode.label")} className="w-full">
+                    <TabsTrigger value="publish" className="flex-1">
+                      {t("mode.publish")}
+                    </TabsTrigger>
+                    <TabsTrigger value="draft" className="flex-1">
+                      {t("mode.draft")}
+                    </TabsTrigger>
+                  </TabsList>
+                </Tabs>
+                <span className="text-caption font-normal text-fg-3">
+                  {mode === "draft" ? t("mode.draftHelp") : t("mode.publishHelp")}
+                </span>
+              </div>
             )}
             <label className="flex cursor-pointer items-center gap-2.5 text-small text-fg">
               <Checkbox checked={notify} onCheckedChange={(v) => setNotify(v === true)} />

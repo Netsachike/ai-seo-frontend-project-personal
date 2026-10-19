@@ -63,6 +63,29 @@ export function ToolsView() {
   );
 }
 
+/** What a tool does, why it matters and when to reach for it, in plain words. */
+function ToolIntro({ tool }: { tool: Tool }) {
+  const t = useTranslations("tools");
+  return (
+    <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-0.5">
+        <CardTitle>{t(`${tool}.title`)}</CardTitle>
+        <CardDescription>{t(`${tool}.body`)}</CardDescription>
+      </div>
+      <dl className="grid gap-x-6 gap-y-1.5 rounded-lg bg-surface-2 px-3.5 py-3 text-small sm:grid-cols-2">
+        <div className="flex flex-col gap-0.5">
+          <dt className="text-overline text-fg-3">{t("whyLabel")}</dt>
+          <dd className="text-fg-2">{t(`${tool}.why`)}</dd>
+        </div>
+        <div className="flex flex-col gap-0.5">
+          <dt className="text-overline text-fg-3">{t("whenLabel")}</dt>
+          <dd className="text-fg-2">{t(`${tool}.when`)}</dd>
+        </div>
+      </dl>
+    </div>
+  );
+}
+
 /** Title, explanation, a URL field and Run, then the result. */
 function UrlToolCard({
   tool,
@@ -82,10 +105,7 @@ function UrlToolCard({
   const id = React.useId();
   return (
     <Card className="gap-5">
-      <div className="flex flex-col gap-0.5">
-        <CardTitle>{t(`${tool}.title`)}</CardTitle>
-        <CardDescription>{t(`${tool}.body`)}</CardDescription>
-      </div>
+      <ToolIntro tool={tool} />
       <form
         className="flex flex-col gap-2 sm:flex-row sm:items-end"
         onSubmit={(e) => {
@@ -311,8 +331,7 @@ function ClusteringTool() {
   return (
     <Card className="gap-5">
       <div className="flex flex-col gap-0.5">
-        <CardTitle>{t("title")}</CardTitle>
-        <CardDescription>{t("body")}</CardDescription>
+        <ToolIntro tool="clustering" />
       </div>
       <div className="flex flex-col gap-1.5">
         <Label htmlFor={id}>{t("keywords")}</Label>
@@ -403,8 +422,7 @@ function SchemaTool({ defaultUrl, siteName }: { defaultUrl: string; siteName: st
   return (
     <Card className="gap-5">
       <div className="flex flex-col gap-0.5">
-        <CardTitle>{t("title")}</CardTitle>
-        <CardDescription>{t("body")}</CardDescription>
+        <ToolIntro tool="schema" />
       </div>
       <div className="grid gap-4 md:grid-cols-2">
         <div className="flex flex-col gap-1.5">
@@ -512,8 +530,7 @@ function AgentTools({ siteId }: { siteId: number }) {
   return (
     <Card className="gap-5">
       <div className="flex flex-col gap-0.5">
-        <CardTitle>{t("title")}</CardTitle>
-        <CardDescription>{t("body")}</CardDescription>
+        <ToolIntro tool="agent" />
       </div>
       <div className="flex flex-col gap-1.5">
         <Label htmlFor={`${ids}-tool`}>{t("tool")}</Label>

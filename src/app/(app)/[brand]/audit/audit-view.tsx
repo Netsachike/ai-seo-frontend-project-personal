@@ -57,11 +57,12 @@ import { PageHeader } from "@/components/layout/page-header";
 import { PageSkeleton } from "@/components/layout/page-skeleton";
 import { useShell } from "@/components/layout/shell-context";
 import { WithPagePreview, pathOf } from "@/components/crawl/page-inspector";
+import { MoneyPanel } from "../money/money-view";
 import { PagesPanel } from "./pages-panel";
 
 export { severityBadge };
 
-const views = ["issues", "pages"] as const;
+const views = ["issues", "money", "pages"] as const;
 const severities = ["all", "critical", "warning", "notice"] as const;
 const layouts = ["grouped", "list"] as const;
 const statusFilters = ["all", ...ISSUE_STATUSES] as const;
@@ -270,7 +271,7 @@ export function AuditView() {
       )}
 
       <Tabs value={view} onValueChange={(v) => void setView(v as (typeof views)[number])}>
-        <TabsList aria-label={t("viewLabel")}>
+        <TabsList aria-label={t("viewLabel")} data-tour="audit-tabs">
           {views.map((v) => (
             <TabsTrigger key={v} value={v}>
               {t(`views.${v}`)}
@@ -279,7 +280,9 @@ export function AuditView() {
         </TabsList>
       </Tabs>
 
-      {view === "pages" ? (
+      {view === "money" ? (
+        <MoneyPanel />
+      ) : view === "pages" ? (
         <PagesPanel siteId={siteId} runId={runId} issues={rows} />
       ) : (
         data &&

@@ -165,12 +165,18 @@ function profileFromPages(site: ProfileSite, key: ProfileSection, pages: CrawlPa
       section(
         "Key Features",
         bullets(
-          featurePages.map((p) => `${squash(p.title!.split(/\s[|–—-]\s/)[0])}: ${p.meta_description ?? p.h1 ?? pathOf(p.url)}`),
+          featurePages.map(
+            (p) => `${squash(p.title!.split(/\s[|–—-]\s/)[0])}: ${p.meta_description ?? p.h1 ?? pathOf(p.url)}`,
+          ),
         ),
       ),
       section(
         "Unique Value Proposition",
-        bullets(headingTexts(home).slice(0, 3).map((h) => `The homepage highlights: ${h}.`)),
+        bullets(
+          headingTexts(home)
+            .slice(0, 3)
+            .map((h) => `The homepage highlights: ${h}.`),
+        ),
       ),
     ]
       .filter(Boolean)

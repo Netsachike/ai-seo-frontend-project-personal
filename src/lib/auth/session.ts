@@ -1,4 +1,5 @@
 import { AUTH_TOKEN_COOKIE_NAME, clearSession, initializeSession } from "@/lib/auth-session";
+import { clearTourState } from "@/lib/tours";
 import authService from "@/services/auth";
 import type { LoginPayload, RegisterPayload } from "@/types/types";
 
@@ -17,13 +18,25 @@ export const NEW_ACCOUNT_START = "/sites/new";
 export const LEGAL_PATHS = ["/privacy-policy", "/terms-of-service", "/refund-policy"] as const;
 
 /** Routes that never need a session. */
-export const PUBLIC_PATHS = ["/sign-in", "/sign-up", "/forgot-password", "/verify", ...LEGAL_PATHS] as const;
-/** Signed-in users who open these are sent into the app instead. */
-export const GUEST_ONLY_PATHS = ["/sign-in", "/sign-up"] as const;
+export const PUBLIC_PATHS = [
+  "/sign-in",
+  "/sign-up",
+  "/forgot-password",
+  "/reset-password",
+  "/verify",
+  ...LEGAL_PATHS,
+] as const;
+/**
+ * Signed-in users who open these are sent into the app instead.
+ * `/reset-password` is left out so someone still signed in on this browser
+ * can finish a reset from the emailed link.
+ */
+export const GUEST_ONLY_PATHS = ["/sign-in", "/sign-up", "/forgot-password"] as const;
 
 /** Signs in and writes the `authToken` + `authUser` cookies from the login response. */
 export async function signIn(payload: LoginPayload) {
   const { data } = await authService.login(payload);
+  clearTourState();
   return initializeSession(data.user, data.token);
 }
 
@@ -40,6 +53,7 @@ export async function endSession() {
   } catch {
     // The token may already be invalid; signing out locally is what matters.
   }
+  clearTourState();
   clearSession();
 }
 

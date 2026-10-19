@@ -1,5 +1,15 @@
 import api from "./api/api";
-import type { ApiSuccess, LoginData, LoginPayload, RegisterPayload, UserResource } from "@/types/types";
+import type {
+  ApiSuccess,
+  forgotPasswordPayload,
+  forgotPasswordResponse,
+  LoginData,
+  LoginPayload,
+  RegisterPayload,
+  resetPasswordPayload,
+  resetPasswordResponse,
+  UserResource,
+} from "@/types/types";
 
 /** Login, logout and the current user. Tokens are Sanctum personal access tokens. */
 const authService = {
@@ -21,6 +31,24 @@ const authService = {
   /** Revokes the current token. */
   logout: async () => {
     const response = await api.post<ApiSuccess<null>>("/logout");
+    return response.data;
+  },
+
+  /** Emails a link to `/reset-password?token=…&email=…` on this app. */
+  forgotPassword: async (payload: forgotPasswordPayload) => {
+    const response = await api.post<forgotPasswordResponse>("/password/forgot", payload);
+    return response.data;
+  },
+
+  /** Sets the new password with the emailed token. Returns no session: the user signs in afterwards. */
+  resetPassword: async (payload: resetPasswordPayload) => {
+    const response = await api.post<resetPasswordResponse>("/password/reset", payload);
+    return response.data;
+  },
+
+  /** Marks the onboarding tours as done, so other browsers don't start them again. Shared with Flowcasta. */
+  markTourCompleted: async () => {
+    const response = await api.patch<ApiSuccess<null>>("/user/tour-completed", { tour_completed: true });
     return response.data;
   },
 

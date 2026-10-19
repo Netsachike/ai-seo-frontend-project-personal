@@ -9,7 +9,8 @@ import type { TopicSuggestion } from "./store";
 export class NoTopicsError extends Error {}
 
 /** Page titles that never make a topic. */
-const GENERIC = /^(home|homepage|about( us)?|contact( us)?|blog|news|privacy( policy)?|terms.*|cookie.*|login|log in|sign (in|up)|cart|checkout|404.*|page not found)$/i;
+const GENERIC =
+  /^(home|homepage|about( us)?|contact( us)?|blog|news|privacy( policy)?|terms.*|cookie.*|login|log in|sign (in|up)|cart|checkout|404.*|page not found)$/i;
 const MAX_SEEDS = 25;
 
 /** "SEO audits | Acme" → "seo audits": the brand suffix goes, and anything too long or generic is dropped. */

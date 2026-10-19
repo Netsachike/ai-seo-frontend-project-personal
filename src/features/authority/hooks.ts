@@ -2,7 +2,12 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import type { BacklinkProspectsPayload, UpdateBacklinkPayload } from "@/types/types";
+import type {
+  BacklinkOpportunity,
+  BacklinkProspectsPayload,
+  BacklinkStatus,
+  UpdateBacklinkPayload,
+} from "@/types/types";
 import { authorityKeys } from "@/lib/api/query-keys";
 import authorityService from "@/services/authority";
 
@@ -24,6 +29,48 @@ export function useBacklinkOpportunities(siteId: number, page: number) {
     enabled: Boolean(siteId),
     queryFn: () => authorityService.opportunities(siteId, { page, per_page: OPPORTUNITIES_PER_PAGE }),
     placeholderData: (previous) => previous,
+  });
+}
+
+/** The board loads every opportunity (up to this many), since the API has no status filter. */
+const BOARD_PAGE_SIZE = 100;
+const BOARD_MAX_PAGES = 3;
+
+/** Every link opportunity, for the outreach board. Sorted by score (the API's order). */
+export function useOpportunityBoard(siteId: number) {
+  return useQuery({
+    queryKey: [...authorityKeys.opportunities(siteId), "board"],
+    enabled: Boolean(siteId),
+    queryFn: async () => {
+      const first = await authorityService.opportunities(siteId, { page: 1, per_page: BOARD_PAGE_SIZE });
+      const rows: BacklinkOpportunity[] = [...first.data];
+      for (let page = 2; page <= Math.min(first.last_page, BOARD_MAX_PAGES); page++)
+        rows.push(...(await authorityService.opportunities(siteId, { page, per_page: BOARD_PAGE_SIZE })).data);
+      return { rows, total: first.total };
+    },
+  });
+}
+
+/** Moves an opportunity on the board straight away, then saves it (and rolls back if saving fails). */
+export function useMoveOpportunity(siteId: number) {
+  const queryClient = useQueryClient();
+  const key = [...authorityKeys.opportunities(siteId), "board"];
+  type Board = { rows: BacklinkOpportunity[]; total: number };
+  return useMutation({
+    mutationFn: async ({ id, status }: { id: number; status: BacklinkStatus }) =>
+      (await authorityService.updateOpportunity(siteId, id, { status })).opportunity,
+    onMutate: async ({ id, status }) => {
+      await queryClient.cancelQueries({ queryKey: key });
+      const previous = queryClient.getQueryData<Board>(key);
+      queryClient.setQueryData<Board>(key, (board) =>
+        board ? { ...board, rows: board.rows.map((r) => (r.id === id ? { ...r, status } : r)) } : board,
+      );
+      return { previous };
+    },
+    onError: (_error, _vars, context) => {
+      if (context?.previous) queryClient.setQueryData(key, context.previous);
+    },
+    onSettled: () => refresh(queryClient, siteId),
   });
 }
 

@@ -1,17 +1,13 @@
 import {
   BriefcaseBusinessIcon,
   CalendarDaysIcon,
-  CircleDollarSignIcon,
   FileTextIcon,
   KeyRoundIcon,
   LayoutGridIcon,
   Link2Icon,
-  ListChecksIcon,
-  MessageCircleIcon,
   PlugIcon,
   RadarIcon,
   ShieldCheckIcon,
-  SlidersHorizontalIcon,
   StoreIcon,
   TrendingUpIcon,
   UsersIcon,
@@ -19,7 +15,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
-import { canUseAgencyResources, canUseResellerConsole, type PlanAccessSession } from "@/lib/plan-core";
+import type { PlanAccessSession } from "@/lib/plan-core";
 
 export type NavKey =
   | "overview"
@@ -54,12 +50,17 @@ export type NavItem = {
 export type NavGroup = { key: "insights" | "grow" | "workspace"; items: NavItem[] };
 
 /**
- * Groups follow the growth loop: see where you stand (Insights), act on it
- * (Grow), and connect and run the tools (Workspace). Keywords, Articles and
- * Calendar follow the content pipeline in order: discover and analyze
- * keywords, research one and write the article, then schedule it. Every brand screen is
- * backed by live endpoints; Social and Reports have none yet, so they stay
- * out of the sidebar until they do.
+ * One short list, in the order people use it: see where you stand
+ * (Overview, AI visibility, Rankings), connect your site (Integrations), then
+ * find and fix what holds it back (Competitors, Site audit with money pages),
+ * and grow (Keywords, Articles, Calendar, Authority).
+ *
+ * Kept out of the sidebar to keep it short, but still reachable:
+ * - Action plan: from the Overview and the assistant.
+ * - Ask Rankoya: the assistant drawer, which links to the full conversation.
+ * - Settings: from the profile menu.
+ * - Money pages: a tab on Site audit.
+ * Social and Reports have no endpoints yet.
  */
 export const navGroups: NavGroup[] = [
   {
@@ -68,6 +69,7 @@ export const navGroups: NavGroup[] = [
       { key: "overview", icon: LayoutGridIcon },
       { key: "visibility", icon: RadarIcon },
       { key: "rankings", icon: TrendingUpIcon },
+      { key: "integrations", icon: PlugIcon },
       { key: "competitors", icon: UsersIcon },
       { key: "audit", icon: ShieldCheckIcon },
     ],
@@ -75,13 +77,15 @@ export const navGroups: NavGroup[] = [
   {
     key: "grow",
     items: [
-      { key: "actions", icon: ListChecksIcon },
+      // { key: "actions", icon: ListChecksIcon },
       { key: "keywords", icon: KeyRoundIcon },
       { key: "articles", icon: FileTextIcon },
       { key: "calendar", icon: CalendarDaysIcon },
-      { key: "money", icon: CircleDollarSignIcon },
+      // Now a tab on Site audit (audit?view=money).
+      // { key: "money", icon: CircleDollarSignIcon },
       { key: "authority", icon: Link2Icon },
-      { key: "agent", icon: MessageCircleIcon },
+      // The assistant drawer opens it, with a link to the full conversation.
+      // { key: "agent", icon: MessageCircleIcon },
       // No endpoints yet; restore with MegaphoneIcon when the backend ships social publishing.
       // { key: "social", icon: MegaphoneIcon, soon: true },
     ],
@@ -89,13 +93,14 @@ export const navGroups: NavGroup[] = [
   {
     key: "workspace",
     items: [
-      { key: "integrations", icon: PlugIcon },
       { key: "tools", icon: WrenchIcon },
       // No endpoints yet; restore with ChartColumnIcon when the backend ships reports.
       // { key: "reports", icon: ChartColumnIcon },
-      { key: "resellers", icon: StoreIcon, href: "/resellers", visible: canUseResellerConsole },
-      { key: "agency", icon: BriefcaseBusinessIcon, href: "/agency", visible: canUseAgencyResources },
-      { key: "settings", icon: SlidersHorizontalIcon, href: "/settings" },
+      // Always listed: the pages explain what they are and how to unlock them.
+      { key: "agency", icon: BriefcaseBusinessIcon, href: "/agency" },
+      { key: "resellers", icon: StoreIcon, href: "/resellers" },
+      // The profile menu and the sidebar's profile link open settings.
+      // { key: "settings", icon: SlidersHorizontalIcon, href: "/settings" },
     ],
   },
 ];

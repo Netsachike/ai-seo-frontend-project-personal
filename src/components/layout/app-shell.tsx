@@ -10,6 +10,7 @@ import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/
 import { AgentPanel } from "@/components/agent/agent-panel";
 import { AppSidebar, SidebarBrand, SidebarFooter, SidebarNav, SidebarSite } from "./app-sidebar";
 import { CommandMenu } from "./command-menu";
+import { TourProvider } from "@/components/tour/tour-provider";
 import { WorkspaceSwitcher } from "./context-switcher";
 import { FeedbackDialog, HelpSheet } from "./help-sheet";
 import { brandHref } from "./nav";
@@ -99,6 +100,7 @@ export function AppShell({
       </Sheet>
 
       <CommandMenu />
+      <TourProvider />
       {lookup.brand && <AgentPanel siteId={lookup.brand.id} agentHref={brandHref(brandSlug, "agent")} />}
       <HelpSheet open={help} onOpenChange={setHelp} />
       <FeedbackDialog open={feedback} onOpenChange={setFeedback} />

@@ -2,13 +2,16 @@
 
 import * as React from "react";
 import {
+  ArchiveIcon,
+  ChevronDownIcon,
   CloudDownloadIcon,
   ExternalLinkIcon,
-  GlobeIcon,
+  InboxIcon,
   Link2Icon,
   RefreshCwIcon,
-  SearchIcon,
-  ShieldAlertIcon,
+  SendIcon,
+  TrophyIcon,
+  Undo2Icon,
   UsersIcon,
 } from "lucide-react";
 import { parseAsInteger, parseAsStringLiteral, useQueryState } from "nuqs";
@@ -22,16 +25,17 @@ import {
   BACKLINKS_PER_PAGE,
   useAnalyzeAuthority,
   useAuthorityProfile,
-  useBacklinkOpportunities,
   useBacklinkOpportunity,
   useBacklinks,
   useBacklinkSummary,
   useDiscoverProspects,
-  useUpdateBacklinkOpportunity,
+  useMoveOpportunity,
+  useOpportunityBoard,
 } from "@/features/authority/hooks";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
   Dialog,
   DialogContent,
@@ -42,11 +46,9 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { StatCard } from "@/components/account/stat-card";
 import { DataTable, type DataColumn } from "@/components/data-table/data-table";
 import { DetailList } from "@/components/brand/detail-list";
 import { EmptyState } from "@/components/brand/empty-state";
@@ -58,8 +60,7 @@ import { PageSkeleton } from "@/components/layout/page-skeleton";
 import { useShell } from "@/components/layout/shell-context";
 import { PreviewPageButton } from "@/components/crawl/page-inspector";
 
-const views = ["opportunities", "backlinks"] as const;
-const STATUSES: BacklinkStatus[] = ["open", "researching", "prospect", "outreach", "acquired", "rejected"];
+const views = ["board", "backlinks"] as const;
 const statusBadge: Record<BacklinkStatus, "neutral" | "blue" | "warning" | "success" | "danger" | "outline"> = {
   open: "neutral",
   researching: "blue",
@@ -69,6 +70,20 @@ const statusBadge: Record<BacklinkStatus, "neutral" | "blue" | "warning" | "succ
   rejected: "danger",
 };
 const priorityBadge = { high: "warning", medium: "blue", low: "neutral" } as const;
+
+/**
+ * The board's columns. The API keeps six statuses; the first three all mean
+ * "not contacted yet", so they share a column. Moving a card back to it
+ * saves `prospect`; restoring an archived one saves `open`.
+ */
+const COLUMNS = [
+  { key: "toContact", statuses: ["open", "researching", "prospect"], icon: InboxIcon },
+  { key: "contacted", statuses: ["outreach"], icon: SendIcon },
+  { key: "won", statuses: ["acquired"], icon: TrophyIcon },
+] as const satisfies ReadonlyArray<{ key: string; statuses: readonly BacklinkStatus[]; icon: unknown }>;
+type ColumnKey = (typeof COLUMNS)[number]["key"];
+const columnOf = (status: BacklinkStatus): ColumnKey | "archived" =>
+  COLUMNS.find((c) => (c.statuses as readonly BacklinkStatus[]).includes(status))?.key ?? "archived";
 
 const hostOf = (url: string | null) => {
   if (!url) return null;
@@ -80,10 +95,10 @@ const hostOf = (url: string | null) => {
 };
 
 /**
- * Authority: how much the web trusts the site. The profile scores, live
- * backlink metrics and backlinks (paid per call, so fetched on request), and
- * the link opportunities to work through, including prospects taken from a
- * competitor's backlinks.
+ * Authority: how much other websites trust the site (one summary card), and
+ * an outreach board to win more links: sites to contact, sites contacted,
+ * links won. The paid link numbers and the full list of linking sites load
+ * only when asked for.
  */
 export function AuthorityView() {
   const t = useTranslations("authority");
@@ -91,7 +106,7 @@ export function AuthorityView() {
   const now = useNow({ updateInterval: 60_000 });
   const { brand } = useShell();
   const siteId = brand?.id ?? 0;
-  const [view, setView] = useQueryState("view", parseAsStringLiteral(views).withDefault("opportunities"));
+  const [view, setView] = useQueryState("view", parseAsStringLiteral(views).withDefault("board"));
   const profile = useAuthorityProfile(siteId);
   const analyze = useAnalyzeAuthority(siteId);
   const summary = useBacklinkSummary(siteId);
@@ -140,91 +155,74 @@ export function AuthorityView() {
 
       {profile.isError && <ErrorState onRetry={() => profile.refetch()} />}
 
-      <div className="grid gap-4 xl:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
-        <Card className="flex-row flex-wrap items-center justify-around gap-6">
-          {(
-            [
-              ["readiness", p?.authority_readiness_score],
-              ["internal", p?.internal_authority_score],
-              ["external", p?.external_authority_score],
-            ] as const
-          ).map(([key, value]) => (
-            <div key={key} className="flex flex-col items-center gap-2">
-              <ScoreRing score={toNumber(value) ?? 0} label={t(`scores.${key}`)} size="sm" />
-              <span className="text-small font-medium text-fg">{t(`scores.${key}`)}</span>
-            </div>
-          ))}
-        </Card>
-        <div className="grid grid-cols-2 gap-4">
-          <StatCard
-            icon={Link2Icon}
-            label={t("stats.backlinks")}
-            value={format.number(live?.backlinks ?? p?.external_backlink_count ?? 0)}
-          />
-          <StatCard
-            icon={GlobeIcon}
-            label={t("stats.domains")}
-            value={format.number(live?.referring_domains ?? p?.referring_domains ?? 0)}
-          />
-          <StatCard
-            icon={ShieldAlertIcon}
-            label={t("stats.gap")}
-            value={format.number(Math.round(toNumber(p?.competitor_authority_gap_score) ?? 0))}
-            hint={t("stats.gapHint")}
-          />
-          <StatCard
-            icon={SearchIcon}
-            label={t("stats.rank")}
-            value={format.number(live?.rank ?? 0)}
-            hint={p?.provider ? t("stats.provider", { provider: p.provider }) : undefined}
-          />
-        </div>
-      </div>
-
-      <Card className="gap-4">
+      <Card className="gap-5">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="flex flex-col gap-0.5">
-            <CardTitle>{t("live.title")}</CardTitle>
-            <CardDescription>{t("live.body")}</CardDescription>
+            <CardTitle>{t("summary.title")}</CardTitle>
+            <CardDescription>{t("summary.body")}</CardDescription>
           </div>
           <Button variant="secondary" size="sm" onClick={() => setConfirmSummary(true)} loading={summary.isFetching}>
             <CloudDownloadIcon />
             {live ? t("live.refresh") : t("live.fetch")}
           </Button>
         </div>
+        <div className="flex flex-wrap items-center gap-6">
+          <div className="flex items-center gap-3">
+            <ScoreRing score={toNumber(p?.authority_readiness_score) ?? 0} label={t("scores.readiness")} size="sm" />
+            <div className="flex max-w-56 flex-col gap-0.5">
+              <span className="text-small font-semibold text-fg">{t("scores.readiness")}</span>
+              <span className="text-caption font-normal text-fg-3">{t("scores.readinessHelp")}</span>
+            </div>
+          </div>
+          <dl className="grid flex-1 grid-cols-2 gap-4 sm:grid-cols-3">
+            {(
+              [
+                ["domains", live?.referring_domains ?? p?.referring_domains ?? 0],
+                ["backlinks", live?.backlinks ?? p?.external_backlink_count ?? 0],
+                ["gap", Math.round(toNumber(p?.competitor_authority_gap_score) ?? 0)],
+              ] as const
+            ).map(([key, value]) => (
+              <div key={key} className="flex flex-col gap-0.5">
+                <dt className="text-caption font-normal text-fg-3">{t(`stats.${key}`)}</dt>
+                <dd className="num text-h2 text-fg">{format.number(value)}</dd>
+                <dd className="text-caption font-normal text-fg-3">{t(`stats.${key}Help`)}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
         {live && (
-          <>
-            <dl className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-              {(
-                [
-                  ["backlinks", live.backlinks],
-                  ["domains", live.referring_domains],
-                  ["pages", live.referring_pages],
-                  ["spam", live.backlinks_spam_score],
-                  ["new", live.new_backlinks],
-                  ["lost", live.lost_backlinks],
-                  ["rank", live.rank],
-                ] as const
-              ).map(([key, value]) => (
-                <div key={key} className="flex flex-col gap-0.5">
-                  <dt className="text-caption font-normal text-fg-3">{t(`live.metrics.${key}`)}</dt>
-                  <dd className="num text-h3 text-fg">{format.number(value ?? 0)}</dd>
-                </div>
-              ))}
-            </dl>
-            <p className="text-caption font-normal text-fg-3">
-              {t("live.meta", {
-                provider: live.provider,
-                when: format.relativeTime(new Date(live.retrieved_at), now),
-                cost: live.api_cost_usd ?? 0,
-              })}
-              {live.sandbox && (
-                <Badge variant="warning" className="ms-2">
-                  {t("sandbox")}
-                </Badge>
-              )}
-            </p>
-          </>
+          <Collapsible>
+            <CollapsibleTrigger className="group flex items-center gap-1 text-small font-medium text-blue hover:underline">
+              {t("summary.more")}
+              <ChevronDownIcon aria-hidden className="size-4 transition-transform group-data-[state=open]:rotate-180" />
+            </CollapsibleTrigger>
+            <CollapsibleContent className="pt-3">
+              <dl className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+                {(
+                  [
+                    ["pages", live.referring_pages],
+                    ["new", live.new_backlinks],
+                    ["lost", live.lost_backlinks],
+                    ["spam", live.backlinks_spam_score],
+                    ["rank", live.rank],
+                  ] as const
+                ).map(([key, value]) => (
+                  <div key={key} className="flex flex-col gap-0.5">
+                    <dt className="text-caption font-normal text-fg-3">{t(`live.metrics.${key}`)}</dt>
+                    <dd className="num text-h3 text-fg">{format.number(value ?? 0)}</dd>
+                  </div>
+                ))}
+              </dl>
+              <p className="mt-3 text-caption font-normal text-fg-3">
+                {t("summary.updated", { when: format.relativeTime(new Date(live.retrieved_at), now) })}
+                {live.sandbox && (
+                  <Badge variant="warning" className="ms-2">
+                    {t("sandbox")}
+                  </Badge>
+                )}
+              </p>
+            </CollapsibleContent>
+          </Collapsible>
         )}
       </Card>
 
@@ -238,8 +236,8 @@ export function AuthorityView() {
         </TabsList>
       </Tabs>
 
-      {view === "opportunities" ? (
-        <OpportunitiesPanel siteId={siteId} onFindProspects={() => setProspectsOpen(true)} />
+      {view === "board" ? (
+        <OutreachBoard siteId={siteId} onFindProspects={() => setProspectsOpen(true)} />
       ) : (
         <BacklinksPanel siteId={siteId} />
       )}
@@ -266,142 +264,204 @@ export function AuthorityView() {
   );
 }
 
-function OpportunitiesPanel({ siteId, onFindProspects }: { siteId: number; onFindProspects: () => void }) {
-  const t = useTranslations("authority.opportunities");
+/**
+ * Winning links, step by step: sites to contact, sites contacted, links won.
+ * Each card moves forward with one button; "Not a fit" archives it.
+ */
+function OutreachBoard({ siteId, onFindProspects }: { siteId: number; onFindProspects: () => void }) {
+  const t = useTranslations("authority.board");
   const tStatus = useTranslations("authority.status");
-  const tPriority = useTranslations("authority.priority");
-  const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
   const [openId, setOpenId] = useQueryState("open", parseAsInteger);
-  const query = useBacklinkOpportunities(siteId, page);
-  const update = useUpdateBacklinkOpportunity(siteId);
+  const [showArchived, setShowArchived] = React.useState(false);
+  const board = useOpportunityBoard(siteId);
+  const move = useMoveOpportunity(siteId);
 
   const setStatus = (id: number, status: BacklinkStatus) =>
-    update.mutate(
-      { id, payload: { status } },
+    move.mutate(
+      { id, status },
       {
-        onSuccess: () => toast.success(t("statusSaved", { status: tStatus(status) })),
-        onError: (error) => toast.error(getErrorMessage(error, t("statusFailed"))),
+        onSuccess: () => toast.success(t("moved", { status: tStatus(status) })),
+        onError: (error) => toast.error(getErrorMessage(error, t("moveFailed"))),
       },
     );
 
-  const columns = React.useMemo<DataColumn<BacklinkOpportunity>[]>(
-    () => [
-      {
-        accessorKey: "title",
-        header: t("columns.title"),
-        meta: { label: t("columns.title"), pinned: true },
-        cell: ({ row }) => (
-          <button
-            type="button"
-            onClick={() => void setOpenId(row.original.id)}
-            className="flex max-w-[22rem] flex-col items-start gap-0.5 text-start"
-          >
-            <span className="w-full truncate text-small font-medium text-fg hover:text-blue hover:underline">
-              {row.original.title}
-            </span>
-            <span className="w-full truncate text-caption font-normal text-fg-3">
-              {row.original.type.replaceAll("_", " ")}
-            </span>
-          </button>
-        ),
-      },
-      {
-        id: "source",
-        accessorFn: (r) => hostOf(r.source_url) ?? "",
-        header: t("columns.source"),
-        meta: { label: t("columns.source"), csv: (r) => (r as BacklinkOpportunity).source_url ?? "" },
-        cell: ({ row }) =>
-          row.original.source_url ? (
-            <a
-              href={row.original.source_url}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex max-w-[12rem] items-center gap-1 text-small text-blue hover:underline"
-            >
-              <span className="truncate">{hostOf(row.original.source_url)}</span>
-              <ExternalLinkIcon aria-hidden className="size-3 shrink-0" />
-            </a>
-          ) : (
-            "—"
-          ),
-      },
-      {
-        id: "priority",
-        accessorFn: (r) => r.priority,
-        header: t("columns.priority"),
-        meta: { label: t("columns.priority") },
-        cell: ({ row }) => (
-          <Badge variant={priorityBadge[row.original.priority]}>{tPriority(row.original.priority)}</Badge>
-        ),
-      },
-      {
-        id: "score",
-        accessorFn: (r) => toNumber(r.opportunity_score) ?? 0,
-        header: t("columns.score"),
-        meta: { label: t("columns.score"), numeric: true },
-        cell: ({ getValue }) => Math.round(getValue() as number),
-      },
-      {
-        id: "status",
-        accessorFn: (r) => r.status,
-        header: t("columns.status"),
-        meta: { label: t("columns.status") },
-        cell: ({ row }) => (
-          <Select value={row.original.status} onValueChange={(v) => setStatus(row.original.id, v as BacklinkStatus)}>
-            <SelectTrigger aria-label={t("columns.status")} className="h-8 w-36">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {STATUSES.map((s) => (
-                <SelectItem key={s} value={s}>
-                  {tStatus(s)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        ),
-      },
-    ],
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [t, tStatus, tPriority, setOpenId],
-  );
+  if (board.isPending) return <Skeleton className="h-80 rounded-xl" />;
+  if (board.isError) return <ErrorState onRetry={() => board.refetch()} />;
 
-  if (query.isError) return <ErrorState onRetry={() => query.refetch()} />;
+  const rows = board.data.rows;
+  const archived = rows.filter((r) => columnOf(r.status) === "archived");
+  if (rows.length === 0) {
+    return (
+      <EmptyState
+        icon={Link2Icon}
+        title={t("emptyTitle")}
+        description={t("emptyBody")}
+        action={
+          <Button size="sm" variant="primary" onClick={onFindProspects}>
+            <UsersIcon />
+            {t("findProspects")}
+          </Button>
+        }
+      />
+    );
+  }
+
   return (
     <div className="flex flex-col gap-4">
-      <DataTable
-        caption={t("caption")}
-        data={query.data?.data ?? []}
-        columns={columns}
-        loading={query.isPending}
-        minWidth={900}
-        getRowId={(r) => String(r.id)}
-        csvFilename="link-opportunities.csv"
-        empty={
-          <EmptyState
-            icon={Link2Icon}
-            title={t("emptyTitle")}
-            description={t("emptyBody")}
-            action={
-              <Button size="sm" variant="secondary" onClick={onFindProspects}>
-                {t("findProspects")}
-              </Button>
-            }
-            compact
-          />
-        }
-        toolbar={
-          query.data && <span className="num text-small text-fg-2">{t("total", { count: query.data.total })}</span>
-        }
-      />
-      <Pager
-        page={page}
-        lastPage={query.data?.last_page ?? 1}
-        onPage={(p) => void setPage(p)}
-        busy={query.isFetching}
-      />
+      <p className="text-small text-fg-2">{t("intro")}</p>
+      <div className="grid gap-4 lg:grid-cols-3">
+        {COLUMNS.map((column) => {
+          const cards = rows.filter((r) => columnOf(r.status) === column.key);
+          const Icon = column.icon;
+          return (
+            <section
+              key={column.key}
+              aria-labelledby={`col-${column.key}`}
+              className="flex min-w-0 flex-col gap-3 rounded-xl border border-border bg-surface-2/60 p-3"
+            >
+              <header className="flex flex-col gap-0.5 px-1">
+                <h3 id={`col-${column.key}`} className="flex items-center gap-2 text-small font-semibold text-fg">
+                  <Icon aria-hidden className="size-4 text-fg-3" />
+                  {t(`columns.${column.key}.title`)}
+                  <span className="rounded-full bg-surface px-2 num text-caption font-medium text-fg-2">
+                    {cards.length}
+                  </span>
+                </h3>
+                <p className="text-caption font-normal text-fg-3">{t(`columns.${column.key}.body`)}</p>
+              </header>
+              {cards.length === 0 ? (
+                <p className="rounded-lg border border-dashed border-border px-3 py-6 text-center text-caption font-normal text-fg-3">
+                  {t(`columns.${column.key}.empty`)}
+                </p>
+              ) : (
+                <ul className="flex max-h-[640px] flex-col gap-2 overflow-y-auto">
+                  {cards.map((o) => (
+                    <li key={o.id}>
+                      <OpportunityCard
+                        o={o}
+                        column={column.key}
+                        onOpen={() => void setOpenId(o.id)}
+                        onStatus={(status) => setStatus(o.id, status)}
+                      />
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+          );
+        })}
+      </div>
+
+      {board.data.total > rows.length && (
+        <p className="text-caption font-normal text-fg-3">
+          {t("capped", { shown: rows.length, total: board.data.total })}
+        </p>
+      )}
+
+      {archived.length > 0 && (
+        <Collapsible open={showArchived} onOpenChange={setShowArchived}>
+          <CollapsibleTrigger className="group flex items-center gap-1 text-small font-medium text-fg-2 hover:text-fg">
+            <ArchiveIcon aria-hidden className="size-4" />
+            {t("archived", { count: archived.length })}
+            <ChevronDownIcon aria-hidden className="size-4 transition-transform group-data-[state=open]:rotate-180" />
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <ul className="mt-2 flex flex-col divide-y divide-border rounded-lg border border-border bg-surface">
+              {archived.map((o) => (
+                <li key={o.id} className="flex flex-wrap items-center gap-3 px-4 py-2.5">
+                  <button
+                    type="button"
+                    onClick={() => void setOpenId(o.id)}
+                    className="min-w-0 flex-1 truncate text-start text-small text-fg hover:text-blue hover:underline"
+                  >
+                    {o.title}
+                  </button>
+                  <span className="text-caption font-normal text-fg-3">{hostOf(o.source_url)}</span>
+                  <Button size="sm" variant="ghost" onClick={() => setStatus(o.id, "open")}>
+                    <Undo2Icon />
+                    {t("restore")}
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          </CollapsibleContent>
+        </Collapsible>
+      )}
+
       <OpportunitySheet siteId={siteId} id={openId} onClose={() => void setOpenId(null)} onStatus={setStatus} />
     </div>
+  );
+}
+
+function OpportunityCard({
+  o,
+  column,
+  onOpen,
+  onStatus,
+}: {
+  o: BacklinkOpportunity;
+  column: ColumnKey;
+  onOpen: () => void;
+  onStatus: (status: BacklinkStatus) => void;
+}) {
+  const t = useTranslations("authority.board");
+  const tPriority = useTranslations("authority.priority");
+  const host = hostOf(o.source_url);
+  return (
+    <article className="flex flex-col gap-2 rounded-lg border border-border bg-surface p-3 shadow-card">
+      <button
+        type="button"
+        onClick={onOpen}
+        className="text-start text-small font-medium text-fg hover:text-blue hover:underline"
+      >
+        {o.title}
+      </button>
+      <div className="flex flex-wrap items-center gap-2">
+        <Badge variant={priorityBadge[o.priority]}>{tPriority(o.priority)}</Badge>
+        {host && o.source_url && (
+          <a
+            href={o.source_url}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex min-w-0 items-center gap-1 text-caption text-blue hover:underline"
+          >
+            <span className="truncate">{host}</span>
+            <ExternalLinkIcon aria-hidden className="size-3 shrink-0" />
+          </a>
+        )}
+      </div>
+      <div className="flex flex-wrap gap-1.5">
+        {column === "toContact" && (
+          <Button size="sm" variant="secondary" onClick={() => onStatus("outreach")}>
+            <SendIcon />
+            {t("markContacted")}
+          </Button>
+        )}
+        {column === "contacted" && (
+          <>
+            <Button size="sm" variant="primary" onClick={() => onStatus("acquired")}>
+              <TrophyIcon />
+              {t("markWon")}
+            </Button>
+            <Button size="sm" variant="ghost" onClick={() => onStatus("prospect")}>
+              <Undo2Icon />
+              {t("backToContact")}
+            </Button>
+          </>
+        )}
+        {column === "won" && (
+          <Button size="sm" variant="ghost" onClick={() => onStatus("outreach")}>
+            <Undo2Icon />
+            {t("notWonYet")}
+          </Button>
+        )}
+        {column !== "won" && (
+          <Button size="sm" variant="ghost" className="text-fg-3" onClick={() => onStatus("rejected")}>
+            {t("notAFit")}
+          </Button>
+        )}
+      </div>
+    </article>
   );
 }
 

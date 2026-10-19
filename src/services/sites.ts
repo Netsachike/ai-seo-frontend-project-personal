@@ -1,6 +1,6 @@
 import api from "./api/api";
 import { sitePath } from "./api/helpers";
-import type { CreateSitePayload, Platform, ResourceEnvelope, Site } from "@/types/types";
+import type { ApiSuccess, CreateSitePayload, Platform, ResourceEnvelope, Site } from "@/types/types";
 
 /** Websites in the active workspace. Responses are API Resources (`{ data }`, no `success`). */
 const siteService = {
@@ -19,6 +19,15 @@ const siteService = {
   /** Includes `settings`. */
   get: async (siteId: number) => {
     const response = await api.get<ResourceEnvelope<Site>>(sitePath(siteId));
+    return response.data;
+  },
+
+  /**
+   * Permanent: the backend deletes the site and everything it owns (crawls,
+   * keywords, articles, connections, Search Console data…). Confirm first.
+   */
+  remove: async (siteId: number) => {
+    const response = await api.delete<ApiSuccess<null>>(sitePath(siteId));
     return response.data;
   },
 

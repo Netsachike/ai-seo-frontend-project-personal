@@ -68,9 +68,13 @@ const authorityService = {
 
   /** Saves a competitor's backlinks as outreach prospects (`status = prospect`). */
   backlinkProspects: async (siteId: number, payload: BacklinkProspectsPayload) => {
-    const response = await api.post<BacklinkProspectsResponse>(sitePath(siteId, "authority/backlink-prospects"), payload, {
-      timeout: LONG_REQUEST_TIMEOUT_MS,
-    });
+    const response = await api.post<BacklinkProspectsResponse>(
+      sitePath(siteId, "authority/backlink-prospects"),
+      payload,
+      {
+        timeout: LONG_REQUEST_TIMEOUT_MS,
+      },
+    );
     return response.data;
   },
 

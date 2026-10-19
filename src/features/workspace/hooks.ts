@@ -52,7 +52,10 @@ export function useWorkspaces() {
     queryFn: workspaceService.getAllWorkspaces,
     select: (response) => {
       const list = response.userWorkspaces ?? [];
-      const activeId = response.currentWorkspace?.[0]?.id ?? list.find((w) => Boolean(w.is_active))?.work_space_id;
+      const current = Array.isArray(response.currentWorkspace)
+        ? response.currentWorkspace[0]
+        : response.currentWorkspace;
+      const activeId = current?.id ?? list.find((w) => Boolean(w.is_active))?.work_space_id;
       return { list, active: list.find((w) => w.work_space_id === activeId) ?? list[0] };
     },
   });

@@ -9,6 +9,7 @@ import type { KeywordRanking } from "@/lib/mocks/ui-data";
 import { cn } from "@/lib/utils";
 import { useRange } from "@/features/insights/url-state";
 import { useRankings } from "@/features/rankings/hooks";
+import { GscPerformanceCard } from "@/features/search-console/gsc-performance";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
@@ -22,6 +23,7 @@ import { RankDistribution } from "@/components/charts/rank-distribution";
 import { VisibilityTrend } from "@/components/charts/visibility-trend";
 import { PageHeader } from "@/components/layout/page-header";
 import { PageSkeleton } from "@/components/layout/page-skeleton";
+import { brandHref } from "@/components/layout/nav";
 import { RangePicker } from "@/components/layout/range-picker";
 import { useShell } from "@/components/layout/shell-context";
 import { AddKeywordsDialog } from "./add-keywords-dialog";
@@ -39,7 +41,7 @@ const inView = (row: KeywordRanking, view: View) => {
 export function RankingsView() {
   const t = useTranslations("rankings");
   const format = useFormatter();
-  const { brand } = useShell();
+  const { brand, brandSlug } = useShell();
   const { days } = useRange();
   const [device, setDevice] = useQueryState("device", parseAsStringLiteral(devices).withDefault("desktop"));
   const [view, setView] = useQueryState("view", parseAsStringLiteral(views).withDefault("all"));
@@ -73,6 +75,9 @@ export function RankingsView() {
         }
       />
       <AddKeywordsDialog siteId={brand.id} open={adding} onOpenChange={setAdding} />
+
+      {/* Real Google numbers first: what people searched and clicked. */}
+      <GscPerformanceCard siteId={brand.id} connectHref={brandHref(brandSlug, "integrations/searchConsole")} />
 
       {query.isError && <ErrorState onRetry={() => query.refetch()} />}
       {data && data.tracked === 0 && (

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 
+import { PRODUCT } from "@/config/product";
 import { Logo } from "@/components/brand/logo";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
@@ -13,9 +14,9 @@ export default async function AuthLayout({ children }: LayoutProps<"/">) {
     <div className="flex min-h-dvh bg-surface">
       <section className="flex min-w-0 flex-1 flex-col px-4 py-4 sm:px-10 sm:py-6">
         <div className="flex items-center justify-between gap-3">
-          <Link href="/sign-in" aria-label={t("home")} className="rounded-md">
+          <a href={PRODUCT.landingUrl} aria-label={t("home")} className="rounded-md">
             <Logo />
-          </Link>
+          </a>
           <div className="flex items-center gap-1">
             <LanguageSwitcher persist={false} />
             <ThemeToggle persist={false} />

@@ -57,6 +57,13 @@ export function CoreTopicsStep({ site, onContinue }: { site: Site; onContinue: (
   const required = Math.min(CORE_TOPIC_COUNT, list.length);
   const full = selected.length >= required;
 
+  // Topics are optional: without them setup goes on and keywords can be found later from the Keywords page.
+  const skip = () => {
+    patchDraft(site.id, { coreTopics: [] });
+    onContinue();
+  };
+  const noTopics = ready && list.length === 0;
+
   const toggle = (id: string) =>
     setSelected((s) => (s.includes(id) ? s.filter((x) => x !== id) : s.length < CORE_TOPIC_COUNT ? [...s, id] : s));
 
@@ -108,6 +115,14 @@ export function CoreTopicsStep({ site, onContinue }: { site: Site; onContinue: (
               )}
             </div>
           )}
+        </div>
+      ) : noTopics ? (
+        <div className="flex flex-col items-start gap-2 rounded-xl bg-surface-2/60 p-6">
+          <p className="text-body-lg text-fg">{t("emptyTitle")}</p>
+          <p className="text-small text-fg-2">{t("emptyBody")}</p>
+          <Button variant="secondary" size="sm" className="mt-1" onClick={() => void topics.refetch()}>
+            {t("retry")}
+          </Button>
         </div>
       ) : (
         <div className="flex flex-col gap-4">
@@ -207,19 +222,31 @@ export function CoreTopicsStep({ site, onContinue }: { site: Site; onContinue: (
         </div>
       )}
 
-      <div className="sticky bottom-0 -mx-1 bg-gradient-to-t from-surface from-60% to-transparent px-1 pt-8 pb-4">
-        <Button
-          variant="primary"
-          size="lg"
-          className="w-full"
-          disabled={!ready || !full}
-          onClick={() => {
-            patchDraft(site.id, { coreTopics: selected });
-            onContinue();
-          }}
-        >
-          {t("continue")}
-        </Button>
+      <div className="sticky bottom-0 -mx-1 flex flex-col gap-2 bg-gradient-to-t from-surface from-60% to-transparent px-1 pt-8 pb-4">
+        {noTopics ? (
+          <Button variant="primary" size="lg" className="w-full" onClick={skip}>
+            {t("skip")}
+          </Button>
+        ) : (
+          <>
+            <Button
+              variant="primary"
+              size="lg"
+              className="w-full"
+              disabled={!ready || !full}
+              onClick={() => {
+                patchDraft(site.id, { coreTopics: selected });
+                onContinue();
+              }}
+            >
+              {t("continue")}
+            </Button>
+            <Button variant="ghost" size="lg" className="w-full text-fg-2" onClick={skip}>
+              {t("skip")}
+            </Button>
+          </>
+        )}
+        <p className="text-center text-caption font-normal text-fg-3">{t("skipHelp")}</p>
       </div>
     </div>
   );
