@@ -2886,7 +2886,9 @@
       "test": "Test connection",
       "sync": "Sync now",
       "gscChooseTitle": "Choose your site in Search Console",
-      "gscChooseBody": "You're signed in with Google. Pick the Search Console property for {domain} so Rankoya can read its search data."
+      "gscChooseBody": "You're signed in with Google. Pick the Search Console property for {domain} so Rankoya can read its search data.",
+      "wpcomChooseTitle": "Choose your WordPress.com site",
+      "wpcomChooseBody": "You're signed in with WordPress.com. Pick the site Rankoya should publish to."
     },
     "providers": {
       "telegram": {
@@ -2979,6 +2981,26 @@
           "control": "Every change needs approval"
         },
         "disconnectBody": "Rankoya can no longer publish to {account}."
+      },
+      "nextjs": {
+        "name": "Next.js app",
+        "description": "For Next.js and other apps without a publishing API: Rankoya prepares each article for you to copy into your app.",
+        "facts": {
+          "access": "Nothing to connect",
+          "data": "Articles ready to copy",
+          "control": "You paste each one in"
+        },
+        "disconnectBody": "{account}"
+      },
+      "manual": {
+        "name": "Copy and paste",
+        "description": "For any site or app builder without a publishing API (Lovable, Replit, custom sites): copy each finished article in yourself.",
+        "facts": {
+          "access": "Nothing to connect",
+          "data": "Articles ready to copy",
+          "control": "You paste each one in"
+        },
+        "disconnectBody": "{account}"
       }
     },
     "select": {
@@ -3005,7 +3027,7 @@
     "wpcom": {
       "title": "Connect WordPress.com",
       "loading": "Finishing the WordPress.com sign-in…",
-      "choose": "Choose the site Rankoya should publish to.",
+      "choose": "Choose the WordPress.com site Rankoya should publish to:",
       "connect": "Connect this site",
       "connected": "{name} connected. Rankoya tested the connection.",
       "testFailed": "Connected, but activating it failed: {message}. Test it again from this page.",
@@ -3018,7 +3040,14 @@
       "rankoyaSiteHelp": "This tab lost which site you were connecting, so pick it again.",
       "confirm": "Rankoya will publish to this WordPress.com site.",
       "siteId": "WordPress.com site {id}",
-      "noSiteList": "WordPress.com signed you in, but the site list didn't come back with it, so there's nothing to pick yet. This is a server issue on our side. Start again from Integrations in a few minutes."
+      "noSiteList": "WordPress.com signed you in, but the site list didn't come back with it, so there's nothing to pick yet. This is a server issue on our side. Start again from Integrations in a few minutes.",
+      "enterAddress": "Which WordPress.com site should Rankoya publish to?",
+      "addressLabel": "Your WordPress.com site address",
+      "addressHelp": "For example yourblog.wordpress.com, or your own domain if it's hosted on WordPress.com.",
+      "addressPlaceholder": "yourblog.wordpress.com",
+      "find": "Find site",
+      "found": "Found {name} ({url}).",
+      "lookupFailed": "We couldn't find a WordPress.com site at {address}. Check the address and try again."
     },
     "platform": {
       "title": "Website platform",
@@ -3115,6 +3144,19 @@
         "s3": "Allow Rankoya to view your Search Console data. It's read-only; Rankoya can't change anything.",
         "s4": "Back in Rankoya, pick your site's property. Your Google data starts syncing straight away.",
         "note": "New properties can take a few days to show data in Search Console."
+      },
+      "nextjs": {
+        "s1": "Choose <b>Connect</b>. There's nothing to fill in.",
+        "s2": "When an article is ready, open it in Rankoya and click <b>Publish</b>. Rankoya prepares it to copy.",
+        "s3": "Copy the HTML (or the text) and add it to your app, for example as a new page, an MDX file or an entry in your CMS.",
+        "s4": "Use the title, meta description and URL slug Rankoya gives you, then deploy.",
+        "note": "Want articles to go live by themselves? Your developer can add a publishing endpoint later; ask us about webhooks."
+      },
+      "manual": {
+        "s1": "Choose <b>Connect</b>. There's nothing to fill in.",
+        "s2": "When an article is ready, open it in Rankoya and click <b>Publish</b>. Rankoya prepares it to copy.",
+        "s3": "Copy it into your site's editor, with the title, meta description and URL slug Rankoya gives you, and publish it there.",
+        "note": "Works with any site, including Lovable, Replit and site builders Rankoya doesn't connect to yet."
       }
     }
   },
@@ -3412,8 +3454,13 @@
         },
         "manual": {
           "name": "Copy and paste",
-          "detail": "Any site, by hand",
+          "detail": "Any other site or app, by hand",
           "help": "Rankoya prepares each approved article for you to paste into your site."
+        },
+        "nextjs": {
+          "name": "Next.js app",
+          "detail": "No publishing API? Copy and paste",
+          "help": "Rankoya prepares each approved article for you to copy into your Next.js app."
         }
       },
       "fields": {
@@ -3427,7 +3474,16 @@
       "continue": "Continue",
       "skip": "Skip for now",
       "failed": "Couldn't connect. Check the details and try again.",
-      "testFailed": "Connected, but the test failed: {message}"
+      "testFailed": "Connected, but the test failed: {message}",
+      "hosting": {
+        "label": "Where is your WordPress site hosted?",
+        "selfHosted": "Self-hosted",
+        "selfHostedDetail": "Your own hosting, with wp-admin",
+        "wordpressCom": "WordPress.com",
+        "wordpressComDetail": "Sign in with WordPress.com",
+        "wordpressComHelp": "Sign in with WordPress.com, then choose the site Rankoya should publish to.",
+        "continue": "Continue with WordPress.com"
+      }
     },
     "preferences": {
       "title": "How should Rankoya work?",
@@ -3487,7 +3543,8 @@
           "webflow": "Webflow",
           "wix": "Wix",
           "ghost": "Ghost",
-          "manual": "Copy and paste"
+          "manual": "Copy and paste",
+          "nextjs": "Next.js app (copy and paste)"
         },
         "mode": {
           "review": "you approve each one",

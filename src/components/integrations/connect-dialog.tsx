@@ -33,7 +33,8 @@ import {
  * Connects one provider for the open site:
  * - publishing platforms: a credentials form, created and tested through the backend;
  * - Search Console: the backend's Google OAuth redirect;
- * - WordPress.com: the backend's OAuth redirect, finished on /integrations/wordpress-com/callback.
+ * - WordPress.com: the backend's OAuth redirect; the site is picked back on its details page;
+ * - copy and paste (Next.js, any other site): a `manual` connection, nothing to fill in.
  */
 export function ConnectDialog({
   provider,
@@ -86,6 +87,22 @@ export function ConnectDialog({
       setError(getErrorMessage(err, t("errors.connectFailed")));
       setIsWaiting(false);
     }
+  };
+
+  const handleManualConnect = () => {
+    if (!provider || !site) return;
+    setError(null);
+    createConnection.mutate(
+      { name, platform: provider === "nextjs" ? "nextjs" : "custom", method: "manual" },
+      {
+        onSuccess: () => {
+          toast.success(t("toasts.connected", { name }));
+          onConnected?.(provider);
+          onOpenChange(false);
+        },
+        onError: (err) => setError(getErrorMessage(err, t("errors.connectFailed"))),
+      },
+    );
   };
 
   const handleCredentialsConnect = () => {
@@ -214,6 +231,11 @@ export function ConnectDialog({
               {meta.method === "oauth" && (
                 <Button variant="primary" loading={isWaiting} onClick={() => void handleOAuthConnect()}>
                   {t("continueWith", { name })}
+                </Button>
+              )}
+              {meta.method === "manual" && (
+                <Button variant="primary" loading={createConnection.isPending} onClick={handleManualConnect}>
+                  {t("connect")}
                 </Button>
               )}
               {meta.method === "credentials" && shopifyConnection === null && (

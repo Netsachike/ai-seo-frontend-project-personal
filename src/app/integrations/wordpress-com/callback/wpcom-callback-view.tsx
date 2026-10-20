@@ -17,6 +17,7 @@ import { useSites, useWorkspaces } from "@/features/workspace/hooks";
 import {
   clearPendingWpcomConnect,
   readPendingWpcomConnect,
+  sitesFromUrl,
   type PendingWpcomConnect,
 } from "@/features/publishing/wpcom";
 import { Button } from "@/components/ui/button";
@@ -27,38 +28,6 @@ import { SITES_PATH } from "@/features/site-setup/steps";
 
 /** A site's WordPress.com page, where a connection that failed its test can be tested again. */
 const detailsPath = (siteId: number) => `/${siteId}/integrations/wordpressCom`;
-
-/**
- * The WordPress.com sites the backend put on the redirect: `sites` as JSON
- * (`[{ id, name, url }]`), or just their ids in `sites_id` (comma-separated).
- */
-function sitesFromUrl(params: URLSearchParams): WordpressComSite[] {
-  const raw = params.get("sites");
-  if (raw) {
-    try {
-      const list: unknown = JSON.parse(raw);
-      if (Array.isArray(list))
-        return list.flatMap((s) =>
-          s && typeof s === "object" && "id" in s
-            ? [
-                {
-                  id: String((s as { id: unknown }).id),
-                  name: String((s as { name?: unknown }).name ?? ""),
-                  url: String((s as { url?: unknown }).url ?? ""),
-                },
-              ]
-            : [],
-        );
-    } catch {
-      // Not JSON: fall through to the ids.
-    }
-  }
-  return (params.get("sites_id") ?? "")
-    .split(",")
-    .map((id) => id.trim())
-    .filter((id) => id && id !== "undefined" && id !== "null")
-    .map((id) => ({ id, name: "", url: "" }));
-}
 
 /**
  * The end of the WordPress.com sign-in. It arrives in one of two ways:
