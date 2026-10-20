@@ -22,6 +22,7 @@ import {
   isCalendarItemId,
   toArticleDetail,
   useArticle,
+  isStillWriting,
   useCalendarItem,
   useSaveArticle,
   useWriteArticle,
@@ -45,6 +46,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { ErrorState } from "@/components/brand/error-state";
+import { EmptyState } from "@/components/brand/empty-state";
 import { RankoyaAvatar } from "@/components/brand/logo";
 import { PlatformLogo } from "@/components/brand/platform-logo";
 import { ScoreRing } from "@/components/brand/score-ring";
@@ -55,7 +57,13 @@ import { SelectField } from "@/components/forms/select-field";
 import { brandHref } from "@/components/layout/nav";
 import { PageSkeleton } from "@/components/layout/page-skeleton";
 import { useShell } from "@/components/layout/shell-context";
-import { InternalLinksCard, ManualPublishCard, PublicationCard, internalLinksOf } from "./publish-panels";
+import {
+  InternalLinksCard,
+  ManualPublishCard,
+  ManualPublishFields,
+  PublicationCard,
+  internalLinksOf,
+} from "./publish-panels";
 
 /** Where a connection publishes to, when the API tells us (Webflow and Shopify connections don't). */
 const connectionUrl = (c: PublishingConnection) =>
@@ -73,7 +81,9 @@ export function ArticleView({ articleId }: { articleId: string }) {
 }
 
 function LoadArticle({ articleId }: { articleId: number }) {
-  const { brand } = useShell();
+  const t = useTranslations("editor");
+  const tNav = useTranslations("shell.nav.items");
+  const { brand, brandSlug } = useShell();
   const query = useArticle(brand?.id, articleId);
   if (!Number.isInteger(articleId)) notFound();
   if (!brand || query.isPending) return <PageSkeleton kpis={0} panels={2} />;
@@ -81,7 +91,35 @@ function LoadArticle({ articleId }: { articleId: number }) {
     if ((query.error as { response?: { status?: number } }).response?.status === 404) notFound();
     return <ErrorState onRetry={() => query.refetch()} />;
   }
+  if (isStillWriting(query.data)) return <StillWriting />;
+  if (!query.data.content)
+    return (
+      <EmptyState
+        icon={FilePenLineIcon}
+        title={t("failedTitle")}
+        description={query.data.error_message ?? t("failedBody")}
+        action={
+          <Button asChild variant="primary">
+            <Link href={brandHref(brandSlug, "articles")}>{tNav("articles")}</Link>
+          </Button>
+        }
+      />
+    );
   return <Editor key={query.data.id} raw={query.data} />;
+}
+
+/** The article exists but its body hasn't come back yet; the query checks again every few seconds. */
+function StillWriting() {
+  const t = useTranslations("editor");
+  return (
+    <Card role="status" className="max-w-[720px] flex-row items-center gap-4">
+      <LoaderCircleIcon aria-hidden className="size-5 shrink-0 animate-spin text-blue" />
+      <div className="flex flex-col gap-0.5">
+        <h1 className="text-h3 text-fg">{t("stillWritingTitle")}</h1>
+        <p className="text-small text-fg-2">{t("stillWritingBody")}</p>
+      </div>
+    </Card>
+  );
 }
 
 /** A planned entry with no article yet: research its keyword, then write it. */
@@ -284,7 +322,7 @@ function Editor({ raw }: { raw: ArticleWithRelations }) {
                 </a>
               </Button>
             )}
-            {publishable && (
+            {publishable && !isManualTarget && (
               <Button variant="primary" disabled={blocked || !targetId} loading={publish.isPending} onClick={approve}>
                 <SendIcon />
                 {manualReady
@@ -374,13 +412,15 @@ function Editor({ raw }: { raw: ArticleWithRelations }) {
 
         <aside className="flex flex-col gap-4">
           {publications.data && <PublicationCard publications={publications.data} />}
-          {manualReady && (
+          {manualReady && !isManualTarget && (
             <ManualPublishCard
               title={article.title}
               metaTitle={metaTitle}
               metaDescription={shortAnswer}
               slug={slug}
               html={html}
+              lang={contentLanguage}
+              domain={brand?.domain}
             />
           )}
           <Card>
@@ -520,10 +560,34 @@ function Editor({ raw }: { raw: ArticleWithRelations }) {
                 </span>
               </div>
             )}
-            <label className="flex cursor-pointer items-center gap-2.5 text-small text-fg">
-              <Checkbox checked={notify} onCheckedChange={(v) => setNotify(v === true)} />
-              {t("notify")}
-            </label>
+            {/* Copy and paste (Next.js, any other site): nothing to approve, the article is copied from here. */}
+            {isManualTarget ? (
+              <div className="flex flex-col gap-3 border-t border-border pt-4">
+                <div className="flex flex-col gap-0.5">
+                  <span className="text-small font-semibold text-fg">{t("manual.inlineTitle")}</span>
+                  <span className="text-caption font-normal text-fg-3">{t("manual.inlineBody")}</span>
+                </div>
+                {blocked && (
+                  <p role="alert" className="text-caption font-normal text-warning">
+                    {t("manual.placeholders")}
+                  </p>
+                )}
+                <ManualPublishFields
+                  title={article.title}
+                  metaTitle={metaTitle}
+                  metaDescription={shortAnswer}
+                  slug={slug}
+                  html={html}
+                  lang={contentLanguage}
+                  domain={brand?.domain}
+                />
+              </div>
+            ) : (
+              <label className="flex cursor-pointer items-center gap-2.5 text-small text-fg">
+                <Checkbox checked={notify} onCheckedChange={(v) => setNotify(v === true)} />
+                {t("notify")}
+              </label>
+            )}
           </Card>
 
           <InternalLinksCard links={internalLinks} domain={brand?.domain ?? ""} />
