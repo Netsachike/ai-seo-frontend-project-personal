@@ -72,30 +72,44 @@ export function readWpcomAuthorization(siteId: number): WpcomAuthorization | nul
   return auth && auth.siteId === siteId && auth.expiresAt > Date.now() ? auth : null;
 }
 
+/** One site from the redirect, whichever casing it uses (`id`/`ID`, `url`/`URL`). */
+function toSite(value: unknown): WordpressComSite | null {
+  if (!value || typeof value !== "object") return null;
+  const r = value as Record<string, unknown>;
+  const id = r.id ?? r.ID;
+  if (id === undefined || id === null || id === "") return null;
+  return { id: String(id), name: String(r.name ?? ""), url: String(r.url ?? r.URL ?? "") };
+}
+
 /**
- * The WordPress.com sites the backend put on the redirect: `sites` as JSON
- * (`[{ id, name, url }]`), or just their ids in `sites_id` (comma-separated).
+ * The WordPress.com sites the backend put on the redirect, in any of the
+ * shapes PHP produces:
+ * - `sites` as JSON (`[{ id, name, url }]`, from `$sites->toJson()`);
+ * - `sites[0][id]=…&sites[0][name]=…` (an array passed to `http_build_query`);
+ * - just their ids in `sites_id` (comma-separated).
  */
 export function sitesFromUrl(params: URLSearchParams): WordpressComSite[] {
   const raw = params.get("sites");
   if (raw) {
     try {
       const list: unknown = JSON.parse(raw);
-      if (Array.isArray(list))
-        return list.flatMap((s) =>
-          s && typeof s === "object" && "id" in s
-            ? [
-                {
-                  id: String((s as { id: unknown }).id),
-                  name: String((s as { name?: unknown }).name ?? ""),
-                  url: String((s as { url?: unknown }).url ?? ""),
-                },
-              ]
-            : [],
-        );
+      const items = Array.isArray(list) ? list : list && typeof list === "object" ? Object.values(list) : [];
+      const sites = items.map(toSite).filter((site): site is WordpressComSite => site !== null);
+      if (sites.length) return sites;
     } catch {
-      // Not JSON: fall through to the ids.
+      // Not JSON: try the other shapes.
     }
+  }
+  const indexed = new Map<string, Record<string, string>>();
+  for (const [key, value] of params) {
+    const match = /^sites\[(\d+)\]\[(\w+)\]$/.exec(key);
+    if (match) indexed.set(match[1], { ...indexed.get(match[1]), [match[2]]: value });
+  }
+  if (indexed.size) {
+    return [...indexed.entries()]
+      .sort(([x], [y]) => Number(x) - Number(y))
+      .map(([, site]) => toSite(site))
+      .filter((site): site is WordpressComSite => site !== null);
   }
   return (params.get("sites_id") ?? "")
     .split(",")
