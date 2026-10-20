@@ -113,9 +113,9 @@ Open the site. The **Overview** shows how easy you are to find on Google and in 
 
 > Say: "From research to a live, internally linked article on your site, and you approve every one."
 
-## 11. Content calendar (20 seconds)
+## 11. Content planner (20 seconds)
 
-Open **Content calendar**: the month's plan, what's published and what's waiting for you. Reschedule or swap any article.
+Open **Content planner**: the month's plan, what's published and what's waiting for you. Reschedule or swap any article.
 
 > Say: "A steady publishing plan without the spreadsheet."
 

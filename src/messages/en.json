@@ -443,7 +443,7 @@
         "actions": "Action plan",
         "keywords": "Keywords",
         "articles": "Articles",
-        "calendar": "Content calendar",
+        "calendar": "Content planner",
         "money": "Money pages",
         "authority": "Authority",
         "social": "Social",
@@ -1604,7 +1604,7 @@
     }
   },
   "content": {
-    "title": "Content calendar",
+    "title": "Content planner",
     "description": "Your plan for {month}: {count, plural, one {# article} other {# articles}}, {published} published, {waiting} waiting for you.",
     "descriptionEmpty": "Nothing planned for {month} yet.",
     "viewLabel": "View",
@@ -1646,10 +1646,10 @@
       "menu": "Actions for {title}",
       "reschedule": "Reschedule",
       "swap": "Change keyword",
-      "remove": "Remove from calendar",
+      "remove": "Remove from the plan",
       "rescheduleTitle": "Reschedule this article",
       "swapTitle": "Change the target keyword",
-      "removeTitle": "Remove from the calendar?",
+      "removeTitle": "Remove from the plan?",
       "rescheduleConfirm": "Save date",
       "swapConfirm": "Change keyword",
       "removeConfirm": "Remove",
@@ -1661,7 +1661,7 @@
       "cancel": "Cancel",
       "rescheduled": "Rescheduled.",
       "swapped": "Keyword changed.",
-      "removed": "Removed from the calendar.",
+      "removed": "Removed from the plan.",
       "failed": "That didn't work. Try again."
     },
     "plans": {
