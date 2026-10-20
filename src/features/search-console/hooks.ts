@@ -7,10 +7,12 @@ import { searchConsoleKeys } from "@/lib/api/query-keys";
 import searchConsoleService from "@/services/search-console";
 
 /**
- * Google sends the browser back to `{FRONTEND_URL}/settings/search-console?connected={siteId}`.
- * That page only forwards: to the setup step the user came from, or to the
- * site's Search Console page, where the property is picked in place. Where
- * to return is kept here across the redirect.
+ * After Google sign-in the backend redirects to
+ * `{FRONTEND_URL}/sites/{siteId}/setup/google-search-console`, where the setup
+ * step lists the properties. A site that already finished setup is forwarded
+ * from there to its Search Console page, which does the same. The older
+ * `/settings/search-console?connected={siteId}` return still works and forwards
+ * the same way.
  */
 const PENDING_KEY = "rankoya:gsc-pending";
 export const GSC_RETURN_PATH = "/settings/search-console";

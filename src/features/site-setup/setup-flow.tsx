@@ -58,7 +58,13 @@ export function SetupFlow({ siteId: siteParam }: { siteId: string }) {
   React.useEffect(() => {
     if (!site) return;
     if (!furthest) {
-      router.replace(`/${siteSlug(site)}/overview`);
+      // Google sends every Search Console sign-in back to the setup step, even for a site
+      // that finished setup; its own Search Console page picks the property instead.
+      router.replace(
+        current === "google-search-console"
+          ? `/${siteSlug(site)}/integrations/searchConsole`
+          : `/${siteSlug(site)}/overview`,
+      );
     } else if (order(current) > order(furthest)) {
       go(furthest, { replace: true });
     }
