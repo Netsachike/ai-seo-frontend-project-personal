@@ -23,7 +23,7 @@ export type PendingWpcomConnect = { siteId: number; returnTo: string };
 export type WpcomAuthorization = {
   siteId: number;
   pendingKey: string;
-  /** Empty when the backend's redirect didn't list them; the user then types the site's address. */
+  /** From the backend's redirect (`sites` JSON or `sites_id`); empty when it didn't send them. */
   sites: WordpressComSite[];
   expiresAt: number;
 };
@@ -105,22 +105,3 @@ export function sitesFromUrl(params: URLSearchParams): WordpressComSite[] {
 }
 
 export const clearWpcomAuthorization = () => remove(AUTH_KEY);
-
-/**
- * A WordPress.com site's id and name from its address, through WordPress.com's
- * public API (open to the browser, no sign-in). Null when there's no such site.
- */
-export async function lookupWpcomSite(address: string): Promise<WordpressComSite | null> {
-  const host = address
-    .trim()
-    .toLowerCase()
-    .replace(/^https?:\/\//, "")
-    .split(/[/?#]/)[0];
-  if (!host) return null;
-  const response = await fetch(
-    `https://public-api.wordpress.com/rest/v1.1/sites/${encodeURIComponent(host)}?fields=ID,name,URL`,
-  );
-  if (!response.ok) return null;
-  const site = (await response.json()) as { ID?: number; name?: string; URL?: string };
-  return site.ID ? { id: String(site.ID), name: site.name ?? host, url: site.URL ?? `https://${host}` } : null;
-}

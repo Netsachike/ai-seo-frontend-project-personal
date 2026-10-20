@@ -104,7 +104,6 @@ export function IntegrationDetailsView({ provider }: { provider: IntegrationProv
         <Card className="gap-4">
           <div className="flex flex-col gap-0.5">
             <h2 className="text-h3 text-fg">{t("details.wpcomChooseTitle")}</h2>
-            <p className="text-small text-fg-2">{t("details.wpcomChooseBody")}</p>
           </div>
           <WpcomSitePicker
             auth={wpcom.auth}

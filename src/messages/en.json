@@ -2887,8 +2887,7 @@
       "sync": "Sync now",
       "gscChooseTitle": "Choose your site in Search Console",
       "gscChooseBody": "You're signed in with Google. Pick the Search Console property for {domain} so Rankoya can read its search data.",
-      "wpcomChooseTitle": "Choose your WordPress.com site",
-      "wpcomChooseBody": "You're signed in with WordPress.com. Pick the site Rankoya should publish to."
+      "wpcomChooseTitle": "Finishing your WordPress.com connection"
     },
     "providers": {
       "telegram": {
@@ -3040,14 +3039,9 @@
       "rankoyaSiteHelp": "This tab lost which site you were connecting, so pick it again.",
       "confirm": "Rankoya will publish to this WordPress.com site.",
       "siteId": "WordPress.com site {id}",
-      "noSiteList": "WordPress.com signed you in, but the site list didn't come back with it, so there's nothing to pick yet. This is a server issue on our side. Start again from Integrations in a few minutes.",
-      "enterAddress": "Which WordPress.com site should Rankoya publish to?",
-      "addressLabel": "Your WordPress.com site address",
-      "addressHelp": "For example yourblog.wordpress.com, or your own domain if it's hosted on WordPress.com.",
-      "addressPlaceholder": "yourblog.wordpress.com",
-      "find": "Find site",
-      "found": "Found {name} ({url}).",
-      "lookupFailed": "We couldn't find a WordPress.com site at {address}. Check the address and try again."
+      "noSiteList": "You're signed in with WordPress.com, but your site list didn't come back from our server, so there's nothing to choose yet. We're fixing this; try connecting again shortly.",
+      "connecting": "Connecting {name} and testing the connection…",
+      "retry": "Try again"
     },
     "platform": {
       "title": "Website platform",
