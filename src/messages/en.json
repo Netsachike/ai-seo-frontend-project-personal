@@ -3986,7 +3986,7 @@
     "picker": {
       "loading": "Looking up your Search Console sites…",
       "failed": "We couldn't load your Search Console sites. Try connecting again.",
-      "choose": "Select the property to connect with:",
+      "choose": "Choose the Search Console property for this site:",
       "domainProperty": "Whole domain",
       "urlProperty": "One address",
       "use": "Use this property",
@@ -3994,11 +3994,13 @@
       "saved": "{property} is connected. Your Google data is syncing in the background.",
       "savedShort": "Connected",
       "saveFailed": "We couldn't connect that property. Try again.",
-      "noneTitle": "{domain} isn't in your Google Search Console yet",
+      "noneTitle": "There are no properties in this Google account's Search Console",
       "noneBody": "Add {domain} as a property in Search Console (a Domain property is best), then come back and check again. You can also skip this for now and connect it later from Integrations.",
       "openGsc": "Open Google Search Console",
       "checkAgain": "Check again",
-      "noneHelp": "Signed in with the wrong Google account? Connect again and pick the account that owns the site."
+      "noneHelp": "Signed in with the wrong Google account? Connect again and pick the account that owns the site.",
+      "matches": "Matches your site",
+      "noMatch": "None of these look like {domain}. Pick the right one, or add {domain} in Search Console and check again."
     }
   },
   "tour": {
