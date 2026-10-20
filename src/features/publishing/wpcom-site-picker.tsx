@@ -4,17 +4,15 @@ import * as React from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 
-import type { PublishingConnection, WordpressComSite } from "@/types/types";
+import type { PublishingConnection } from "@/types/types";
 import { cn } from "@/lib/utils";
 import { getErrorMessage } from "@/lib/errors";
 import { useMounted } from "@/lib/hooks/use-mounted";
 import { publishingKeys } from "@/lib/api/query-keys";
 import publishingService from "@/services/publishing";
-import { FormField } from "@/components/forms/form-field";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { ConnectionTestError } from "./hooks";
-import { clearWpcomAuthorization, lookupWpcomSite, readWpcomAuthorization, type WpcomAuthorization } from "./wpcom";
+import { clearWpcomAuthorization, readWpcomAuthorization, type WpcomAuthorization } from "./wpcom";
 
 /** The WordPress.com sign-in waiting for this site, read once in the browser. */
 export function useWpcomAuthorization(siteId: number | undefined) {
@@ -28,10 +26,10 @@ export function useWpcomAuthorization(siteId: number | undefined) {
 }
 
 /**
- * After WordPress.com sign-in: the user picks which WordPress.com site
- * Rankoya publishes to. The sites come from the backend's redirect; when it
- * didn't list them, the user types the site's address and its id is looked
- * up. Then the connection is created and tested (which activates it).
+ * After WordPress.com sign-in: the site chosen on WordPress.com's own consent
+ * screen, from the backend's redirect. One site connects by itself: the
+ * connection is created and tested (which activates it). Only an
+ * authorization for several sites (`scope=global`) asks which one.
  */
 export function WpcomSitePicker({
   auth,
@@ -44,20 +42,7 @@ export function WpcomSitePicker({
   const t = useTranslations("integrations.wpcom");
   const queryClient = useQueryClient();
   const [picked, setPicked] = React.useState<string | null>(auth.sites[0]?.id ?? null);
-  const [address, setAddress] = React.useState("");
-  const [found, setFound] = React.useState<WordpressComSite | null>(null);
-  const listed = auth.sites.length > 0;
-
-  const lookup = useMutation({
-    mutationFn: async () => {
-      const site = await lookupWpcomSite(address);
-      if (!site) throw new Error(t("lookupFailed", { address: address.trim() }));
-      return site;
-    },
-    onSuccess: setFound,
-  });
-
-  const site = listed ? auth.sites.find((s) => s.id === picked) : found;
+  const site = auth.sites.find((s) => s.id === picked);
 
   const complete = useMutation({
     mutationFn: async () => {
@@ -84,75 +69,69 @@ export function WpcomSitePicker({
     },
   });
 
+  // The site was chosen on WordPress.com's screen: connect it straight away, once.
+  const auto = React.useRef(false);
+  const { mutate } = complete;
+  React.useEffect(() => {
+    if (auth.sites.length === 1 && !auto.current) {
+      auto.current = true;
+      mutate();
+    }
+  }, [auth.sites.length, mutate]);
+
+  if (auth.sites.length === 1) {
+    const only = auth.sites[0];
+    const label = only.name || only.url || t("siteId", { id: only.id });
+    return complete.isError ? (
+      <div className="flex flex-col gap-3">
+        <p role="alert" className="text-small text-danger">
+          {getErrorMessage(complete.error, t("failed"))}
+        </p>
+        <Button variant="primary" className="self-start" onClick={() => complete.mutate()}>
+          {t("retry")}
+        </Button>
+      </div>
+    ) : (
+      <p role="status" className="rounded-lg bg-surface-2 px-4 py-3 text-small text-fg-2">
+        {t("connecting", { name: label })}
+      </p>
+    );
+  }
+
+  if (auth.sites.length === 0) {
+    return (
+      <p role="alert" className="rounded-lg bg-surface-2 px-4 py-3 text-small text-fg-2">
+        {t("noSiteList")}
+      </p>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-3">
-      <span className="text-small font-medium text-fg">{listed ? t("choose") : t("enterAddress")}</span>
-
-      {listed ? (
-        <div role="radiogroup" aria-label={t("choose")} className="flex flex-col gap-2">
-          {auth.sites.map((s) => (
-            <button
-              key={s.id}
-              type="button"
-              role="radio"
-              aria-checked={s.id === picked}
-              disabled={complete.isPending}
-              onClick={() => setPicked(s.id)}
-              className={cn(
-                "flex flex-col rounded-lg border px-4 py-3 text-start",
-                s.id === picked ? "border-blue bg-blue-bg" : "border-border hover:border-border-strong",
-              )}
-            >
-              <span className="text-small font-medium text-fg">{s.name || t("siteId", { id: s.id })}</span>
-              {s.url && (
-                <span dir="ltr" className="truncate text-start text-caption font-normal text-fg-3">
-                  {s.url}
-                </span>
-              )}
-            </button>
-          ))}
-        </div>
-      ) : (
-        <form
-          className="flex flex-col gap-2"
-          onSubmit={(event) => {
-            event.preventDefault();
-            if (address.trim()) lookup.mutate();
-          }}
-        >
-          <FormField label={t("addressLabel")} helper={t("addressHelp")}>
-            {(props) => (
-              <div className="flex gap-2">
-                <Input
-                  {...props}
-                  dir="ltr"
-                  inputMode="url"
-                  autoComplete="off"
-                  placeholder={t("addressPlaceholder")}
-                  value={address}
-                  onChange={(event) => {
-                    setAddress(event.target.value);
-                    setFound(null);
-                  }}
-                />
-                <Button type="submit" variant="secondary" loading={lookup.isPending} disabled={!address.trim()}>
-                  {t("find")}
-                </Button>
-              </div>
+      <span className="text-small font-medium text-fg">{t("choose")}</span>
+      <div role="radiogroup" aria-label={t("choose")} className="flex flex-col gap-2">
+        {auth.sites.map((s) => (
+          <button
+            key={s.id}
+            type="button"
+            role="radio"
+            aria-checked={s.id === picked}
+            disabled={complete.isPending}
+            onClick={() => setPicked(s.id)}
+            className={cn(
+              "flex flex-col rounded-lg border px-4 py-3 text-start",
+              s.id === picked ? "border-blue bg-blue-bg" : "border-border hover:border-border-strong",
             )}
-          </FormField>
-          {lookup.isError && (
-            <p role="alert" className="text-small text-danger">
-              {lookup.error.message}
-            </p>
-          )}
-          {found && (
-            <p className="rounded-lg border border-blue bg-blue-bg px-4 py-3 text-small text-fg">
-              {t("found", { name: found.name, url: found.url })}
-            </p>
-          )}
-        </form>
-      )}
+          >
+            <span className="text-small font-medium text-fg">{s.name || t("siteId", { id: s.id })}</span>
+            {s.url && (
+              <span dir="ltr" className="truncate text-start text-caption font-normal text-fg-3">
+                {s.url}
+              </span>
+            )}
+          </button>
+        ))}
+      </div>
 
       {complete.isError && (
         <p role="alert" className="text-small text-danger">
