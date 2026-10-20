@@ -23,6 +23,7 @@ import { Input } from "@/components/ui/input";
 import { dur, ease } from "../motion";
 import { patchDraft } from "../store";
 import { StepHeading } from "./step-heading";
+import { ConnectGuide } from "@/components/integrations/connect-guide";
 
 /** The API platforms, then copy-and-paste (a `manual` connection, active straight away). */
 export const PUBLISH_PLATFORMS = [...PUBLISHING_PLATFORMS, "manual"] as const;
@@ -128,6 +129,7 @@ export function IntegrationStep({ site, onContinue }: { site: Site; onContinue: 
             className="flex flex-col gap-4 rounded-xl border border-border bg-surface p-5 shadow-card"
           >
             <p className="text-small text-fg-2">{t(`platform.${choice}.help`)}</p>
+            <ConnectGuide provider={choice} defaultOpen={false} />
             {fields.length > 0 && (
               <div className="grid gap-4 sm:grid-cols-2">
                 {fields.map((field) => {

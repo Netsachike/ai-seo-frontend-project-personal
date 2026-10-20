@@ -82,7 +82,12 @@ export function TourProvider() {
           close.type = "button";
           close.className = "rankoya-tour-close";
           close.textContent = t("close");
-          close.addEventListener("click", () => run.destroy());
+          // destroy() skips onDestroyStarted, so record the close here.
+          close.addEventListener("click", () => {
+            instance.current = null;
+            run.destroy();
+            dismissTour(tour.id);
+          });
           popover.footerButtons.prepend(close);
         },
         onDestroyStarted: () => {

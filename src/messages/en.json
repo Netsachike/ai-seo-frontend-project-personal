@@ -2884,7 +2884,9 @@
       "disconnect": "Disconnect",
       "disconnectTitle": "Disconnect {name}?",
       "test": "Test connection",
-      "sync": "Sync now"
+      "sync": "Sync now",
+      "gscChooseTitle": "Choose your site in Search Console",
+      "gscChooseBody": "You're signed in with Google. Pick the Search Console property for {domain} so Rankoya can read its search data."
     },
     "providers": {
       "telegram": {
@@ -3046,11 +3048,74 @@
     },
     "shopifyBlogs": {
       "title": "{count, plural, one {# blog in this store} other {# blogs in this store}}",
-      "help": "You choose which blog each article goes to when you publish it.",
+      "help": "Rankoya adds every article to this blog in your store. You can change it any time.",
       "loading": "Loading the store's blogs…",
       "failed": "We couldn't load this store's blogs. Test the connection, or reconnect with a new access token.",
       "none": "This store has no blogs yet. Create one in Shopify (Online Store › Blog posts) so Rankoya can publish there.",
-      "path": "/blogs/{handle}"
+      "path": "/blogs/{handle}",
+      "pick": "Blog for your articles",
+      "save": "Use this blog",
+      "current": "In use",
+      "saved": "Articles will go to {name}.",
+      "saveFailed": "We couldn't save the blog. Try again.",
+      "chooseTitle": "Connected. Now choose the blog",
+      "chooseBody": "Pick the blog in your Shopify store where Rankoya should publish your articles."
+    },
+    "reconnect": "Reconnect",
+    "guides": {
+      "title": "How to get what you need",
+      "wordpress": {
+        "s1": "Sign in to your WordPress admin (usually <code>yoursite.com/wp-admin</code>).",
+        "s2": "Go to <b>Users › Profile</b>.",
+        "s3": "Scroll to <b>Application Passwords</b>, type a name such as <code>Rankoya</code> and click <b>Add New Application Password</b>.",
+        "s4": "Copy the password WordPress shows, spaces and all. It's only shown once.",
+        "s5": "Paste it here, with your site's address and the username you sign in with.",
+        "note": "Your user needs to be an Editor or Administrator. Application Passwords need WordPress 5.6 or later and a site on https; some security plugins switch them off."
+      },
+      "wordpressCom": {
+        "s1": "Click <b>Continue with WordPress.com</b> below.",
+        "s2": "Sign in with the account that manages your blog, then click <b>Approve</b>.",
+        "s3": "Back in Rankoya, choose which of your WordPress.com sites to publish to.",
+        "note": "You need to be an administrator of that WordPress.com site."
+      },
+      "shopify": {
+        "s1": "Open the <link>Shopify Dev Dashboard</link> and create an app for your store.",
+        "s2": "In the app's settings, add the scopes <code>read_content</code> and <code>write_content</code>, then release a version.",
+        "s3": "Install the app on your store from the app's overview page.",
+        "s4": "Copy the <b>Admin API access token</b> (it starts with <code>shpat_</code>).",
+        "s5": "Enter your store's address ending in <code>.myshopify.com</code> (not your own domain) and paste the token.",
+        "note": "After connecting you'll choose the blog articles go to. Some tokens expire after about 24 hours; if publishing stops working, reconnect with a new token."
+      },
+      "webflow": {
+        "s1": "Open your site in the <link>Webflow dashboard</link> and go to <b>Site settings › Apps & integrations</b>.",
+        "s2": "Under <b>API access</b>, click <b>Generate API token</b>, name it <code>Rankoya</code> and allow <b>CMS: read and write</b> and <b>Sites: read</b>.",
+        "s3": "Copy the token. It's only shown once.",
+        "s4": "In the Designer, open <b>CMS</b>, then your blog collection's settings, and copy the <b>Collection ID</b>.",
+        "s5": "Paste the token and the Collection ID here.",
+        "note": "The collection needs fields for the post's title, slug and body. Ask your developer if you're not sure which collection is your blog."
+      },
+      "wix": {
+        "s1": "Open the <link>Wix API Keys page</link> and click <b>Generate API Key</b>.",
+        "s2": "Name it <code>Rankoya</code>, pick your site and allow the <b>Blog</b> permissions, then generate it.",
+        "s3": "Copy the key. It's only shown once.",
+        "s4": "Open your site's dashboard: the site ID is the code in the address bar right after <code>/dashboard/</code>.",
+        "s5": "Paste the key and the site ID here.",
+        "note": "You need to be the site owner, or have API key permissions on the Wix account."
+      },
+      "ghost": {
+        "s1": "In Ghost Admin, go to <b>Settings › Integrations</b>.",
+        "s2": "Click <b>Add custom integration</b> and name it <code>Rankoya</code>.",
+        "s3": "Copy the <b>Admin API key</b> (it looks like <code>id:secret</code>) and the <b>API URL</b>.",
+        "s4": "Paste the API URL as your Ghost site address, and the Admin API key here.",
+        "note": "Custom integrations are available on every Ghost plan, including Ghost(Pro) Starter."
+      },
+      "searchConsole": {
+        "s1": "Make sure your site is added in <link>Google Search Console</link>. A <b>Domain</b> property is best.",
+        "s2": "Click <b>Continue with Google</b> and sign in with the Google account that owns the site there.",
+        "s3": "Allow Rankoya to view your Search Console data. It's read-only; Rankoya can't change anything.",
+        "s4": "Back in Rankoya, pick your site's property. Your Google data starts syncing straight away.",
+        "note": "New properties can take a few days to show data in Search Console."
+      }
     }
   },
   "legal": {
@@ -3192,7 +3257,8 @@
       "connect": "Connect",
       "continue": "Continue",
       "skip": "Skip for now",
-      "connectFailed": "Couldn't start the Google sign-in. Try again."
+      "connectFailed": "Couldn't start the Google sign-in. Try again.",
+      "signedIn": "Signed in with Google. Now choose your site below."
     },
     "topics": {
       "title": "Core topics",
@@ -3916,6 +3982,23 @@
       "clicks": "Clicks",
       "impressions": "Impressions",
       "position": "Position"
+    },
+    "picker": {
+      "loading": "Looking up your Search Console sites…",
+      "failed": "We couldn't load your Search Console sites. Try connecting again.",
+      "choose": "Select the property to connect with:",
+      "domainProperty": "Whole domain",
+      "urlProperty": "One address",
+      "use": "Use this property",
+      "saving": "Connecting {property} and pulling your Google data…",
+      "saved": "{property} is connected. Your Google data is syncing in the background.",
+      "savedShort": "Connected",
+      "saveFailed": "We couldn't connect that property. Try again.",
+      "noneTitle": "{domain} isn't in your Google Search Console yet",
+      "noneBody": "Add {domain} as a property in Search Console (a Domain property is best), then come back and check again. You can also skip this for now and connect it later from Integrations.",
+      "openGsc": "Open Google Search Console",
+      "checkAgain": "Check again",
+      "noneHelp": "Signed in with the wrong Google account? Connect again and pick the account that owns the site."
     }
   },
   "tour": {

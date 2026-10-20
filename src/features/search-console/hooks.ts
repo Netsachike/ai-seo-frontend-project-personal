@@ -8,8 +8,9 @@ import searchConsoleService from "@/services/search-console";
 
 /**
  * Google sends the browser back to `{FRONTEND_URL}/settings/search-console?connected={siteId}`.
- * The site's domain and where to return are kept here across the redirect;
- * without them (another tab, cleared storage) they are rebuilt from the site.
+ * That page only forwards: to the setup step the user came from, or to the
+ * site's Search Console page, where the property is picked in place. Where
+ * to return is kept here across the redirect.
  */
 const PENDING_KEY = "rankoya:gsc-pending";
 export const GSC_RETURN_PATH = "/settings/search-console";
@@ -63,6 +64,27 @@ export function useGscProperties(siteId: number | undefined) {
     enabled: Boolean(siteId),
     queryFn: async () => (await searchConsoleService.properties(siteId as number)).data,
   });
+}
+
+/** Where Search Console adds a new property. */
+export const GSC_ADD_PROPERTY_URL = "https://search.google.com/search-console/welcome";
+
+/**
+ * The properties that belong to the site: the domain property first, then
+ * URL-prefix ones for the same host (http/https, with or without www).
+ */
+export function matchingProperties(properties: GscProperty[], domain: string) {
+  const bare = domain.toLowerCase().replace(/^www\./, "");
+  const hostOf = (p: string) =>
+    p
+      .toLowerCase()
+      .replace(/^sc-domain:/, "")
+      .replace(/^https?:\/\//, "")
+      .replace(/^www\./, "")
+      .split("/")[0];
+  return properties
+    .filter((p) => hostOf(p.property) === bare)
+    .sort((a, b) => Number(b.property.startsWith("sc-domain:")) - Number(a.property.startsWith("sc-domain:")));
 }
 
 /** The property that matches the site's domain: the domain property first, then a URL-prefix one. */

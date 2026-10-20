@@ -2,15 +2,17 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { ChevronLeftIcon, PlugIcon, PlusIcon, RefreshCwIcon } from "lucide-react";
+import { ChevronLeftIcon, PlugIcon, RefreshCwIcon } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
 
 import { toast } from "@/lib/toast";
 import { getErrorMessage } from "@/lib/errors";
 import { PROVIDERS, type IntegrationProvider } from "@/features/integrations/catalog";
 import { useProviderAccounts, type ProviderAccount } from "@/features/integrations/connections";
-import { useShopifyBlogs, useTestConnection } from "@/features/publishing/hooks";
-import { useSyncGsc } from "@/features/search-console/hooks";
+import { useTestConnection } from "@/features/publishing/hooks";
+import { ShopifyBlogPicker } from "@/features/publishing/shopify-blog-picker";
+import { useGscOverview, useSyncGsc } from "@/features/search-console/hooks";
+import { GscPropertyPicker } from "@/features/search-console/gsc-property-picker";
 import { GscPerformanceCard } from "@/features/search-console/gsc-performance";
 import { workspaceRole } from "@/features/workspace/hooks";
 import { ConnectDialog } from "@/components/integrations/connect-dialog";
@@ -26,29 +28,6 @@ import { Card } from "@/components/ui/card";
  * re-tested and Search Console re-synced through the backend. The backend has
  * no endpoint to remove a connection, so there is no Disconnect here.
  */
-/** The store's blogs: where Shopify articles go. The blog is picked on each article when publishing. */
-function ShopifyBlogs({ siteId, connectionId }: { siteId: number | undefined; connectionId: number }) {
-  const t = useTranslations("integrations.shopifyBlogs");
-  const blogs = useShopifyBlogs(siteId, connectionId);
-  if (blogs.isPending) return <span className="text-caption font-normal text-fg-3">{t("loading")}</span>;
-  if (blogs.isError)
-    return <p className="text-caption font-normal text-danger">{getErrorMessage(blogs.error, t("failed"))}</p>;
-  if (blogs.data.length === 0) return <p className="text-caption font-normal text-warning">{t("none")}</p>;
-  return (
-    <div className="mt-2 flex flex-col gap-1">
-      <span className="text-overline text-fg-3">{t("title", { count: blogs.data.length })}</span>
-      <ul className="flex flex-wrap gap-1.5">
-        {blogs.data.map((b) => (
-          <li key={b.id} className="rounded-full border border-border px-2.5 py-0.5 text-caption text-fg-2">
-            {b.title} <span className="font-mono text-fg-3">{t("path", { handle: b.handle })}</span>
-          </li>
-        ))}
-      </ul>
-      <span className="text-caption font-normal text-fg-3">{t("help")}</span>
-    </div>
-  );
-}
-
 export function IntegrationDetailsView({ provider }: { provider: IntegrationProvider }) {
   const t = useTranslations("integrations");
   const format = useFormatter();
@@ -56,12 +35,20 @@ export function IntegrationDetailsView({ provider }: { provider: IntegrationProv
   const { accounts: byProvider } = useProviderAccounts(brand?.id, brandSlug);
   const testConnection = useTestConnection(brand?.id ?? 0);
   const syncGsc = useSyncGsc(brand?.id ?? 0);
+  const gsc = useGscOverview(provider === "searchConsole" ? brand?.id : undefined);
+  const gscChoosing = provider === "searchConsole" && Boolean(gsc.data?.connection) && !gsc.data?.connection?.property;
   const accounts = byProvider[provider];
   const meta = PROVIDERS[provider];
   const name = t(`providers.${provider}.name`);
   const canConnect = workspaceRole(workspace) !== "viewer";
   // Search Console holds one property per site.
-  const canAddAnother = canConnect && provider !== "searchConsole" && !(meta.scope === "user" && accounts.length > 0);
+  // One connection per platform per site for now. A site whose connection failed its test can still reconnect.
+  // const canAddAnother = canConnect && provider !== "searchConsole" && !(meta.scope === "user" && accounts.length > 0);
+  const canReconnect =
+    canConnect &&
+    provider !== "searchConsole" &&
+    accounts.length > 0 &&
+    !accounts.some((a) => !a.status || a.status === "active");
 
   const [connecting, setConnecting] = React.useState(false);
   function handleTest(account: ProviderAccount) {
@@ -95,15 +82,30 @@ export function IntegrationDetailsView({ provider }: { provider: IntegrationProv
           <h1 className="truncate text-h1 text-fg">{name}</h1>
           <p className="text-body text-fg-2">{t(`providers.${provider}.description`)}</p>
         </div>
+        {/* "Connect another" is off for now: one connection per platform per site.
         {canAddAnother && accounts.length > 0 && (
           <Button variant="primary" onClick={() => setConnecting(true)}>
             <PlusIcon />
             {t("addAnother")}
           </Button>
+        )} */}
+        {canReconnect && (
+          <Button variant="primary" onClick={() => setConnecting(true)}>
+            <RefreshCwIcon />
+            {t("reconnect")}
+          </Button>
         )}
       </header>
 
-      {accounts.length === 0 ? (
+      {gscChoosing && brand ? (
+        <Card className="gap-4">
+          <div className="flex flex-col gap-0.5">
+            <h2 className="text-h3 text-fg">{t("details.gscChooseTitle")}</h2>
+            <p className="text-small text-fg-2">{t("details.gscChooseBody", { domain: brand.domain })}</p>
+          </div>
+          <GscPropertyPicker siteId={brand.id} domain={brand.domain} />
+        </Card>
+      ) : accounts.length === 0 ? (
         <EmptyState
           icon={PlugIcon}
           title={t("details.emptyTitle", { name })}
@@ -151,9 +153,19 @@ export function IntegrationDetailsView({ provider }: { provider: IntegrationProv
                   {account.lastError && account.status !== "active" && (
                     <p className="text-caption font-normal text-danger">{account.lastError}</p>
                   )}
-                  {provider === "shopify" && account.status === "active" && account.connectionId !== undefined && (
-                    <ShopifyBlogs siteId={brand?.id} connectionId={account.connectionId} />
-                  )}
+                  {provider === "shopify" &&
+                    account.status === "active" &&
+                    account.connectionId !== undefined &&
+                    brand && (
+                      <div className="mt-3 max-w-sm">
+                        <ShopifyBlogPicker
+                          siteId={brand.id}
+                          connectionId={account.connectionId}
+                          currentBlogId={account.blogId}
+                          compact
+                        />
+                      </div>
+                    )}
                 </div>
                 {canConnect && (
                   <div className="flex items-center gap-2">

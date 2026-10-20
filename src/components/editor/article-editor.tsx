@@ -71,9 +71,19 @@ export function ArticleEditor({
   label,
   domain = "",
   onChange,
+  sync,
+  onSynced,
   className,
 }: {
   content: string;
+  /**
+   * A newer body from the server (it rewrites internal links on save). Each
+   * new `version` replaces the editor's content, keeping the cursor where it
+   * was. Only send it when the user hasn't typed since that save.
+   */
+  sync?: { html: string; version: number } | null;
+  /** After a sync: the new text and HTML. Not an edit, so it must not trigger a save. */
+  onSynced?: (text: string, html: string) => void;
   lang: string;
   /** The site's domain, to tell its own pages from other sites. */
   domain?: string;
@@ -106,6 +116,23 @@ export function ArticleEditor({
     onUpdate: ({ editor: e }) => onChange?.(e.getText(), e.getHTML()),
     onCreate: ({ editor: e }) => onChange?.(e.getText(), e.getHTML()),
   });
+
+  const syncedVersion = React.useRef(0);
+  const onSyncedRef = React.useRef(onSynced);
+  React.useEffect(() => {
+    onSyncedRef.current = onSynced;
+  });
+  React.useEffect(() => {
+    if (!editor || !sync || sync.version === syncedVersion.current) return;
+    syncedVersion.current = sync.version;
+    if (sync.html === editor.getHTML()) return;
+    const { from, to } = editor.state.selection;
+    // No update event: this isn't an edit, so it mustn't trigger another save.
+    editor.commands.setContent(sync.html, { emitUpdate: false });
+    const size = editor.state.doc.content.size;
+    editor.commands.setTextSelection({ from: Math.min(from, size), to: Math.min(to, size) });
+    onSyncedRef.current?.(editor.getText(), editor.getHTML());
+  }, [editor, sync]);
 
   return (
     <div

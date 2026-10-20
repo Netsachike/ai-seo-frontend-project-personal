@@ -64,6 +64,15 @@ const publishingService = {
     return response.data;
   },
 
+  /** Saves the Shopify blog that articles go to on the connection (`config.blog_id`). */
+  selectShopifyBlog: async (siteId: number, connectionId: number, payload: { blog_id: string; blog_name: string }) => {
+    const response = await api.patch<ApiSuccess<PublishingConnection>>(
+      sitePath(siteId, `publishing/connections/${connectionId}/shopify-blog`),
+      payload,
+    );
+    return response.data;
+  },
+
   /** 25 per page. */
   publications: async (siteId: number, params: PageParams = {}) => {
     const response = await api.get<ApiSuccess<LaravelPaginator<PublicationWithRelations>>>(

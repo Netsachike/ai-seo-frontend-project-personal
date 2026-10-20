@@ -6,13 +6,13 @@ import { PencilIcon, PlusIcon, StoreIcon, Trash2Icon, TrendingUpIcon, UserPlusIc
 import { useFormatter, useTranslations } from "next-intl";
 
 import { toast } from "@/lib/toast";
-import { canUseResellerConsole } from "@/lib/plan-core";
+// import { canUseResellerConsole } from "@/lib/plan-core"; (plan gate off for now)
 import resellerService from "@/services/reseller";
 import type { User } from "@/types/types";
 import { accountKeys } from "@/features/account/query-keys";
 import { useSessionUser } from "@/features/account/use-session-user";
 import { ConfirmDialog } from "@/components/account/confirm-dialog";
-import { LockedState } from "@/components/account/locked-state";
+// import { LockedState } from "@/components/account/locked-state"; (plan gate off for now)
 import { ResellerDialog, type ResellerFormValues } from "@/components/account/reseller-dialog";
 import { StatCard } from "@/components/account/stat-card";
 import { EmptyState } from "@/components/brand/empty-state";
@@ -25,11 +25,12 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 
 /** Reseller console: admins, or the Enterprise (`reseller`) plan. White Label alone doesn't open it. */
 export function ResellersView() {
-  const t = useTranslations("account.resellers");
+  // const t = useTranslations("account.resellers"); (used by the plan gate below)
   const session = useSessionUser();
 
   if (session === undefined) return <Skeleton className="h-96" />;
-  if (!canUseResellerConsole(session)) return <LockedState title={t("lockedTitle")} body={t("lockedBody")} />;
+  // Plan gate off for now (open to every plan) until it is switched back on.
+  // if (!canUseResellerConsole(session)) return <LockedState title={t("lockedTitle")} body={t("lockedBody")} />;
   return <ResellersConsole />;
 }
 

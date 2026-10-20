@@ -16,10 +16,8 @@ export async function generateMetadata(): Promise<Metadata> {
  */
 export default function WordpressComReturnPage() {
   return (
-    <div className="grid place-items-center py-10">
-      <Suspense>
-        <WpcomCallbackView />
-      </Suspense>
-    </div>
+    <Suspense>
+      <WpcomCallbackView />
+    </Suspense>
   );
 }

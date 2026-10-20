@@ -175,6 +175,8 @@ function Editor({ raw }: { raw: ArticleWithRelations }) {
   const [notify, setNotify] = React.useState(Boolean(me?.telegram?.connected));
   const [savedAt, setSavedAt] = React.useState(article.savedAt);
   const [words, setWords] = React.useState(article.words);
+  // The server rewrites internal links on save; its body is shown once the user has stopped typing.
+  const [serverBody, setServerBody] = React.useState<{ html: string; version: number } | null>(null);
   const saveTimer = React.useRef<ReturnType<typeof setTimeout>>(undefined);
   React.useEffect(() => () => clearTimeout(saveTimer.current), []);
 
@@ -187,10 +189,16 @@ function Editor({ raw }: { raw: ArticleWithRelations }) {
     clearTimeout(saveTimer.current);
     saveTimer.current = setTimeout(() => {
       const { shortAnswer: description, metaTitle: title, slug: path } = latest.current;
+      const sent = htmlRef.current;
       save.mutate(
-        { meta_description: description, meta_title: title, slug: path || null, content: htmlRef.current },
+        { meta_description: description, meta_title: title, slug: path || null, content: sent },
         {
-          onSuccess: (saved) => setSavedAt(saved.updated_at),
+          onSuccess: (saved) => {
+            setSavedAt(saved.updated_at);
+            // Only if nothing was typed since this save went out; otherwise the next save brings it.
+            if (saved.content && saved.content !== sent && htmlRef.current === sent)
+              setServerBody((prev) => ({ html: saved.content as string, version: (prev?.version ?? 0) + 1 }));
+          },
           onError: (error) => toast.error(getErrorMessage(error, t("saveFailed"))),
         },
       );
@@ -345,6 +353,13 @@ function Editor({ raw }: { raw: ArticleWithRelations }) {
             lang={contentLanguage}
             label={t("bodyLabel")}
             domain={brand?.domain ?? ""}
+            sync={serverBody}
+            onSynced={(text, html) => {
+              setBodyText(text);
+              setWords(text.split(/\s+/).filter(Boolean).length);
+              htmlRef.current = html;
+              setHtml(html);
+            }}
             onChange={(text, html) => {
               setBodyText(text);
               setWords(text.split(/\s+/).filter(Boolean).length);

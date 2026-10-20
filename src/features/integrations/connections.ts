@@ -18,6 +18,8 @@ export type ProviderAccount = {
   lastError?: string | null;
   /** Backend publishing connection id, for testing and publishing. */
   connectionId?: number;
+  /** Shopify: the blog saved on the connection. */
+  blogId?: string | null;
 };
 
 const publishingAccount = (c: PublishingConnection): ProviderAccount => ({
@@ -28,6 +30,7 @@ const publishingAccount = (c: PublishingConnection): ProviderAccount => ({
   status: c.status,
   lastError: c.last_error,
   connectionId: c.id,
+  blogId: typeof c.config?.blog_id === "string" ? c.config.blog_id : null,
 });
 
 /**
