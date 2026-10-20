@@ -1558,8 +1558,8 @@ export interface Article {
   slug: string;
   meta_title: string | null;
   meta_description: string | null;
-  /** HTML */
-  content: string;
+  /** HTML. Null until the article has been written (and while a write is running). */
+  content: string | null;
   language: string | null;
   target_word_count: number | null;
   word_count: number | null;

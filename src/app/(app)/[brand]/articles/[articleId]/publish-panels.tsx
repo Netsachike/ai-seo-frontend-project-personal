@@ -1,6 +1,6 @@
 "use client";
 
-import { ExternalLinkIcon, Link2Icon, LocateFixedIcon } from "lucide-react";
+import { DownloadIcon, ExternalLinkIcon, Link2Icon, LocateFixedIcon } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
 
 import type { ArticleWithRelations, PublicationWithRelations } from "@/types/types";
@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
 import { CopyButton } from "@/components/brand/copy-button";
+import { cn } from "@/lib/utils";
 
 const KNOWN_PUBLICATION_STATUSES = [
   "published",
@@ -110,19 +111,82 @@ export function PublicationCard({ publications }: { publications: PublicationWit
  * A manual connection publishes nothing: the backend only prepares the
  * article. Everything needed to paste it into the CMS, one copy button each.
  */
-export function ManualPublishCard({
-  title,
-  metaTitle,
-  metaDescription,
-  slug,
-  html,
-}: {
+type ManualContent = {
   title: string;
   metaTitle: string;
   metaDescription: string;
   slug: string;
   html: string;
-}) {
+  /** `lang` on the downloaded page. */
+  lang?: string;
+  /** For the downloaded page's canonical link. */
+  domain?: string;
+};
+
+export function ManualPublishCard(props: ManualContent) {
+  const t = useTranslations("editor.manual");
+  return (
+    <Card className="gap-4 border-warning">
+      <div className="flex flex-col gap-0.5">
+        <CardTitle>{t("title")}</CardTitle>
+        <p className="text-small text-fg-2">{t("body")}</p>
+      </div>
+      <ManualPublishFields {...props} />
+    </Card>
+  );
+}
+
+const escapeHtml = (value: string) =>
+  value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+
+/** A complete page: the meta tags in `<head>`, the article in `<body>` (with its title if the body has no h1). */
+function fullHtmlDocument({ title, metaTitle, metaDescription, slug, html, lang, domain }: ManualContent) {
+  const path = slug.replace(/^\/+/, "");
+  const canonical = domain && path ? `https://${domain}/${path}` : null;
+  const heading = metaTitle || title;
+  const body = /<h1[\s>]/i.test(html) ? html : `<h1>${escapeHtml(title)}</h1>\n${html}`;
+  return [
+    "<!doctype html>",
+    `<html lang="${escapeHtml(lang || "en")}">`,
+    "<head>",
+    '  <meta charset="utf-8" />',
+    '  <meta name="viewport" content="width=device-width, initial-scale=1" />',
+    `  <title>${escapeHtml(heading)}</title>`,
+    `  <meta name="description" content="${escapeHtml(metaDescription)}" />`,
+    `  <meta property="og:title" content="${escapeHtml(heading)}" />`,
+    `  <meta property="og:description" content="${escapeHtml(metaDescription)}" />`,
+    ...(canonical ? [`  <link rel="canonical" href="${escapeHtml(canonical)}" />`] : []),
+    "</head>",
+    "<body>",
+    "<article>",
+    body,
+    "</article>",
+    "</body>",
+    "</html>",
+    "",
+  ].join("\n");
+}
+
+/** `my-article.html` from the slug. */
+const fileNameOf = (slug: string) => `${slug.replace(/[^a-z0-9-]+/gi, "-").replace(/^-+|-+$/g, "") || "article"}.html`;
+
+function download(filename: string, contents: string) {
+  const url = URL.createObjectURL(new Blob([contents], { type: "text/html;charset=utf-8" }));
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  document.body.append(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
+
+/**
+ * Everything a copy-and-paste site needs: the meta tags to copy one by one,
+ * then the article as HTML, as plain text, or as a whole HTML page to download.
+ */
+export function ManualPublishFields(props: ManualContent) {
+  const { title, metaTitle, metaDescription, slug, html } = props;
   const t = useTranslations("editor.manual");
   const fields = [
     { key: "title", value: title },
@@ -132,11 +196,7 @@ export function ManualPublishCard({
   ] as const;
 
   return (
-    <Card className="gap-4 border-warning">
-      <div className="flex flex-col gap-0.5">
-        <CardTitle>{t("title")}</CardTitle>
-        <p className="text-small text-fg-2">{t("body")}</p>
-      </div>
+    <div className="flex flex-col gap-4">
       <ul className="flex flex-col gap-3">
         {fields.map((f) => (
           <li key={f.key} className="flex flex-col gap-1">
@@ -144,7 +204,13 @@ export function ManualPublishCard({
               <span className="text-overline text-fg-3">{t(`fields.${f.key}`)}</span>
               <CopyButton value={f.value} iconOnly label={t("copyField", { field: t(`fields.${f.key}`) })} />
             </div>
-            <p dir="auto" className="truncate rounded-md bg-surface-2 px-2.5 py-1.5 text-small text-fg">
+            <p
+              dir="auto"
+              className={cn(
+                "rounded-md bg-surface-2 px-2.5 py-1.5 text-small text-fg",
+                f.key === "metaDescription" ? "line-clamp-3" : "truncate",
+              )}
+            >
               {f.value || "—"}
             </p>
           </li>
@@ -153,8 +219,12 @@ export function ManualPublishCard({
       <div className="flex flex-wrap gap-2">
         <CopyButton value={html} label={t("copyHtml")} />
         <CopyButton value={htmlToText(html)} label={t("copyText")} />
+        <Button size="sm" variant="secondary" onClick={() => download(fileNameOf(slug), fullHtmlDocument(props))}>
+          <DownloadIcon />
+          {t("download")}
+        </Button>
       </div>
-    </Card>
+    </div>
   );
 }
 
@@ -193,8 +263,9 @@ function linkOf(item: unknown): RawLink | null {
 }
 
 /** Links in the HTML that stay on the site: relative, or to the site's own host. */
-function linksInHtml(html: string, domain: string): RawLink[] {
+function linksInHtml(html: string | null | undefined, domain: string): RawLink[] {
   const links: RawLink[] = [];
+  if (!html) return links;
   for (const match of html.matchAll(/<a\b[^>]*\bhref\s*=\s*["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi)) {
     const href = match[1].trim();
     if (isInternalHref(href, domain))

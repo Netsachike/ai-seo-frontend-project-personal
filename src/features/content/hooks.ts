@@ -113,7 +113,7 @@ export function toArticleDetail(article: ArticleWithRelations): ArticleDetail {
     words: article.word_count ?? 0,
     savedAt: article.updated_at,
     shortAnswer: article.meta_description ?? "",
-    html: article.content,
+    html: article.content ?? "",
     metaTitle: article.meta_title ?? article.title,
     slug: article.slug,
     // The backend's SEO analysis has no fixed checklist shape yet.
@@ -126,8 +126,13 @@ export function useArticle(siteId: number | undefined, articleId: number) {
     queryKey: contentKeys.article(siteId ?? 0, articleId),
     enabled: Boolean(siteId) && Number.isInteger(articleId),
     queryFn: async () => (await articleService.get(siteId as number, articleId)).data.article,
+    // Still being written: check again until the body arrives.
+    refetchInterval: (query) => (query.state.data && isStillWriting(query.state.data) ? 5000 : false),
   });
 }
+
+/** No body yet and the backend is (or may still be) writing it. */
+export const isStillWriting = (article: ArticleWithRelations) => !article.content && article.status !== "failed";
 
 /** Saves draft edits (the backend snapshots a revision first). */
 export function useSaveArticle(siteId: number, articleId: number) {

@@ -158,7 +158,7 @@ function Fields({
   const [metaTitle, setMetaTitle] = React.useState(article.meta_title ?? "");
   const [metaDescription, setMetaDescription] = React.useState(article.meta_description ?? "");
   const [slug, setSlug] = React.useState(article.slug ?? "");
-  const html = React.useRef(article.content);
+  const html = React.useRef(article.content ?? "");
   // The editor reports its normalised HTML once on load; that isn't an edit.
   const loaded = React.useRef(false);
   const [dirty, setDirty] = React.useState(false);
@@ -229,7 +229,7 @@ function Fields({
           </span>
         </div>
         <ArticleEditor
-          content={article.content}
+          content={article.content ?? ""}
           lang={lang}
           label={t("body")}
           onChange={(_text, next) => {

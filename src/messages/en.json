@@ -1784,7 +1784,11 @@
       },
       "copyField": "Copy {field}",
       "copyHtml": "Copy article HTML",
-      "copyText": "Copy as plain text"
+      "copyText": "Copy as plain text",
+      "download": "Download HTML file",
+      "inlineTitle": "Copy it to your site",
+      "inlineBody": "This site publishes by copy and paste, so there's nothing to approve. Copy the meta tags and the article, or download it as a full HTML page.",
+      "placeholders": "Fill in the bracketed placeholders in the article first, so they don't end up on your site."
     },
     "internalLinks": {
       "title": "Internal links",
@@ -1810,7 +1814,11 @@
       "failed": "We couldn't load your Shopify blogs. Check the connection on the Integrations page.",
       "none": "This store has no blogs yet. Create one in Shopify (Online Store › Blog posts), then come back.",
       "pickBlog": "Choose the Shopify blog to publish to."
-    }
+    },
+    "stillWritingTitle": "Rankoya is still writing this article",
+    "stillWritingBody": "This usually takes a minute or two. The article opens here by itself when it's ready.",
+    "failedTitle": "This article couldn't be written",
+    "failedBody": "Something went wrong while writing it. Go back to Articles and write it again."
   },
   "agentPage": {
     "title": "Ask Rankoya",
