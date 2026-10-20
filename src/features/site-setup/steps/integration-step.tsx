@@ -15,6 +15,9 @@ import {
   type ApiPublishingPlatform,
 } from "@/features/publishing/forms";
 import { ConnectionTestError, useCreateConnection, usePublishingConnections } from "@/features/publishing/hooks";
+import { startWpcomConnect } from "@/features/publishing/wpcom";
+import { WpcomSitePicker, useWpcomAuthorization } from "@/features/publishing/wpcom-site-picker";
+import { SelectField } from "@/components/forms/select-field";
 import { FormField } from "@/components/forms/form-field";
 import { PasswordInput } from "@/components/forms/password-input";
 import { IntegrationTile } from "@/components/brand/integration-row";
@@ -24,10 +27,20 @@ import { dur, ease } from "../motion";
 import { patchDraft } from "../store";
 import { StepHeading } from "./step-heading";
 import { ConnectGuide } from "@/components/integrations/connect-guide";
+import { setupPath } from "../steps";
 
-/** The API platforms, then copy-and-paste (a `manual` connection, active straight away). */
-export const PUBLISH_PLATFORMS = [...PUBLISHING_PLATFORMS, "manual"] as const;
+/**
+ * The API platforms, then the ones without a publishing API: a Next.js app
+ * and any other site. Both are copy-and-paste (a `manual` connection,
+ * active straight away): Rankoya prepares each article to paste in.
+ */
+export const PUBLISH_PLATFORMS = [...PUBLISHING_PLATFORMS, "nextjs", "manual"] as const;
 export type PublishPlatform = (typeof PUBLISH_PLATFORMS)[number];
+type CopyPastePlatform = "nextjs" | "manual";
+const isCopyPaste = (p: PublishPlatform | null): p is CopyPastePlatform => p === "nextjs" || p === "manual";
+
+/** WordPress is one card: self-hosted connects with an application password, WordPress.com signs in. */
+type WordpressHosting = "selfHosted" | "wordpressCom";
 
 const MONOGRAMS: Record<PublishPlatform, string> = {
   wordpress: "WP",
@@ -35,6 +48,7 @@ const MONOGRAMS: Record<PublishPlatform, string> = {
   webflow: "WF",
   wix: "WX",
   ghost: "GH",
+  nextjs: "N",
   manual: "</>",
 };
 
@@ -52,20 +66,54 @@ export function IntegrationStep({ site, onContinue }: { site: Site; onContinue: 
   const [choice, setChoice] = React.useState<PublishPlatform | null>(null);
   const [values, setValues] = React.useState<Record<string, string>>({});
   const [error, setError] = React.useState<string | null>(null);
-  const connected = existing ? (existing.method === "manual" ? "manual" : existing.platform) : null;
+  const [hosting, setHosting] = React.useState<WordpressHosting>("selfHosted");
+  const [redirecting, setRedirecting] = React.useState(false);
+  // Back from WordPress.com sign-in: the site still has to be picked.
+  const wpcom = useWpcomAuthorization(site.id);
+  const connected: PublishPlatform | null = existing
+    ? existing.method === "manual"
+      ? existing.platform === "nextjs"
+        ? "nextjs"
+        : "manual"
+      : existing.platform === "wordpress_com"
+        ? "wordpress"
+        : (existing.platform as PublishPlatform)
+    : null;
 
-  const fields = choice && choice !== "manual" ? PUBLISHING_FIELDS[choice] : [];
-  const canConnect = choice === "manual" || (fields.length > 0 && fields.every((f) => (values[f.key] ?? "").trim()));
+  const [resumed, setResumed] = React.useState(false);
+  if (wpcom.auth && !resumed && !connected) {
+    setResumed(true);
+    setChoice("wordpress");
+    setHosting("wordpressCom");
+  }
+
+  const isWpcom = choice === "wordpress" && hosting === "wordpressCom";
+  const fields = choice && !isCopyPaste(choice) && !isWpcom ? PUBLISHING_FIELDS[choice] : [];
+  const canConnect = isCopyPaste(choice) || (fields.length > 0 && fields.every((f) => (values[f.key] ?? "").trim()));
+
+  const signInWithWpcom = async () => {
+    setError(null);
+    setRedirecting(true);
+    try {
+      await startWpcomConnect({ siteId: site.id, returnTo: setupPath(site.id, "integration") });
+    } catch (err) {
+      setError(getErrorMessage(err, t("failed")));
+      setRedirecting(false);
+    }
+  };
 
   const connect = (event: React.FormEvent) => {
     event.preventDefault();
+    if (isWpcom) {
+      if (!wpcom.auth) void signInWithWpcom();
+      return;
+    }
     if (!choice || !canConnect) return;
     setError(null);
     const name = t(`platform.${choice}.name`);
-    const payload =
-      choice === "manual"
-        ? { name, platform: "custom" as const, method: "manual" as const }
-        : connectionPayload(choice as ApiPublishingPlatform, `${name} · ${site.domain}`, values);
+    const payload = isCopyPaste(choice)
+      ? { name, platform: choice === "nextjs" ? ("nextjs" as const) : ("custom" as const), method: "manual" as const }
+      : connectionPayload(choice as ApiPublishingPlatform, `${name} · ${site.domain}`, values);
     create.mutate(payload, {
       onSuccess: () =>
         patchDraft(site.id, { integration: { provider: choice, connectedAt: new Date().toISOString() } }),
@@ -95,6 +143,7 @@ export function IntegrationStep({ site, onContinue }: { site: Site; onContinue: 
               disabled={Boolean(connected) && !isConnected}
               onClick={() => {
                 setChoice(platform);
+                if (platform !== "wordpress") setHosting("selfHosted");
                 setValues(platform === "wordpress" ? { site_url: site.domain } : {});
                 setError(null);
               }}
@@ -128,8 +177,40 @@ export function IntegrationStep({ site, onContinue }: { site: Site; onContinue: 
             transition={{ duration: dur.base, ease: ease.out }}
             className="flex flex-col gap-4 rounded-xl border border-border bg-surface p-5 shadow-card"
           >
-            <p className="text-small text-fg-2">{t(`platform.${choice}.help`)}</p>
-            <ConnectGuide provider={choice} defaultOpen={false} />
+            {choice === "wordpress" && (
+              <SelectField
+                label={t("hosting.label")}
+                value={hosting}
+                onChange={(value) => {
+                  setHosting(value as WordpressHosting);
+                  setError(null);
+                }}
+                options={(["selfHosted", "wordpressCom"] as const).map((value) => ({
+                  value,
+                  label: t(`hosting.${value}`),
+                  detail: t(`hosting.${value}Detail`),
+                }))}
+              />
+            )}
+            <p className="text-small text-fg-2">
+              {isWpcom ? t("hosting.wordpressComHelp") : t(`platform.${choice}.help`)}
+            </p>
+            <ConnectGuide provider={isWpcom ? "wordpressCom" : choice} defaultOpen={false} />
+            {isWpcom && wpcom.auth && (
+              <WpcomSitePicker
+                auth={wpcom.auth}
+                onDone={(_, failure) => {
+                  wpcom.done();
+                  if (failure) {
+                    setError(t("testFailed", { message: failure }));
+                    return;
+                  }
+                  patchDraft(site.id, {
+                    integration: { provider: "wordpress", connectedAt: new Date().toISOString() },
+                  });
+                }}
+              />
+            )}
             {fields.length > 0 && (
               <div className="grid gap-4 sm:grid-cols-2">
                 {fields.map((field) => {
@@ -167,15 +248,17 @@ export function IntegrationStep({ site, onContinue }: { site: Site; onContinue: 
                 {error}
               </p>
             )}
-            <Button
-              type="submit"
-              variant="primary"
-              loading={create.isPending}
-              disabled={!canConnect}
-              className="self-start"
-            >
-              {t("connect")}
-            </Button>
+            {!(isWpcom && wpcom.auth) && (
+              <Button
+                type="submit"
+                variant="primary"
+                loading={create.isPending || redirecting}
+                disabled={!isWpcom && !canConnect}
+                className="self-start"
+              >
+                {isWpcom ? t("hosting.continue") : t("connect")}
+              </Button>
+            )}
           </motion.form>
         )}
       </AnimatePresence>

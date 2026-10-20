@@ -11,6 +11,7 @@ import { PROVIDERS, type IntegrationProvider } from "@/features/integrations/cat
 import { useProviderAccounts, type ProviderAccount } from "@/features/integrations/connections";
 import { useTestConnection } from "@/features/publishing/hooks";
 import { ShopifyBlogPicker } from "@/features/publishing/shopify-blog-picker";
+import { WpcomSitePicker, useWpcomAuthorization } from "@/features/publishing/wpcom-site-picker";
 import { useGscOverview, useSyncGsc } from "@/features/search-console/hooks";
 import { GscPropertyPicker } from "@/features/search-console/gsc-property-picker";
 import { GscPerformanceCard } from "@/features/search-console/gsc-performance";
@@ -37,6 +38,8 @@ export function IntegrationDetailsView({ provider }: { provider: IntegrationProv
   const syncGsc = useSyncGsc(brand?.id ?? 0);
   const gsc = useGscOverview(provider === "searchConsole" ? brand?.id : undefined);
   const gscChoosing = provider === "searchConsole" && Boolean(gsc.data?.connection) && !gsc.data?.connection?.property;
+  // Back from WordPress.com sign-in: the WordPress.com site still has to be picked.
+  const wpcom = useWpcomAuthorization(provider === "wordpressCom" ? brand?.id : undefined);
   const accounts = byProvider[provider];
   const meta = PROVIDERS[provider];
   const name = t(`providers.${provider}.name`);
@@ -97,6 +100,23 @@ export function IntegrationDetailsView({ provider }: { provider: IntegrationProv
         )}
       </header>
 
+      {wpcom.auth && (
+        <Card className="gap-4">
+          <div className="flex flex-col gap-0.5">
+            <h2 className="text-h3 text-fg">{t("details.wpcomChooseTitle")}</h2>
+            <p className="text-small text-fg-2">{t("details.wpcomChooseBody")}</p>
+          </div>
+          <WpcomSitePicker
+            auth={wpcom.auth}
+            onDone={(connection, failure) => {
+              wpcom.done();
+              if (failure) toast.error(t("errors.testFailed", { message: failure }));
+              else toast.success(t("toasts.connected", { name: connection.name }));
+            }}
+          />
+        </Card>
+      )}
+
       {gscChoosing && brand ? (
         <Card className="gap-4">
           <div className="flex flex-col gap-0.5">
@@ -105,7 +125,7 @@ export function IntegrationDetailsView({ provider }: { provider: IntegrationProv
           </div>
           <GscPropertyPicker siteId={brand.id} domain={brand.domain} />
         </Card>
-      ) : accounts.length === 0 ? (
+      ) : wpcom.auth && accounts.length === 0 ? null : accounts.length === 0 ? (
         <EmptyState
           icon={PlugIcon}
           title={t("details.emptyTitle", { name })}
@@ -169,7 +189,7 @@ export function IntegrationDetailsView({ provider }: { provider: IntegrationProv
                 </div>
                 {canConnect && (
                   <div className="flex items-center gap-2">
-                    {account.connectionId !== undefined && (
+                    {account.connectionId !== undefined && meta.method !== "manual" && (
                       <Button
                         size="sm"
                         loading={testConnection.isPending && testConnection.variables === account.connectionId}

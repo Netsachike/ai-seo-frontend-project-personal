@@ -13,6 +13,8 @@ export const INTEGRATION_PROVIDERS = [
   "webflow",
   "wix",
   "ghost",
+  "nextjs",
+  "manual",
 ] as const;
 
 export type IntegrationProvider = (typeof INTEGRATION_PROVIDERS)[number];
@@ -21,8 +23,10 @@ export type IntegrationProvider = (typeof INTEGRATION_PROVIDERS)[number];
  * oauth: the backend's redirect flow (Search Console, WordPress.com).
  * credentials: a publishing connection created and tested through the
  * backend. code: Telegram's chat link (no endpoint yet, so it is "soon").
+ * manual: copy and paste, for sites without a publishing API (a `manual`
+ * connection, active straight away; each article is prepared to paste in).
  */
-export type ConnectMethod = "oauth" | "credentials" | "code";
+export type ConnectMethod = "oauth" | "credentials" | "code" | "manual";
 
 /**
  * The tabs on the integrations page. "ai" holds the AI engines Rankoya
@@ -55,6 +59,8 @@ export const PROVIDERS: Record<IntegrationProvider, ProviderMeta> = {
   webflow: { monogram: "WF", category: "platforms", method: "credentials", scope: "brand", backend: true },
   wix: { monogram: "WX", category: "platforms", method: "credentials", scope: "brand", backend: true },
   ghost: { monogram: "GH", category: "platforms", method: "credentials", scope: "brand", backend: true },
+  nextjs: { monogram: "N", category: "platforms", method: "manual", scope: "brand", backend: true },
+  manual: { monogram: "</>", category: "platforms", method: "manual", scope: "brand", backend: true },
 };
 
 /** Providers on one tab, in catalog order (available ones first, then "soon"). */

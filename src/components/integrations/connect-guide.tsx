@@ -15,6 +15,8 @@ const GUIDES = {
   wix: { steps: 5, links: { 1: "https://manage.wix.com/account/api-keys" } },
   ghost: { steps: 4, links: {} },
   searchConsole: { steps: 4, links: { 1: "https://search.google.com/search-console/welcome" } },
+  nextjs: { steps: 4, links: {} },
+  manual: { steps: 3, links: {} },
 } as const satisfies Record<string, { steps: number; links: Partial<Record<number, string>> }>;
 
 export type GuideProvider = keyof typeof GUIDES;

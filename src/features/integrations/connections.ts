@@ -46,7 +46,21 @@ export function useProviderAccounts(siteId: number | undefined, brandSlug: strin
   const accounts = Object.fromEntries(
     INTEGRATION_PROVIDERS.map((provider): [IntegrationProvider, ProviderAccount[]] => {
       if (isPublishingPlatform(provider)) {
-        return [provider, (publishing.data ?? []).filter((c) => c.platform === provider).map(publishingAccount)];
+        return [
+          provider,
+          (publishing.data ?? [])
+            .filter((c) => c.platform === provider && c.method !== "manual")
+            .map(publishingAccount),
+        ];
+      }
+      // Copy and paste: Next.js apps on their own card, every other manual connection on the general one.
+      if (provider === "nextjs" || provider === "manual") {
+        return [
+          provider,
+          (publishing.data ?? [])
+            .filter((c) => c.method === "manual" && (c.platform === "nextjs") === (provider === "nextjs"))
+            .map(publishingAccount),
+        ];
       }
       if (provider === "wordpressCom") {
         return [provider, (publishing.data ?? []).filter((c) => c.platform === "wordpress_com").map(publishingAccount)];
