@@ -13,6 +13,7 @@ import { PUBLISHING_FIELDS, connectionPayload, isPublishingPlatform } from "@/fe
 import { ConnectionTestError, useCreateConnection } from "@/features/publishing/hooks";
 import { startWpcomConnect } from "@/features/publishing/wpcom";
 import { ShopifyBlogPicker } from "@/features/publishing/shopify-blog-picker";
+import { ShopifyTokenGenerator } from "@/features/publishing/shopify-token-generator";
 import { startGscConnect } from "@/features/search-console/hooks";
 import { DomainInput, FormField } from "@/components/forms/form-field";
 import { PasswordInput } from "@/components/forms/password-input";
@@ -166,6 +167,14 @@ export function ConnectDialog({
 
             {shopifyConnection === null && <ConnectGuide provider={provider} />}
 
+            {provider === "shopify" && shopifyConnection === null && (
+              <ShopifyTokenGenerator
+                onToken={(token) =>
+                  setValues((prev) => ({ ...prev, store_domain: token.storeDomain, access_token: token.accessToken }))
+                }
+              />
+            )}
+
             {meta.method === "credentials" && shopifyConnection === null && (
               <form
                 id="connect-credentials"
@@ -182,7 +191,13 @@ export function ConnectDialog({
                     <FormField
                       key={field.key}
                       label={t(`fields.${field.label}`)}
-                      helper={field.key === "application_password" ? t("wordpress.appPasswordHelper") : undefined}
+                      helper={
+                        field.key === "application_password"
+                          ? t("wordpress.appPasswordHelper")
+                          : provider === "shopify" && field.key === "access_token"
+                            ? t("shopifyToken.tokenHelper")
+                            : undefined
+                      }
                     >
                       {(props) =>
                         field.input === "url" ? (

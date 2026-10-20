@@ -18,6 +18,7 @@ import { ConnectionTestError, useCreateConnection, usePublishingConnections } fr
 import { startWpcomConnect } from "@/features/publishing/wpcom";
 import { WpcomSitePicker, useWpcomAuthorization } from "@/features/publishing/wpcom-site-picker";
 import { SelectField } from "@/components/forms/select-field";
+import { ShopifyTokenGenerator } from "@/features/publishing/shopify-token-generator";
 import { FormField } from "@/components/forms/form-field";
 import { PasswordInput } from "@/components/forms/password-input";
 import { IntegrationTile } from "@/components/brand/integration-row";
@@ -60,6 +61,7 @@ const MONOGRAMS: Record<PublishPlatform, string> = {
 export function IntegrationStep({ site, onContinue }: { site: Site; onContinue: () => void }) {
   const t = useTranslations("siteSetup.integration");
   const tFields = useTranslations("integrations.fields");
+  const tToken = useTranslations("integrations.shopifyToken");
   const connections = usePublishingConnections(site.id);
   const create = useCreateConnection(site.id);
   const existing = connections.data?.find((c) => c.status === "active");
@@ -211,13 +213,24 @@ export function IntegrationStep({ site, onContinue }: { site: Site; onContinue: 
                 }}
               />
             )}
+            {choice === "shopify" && (
+              <ShopifyTokenGenerator
+                onToken={(token) =>
+                  setValues((prev) => ({ ...prev, store_domain: token.storeDomain, access_token: token.accessToken }))
+                }
+              />
+            )}
             {fields.length > 0 && (
               <div className="grid gap-4 sm:grid-cols-2">
                 {fields.map((field) => {
                   const value = values[field.key] ?? "";
                   const set = (next: string) => setValues((prev) => ({ ...prev, [field.key]: next }));
                   return (
-                    <FormField key={field.key} label={tFields(field.label)}>
+                    <FormField
+                      key={field.key}
+                      label={tFields(field.label)}
+                      helper={choice === "shopify" && field.key === "access_token" ? tToken("tokenHelper") : undefined}
+                    >
                       {(props) =>
                         field.input === "secret" ? (
                           <PasswordInput

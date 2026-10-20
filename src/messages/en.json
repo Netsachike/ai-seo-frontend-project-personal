@@ -3113,9 +3113,9 @@
         "s1": "Open the <link>Shopify Dev Dashboard</link> and create an app for your store.",
         "s2": "In the app's settings, add the scopes <code>read_content</code> and <code>write_content</code>, then release a version.",
         "s3": "Install the app on your store from the app's overview page.",
-        "s4": "Copy the <b>Admin API access token</b> (it starts with <code>shpat_</code>).",
-        "s5": "Enter your store's address ending in <code>.myshopify.com</code> (not your own domain) and paste the token.",
-        "note": "After connecting you'll choose the blog articles go to. Some tokens expire after about 24 hours; if publishing stops working, reconnect with a new token."
+        "s4": "In the app's <b>Settings</b>, copy the <b>Client ID</b> and <b>Client secret</b>.",
+        "s5": "Paste them below with your store's address ending in <code>.myshopify.com</code>, then click <b>Get access token</b> and <b>Connect</b>.",
+        "note": "Shopify's tokens for these apps last 24 hours. If publishing stops working, get a new token and reconnect."
       },
       "webflow": {
         "s1": "Open your site in the <link>Webflow dashboard</link> and go to <b>Site settings › Apps & integrations</b>.",
@@ -3160,6 +3160,19 @@
         "s3": "Copy it into your site's editor, with the title, meta description and URL slug Rankoya gives you, and publish it there.",
         "note": "Works with any site, including Lovable, Replit and site builders Rankoya doesn't connect to yet."
       }
+    },
+    "shopifyToken": {
+      "title": "Get your access token",
+      "body": "Enter your app's Client ID and Client secret from the Shopify Dev Dashboard and Rankoya gets the token for you. Your secret is only used for this and isn't saved.",
+      "storeDomain": "Store address",
+      "storeDomainHelp": "Ends in .myshopify.com (not your own domain).",
+      "storeDomainPlaceholder": "your-store.myshopify.com",
+      "clientId": "Client ID",
+      "clientSecret": "Client secret",
+      "generate": "Get access token",
+      "generated": "Token added below. Shopify tokens like this work for 24 hours, so connect now.",
+      "failed": "We couldn't get a token from Shopify. Check the details and try again.",
+      "tokenHelper": "Filled in for you above, or paste your own. Valid for 24 hours."
     }
   },
   "legal": {
