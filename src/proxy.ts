@@ -66,6 +66,17 @@ export function proxy(request: NextRequest) {
     return NextResponse.rewrite(new URL("/_vendor-only", request.url));
   }
 
+  const headers = new Headers(request.headers);
+  if (!request.cookies.has(LOCALE_COOKIE)) {
+    const locale = matchAcceptLanguage(request.headers.get("accept-language"));
+    if (locale) headers.set(LOCALE_HEADER, locale);
+  }
+
+  // The bare domain shows the sign-in page itself (no redirect), so reviewers
+  // such as Paddle land on a real page at app.rankoya.uk.
+  if (!signedIn && pathname === "/") {
+    return NextResponse.rewrite(new URL("/sign-in", request.url), { request: { headers } });
+  }
   if (!signedIn && !matches(pathname, PUBLIC_PATHS)) {
     const url = new URL("/sign-in", request.url);
     if (pathname !== "/") url.searchParams.set("next", `${pathname}${search}`);
@@ -80,11 +91,6 @@ export function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 
-  const headers = new Headers(request.headers);
-  if (!request.cookies.has(LOCALE_COOKIE)) {
-    const locale = matchAcceptLanguage(request.headers.get("accept-language"));
-    if (locale) headers.set(LOCALE_HEADER, locale);
-  }
   return NextResponse.next({ request: { headers } });
 }
 
