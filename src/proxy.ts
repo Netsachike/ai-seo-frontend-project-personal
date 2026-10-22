@@ -72,11 +72,6 @@ export function proxy(request: NextRequest) {
     if (locale) headers.set(LOCALE_HEADER, locale);
   }
 
-  // The bare domain shows the sign-in page itself (no redirect), so reviewers
-  // such as Paddle land on a real page at app.rankoya.uk.
-  if (!signedIn && pathname === "/") {
-    return NextResponse.rewrite(new URL("/sign-in", request.url), { request: { headers } });
-  }
   if (!signedIn && !matches(pathname, PUBLIC_PATHS)) {
     const url = new URL("/sign-in", request.url);
     if (pathname !== "/") url.searchParams.set("next", `${pathname}${search}`);

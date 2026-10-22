@@ -1232,12 +1232,8 @@ export interface SerpResult {
 }
 
 export interface SerpResearchPayload {
-  /** Defaults to the top keywords when empty */
-  keyword_ids?: number[];
-  /** 1–100, default 50 */
-  limit?: number;
-  /** Manual SERP rows (only used by the `manual` provider) */
-  results?: JsonObject[];
+  /** 1–10 distinct ids, each an accepted keyword of the site. */
+  keyword_ids: number[];
 }
 
 export interface SerpResearchResult {

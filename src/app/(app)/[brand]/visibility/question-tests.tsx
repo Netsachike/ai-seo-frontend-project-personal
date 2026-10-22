@@ -25,7 +25,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { DataTable, type DataColumn } from "@/components/data-table/data-table";
 import { EmptyState } from "@/components/brand/empty-state";
 import { EngineIcon } from "@/components/brand/engine-icon";
-import { RankCell } from "@/components/brand/rank-cell";
+// import { RankCell } from "@/components/brand/rank-cell";
 import { brandHref } from "@/components/layout/nav";
 import { useShell } from "@/components/layout/shell-context";
 
@@ -119,7 +119,8 @@ export function QuestionTests({
       cell: ({ row }) => (
         <Link
           href={brandHref(brandSlug, `visibility/prompts/${row.original.id}`)}
-          className="font-medium text-fg hover:text-blue hover:underline"
+          // Wraps: cells are nowrap, and a long question would push the Check button out of view.
+          className="block min-w-64 font-medium whitespace-normal text-fg hover:text-blue hover:underline"
         >
           {row.original.text}
         </Link>
@@ -132,39 +133,41 @@ export function QuestionTests({
       meta: { label: t("engines"), csv: (r) => (r as TrackedQuestion).mentionedBy.length },
       cell: ({ row }) => <EngineDots mentionedBy={row.original.mentionedBy} highlight={highlight} />,
     },
-    {
-      id: "tested",
-      accessorFn: (r) => r.testedModels?.length ?? 0,
-      header: t("tested"),
-      meta: { label: t("tested"), numeric: true },
-      cell: ({ row }) => {
-        const tested = row.original.testedModels ?? [];
-        return (
-          <span
-            className="num text-small text-fg-2"
-            title={tested.length ? tested.map(modelLabel).join(", ") : undefined}
-          >
-            {t("testedCount", { count: tested.length, total: AI_TEST_MODELS.length })}
-          </span>
-        );
-      },
-    },
-    {
-      accessorKey: "rank",
-      header: t("rank"),
-      sortUndefined: "last",
-      meta: { label: t("rank"), numeric: true },
-      cell: ({ row }) => <RankCell position={row.original.rank} />,
-    },
-    { accessorKey: "topCompetitor", header: t("competitor"), meta: { label: t("competitor") } },
-    {
-      id: "lastTested",
-      accessorFn: (r) => r.lastTested ?? "",
-      header: t("lastTested"),
-      meta: { label: t("lastTested"), numeric: true },
-      cell: ({ row }) =>
-        row.original.lastTested ? format.relativeTime(new Date(row.original.lastTested), now) : t("never"),
-    },
+    // Hidden so the Check button fits without scrolling sideways.
+    // {
+    //   id: "tested",
+    //   accessorFn: (r) => r.testedModels?.length ?? 0,
+    //   header: t("tested"),
+    //   meta: { label: t("tested"), numeric: true },
+    //   cell: ({ row }) => {
+    //     const tested = row.original.testedModels ?? [];
+    //     return (
+    //       <span
+    //         className="num text-small text-fg-2"
+    //         title={tested.length ? tested.map(modelLabel).join(", ") : undefined}
+    //       >
+    //         {t("testedCount", { count: tested.length, total: AI_TEST_MODELS.length })}
+    //       </span>
+    //     );
+    //   },
+    // },
+    // Hidden so the Check button fits without scrolling sideways.
+    // {
+    //   accessorKey: "rank",
+    //   header: t("rank"),
+    //   sortUndefined: "last",
+    //   meta: { label: t("rank"), numeric: true },
+    //   cell: ({ row }) => <RankCell position={row.original.rank} />,
+    // },
+    // { accessorKey: "topCompetitor", header: t("competitor"), meta: { label: t("competitor") } },
+    // {
+    //   id: "lastTested",
+    //   accessorFn: (r) => r.lastTested ?? "",
+    //   header: t("lastTested"),
+    //   meta: { label: t("lastTested"), numeric: true },
+    //   cell: ({ row }) =>
+    //     row.original.lastTested ? format.relativeTime(new Date(row.original.lastTested), now) : t("never"),
+    // },
     {
       id: "test",
       header: () => <span className="sr-only">{t("test")}</span>,
@@ -227,7 +230,7 @@ export function QuestionTests({
           caption={t("title")}
           data={questions}
           columns={columns}
-          minWidth={980}
+          minWidth={560}
           getRowId={(r) => r.id}
           csvFilename="tracked-questions.csv"
           toolbar={

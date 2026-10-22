@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { notFound } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 import { useUiStore } from "@/lib/store/ui";
@@ -13,6 +13,8 @@ import { CommandMenu } from "./command-menu";
 import { TourProvider } from "@/components/tour/tour-provider";
 import { WorkspaceSwitcher } from "./context-switcher";
 import { FeedbackDialog, HelpSheet } from "./help-sheet";
+import { NoSiteDialog } from "./no-site-dialog";
+import { BusyOverlay } from "@/components/brand/busy-overlay";
 import { brandHref } from "./nav";
 import { ShellProvider, type ShellValue } from "./shell-context";
 import { Topbar } from "./topbar";
@@ -37,8 +39,15 @@ export function AppShell({
   const [mobileNav, setMobileNav] = React.useState(false);
   const [help, setHelp] = React.useState(false);
   const [feedback, setFeedback] = React.useState(false);
+  const [siteGate, setSiteGate] = React.useState(false);
+  const router = useRouter();
 
-  if (lookup.notFound && !accountMode) notFound();
+  // A site that doesn't exist (typed URL, deleted, another workspace's) goes back to the sites page, not a 404.
+  const missing = lookup.notFound && !accountMode;
+  React.useEffect(() => {
+    if (missing) router.replace("/sites");
+  }, [missing, router]);
+  const noSite = accountMode && !lookup.brand && !lookup.isPending && !lookup.isError;
 
   const workspaceId = lookup.workspace?.work_space_id;
   // Runs before children's passive effects, so their first queries see the active workspace.
@@ -51,6 +60,8 @@ export function AppShell({
   const value: ShellValue = {
     brandSlug,
     brand: lookup.brand,
+    noSite,
+    requireSite: () => setSiteGate(true),
     workspace: lookup.workspace,
     workspaces: lookup.workspaces,
     me: me.data,
@@ -78,7 +89,7 @@ export function AppShell({
             tabIndex={-1}
             className="mx-auto w-full max-w-[1440px] flex-1 px-4 py-6 outline-none md:px-8 md:py-8"
           >
-            {children}
+            {missing ? null : children}
           </main>
         </div>
       </div>
@@ -104,6 +115,8 @@ export function AppShell({
       {lookup.brand && <AgentPanel siteId={lookup.brand.id} agentHref={brandHref(brandSlug, "agent")} />}
       <HelpSheet open={help} onOpenChange={setHelp} />
       <FeedbackDialog open={feedback} onOpenChange={setFeedback} />
+      <NoSiteDialog open={siteGate} onOpenChange={setSiteGate} />
+      <BusyOverlay />
     </ShellProvider>
   );
 }

@@ -14,6 +14,7 @@ import type {
   VisibilityData,
 } from "@/lib/mocks/ui-data";
 import { toNumber } from "@/services/api/helpers";
+import { siteMarket } from "@/features/sites/site-utils";
 
 /**
  * The backend tests through OpenRouter and records the model of each answer
@@ -39,7 +40,8 @@ export const AI_TEST_PROVIDER = "openrouter";
 export const AI_TEST_MODELS: { id: string; engine: Engine; label: string }[] = [
   { id: "openai/gpt-5", engine: "chatgpt", label: "GPT-5" },
   { id: "google/gemini-2.5-flash", engine: "gemini", label: "Gemini 2.5 Flash" },
-  { id: "anthropic/claude-sonnet-4", engine: "claude", label: "Claude Sonnet 4" },
+  // OpenRouter retired anthropic/claude-sonnet-4; older results keep that id and still count as Claude.
+  { id: "anthropic/claude-sonnet-4.5", engine: "claude", label: "Claude Sonnet 4.5" },
   { id: "perplexity/sonar", engine: "perplexity", label: "Perplexity Sonar" },
   { id: "perplexity/sonar-deep-research", engine: "perplexity", label: "Sonar Deep Research" },
 ];
@@ -249,7 +251,7 @@ export function buildQuestionDetail(
   });
   return {
     question: trackedQuestion(prompt, results),
-    market: site.location.country ?? "US",
+    market: siteMarket(site),
     language: prompt.language ?? site.language ?? "en",
     checkedAt: results.map(testedAt).sort().pop() ?? new Date().toISOString(),
     answers,

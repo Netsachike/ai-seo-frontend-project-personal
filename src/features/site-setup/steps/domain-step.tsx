@@ -15,19 +15,21 @@ import crawlerService from "@/services/crawler";
 import siteService from "@/services/sites";
 import workspaceService from "@/services/workspaces";
 import { useWorkspaces } from "@/features/workspace/hooks";
-import { nameFromDomain } from "@/features/sites/site-utils";
+import { countryName, nameFromDomain } from "@/features/sites/site-utils";
+import { localeFromDomain } from "../detect-locale";
 import { setSetupStep } from "../progress";
 import { patchDraft } from "../store";
 import { DomainInput, FormField } from "@/components/forms/form-field";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { domainSchema, setupPath } from "../steps";
+import { LocaleSelects } from "./details/language-fields";
 import { StepHeading } from "./step-heading";
 
 const schema = z.object({ domain: domainSchema });
 
 /**
- * Step 2a. One input turns into a site (`POST /sites`) and starts its first
+ * Step 2a. The domain, country and language become a site (`POST /sites`), which starts its first
  * crawl. Continue stays disabled until the domain is valid; a pasted URL is
  * accepted and trimmed to its host. Errors show under the field, never as a
  * toast. Sites are created in the backend's active workspace, so picking
@@ -51,6 +53,11 @@ export function DomainStep() {
   });
   const { isValid, isSubmitting, errors } = form.formState;
   const domain = useWatch({ control: form.control, name: "domain" });
+  // Follows the domain's TLD until the user picks one themselves.
+  const [picked, setPicked] = React.useState<{ country?: string; language?: string }>({});
+  const guess = localeFromDomain(domain);
+  const country = picked.country ?? guess.country;
+  const language = picked.language ?? guess.language;
 
   const submit = form.handleSubmit(async (values) => {
     if (!target) return;
@@ -62,7 +69,12 @@ export function DomainStep() {
       const { data: site } = await siteService.create({
         name: nameFromDomain(values.domain),
         url: `https://${values.domain}`,
+        // Only creation takes these; there's no endpoint to change them later.
+        // The backend wants the country's name ("United States"), not its code.
+        country: countryName(country),
+        language,
       });
+      patchDraft(site.id, { country, language });
       // The crawl feeds keywords, topics and the site audit; it runs while setup continues.
       void crawlerService
         .start(site.id)
@@ -117,6 +129,14 @@ export function DomainStep() {
           />
         )}
       </FormField>
+
+      <LocaleSelects
+        country={country}
+        language={language}
+        onCountryChange={(code) => setPicked((p) => ({ ...p, country: code }))}
+        onLanguageChange={(code) => setPicked((p) => ({ ...p, language: code }))}
+        hint={t("localeHint")}
+      />
 
       <Button type="submit" variant="primary" size="lg" disabled={!isValid || !target} loading={isSubmitting}>
         {t("continue")}

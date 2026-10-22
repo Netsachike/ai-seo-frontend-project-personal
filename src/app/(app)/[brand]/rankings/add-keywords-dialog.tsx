@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { FormField } from "@/components/forms/form-field";
+import { useBusyOverlay } from "@/components/brand/busy-overlay";
 
 /** The backend accepts up to 100 seeds of 2–200 characters. */
 const MAX_SEEDS = 100;
@@ -38,6 +39,7 @@ export function AddKeywordsDialog({
 }) {
   const t = useTranslations("visibility.add.keywords");
   const tCommon = useTranslations("common");
+  const tBusy = useTranslations("busy");
   const queryClient = useQueryClient();
   const [text, setText] = React.useState("");
   const [error, setError] = React.useState<string>();
@@ -64,6 +66,7 @@ export function AddKeywordsDialog({
     },
     onError: (err) => setError(getErrorMessage(err, t("failed"))),
   });
+  useBusyOverlay(discover.isPending, tBusy("findingKeywords"));
 
   const submit = (event: React.FormEvent) => {
     event.preventDefault();

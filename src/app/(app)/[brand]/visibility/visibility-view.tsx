@@ -10,7 +10,7 @@ import { type CitedSource, type EngineVisibility } from "@/lib/mocks/ui-data";
 import { useRunAiScan } from "@/features/insights/hooks";
 import { useEngineFilter } from "@/features/insights/url-state";
 import { useGeneratePrompts, useVisibility } from "@/features/visibility/hooks";
-import { TESTED_ENGINES } from "@/features/visibility/model";
+import { TESTED_ENGINES, modelLabel } from "@/features/visibility/model";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardAction, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -23,6 +23,7 @@ import { KpiCard } from "@/components/brand/kpi-card";
 import { PageHeader } from "@/components/layout/page-header";
 import { PageSkeleton } from "@/components/layout/page-skeleton";
 import { useShell } from "@/components/layout/shell-context";
+import { useBusyOverlay } from "@/components/brand/busy-overlay";
 import { QuestionTests } from "./question-tests";
 
 export function VisibilityView() {
@@ -35,6 +36,12 @@ export function VisibilityView() {
   const query = useVisibility(brand);
   const generate = useGeneratePrompts(brand?.id ?? 0);
   const scan = useRunAiScan(brand?.id ?? 0);
+  const tBusy = useTranslations("busy");
+  useBusyOverlay(
+    scan.isPending,
+    scan.current ? tBusy("checkingModel", { model: modelLabel(scan.current) }) : tBusy("checking"),
+  );
+  useBusyOverlay(generate.isPending, tBusy("generatingQuestions"));
 
   const generateQuestions = () =>
     generate.mutate(undefined, {
