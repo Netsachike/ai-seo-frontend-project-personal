@@ -11,14 +11,14 @@ import { AiSection } from "./ai-section";
 import { DomainCard } from "./domain-card";
 import { LanguageFields } from "./language-fields";
 import { SetupSection, type SectionStatus } from "./setup-section";
-import { faviconFor } from "@/features/sites/site-utils";
+import { countryCode, faviconFor } from "@/features/sites/site-utils";
 
 type SectionKey = "description" | "audience" | "language";
 
 /**
  * Step 2b. Three sections confirmed one at a time: Rankoya writes the
  * description, then the audience (reading the confirmed description), then
- * the user confirms country and language. Confirming ticks a section,
+ * the user reviews the country and language chosen when the site was added. Confirming ticks a section,
  * collapses it and opens the next.
  */
 export function DetailsStep({
@@ -58,9 +58,10 @@ export function DetailsStep({
     setOpen(key === "description" && !draft.audienceConfirmed ? "audience" : "language");
   };
 
+  // What the site was created with; the draft and the TLD cover older sites saved without them.
   const locale = {
-    country: draft.country ?? detectLocale(site).country,
-    language: draft.language ?? detectLocale(site).language,
+    country: countryCode(site.location.country) ?? draft.country ?? detectLocale(site).country,
+    language: site.language ?? draft.language ?? detectLocale(site).language,
   };
 
   return (
@@ -113,7 +114,7 @@ export function DetailsStep({
           onOpen={draft.audienceConfirmed ? () => setOpen("language") : undefined}
         >
           <LanguageFields
-            defaults={locale}
+            values={locale}
             saving={completing}
             onContinue={(value) => {
               patchDraft(site.id, value);

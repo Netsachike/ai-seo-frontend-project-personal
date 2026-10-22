@@ -38,3 +38,9 @@ export function detectLocale(site: Pick<Site, "domain" | "location" | "language"
   const country = COUNTRY_BY_TLD[site.domain.split(".").pop() ?? ""] ?? siteMarket(site);
   return { country, language: LANGUAGE_BY_COUNTRY[country] ?? siteLanguage(site) };
 }
+
+/** Defaults for a domain that isn't a site yet (the domain step): its TLD, else the US in English. */
+export function localeFromDomain(domain: string) {
+  const country = COUNTRY_BY_TLD[domain.trim().toLowerCase().split(".").pop() ?? ""] ?? "US";
+  return { country, language: LANGUAGE_BY_COUNTRY[country] ?? "en" };
+}

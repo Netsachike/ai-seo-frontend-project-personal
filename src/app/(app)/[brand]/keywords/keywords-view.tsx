@@ -62,6 +62,7 @@ import { brandHref } from "@/components/layout/nav";
 import { PageHeader } from "@/components/layout/page-header";
 import { PageSkeleton } from "@/components/layout/page-skeleton";
 import { useShell } from "@/components/layout/shell-context";
+import { useBusyOverlay } from "@/components/brand/busy-overlay";
 
 const views = ["keywords", "map"] as const;
 const filters = ["accepted", "rejected", "all"] as const;
@@ -87,6 +88,8 @@ export function KeywordsView() {
   const [view, setView] = useQueryState("view", parseAsStringLiteral(views).withDefault("keywords"));
   const analyze = useAnalyzeKeywords(siteId);
   const [growOpen, setGrowOpen] = React.useState(false);
+  const tBusy = useTranslations("busy");
+  useBusyOverlay(analyze.isPending, tBusy("analyzingKeywords"));
 
   const runAnalyze = () =>
     analyze.mutate(undefined, {
@@ -174,6 +177,11 @@ function KeywordsTable({
   const rows = filter === "all" ? all : all.filter((k) => keywordQualityOf(k) === filter);
   const unanalyzed = all.filter((k) => keywordQualityOf(k) === null).length;
   const researchingId = research.isPending ? research.variables : null;
+  const tBusy = useTranslations("busy");
+  useBusyOverlay(
+    research.isPending,
+    tBusy("researchingKeyword", { keyword: all.find((k) => k.id === researchingId)?.keyword ?? "" }),
+  );
 
   const columns = React.useMemo<DataColumn<Keyword>[]>(
     () => [
@@ -226,20 +234,21 @@ function KeywordsTable({
         meta: { label: t("opportunity"), numeric: true },
         cell: ({ getValue }) => Math.round(getValue() as number),
       },
-      {
-        id: "intent",
-        accessorFn: (r) => r.intent ?? "",
-        header: t("intent"),
-        meta: { label: t("intent") },
-        cell: ({ row }) => (row.original.intent ? <Badge variant="outline">{row.original.intent}</Badge> : "—"),
-      },
-      {
-        id: "cluster",
-        accessorFn: (r) => r.cluster ?? "",
-        header: t("cluster"),
-        meta: { label: t("cluster") },
-        cell: ({ row }) => <span className="block max-w-[14rem] truncate">{row.original.cluster ?? "—"}</span>,
-      },
+      // Hidden so the Research button fits without scrolling sideways. Intent and cluster are on the topical map tab.
+      // {
+      //   id: "intent",
+      //   accessorFn: (r) => r.intent ?? "",
+      //   header: t("intent"),
+      //   meta: { label: t("intent") },
+      //   cell: ({ row }) => (row.original.intent ? <Badge variant="outline">{row.original.intent}</Badge> : "—"),
+      // },
+      // {
+      //   id: "cluster",
+      //   accessorFn: (r) => r.cluster ?? "",
+      //   header: t("cluster"),
+      //   meta: { label: t("cluster") },
+      //   cell: ({ row }) => <span className="block max-w-[14rem] truncate">{row.original.cluster ?? "—"}</span>,
+      // },
       {
         id: "actions",
         header: () => <span className="sr-only">{t("actions")}</span>,
@@ -274,17 +283,12 @@ function KeywordsTable({
           </Button>
         </div>
       )}
-      {research.isPending && (
-        <p role="status" className="rounded-lg bg-surface-2 px-4 py-3 text-small text-fg-2">
-          {t("researchingNote")}
-        </p>
-      )}
       <DataTable
         caption={t("caption")}
         data={rows}
         columns={columns}
         loading={query.isPending}
-        minWidth={960}
+        minWidth={680}
         getRowId={(r) => String(r.id)}
         csvFilename="keywords.csv"
         empty={
@@ -331,6 +335,8 @@ function TopicalMapPanel({ siteId, onGrow }: { siteId: number; onGrow: () => voi
   const mapId = mapParam ?? maps.data?.[0]?.id ?? null;
   const map = useTopicalMap(siteId, mapId);
   const build = useBuildMap(siteId);
+  const tBusy = useTranslations("busy");
+  useBusyOverlay(build.isPending, tBusy("buildingMap"));
   const [preview, setPreview] = React.useState<CrawlPage | null>(null);
 
   const rebuild = () =>
@@ -551,6 +557,8 @@ function GrowDialog({
 }) {
   const t = useTranslations("keywords.grow");
   const grow = useGrowMap(siteId);
+  const tBusy = useTranslations("busy");
+  useBusyOverlay(grow.isPending, tBusy("findingKeywords"));
   const [seeds, setSeeds] = React.useState("");
   const list = seeds
     .split(/[\n,]+/)

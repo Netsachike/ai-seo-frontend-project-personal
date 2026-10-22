@@ -118,7 +118,36 @@ export function SidebarSite({
 }) {
   const t = useTranslations("shell.sidebar");
   const side = useEndSide();
-  const { brand } = useShell();
+  const { brand, noSite } = useShell();
+
+  if (!brand && noSite) {
+    const choose = (
+      <Link
+        href="/sites"
+        onClick={onNavigate}
+        aria-label={collapsed ? t("chooseSite") : undefined}
+        className={cn(
+          "flex items-center gap-2.5 rounded-lg border border-dashed border-nav-border p-2.5 text-small font-medium text-nav-fg transition-colors duration-120 hover:bg-nav-hover hover:text-white",
+          collapsed && "mx-auto size-11 justify-center p-0",
+        )}
+      >
+        <ArrowLeftRightIcon aria-hidden className="size-4 shrink-0" />
+        {!collapsed && <span className="min-w-0 flex-1 truncate">{t("chooseSite")}</span>}
+      </Link>
+    );
+    return (
+      <div className={className}>
+        {collapsed ? (
+          <Tooltip>
+            <TooltipTrigger asChild>{choose}</TooltipTrigger>
+            <TooltipContent side={side}>{t("chooseSite")}</TooltipContent>
+          </Tooltip>
+        ) : (
+          choose
+        )}
+      </div>
+    );
+  }
 
   if (!brand) {
     return (
@@ -178,7 +207,7 @@ export function SidebarNav({
   onNavigate?: () => void;
 }) {
   const t = useTranslations("shell.nav");
-  const { brandSlug } = useShell();
+  const { brandSlug, noSite, requireSite } = useShell();
   const session = useSessionUser();
   const active = activeNavKey(usePathname());
   const items = navGroups.flatMap((g) => g.items).filter((item) => !item.visible || item.visible(session));
@@ -200,6 +229,8 @@ export function SidebarNav({
               active={item.key === active}
               collapsed={collapsed}
               onNavigate={onNavigate}
+              // Site pages can't open without a site: greyed out, and a click explains what to do.
+              onLocked={noSite && !item.href ? requireSite : undefined}
             />
           </li>
         ))}
@@ -214,31 +245,23 @@ function NavLink({
   active,
   collapsed,
   onNavigate,
+  onLocked,
 }: {
   item: NavItem;
   href: string;
   active: boolean;
   collapsed: boolean;
   onNavigate?: () => void;
+  /** Set when the page needs a site and none is open: renders a greyed button that calls this. */
+  onLocked?: () => void;
 }) {
   const t = useTranslations("shell.nav");
   const side = useEndSide();
   const label = t(`items.${item.key}`);
   const Icon = item.icon;
 
-  const link = (
-    <Link
-      href={href}
-      onClick={onNavigate}
-      aria-current={active ? "page" : undefined}
-      aria-label={collapsed ? label : undefined}
-      className={cn(
-        "flex h-11 items-center gap-3 rounded-md px-3 text-body font-medium whitespace-nowrap text-nav-fg transition-colors duration-120",
-        "hover:bg-nav-hover hover:text-white",
-        "aria-[current=page]:bg-nav-active aria-[current=page]:font-semibold aria-[current=page]:text-white aria-[current=page]:shadow-[0_4px_12px_-4px_rgb(37_99_235/0.6)]",
-        collapsed && "justify-center px-0",
-      )}
-    >
+  const content = (
+    <>
       <Icon aria-hidden className="size-[18px] shrink-0 stroke-[1.75]" />
       {!collapsed && <span className="min-w-0 flex-1 truncate">{label}</span>}
       {!collapsed && item.soon && (
@@ -246,6 +269,36 @@ function NavLink({
           {t("soon")}
         </span>
       )}
+    </>
+  );
+  const classes = cn(
+    "flex h-11 w-full items-center gap-3 rounded-md px-3 text-body font-medium whitespace-nowrap text-nav-fg transition-colors duration-120",
+    "hover:bg-nav-hover hover:text-white",
+    "aria-[current=page]:bg-nav-active aria-[current=page]:font-semibold aria-[current=page]:text-white aria-[current=page]:shadow-[0_4px_12px_-4px_rgb(37_99_235/0.6)]",
+    collapsed && "justify-center px-0",
+  );
+
+  const link = onLocked ? (
+    <button
+      type="button"
+      onClick={() => {
+        onNavigate?.();
+        onLocked();
+      }}
+      aria-label={collapsed ? label : undefined}
+      className={cn(classes, "text-start opacity-45 hover:bg-transparent hover:text-nav-fg")}
+    >
+      {content}
+    </button>
+  ) : (
+    <Link
+      href={href}
+      onClick={onNavigate}
+      aria-current={active ? "page" : undefined}
+      aria-label={collapsed ? label : undefined}
+      className={classes}
+    >
+      {content}
     </Link>
   );
 

@@ -25,6 +25,9 @@ export function SitesShell({ children }: { children: React.ReactNode }) {
   const value: ShellValue = {
     brandSlug: "",
     brand: undefined,
+    // The sites page has no site nav to gate.
+    noSite: false,
+    requireSite: () => {},
     workspace,
     workspaces: list,
     me: me.data,

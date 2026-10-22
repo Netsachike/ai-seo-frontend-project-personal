@@ -473,7 +473,8 @@
       "viewPlans": "View plans",
       "telegramOn": "Telegram connected",
       "changeSite": "Change site. Current site: {name}",
-      "upgradeShort": "Upgrade"
+      "upgradeShort": "Upgrade",
+      "chooseSite": "Choose a site"
     },
     "topbar": {
       "openNav": "Open navigation",
@@ -610,6 +611,18 @@
     "placeholder": {
       "title": "This screen is on its way",
       "description": "It's built in a later phase of the MVP. Use the sidebar to look around."
+    },
+    "noSite": {
+      "pendingTitle": "Finish setting up {name}",
+      "pendingBody": "This page shows data for one site. Finish setting yours up to open it.",
+      "finish": "Finish setup",
+      "chooseTitle": "Choose a site first",
+      "chooseBody": "This page shows data for one site. Pick the site you want to work on.",
+      "choose": "Go to my sites",
+      "addTitle": "Add your site first",
+      "addBody": "This page shows data for one site. Add your website to get started.",
+      "add": "Add a site",
+      "later": "Not now"
     }
   },
   "auth": {
@@ -783,7 +796,7 @@
         "done": "Fixes are live. Rankoya will recheck them tomorrow."
       },
       "failed": "The check didn't finish. Try again.",
-      "noPrompts": "No questions to test. Discover and analyze keywords first, then generate questions."
+      "noPrompts": "No questions to check. Discover and analyze keywords first, then generate questions."
     }
   },
   "overview": {
@@ -922,7 +935,7 @@
     "addQuestions": "Add questions",
     "engineFilter": "Filter by engine",
     "emptyTitle": "No answers to show yet",
-    "emptyDescription": "Run a test and Rankoya asks each AI assistant your questions. You'll see who they recommend, and whether it's you.",
+    "emptyDescription": "Run a check and Rankoya asks each AI assistant your questions. You'll see who they recommend, and whether it's you.",
     "kpis": {
       "score": "Visibility score",
       "scoreNote": "{rank, selectordinal, one {#st} two {#nd} few {#rd} other {#th}} of {count} tracked brands",
@@ -956,7 +969,7 @@
     },
     "questions": {
       "title": "Questions you track",
-      "legend": "Pick questions and a model, or test one question from its row. A ticked, coloured icon means that engine mentions you; a grey one means it doesn’t.",
+      "legend": "Pick questions and a model, or check one question from its row. A ticked, coloured icon means that engine mentions you; a grey one means it doesn’t.",
       "question": "Question",
       "engines": "Engines",
       "rank": "Your rank",
@@ -967,16 +980,16 @@
       "select": "Select",
       "selectAll": "Select all questions",
       "selectOne": "Select “{question}”",
-      "tested": "Models tested",
+      "tested": "Models checked",
       "testedCount": "{count} of {total}",
-      "lastTested": "Last tested",
-      "never": "Not tested yet",
-      "test": "Test",
-      "testOne": "Test “{question}”",
+      "lastTested": "Last checked",
+      "never": "Not checked yet",
+      "test": "Check",
+      "testOne": "Check “{question}”",
       "scopeAll": "{count, plural, one {the question} other {all # questions}}",
       "scopeSelected": "{count, plural, one {# question} other {# questions}}",
       "emptyTitle": "No questions yet",
-      "emptyBody": "Rankoya writes the questions your buyers ask AI assistants from your keywords. Generate them, then test.",
+      "emptyBody": "Rankoya writes the questions your buyers ask AI assistants from your keywords. Generate them, then check.",
       "generate": "Generate questions"
     },
     "sources": {
@@ -1018,14 +1031,14 @@
     "generated": "{count, plural, =0 {No new questions.} one {# question added.} other {# questions added.}}",
     "generateFailed": "Couldn't generate questions. Add keywords first, then try again.",
     "test": {
-      "running": "Testing {model}… keep this page open.",
-      "all": "Test all models",
-      "last": "Tested {when}",
-      "never": "Not tested yet",
+      "running": "Checking {model}… keep this page open.",
+      "all": "Check all models",
+      "last": "Checked {when}",
+      "never": "Not checked yet",
       "allModels": "All models",
       "oneModel": "One model",
-      "modelLabel": "Model to test",
-      "run": "Test {scope} on {model}"
+      "modelLabel": "Model to check",
+      "run": "Check {scope} on {model}"
     }
   },
   "prompt": {
@@ -1062,7 +1075,7 @@
     "thisWeek": "This week",
     "recheckAll": "All models",
     "recheckOne": "One model",
-    "recheckRunning": "Testing {model}…"
+    "recheckRunning": "Checking {model}…"
   },
   "rankings": {
     "title": "Google rankings",
@@ -1124,7 +1137,7 @@
     "descriptionEmpty": "See who you compete with in Google and AI answers, and what they do that you don't.",
     "add": "Add competitor",
     "emptyTitle": "No comparison yet",
-    "emptyDescription": "Click Research competitors. Rankoya looks at who ranks for your keywords and who AI assistants mention, and lists them here.",
+    "emptyDescription": "Click Select keywords and pick up to {max} of your keywords. Rankoya checks who ranks for them on Google and shows you here where competitors beat you.",
     "table": {
       "caption": "Your brand compared with tracked competitors",
       "brand": "Brand",
@@ -1163,16 +1176,6 @@
       "drafting": "Ask Rankoya is writing the answer…",
       "draftFailed": "Couldn't draft the answer. Try again."
     },
-    "keywordGaps": {
-      "title": "Keywords they rank for, you don't",
-      "description": "Searches where a competitor is on Google's first page and you're not in the top 50.",
-      "who": "{name} #{position}",
-      "volume": "{volume}/mo",
-      "addToPlan": "Add to keywords",
-      "inPlan": "Added",
-      "added": "\"{keyword}\" added to your keywords.",
-      "addFailed": "Couldn't add the keyword. Try again."
-    },
     "sites": {
       "title": "Websites that link to your competitors",
       "description": "Each of these links to a competitor, so they may link to you too. Open them in Authority to track who you have contacted and which links you have won.",
@@ -1199,8 +1202,7 @@
       "added": "Added {domain}. They'll appear after the next scan.",
       "submit": "Add competitor"
     },
-    "research": "Research competitors",
-    "researched": "{count, plural, one {# competitor} other {# competitors}} found.",
+    "researched": "{count, plural, one {# competitor} other {# competitors}} found, {gaps, plural, =0 {no content gaps} one {# content gap} other {# content gaps}}.",
     "researchFailed": "Couldn't run the research. Try again.",
     "runs": {
       "title": "Research history",
@@ -1211,16 +1213,80 @@
       "label": "How to use this page",
       "compare": {
         "title": "See where you stand",
-        "body": "The table puts your site next to each competitor in Google and in AI answers. Hover a column name to see what it means."
+        "body": "The table puts your site next to each competitor, and the search results show where you rank for each keyword and who's above you."
       },
       "gaps": {
         "title": "Close the gaps",
-        "body": "Below it are the questions and keywords competitors win and you don't. Write an answer page or add the keyword in one click."
+        "body": "Content gaps are keywords competitors rank for and you don't. Research one and Rankoya drafts the page for you."
       },
       "links": {
         "title": "Get the links they have",
         "body": "Find link prospects lists the websites that link to a competitor. Those sites are likely to link to you too, so Rankoya adds them to your Authority page as sites to contact."
+      },
+      "research": {
+        "title": "Pick keywords to research",
+        "body": "Click Select keywords and choose up to 5. Rankoya checks who ranks for them on Google."
       }
+    },
+    "selectKeywords": "Select keywords",
+    "researching": "Researching who ranks for {count, plural, one {# keyword} other {# keywords}}…",
+    "picker": {
+      "title": "Select keywords to research",
+      "description": "Pick up to {max} keywords. Rankoya checks who ranks for each one on Google, then shows where you stand and the gaps to close.",
+      "search": "Search your keywords",
+      "picked": "Selected keywords",
+      "remove": "Remove {keyword}",
+      "volume": "{volume}/mo",
+      "score": "Score {score}",
+      "noMatch": "No approved keywords match that search.",
+      "emptyTitle": "No approved keywords yet",
+      "emptyBody": "Only approved keywords can be researched. Analyse your keywords first, then come back.",
+      "openKeywords": "Open keywords",
+      "count": "{count} of {max} selected",
+      "limit": "{max} of {max} selected. Remove one to pick another.",
+      "cancel": "Cancel",
+      "research": "{count, plural, =0 {Research} one {Research # keyword} other {Research # keywords}}"
+    },
+    "results": {
+      "title": "Search results for your keywords",
+      "description": "For each keyword you researched: where your site ranks on Google, and the top sites ranking for it.",
+      "keyword": "Keyword",
+      "you": "Your position",
+      "top": "Top competitors",
+      "position": "#{position} on page one",
+      "positionLow": "#{position}, past page one",
+      "notFound": "Not in the top {checked}",
+      "more": "+{count} more"
+    },
+    "contentGaps": {
+      "title": "Content gaps ({count})",
+      "description": "Keywords competitors rank for where you have no page, or only rank past page one. Close the ones with the highest score first.",
+      "empty": "No content gaps in the keywords you researched. Select more keywords to find more.",
+      "kind": {
+        "noPage": "No page for this",
+        "weak": "Past page one",
+        "weakAt": "You're #{position}",
+        "other": "Gap"
+      },
+      "why": {
+        "noPage": "Competitors rank for this, but none of your pages do. Write a page that targets it.",
+        "weak": "You rank, but past page one where few people look. Improve the page to move up.",
+        "weakAt": "Your page is at #{position}, past page one where few people look. Improve it to move up.",
+        "other": "Competitors rank for this ahead of you."
+      },
+      "volume": "Searches/mo",
+      "score": "Score",
+      "whoRanks": "{count, plural, one {# competitor ranks:} other {# competitors rank:}}",
+      "write": "Research and write",
+      "improve": "Research and improve",
+      "researching": "Researching “{keyword}” for an article…",
+      "researchFailed": "Couldn't research this keyword. Try again.",
+      "addToPlan": "Add to keywords",
+      "inPlan": "Added",
+      "added": "\"{keyword}\" added to your keywords.",
+      "addFailed": "Couldn't add the keyword. Try again.",
+      "showAll": "Show all {count}",
+      "showLess": "Show fewer"
     }
   },
   "audit": {
@@ -1431,7 +1497,7 @@
     "confirmDescription": "These change your live site. Rankoya starts right away and tells you when each one is live.",
     "cancel": "Cancel",
     "emptyTitle": "No actions yet",
-    "emptyDescription": "Nothing here yet. Scan your site and test your AI visibility, and Rankoya builds your plan from what it finds.",
+    "emptyDescription": "Nothing here yet. Scan your site and check your AI visibility, and Rankoya builds your plan from what it finds.",
     "projected": "Projected AI visibility: <strong>{current}</strong> → <strong>{projected}</strong> when this plan is done",
     "projectedAria": "Visibility score {current} now, {projected} projected",
     "gain": "+{points} pts",
@@ -3261,7 +3327,8 @@
       "placeholder": "yourdomain.com",
       "exists": "This site is already in Rankoya. Open it from your sites.",
       "failed": "Rankoya couldn't add that domain. Check it and try again.",
-      "continue": "Continue"
+      "continue": "Continue",
+      "localeHint": "Select the country and language that best represent your target audience"
     },
     "details": {
       "title": "Let's get started",
@@ -3300,7 +3367,8 @@
       "country": "Country",
       "language": "Language",
       "localeHint": "Select the country and language that best represent your target audience",
-      "continue": "Continue"
+      "continue": "Continue",
+      "localeSaved": "Saved when you added your site. Rankoya researches and writes for this audience."
     },
     "gsc": {
       "title": "Connect Search Console",
@@ -4117,12 +4185,12 @@
         "body": "See how often ChatGPT, Gemini, Claude and Perplexity name your brand when people ask questions you should own."
       },
       "actions": {
-        "title": "Run a new test",
-        "body": "Test again any time to see whether your changes moved the needle."
+        "title": "Run a new check",
+        "body": "Check again any time to see whether your changes moved the needle."
       },
       "questions": {
-        "title": "Test the questions that matter",
-        "body": "These are the questions your customers ask. Test all of them, a few, or one, on every assistant or just one."
+        "title": "Check the questions that matter",
+        "body": "These are the questions your customers ask. Check all of them, a few, or one, on every assistant or just one."
       }
     },
     "rankings": {
@@ -4211,5 +4279,15 @@
         "body": "Run an analysis to see your links and find new link opportunities."
       }
     }
+  },
+  "busy": {
+    "body": "This can take a minute. Keep this page open.",
+    "checking": "Checking your AI visibility…",
+    "checkingModel": "Checking your AI visibility on {model}…",
+    "generatingQuestions": "Writing the questions your buyers ask…",
+    "analyzingKeywords": "Analysing your keywords…",
+    "researchingKeyword": "Researching “{keyword}” for an article…",
+    "findingKeywords": "Finding keywords…",
+    "buildingMap": "Building your topical map…"
   }
 }

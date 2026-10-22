@@ -53,7 +53,7 @@ export function CommandMenu() {
   const open = useUiStore((s) => s.commandOpen);
   const setOpen = useUiStore((s) => s.setCommandOpen);
   const [query, setQuery] = React.useState("");
-  const { brandSlug, brand, workspace, workspaces } = useShell();
+  const { brandSlug, brand, noSite, requireSite, workspace, workspaces } = useShell();
   const session = useSessionUser();
   const brands = useSites(workspace?.work_space_id);
   const switchBrand = useSwitchBrand();
@@ -106,7 +106,9 @@ export function CommandMenu() {
                     <CommandItem
                       key={item.key}
                       value={`nav ${tNav(`items.${item.key}`)}`}
-                      onSelect={() => run(() => router.push(navItemHref(item, brandSlug)))}
+                      onSelect={() =>
+                        run(() => (noSite && !item.href ? requireSite() : router.push(navItemHref(item, brandSlug))))
+                      }
                     >
                       <Icon />
                       {tNav(`items.${item.key}`)}

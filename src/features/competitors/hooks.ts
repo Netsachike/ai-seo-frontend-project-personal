@@ -12,7 +12,7 @@ import type {
   SerpResult,
   Site,
 } from "@/types/types";
-import type { CompetitorRow, CompetitorsData, KeywordGap, LinkSite, QuestionGap } from "@/lib/mocks/ui-data";
+import type { CompetitorRow, CompetitorsData, LinkSite, QuestionGap } from "@/lib/mocks/ui-data";
 import { aiVisibilityKeys, authorityKeys, keywordKeys, serpKeys, siteKeys } from "@/lib/api/query-keys";
 import { toNumber } from "@/services/api/helpers";
 import aiVisibilityService from "@/services/ai-visibility";
@@ -127,18 +127,105 @@ function questionGaps(
     .slice(0, 8);
 }
 
-function keywordGaps(gaps: ContentGap[], keywords: Keyword[], serp: SerpResult[]): KeywordGap[] {
-  const volume = new Map(keywords.map((k) => [k.id, k.metrics.search_volume ?? 0]));
-  return gaps.slice(0, 8).map((gap) => {
-    const best = serp
-      .filter((r) => !r.is_target_site && r.keyword.toLowerCase() === gap.keyword.toLowerCase())
-      .sort((a, b) => a.position - b.position)[0];
+/** A competitor's page in Google for one keyword. */
+export type RankedPage = { domain: string; position: number; url: string | null; title: string | null };
+
+/**
+ * A keyword competitors rank for and the site doesn't (or only past page one),
+ * from `GET /content-gaps`: `no_target_page` or `weak_position`.
+ */
+export type ContentGapRow = {
+  id: string;
+  keyword: string;
+  keywordId: number | null;
+  kind: "noPage" | "weak" | "other";
+  /** The site's own position when it ranks at all. */
+  yourPosition: number | null;
+  competitors: RankedPage[];
+  competitorCount: number;
+  volume: number | null;
+  score: number;
+};
+
+/** One researched keyword: where the site ranks and who's above it. */
+export type KeywordResult = {
+  keyword: string;
+  yourPosition: number | null;
+  yourUrl: string | null;
+  top: RankedPage[];
+  /** Results Google returned for it (how deep "not found" looked). */
+  checked: number;
+};
+
+export type CompetitorsPageData = Omit<CompetitorsData, "keywordGaps"> & {
+  contentGaps: ContentGapRow[];
+  results: KeywordResult[];
+};
+
+function rankedPage(value: unknown): RankedPage | null {
+  if (!value || typeof value !== "object") {
+    const name = nameOf(value);
+    return name ? { domain: bare(name), position: 0, url: null, title: null } : null;
+  }
+  const record = value as Record<string, unknown>;
+  const domain = nameOf(record);
+  if (!domain) return null;
+  return {
+    domain: hostOf(domain) ?? bare(domain),
+    position: toNumber(record.position as number | string | null) ?? 0,
+    url: typeof record.url === "string" ? record.url : null,
+    title: typeof record.title === "string" ? record.title : null,
+  };
+}
+
+function contentGaps(gaps: ContentGap[], keywords: Keyword[], serp: SerpResult[]): ContentGapRow[] {
+  const volume = new Map(keywords.map((k) => [k.id, k.metrics.search_volume]));
+  return gaps.map((gap) => {
+    const forKeyword = serp.filter((r) => r.keyword.toLowerCase() === gap.keyword.toLowerCase());
+    const own = forKeyword.filter((r) => r.is_target_site).sort((a, b) => a.position - b.position)[0];
+    const stored = (gap.competitors ?? []).map(rankedPage).filter((p): p is RankedPage => p !== null);
+    const competitors = stored.length
+      ? stored
+      : forKeyword
+          .filter((r) => !r.is_target_site)
+          .sort((a, b) => a.position - b.position)
+          .map((r) => ({ domain: bare(r.domain), position: r.position, url: r.url, title: r.title }));
     return {
       id: String(gap.id),
       keyword: gap.keyword,
-      competitor: best?.domain ?? nameOf(gap.competitors?.[0]) ?? "—",
-      position: best?.position ?? 0,
-      volume: (gap.keyword_id && volume.get(gap.keyword_id)) || 0,
+      keywordId: gap.keyword_id,
+      kind: gap.gap_type === "no_target_page" ? "noPage" : gap.gap_type === "weak_position" ? "weak" : "other",
+      yourPosition: own?.position ?? null,
+      competitors: competitors.sort((a, b) => a.position - b.position),
+      competitorCount: gap.competitor_count || competitors.length,
+      volume: (gap.keyword_id && volume.get(gap.keyword_id)) ?? null,
+      score: Math.round(toNumber(gap.opportunity_score) ?? 0),
+    };
+  });
+}
+
+/** SERP results grouped by keyword, newest research first. */
+function keywordResults(serp: SerpResult[]): KeywordResult[] {
+  const byKeyword = new Map<string, SerpResult[]>();
+  for (const result of [...serp].sort((a, b) => b.serp_research_run_id - a.serp_research_run_id)) {
+    const key = result.keyword.toLowerCase();
+    const list = byKeyword.get(key);
+    // Only the latest run for each keyword.
+    if (list && list[0].serp_research_run_id !== result.serp_research_run_id) continue;
+    byKeyword.set(key, [...(list ?? []), result]);
+  }
+  return [...byKeyword.values()].map((rows) => {
+    const sorted = [...rows].sort((a, b) => a.position - b.position);
+    const own = sorted.find((r) => r.is_target_site);
+    return {
+      keyword: sorted[0].keyword,
+      yourPosition: own?.position ?? null,
+      yourUrl: own?.url ?? null,
+      top: sorted
+        .filter((r) => !r.is_target_site)
+        .slice(0, 3)
+        .map((r) => ({ domain: bare(r.domain), position: r.position, url: r.url, title: r.title })),
+      checked: sorted.length,
     };
   });
 }
@@ -211,7 +298,7 @@ export function useCompetitors(site: Site | undefined) {
   });
   const queries = [competitors, gaps, serp, keywords, prompts, results, authority];
 
-  let data: CompetitorsData | undefined;
+  let data: CompetitorsPageData | undefined;
   if (site && queries.every((q) => q.data)) {
     const rows = rowsFor(site, competitors.data!, serp.data!, results.data!);
     const others = rows.filter((r) => !r.isYou).sort((a, b) => b.score - a.score);
@@ -222,7 +309,8 @@ export function useCompetitors(site: Site | undefined) {
       // Only the site itself means no competitors were found yet.
       rows: rows.length > 1 ? rows : [],
       questionGaps: questionGaps(prompts.data!, results.data!),
-      keywordGaps: keywordGaps(gaps.data!, keywords.data!, serp.data!),
+      contentGaps: contentGaps(gaps.data!, keywords.data!, serp.data!),
+      results: keywordResults(serp.data!),
       sites: linkSites(authority.data!),
     };
   }
@@ -235,11 +323,15 @@ export function useCompetitors(site: Site | undefined) {
   };
 }
 
-/** SERP research finds the competitors and content gaps for the site's top keywords. */
+/** Most keywords one research run takes. The backend allows 10; 5 keeps a run quick. */
+export const MAX_RESEARCH_KEYWORDS = 5;
+
+/** SERP research for the keywords the user picked: finds who ranks for them, and the content gaps. */
 export function useResearchCompetitors(siteId: number) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async () => (await serpService.research(siteId)).data,
+    mutationFn: async (keywordIds: number[]) =>
+      (await serpService.research(siteId, { keyword_ids: keywordIds.slice(0, MAX_RESEARCH_KEYWORDS) })).data,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: siteKeys.detail(siteId) }),
   });
 }

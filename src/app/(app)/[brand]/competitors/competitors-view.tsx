@@ -2,15 +2,18 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowRightIcon,
   CheckIcon,
   ExternalLinkIcon,
   FilePenLineIcon,
+  FlaskConicalIcon,
   Link2Icon,
+  ListChecksIcon,
   ListPlusIcon,
-  ScanSearchIcon,
+  SearchIcon,
   UsersIcon,
 } from "lucide-react";
 import { useFormatter, useNow, useTranslations } from "next-intl";
@@ -22,8 +25,17 @@ import copilotService from "@/services/copilot";
 import keywordService from "@/services/keywords";
 import serpService from "@/services/serp";
 import { useDiscoverProspects } from "@/features/authority/hooks";
-import type { CompetitorRow, KeywordGap, LinkSite, QuestionGap } from "@/lib/mocks/ui-data";
-import { useCompetitors, useResearchCompetitors } from "@/features/competitors/hooks";
+import type { CompetitorRow, LinkSite, QuestionGap } from "@/lib/mocks/ui-data";
+import {
+  useCompetitors,
+  useResearchCompetitors,
+  type ContentGapRow,
+  type KeywordResult,
+  type RankedPage,
+} from "@/features/competitors/hooks";
+import { KeywordPickerDialog } from "@/features/competitors/keyword-picker-dialog";
+import { useResearchKeyword } from "@/features/content/hooks";
+import { useBusyOverlay } from "@/components/brand/busy-overlay";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -46,12 +58,22 @@ export function CompetitorsView() {
   const { brand } = useShell();
   const query = useCompetitors(brand);
   const research = useResearchCompetitors(brand?.id ?? 0);
+  const [picking, setPicking] = React.useState(false);
+  useBusyOverlay(research.isPending, t("researching", { count: research.variables?.length ?? 0 }));
 
-  const runResearch = () =>
-    research.mutate(undefined, {
-      onSuccess: (result) => toast.success(t("researched", { count: result.competitors })),
+  const runResearch = (keywordIds: number[]) => {
+    setPicking(false);
+    research.mutate(keywordIds, {
+      onSuccess: (result) => toast.success(t("researched", { count: result.competitors, gaps: result.content_gaps })),
       onError: (error) => toast.error(getErrorMessage(error, t("researchFailed"))),
     });
+  };
+  const selectKeywords = (
+    <Button variant="primary" loading={research.isPending} onClick={() => setPicking(true)}>
+      <ListChecksIcon />
+      {t("selectKeywords")}
+    </Button>
+  );
 
   if (!brand || query.isPending) return <PageSkeleton kpis={0} panels={4} />;
   const data = query.data;
@@ -63,30 +85,35 @@ export function CompetitorsView() {
         description={
           data && data.rows.length > 0 ? t("insight", { leader: data.leader, lead: data.lead }) : t("descriptionEmpty")
         }
-        actions={
-          <Button variant="primary" loading={research.isPending} onClick={runResearch}>
-            <ScanSearchIcon />
-            {t("research")}
-          </Button>
-        }
+        actions={selectKeywords}
       />
 
       {query.isError && <ErrorState onRetry={() => query.refetch()} />}
-      {data && data.rows.length === 0 && (
-        <EmptyState icon={UsersIcon} title={t("emptyTitle")} description={t("emptyDescription")} />
+      {data && data.rows.length === 0 && data.results.length === 0 && (
+        <EmptyState
+          icon={UsersIcon}
+          title={t("emptyTitle")}
+          description={t("emptyDescription", { max: 5 })}
+          action={selectKeywords}
+        />
       )}
-      {data && data.rows.length > 0 && (
+      {data && (data.rows.length > 0 || data.results.length > 0) && (
         <>
           <PageGuide />
-          <ComparisonTable rows={data.rows} />
-          <div className="grid gap-4 xl:grid-cols-2">
-            <QuestionGaps gaps={data.questionGaps} />
-            <KeywordGaps gaps={data.keywordGaps} />
-          </div>
+          {data.rows.length > 0 && <ComparisonTable rows={data.rows} />}
+          <SearchResults results={data.results} />
+          <ContentGaps gaps={data.contentGaps} />
+          {data.questionGaps.length > 0 && <QuestionGaps gaps={data.questionGaps} />}
           <LinkSites sites={data.sites} />
         </>
       )}
       <ResearchRuns siteId={brand.id} />
+      <KeywordPickerDialog
+        siteId={brand.id}
+        open={picking}
+        onOpenChange={setPicking}
+        onResearch={(keywords) => runResearch(keywords.map((k) => k.id))}
+      />
     </div>
   );
 }
@@ -94,7 +121,7 @@ export function CompetitorsView() {
 /** What each part of the page is for, so the numbers and buttons make sense at a glance. */
 function PageGuide() {
   const t = useTranslations("competitors.guide");
-  const items = ["compare", "gaps", "links"] as const;
+  const items = ["research", "compare", "gaps"] as const;
   return (
     <section
       aria-label={t("label")}
@@ -260,14 +287,112 @@ function QuestionGaps({ gaps }: { gaps: QuestionGap[] }) {
   );
 }
 
-function KeywordGaps({ gaps }: { gaps: KeywordGap[] }) {
-  const t = useTranslations("competitors.keywordGaps");
+/** Where you rank for each researched keyword, and who's above you. */
+function SearchResults({ results }: { results: KeywordResult[] }) {
+  const t = useTranslations("competitors.results");
+  if (results.length === 0) return null;
+  return (
+    <Card className="gap-0 overflow-hidden p-0">
+      <div className="flex flex-col gap-0.5 border-b border-border px-5 py-4">
+        <CardTitle>{t("title")}</CardTitle>
+        <CardDescription>{t("description")}</CardDescription>
+      </div>
+      <div className="overflow-x-auto">
+        <Table className="min-w-[720px]">
+          <caption className="sr-only">{t("title")}</caption>
+          <TableHeader>
+            <TableRow>
+              <TableHead>{t("keyword")}</TableHead>
+              <TableHead>{t("you")}</TableHead>
+              <TableHead>{t("top")}</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {results.map((r) => (
+              <TableRow key={r.keyword}>
+                <TableCell className="font-medium text-fg">{r.keyword}</TableCell>
+                <TableCell>
+                  <YourPosition position={r.yourPosition} checked={r.checked} url={r.yourUrl} />
+                </TableCell>
+                <TableCell>
+                  <RankedList pages={r.top} />
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    </Card>
+  );
+}
+
+function YourPosition({ position, checked, url }: { position: number | null; checked: number; url?: string | null }) {
+  const t = useTranslations("competitors.results");
+  if (position === null) return <Badge variant="danger">{t("notFound", { checked })}</Badge>;
+  const badge = (
+    <Badge variant={position <= 3 ? "success" : position <= 10 ? "blue" : "warning"}>
+      {position <= 10 ? t("position", { position }) : t("positionLow", { position })}
+    </Badge>
+  );
+  if (!url) return badge;
+  return (
+    <a href={url} target="_blank" rel="noreferrer" title={url} className="inline-flex">
+      {badge}
+    </a>
+  );
+}
+
+/** "#1 example.com · #2 other.com", each opening the ranking page. */
+function RankedList({ pages, max = 3 }: { pages: RankedPage[]; max?: number }) {
+  const t = useTranslations("competitors.results");
+  if (pages.length === 0) return <span className="text-small text-fg-3">—</span>;
+  return (
+    <ol className="flex flex-wrap gap-x-3 gap-y-1">
+      {pages.slice(0, max).map((page) => (
+        <li key={`${page.domain}-${page.position}`} className="flex items-center gap-1 text-small">
+          {page.position > 0 && <span className="num text-caption font-semibold text-fg-3">#{page.position}</span>}
+          {page.url ? (
+            <a
+              href={page.url}
+              target="_blank"
+              rel="noreferrer"
+              title={page.title ?? page.url}
+              dir="ltr"
+              className="font-mono text-[13px] text-fg hover:text-blue hover:underline"
+            >
+              {page.domain}
+            </a>
+          ) : (
+            <span dir="ltr" className="font-mono text-[13px] text-fg">
+              {page.domain}
+            </span>
+          )}
+        </li>
+      ))}
+      {pages.length > max && (
+        <li className="text-caption font-normal text-fg-3">{t("more", { count: pages.length - max })}</li>
+      )}
+    </ol>
+  );
+}
+
+const GAPS_SHOWN = 6;
+
+/**
+ * Keywords competitors rank for where you have no page, or only rank past
+ * page one: what's wrong, who ranks, and the one thing to do about it.
+ */
+function ContentGaps({ gaps }: { gaps: ContentGapRow[] }) {
+  const t = useTranslations("competitors.contentGaps");
   const format = useFormatter();
-  const { brand } = useShell();
+  const router = useRouter();
+  const { brand, brandSlug } = useShell();
   const queryClient = useQueryClient();
+  const [all, setAll] = React.useState(false);
   const [added, setAdded] = React.useState<string[]>([]);
+  const research = useResearchKeyword(brand?.id ?? 0);
   const add = useMutation({
-    mutationFn: (gap: KeywordGap) => keywordService.discover(brand?.id ?? 0, { seed_keywords: [gap.keyword] }),
+    mutationFn: (gap: ContentGapRow) => keywordService.discover(brand?.id ?? 0, { seed_keywords: [gap.keyword] }),
     onSuccess: (_result, gap) => {
       setAdded((a) => [...a, gap.id]);
       toast.success(t("added", { keyword: gap.keyword }));
@@ -275,40 +400,102 @@ function KeywordGaps({ gaps }: { gaps: KeywordGap[] }) {
     },
     onError: (error) => toast.error(getErrorMessage(error, t("addFailed"))),
   });
+  const researching = research.isPending ? gaps.find((g) => g.keywordId === research.variables) : undefined;
+  useBusyOverlay(Boolean(researching), t("researching", { keyword: researching?.keyword ?? "" }));
+
+  const write = (gap: ContentGapRow) =>
+    gap.keywordId !== null &&
+    research.mutate(gap.keywordId, {
+      onSuccess: (brief) => router.push(brandHref(brandSlug, `articles?view=research&brief=${brief.id}`)),
+      onError: (error) => toast.error(getErrorMessage(error, t("researchFailed"))),
+    });
+
+  const shown = all ? gaps : gaps.slice(0, GAPS_SHOWN);
   return (
     <Card>
       <div className="flex flex-col gap-0.5">
-        <CardTitle>{t("title")}</CardTitle>
+        <CardTitle>{t("title", { count: gaps.length })}</CardTitle>
         <CardDescription>{t("description")}</CardDescription>
       </div>
-      <ul className="flex flex-col divide-y divide-border">
-        {gaps.map((g) => {
-          const on = added.includes(g.id);
-          return (
-            <li key={g.id} className="flex flex-wrap items-center gap-3 py-3">
-              <div className="flex min-w-0 flex-1 basis-48 flex-col gap-0.5">
-                <span className="text-small font-medium text-fg">{g.keyword}</span>
-                <span className="text-caption font-normal text-fg-3">
-                  {t("who", { name: g.competitor, position: g.position })}
-                </span>
-              </div>
-              <span className="num text-small text-fg-2">
-                {t("volume", { volume: format.number(g.volume, "integer") })}
-              </span>
-              <Button
-                size="sm"
-                variant="ghost"
-                disabled={on}
-                loading={add.isPending && add.variables?.id === g.id}
-                onClick={() => add.mutate(g)}
-              >
-                {on ? <CheckIcon /> : <ListPlusIcon />}
-                {on ? t("inPlan") : t("addToPlan")}
-              </Button>
-            </li>
-          );
-        })}
-      </ul>
+      {gaps.length === 0 ? (
+        <p className="text-small text-fg-3">{t("empty")}</p>
+      ) : (
+        <ul className="flex flex-col gap-3">
+          {shown.map((g) => {
+            const on = added.includes(g.id);
+            return (
+              <li key={g.id} className="flex flex-col gap-3 rounded-lg border border-border p-4">
+                <div className="flex flex-wrap items-start gap-3">
+                  <div className="flex min-w-0 flex-1 basis-60 flex-col gap-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="text-body font-semibold text-fg">{g.keyword}</span>
+                      <Badge variant={g.kind === "noPage" ? "warning" : "blue"}>
+                        {g.kind === "weak" && g.yourPosition !== null
+                          ? t("kind.weakAt", { position: g.yourPosition })
+                          : t(`kind.${g.kind}`)}
+                      </Badge>
+                    </div>
+                    <p className="text-small text-fg-2">
+                      {g.kind === "weak" && g.yourPosition !== null
+                        ? t("why.weakAt", { position: g.yourPosition })
+                        : t(`why.${g.kind}`)}
+                    </p>
+                  </div>
+                  <dl className="flex shrink-0 gap-5 text-end">
+                    <div className="flex flex-col">
+                      <dt className="text-caption font-normal text-fg-3">{t("volume")}</dt>
+                      <dd className="num text-small font-semibold text-fg">
+                        {g.volume === null ? "—" : format.number(g.volume, "integer")}
+                      </dd>
+                    </div>
+                    <div className="flex flex-col">
+                      <dt className="text-caption font-normal text-fg-3">{t("score")}</dt>
+                      <dd className="num text-small font-semibold text-fg">{g.score}</dd>
+                    </div>
+                  </dl>
+                </div>
+                <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-3">
+                  <div className="flex min-w-0 flex-wrap items-center gap-2">
+                    <span className="text-caption font-medium text-fg-3">
+                      {t("whoRanks", { count: g.competitorCount })}
+                    </span>
+                    <RankedList pages={g.competitors} />
+                  </div>
+                  {g.keywordId !== null ? (
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      loading={research.isPending && research.variables === g.keywordId}
+                      disabled={research.isPending}
+                      onClick={() => write(g)}
+                    >
+                      <FlaskConicalIcon />
+                      {g.kind === "weak" ? t("improve") : t("write")}
+                    </Button>
+                  ) : (
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      disabled={on}
+                      loading={add.isPending && add.variables?.id === g.id}
+                      onClick={() => add.mutate(g)}
+                    >
+                      {on ? <CheckIcon /> : <ListPlusIcon />}
+                      {on ? t("inPlan") : t("addToPlan")}
+                    </Button>
+                  )}
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+      {gaps.length > GAPS_SHOWN && (
+        <Button variant="ghost" size="sm" className="self-start" onClick={() => setAll((v) => !v)}>
+          <SearchIcon />
+          {all ? t("showLess") : t("showAll", { count: gaps.length })}
+        </Button>
+      )}
     </Card>
   );
 }

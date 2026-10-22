@@ -10,6 +10,10 @@ export type ShellValue = {
   brandSlug: string;
   /** The open site. */
   brand: Site | undefined;
+  /** Account pages with no site to open (none set up yet, or the last one is gone). */
+  noSite: boolean;
+  /** For a site-only link clicked while `noSite`: explains what to do instead of navigating. */
+  requireSite: () => void;
   /** The workspace the backend has active. */
   workspace: AllUserWorkspace | undefined;
   workspaces: AllUserWorkspace[];

@@ -14,7 +14,8 @@ import type {
 
 /** SERP results, competitors and content gaps. */
 const serpService = {
-  research: async (siteId: number, payload: SerpResearchPayload = {}) => {
+  /** 422 unless every id is an accepted keyword of this site. */
+  research: async (siteId: number, payload: SerpResearchPayload) => {
     const response = await api.post<ApiSuccess<SerpResearchResult>>(sitePath(siteId, "serp/research"), payload, {
       timeout: LONG_REQUEST_TIMEOUT_MS,
     });
