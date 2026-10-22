@@ -969,7 +969,7 @@
     },
     "questions": {
       "title": "Questions you track",
-      "legend": "Pick questions and a model, or check one question from its row. A ticked, coloured icon means that engine mentions you; a grey one means it doesn’t.",
+      "legend": "Check one question at a time: click Check on its row and pick a model. A ticked, coloured icon means that engine mentions you; a grey one means it doesn’t.",
       "question": "Question",
       "engines": "Engines",
       "rank": "Your rank",
@@ -4190,7 +4190,7 @@
       },
       "questions": {
         "title": "Check the questions that matter",
-        "body": "These are the questions your customers ask. Check all of them, a few, or one, on every assistant or just one."
+        "body": "These are the questions your customers ask. Check them one at a time, on one assistant at a time."
       }
     },
     "rankings": {
