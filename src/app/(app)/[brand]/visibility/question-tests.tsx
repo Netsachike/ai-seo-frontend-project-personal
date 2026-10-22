@@ -12,16 +12,16 @@ import type { AiScanInput } from "@/features/insights/hooks";
 import { AI_TEST_MODELS, TESTED_ENGINES, modelLabel } from "@/features/visibility/model";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
+// import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuSeparator,
+  // DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+// import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DataTable, type DataColumn } from "@/components/data-table/data-table";
 import { EmptyState } from "@/components/brand/empty-state";
 import { EngineIcon } from "@/components/brand/engine-icon";
@@ -29,7 +29,8 @@ import { EngineIcon } from "@/components/brand/engine-icon";
 import { brandHref } from "@/components/layout/nav";
 import { useShell } from "@/components/layout/shell-context";
 
-const ALL = "all";
+// Checking all models at once is off to save units.
+// const ALL = "all";
 
 type Scan = {
   mutate: (input: AiScanInput) => void;
@@ -39,9 +40,9 @@ type Scan = {
 };
 
 /**
- * The site's questions, shown before any test runs. Pick questions (or none
- * for all of them) and a model (or all models), then test; each row also
- * tests that one question with one model or all of them.
+ * The site's questions, shown before any test runs. Each row checks that one
+ * question on one model; bulk checks (selection, model picker, toolbar
+ * button) are off for now to save units.
  */
 export function QuestionTests({
   questions,
@@ -63,55 +64,56 @@ export function QuestionTests({
   const format = useFormatter();
   const now = useNow({ updateInterval: 60_000 });
   const { brandSlug } = useShell();
-  const [selected, setSelected] = React.useState<Set<string>>(() => new Set());
-  const [model, setModel] = React.useState<string>(ALL);
+  // One question at a time for now: the selection and the toolbar model picker are off to save units.
+  // const [selected, setSelected] = React.useState<Set<string>>(() => new Set());
+  // const [model, setModel] = React.useState<string>(AI_TEST_MODELS[0].id);
 
-  // Drop selections of questions that are no longer active.
-  const ids = React.useMemo(() => new Set(questions.map((q) => q.id)), [questions]);
-  const chosen = [...selected].filter((id) => ids.has(id));
-  const allChosen = questions.length > 0 && chosen.length === questions.length;
+  // // Drop selections of questions that are no longer active.
+  // const ids = React.useMemo(() => new Set(questions.map((q) => q.id)), [questions]);
+  // const chosen = [...selected].filter((id) => ids.has(id));
+  // const allChosen = questions.length > 0 && chosen.length === questions.length;
   const busy = scan.isPending;
   const runningIds = busy && scan.variables ? (scan.variables.promptIds ?? []).map(String) : [];
 
-  const toggle = (id: string, on: boolean) =>
-    setSelected((prev) => {
-      const next = new Set(prev);
-      if (on) next.add(id);
-      else next.delete(id);
-      return next;
-    });
+  // const toggle = (id: string, on: boolean) =>
+  // setSelected((prev) => {
+  // const next = new Set(prev);
+  // if (on) next.add(id);
+  // else next.delete(id);
+  // return next;
+  // });
 
   const run = (promptIds: string[], only: string) => {
     const input: AiScanInput = {
-      models: only === ALL ? undefined : [only],
+      models: [only],
       promptIds: promptIds.length ? promptIds.map(Number) : undefined,
     };
     scan.mutate(input);
-    return input;
   };
-  // The toolbar button spins only for the run it started, not for a row's.
-  const [bulk, setBulk] = React.useState<AiScanInput | null>(null);
+  // // The toolbar button spins only for the run it started, not for a row's.
+  // const [bulk, setBulk] = React.useState<AiScanInput | null>(null);
 
   const columns: DataColumn<TrackedQuestion>[] = [
-    {
-      id: "select",
-      header: () => (
-        <Checkbox
-          aria-label={t("selectAll")}
-          checked={allChosen ? true : chosen.length > 0 ? "indeterminate" : false}
-          onCheckedChange={(v) => setSelected(v === true ? new Set(ids) : new Set())}
-        />
-      ),
-      enableSorting: false,
-      meta: { label: t("select"), csv: () => null },
-      cell: ({ row }) => (
-        <Checkbox
-          aria-label={t("selectOne", { question: row.original.text })}
-          checked={selected.has(row.original.id)}
-          onCheckedChange={(v) => toggle(row.original.id, v === true)}
-        />
-      ),
-    },
+    // One question at a time for now.
+    // {
+    // id: "select",
+    // header: () => (
+    // <Checkbox
+    // aria-label={t("selectAll")}
+    // checked={allChosen ? true : chosen.length > 0 ? "indeterminate" : false}
+    // onCheckedChange={(v) => setSelected(v === true ? new Set(ids) : new Set())}
+    // />
+    // ),
+    // enableSorting: false,
+    // meta: { label: t("select"), csv: () => null },
+    // cell: ({ row }) => (
+    // <Checkbox
+    // aria-label={t("selectOne", { question: row.original.text })}
+    // checked={selected.has(row.original.id)}
+    // onCheckedChange={(v) => toggle(row.original.id, v === true)}
+    // />
+    // ),
+    // },
     {
       accessorKey: "text",
       header: t("question"),
@@ -191,13 +193,18 @@ export function QuestionTests({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onSelect={() => run([row.original.id], ALL)}>{tTest("allModels")}</DropdownMenuItem>
-              <DropdownMenuSeparator />
+              {/* <DropdownMenuItem onSelect={() => run([row.original.id], ALL)}>{tTest("allModels")}</DropdownMenuItem>
+              <DropdownMenuSeparator /> */}
               <DropdownMenuLabel>{tTest("oneModel")}</DropdownMenuLabel>
               {AI_TEST_MODELS.map((m) => (
                 <DropdownMenuItem key={m.id} onSelect={() => run([row.original.id], m.id)}>
                   <EngineIcon engine={m.engine} />
                   {m.label}
+                  <span className="ms-auto ps-3 text-caption font-normal text-fg-3">
+                    {lastTested[m.id]
+                      ? tTest("last", { when: format.relativeTime(new Date(lastTested[m.id]), now) })
+                      : tTest("never")}
+                  </span>
                 </DropdownMenuItem>
               ))}
             </DropdownMenuContent>
@@ -207,9 +214,9 @@ export function QuestionTests({
     },
   ];
 
-  const scope = chosen.length
-    ? t("scopeSelected", { count: chosen.length })
-    : t("scopeAll", { count: questions.length });
+  // const scope = chosen.length
+  // ? t("scopeSelected", { count: chosen.length })
+  // : t("scopeAll", { count: questions.length });
 
   return (
     <Card data-tour="question-tests" className="gap-0 p-0">
@@ -241,13 +248,13 @@ export function QuestionTests({
                   {busy && scan.current ? tTest("running", { model: modelLabel(scan.current) }) : t("legend")}
                 </span>
               </div>
+              {/* One question at a time for now: check from each row.
               <div className="flex flex-wrap items-center gap-2">
                 <Select value={model} onValueChange={setModel} disabled={busy}>
                   <SelectTrigger aria-label={tTest("modelLabel")} className="w-[220px]">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value={ALL}>{tTest("allModels")}</SelectItem>
                     {AI_TEST_MODELS.map((m) => (
                       <SelectItem key={m.id} value={m.id}>
                         <EngineIcon engine={m.engine} />
@@ -269,9 +276,9 @@ export function QuestionTests({
                   onClick={() => setBulk(run(chosen, model))}
                 >
                   <PlayIcon />
-                  {tTest("run", { scope, model: model === ALL ? tTest("allModels") : modelLabel(model) })}
+                  {tTest("run", { scope, model: modelLabel(model) })}
                 </Button>
-              </div>
+              </div> */}
             </div>
           }
         />

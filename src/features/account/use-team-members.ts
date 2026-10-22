@@ -47,10 +47,11 @@ export function useTeamMembers() {
 
 export type TeamMembersState = ReturnType<typeof useTeamMembers>;
 
-/** Workspace ids a member belongs to: the relation rows first, else `user_workspaces`. */
+/** Workspace ids a member belongs to: the membership rows first, else `user_workspaces`. */
 export function getTeamMemberWorkspaceIds(member: User): number[] {
   const idsFromRelations =
-    member.all_user_workspaces?.map((entry) => Number(entry.id)).filter((id) => !Number.isNaN(id)) ?? [];
+    // Each entry is a membership row: `id` is the row's own id, `work_space_id` the workspace.
+    member.all_user_workspaces?.map((entry) => Number(entry.work_space_id)).filter((id) => !Number.isNaN(id)) ?? [];
 
   if (idsFromRelations.length > 0) {
     return idsFromRelations;

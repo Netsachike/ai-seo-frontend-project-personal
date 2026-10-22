@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { ListPlusIcon, RadarIcon, ScanSearchIcon, SparklesIcon } from "lucide-react";
+import { ListPlusIcon, RadarIcon, SparklesIcon } from "lucide-react";
 import { useFormatter, useNow, useTranslations } from "next-intl";
 import { toast } from "sonner";
 
@@ -55,7 +55,8 @@ export function VisibilityView() {
   const engineRows = engine === "all" ? [] : (data?.engines.filter((e) => e.engine === engine) ?? []);
   const selected = engineRows.length ? combine(engineRows) : undefined;
   const position = selected ? selected.avgPosition : (data?.avgPosition ?? null);
-  const testAll = () => scan.mutate();
+  // Checking every model at once is off to save units; checks run one model at a time from the questions table.
+  // const testAll = () => scan.mutate();
   const questionTests = data && (
     <QuestionTests
       questions={data.questions}
@@ -78,6 +79,7 @@ export function VisibilityView() {
               <SparklesIcon />
               {t("generateQuestions")}
             </Button>
+            {/* One model at a time to save units.
             <Button
               variant="primary"
               loading={scan.isPending && !scan.variables}
@@ -86,7 +88,7 @@ export function VisibilityView() {
             >
               <ScanSearchIcon />
               {t("test.all")}
-            </Button>
+            </Button> */}
           </>
         }
       />
@@ -99,11 +101,12 @@ export function VisibilityView() {
           tone="agent"
           title={t("emptyTitle")}
           description={t("emptyDescription")}
-          action={
-            <Button variant="secondary" size="sm" loading={scan.isPending} onClick={testAll}>
-              {t("test.all")}
-            </Button>
-          }
+          // One model at a time to save units: pick a model in the questions table below.
+          // action={
+          //   <Button variant="secondary" size="sm" loading={scan.isPending} onClick={testAll}>
+          //     {t("test.all")}
+          //   </Button>
+          // }
         />
       )}
       {data && data.score === null && questionTests}
