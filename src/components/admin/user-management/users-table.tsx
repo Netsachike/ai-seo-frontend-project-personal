@@ -1,13 +1,24 @@
 "use client";
 
 import * as React from "react";
-import { EyeIcon, MoreHorizontalIcon, PencilIcon, Trash2Icon, UserCogIcon, UsersIcon } from "lucide-react";
+import {
+  CoinsIcon,
+  EyeIcon,
+  KeyRoundIcon,
+  ListChecksIcon,
+  MoreHorizontalIcon,
+  PencilIcon,
+  PowerIcon,
+  Trash2Icon,
+  UserCogIcon,
+  UsersIcon,
+} from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
 
 import { toast } from "@/lib/toast";
 import adminService from "@/services/admin";
 import creditService from "@/services/credits";
-import type { User } from "@/types/types";
+import type { AdminUserCredits, User } from "@/types/types";
 import { ConfirmDialog } from "@/components/account/confirm-dialog";
 import { EmptyState } from "@/components/brand/empty-state";
 import { UserAvatar } from "@/components/layout/avatars";
@@ -27,9 +38,14 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { CreditsDialog } from "./credits-dialog";
 import { EditUserDialog } from "./edit-user-dialog";
 import { LicenseDialog } from "./license-dialog";
-import { getSubscriptions, getUserCreditBalance, getUserDisplayName, type SubscriptionDisplay } from "./user-utils";
+import { getSubscriptions, getUserDisplayName, type SubscriptionDisplay } from "./user-utils";
 
-/** Paged user list with per-row actions. Pagination is off while searching. */
+/**
+ * Paged user list. Every row action lives in the ⋯ menu, which stays pinned
+ * at the row's end so it's reachable without scrolling the table sideways.
+ * Credits are each user's API wallet (GET /admin/users-with-credits).
+ * Pagination is off while searching.
+ */
 export function UsersTable({
   users,
   isLoading,
@@ -39,6 +55,8 @@ export function UsersTable({
   total,
   onPageChange,
   onUsersChanged,
+  credits,
+  creditsLoading = false,
 }: {
   users: User[];
   isLoading: boolean;
@@ -48,6 +66,9 @@ export function UsersTable({
   total: number;
   onPageChange: (page: number) => void;
   onUsersChanged: () => Promise<void>;
+  /** Wallets by user id; undefined while loading or if the call failed. */
+  credits?: Map<number, AdminUserCredits>;
+  creditsLoading?: boolean;
 }) {
   const t = useTranslations("admin.users");
   const tPlan = useTranslations("account.plans");
@@ -57,7 +78,6 @@ export function UsersTable({
   const [isMutating, setIsMutating] = React.useState(false);
   const [editUser, setEditUser] = React.useState<User | null>(null);
   const [addCreditUser, setAddCreditUser] = React.useState<User | null>(null);
-  const [updateCreditUser, setUpdateCreditUser] = React.useState<User | null>(null);
   const [deleteUser, setDeleteUser] = React.useState<User | null>(null);
   const [subscriptionsUser, setSubscriptionsUser] = React.useState<User | null>(null);
   const [licenseUser, setLicenseUser] = React.useState<User | null>(null);
@@ -104,24 +124,23 @@ export function UsersTable({
     if (ok) setDeleteUser(null);
   }
 
-  async function handleAddCredits(amount: number) {
+  /** One grant through POST /admin/users/add-api-credits; the toast confirms the new balance. */
+  async function handleAddCredits(credits: number, description: string | null) {
     if (!addCreditUser) return;
     const ok = await run(
-      () => creditService.addCreditsForUsers({ user_id: addCreditUser.id, amount }),
-      t("toasts.creditsAdded"),
+      async () => {
+        const result = await creditService.addApiCredits({ user_id: addCreditUser.id, credits, description });
+        return {
+          message: t("toasts.creditsAdded", {
+            added: format.number(result.credits_added, "integer"),
+            balance: format.number(result.available_credits, "integer"),
+          }),
+        };
+      },
+      t("toasts.creditsAddedPlain"),
       t("toasts.creditsAddFailed"),
     );
     if (ok) setAddCreditUser(null);
-  }
-
-  async function handleUpdateCredits(amount: number) {
-    if (!updateCreditUser) return;
-    const ok = await run(
-      () => creditService.updateCreditForUsers({ user_id: updateCreditUser.id, amount }),
-      t("toasts.creditsUpdated"),
-      t("toasts.creditsUpdateFailed"),
-    );
-    if (ok) setUpdateCreditUser(null);
   }
 
   const billingLabel = (value: string | null) =>
@@ -154,7 +173,7 @@ export function UsersTable({
                 <TableHead className="text-end">{t("columns.credits")}</TableHead>
                 <TableHead>{t("columns.subscriptions")}</TableHead>
                 <TableHead>{t("columns.license")}</TableHead>
-                <TableHead className="text-end">
+                <TableHead className="sticky end-0 z-10 w-12 bg-surface text-end">
                   <span className="sr-only">{t("columns.actions")}</span>
                 </TableHead>
               </TableRow>
@@ -193,7 +212,7 @@ export function UsersTable({
                       <Badge variant="neutral">{user.role}</Badge>
                     </TableCell>
                     <TableCell className="text-end num text-fg">
-                      {format.number(getUserCreditBalance(user), "integer")}
+                      <CreditsCell wallet={credits?.get(user.id)} loading={creditsLoading} />
                     </TableCell>
                     <TableCell>
                       <Button size="sm" variant="ghost" onClick={() => setSubscriptionsUser(user)}>
@@ -219,60 +238,50 @@ export function UsersTable({
                         <span className="text-fg-3">{t("none")}</span>
                       )}
                     </TableCell>
-                    <TableCell>
-                      <div className="flex items-center justify-end gap-1">
-                        <Button
-                          size="icon-sm"
-                          variant="ghost"
-                          aria-label={t("accessAsAria", { name })}
-                          onClick={() => toast.success(t("toasts.accessAsSoon", { name }))}
-                        >
-                          <UserCogIcon />
-                        </Button>
-                        <Button
-                          size="icon-sm"
-                          variant="ghost"
-                          aria-label={t("editAria", { name })}
-                          onClick={() => setEditUser(user)}
-                        >
-                          <PencilIcon />
-                        </Button>
-                        {/* Admin accounts can't be deleted from the console. */}
-                        {user.role !== "admin" && (
-                          <Button
-                            size="icon-sm"
-                            variant="ghost"
-                            aria-label={t("deleteAria", { name })}
-                            className="text-danger hover:bg-danger-bg hover:text-danger"
-                            onClick={() => setDeleteUser(user)}
-                          >
-                            <Trash2Icon />
+                    <TableCell className="sticky end-0 z-10 w-12 bg-surface text-end">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button size="icon-sm" variant="ghost" aria-label={t("moreAria", { name })}>
+                            <MoreHorizontalIcon />
                           </Button>
-                        )}
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button size="icon-sm" variant="ghost" aria-label={t("moreAria", { name })}>
-                              <MoreHorizontalIcon />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-48">
-                            <DropdownMenuItem disabled={isMutating} onSelect={() => void handleToggleActivation(user)}>
-                              {isActive ? t("actions.deactivate") : t("actions.activate")}
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-52">
+                          <DropdownMenuItem onSelect={() => setEditUser(user)}>
+                            <PencilIcon />
+                            {t("actions.edit")}
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onSelect={() => setAddCreditUser(user)}>
+                            <CoinsIcon />
+                            {t("actions.addCredits")}
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onSelect={() => setSubscriptionsUser(user)}>
+                            <ListChecksIcon />
+                            {t("actions.viewSubscriptions")}
+                          </DropdownMenuItem>
+                          {user.license_key && (
+                            <DropdownMenuItem onSelect={() => setLicenseUser(user)}>
+                              <KeyRoundIcon />
+                              {t("actions.viewLicense")}
                             </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem onSelect={() => setAddCreditUser(user)}>
-                              {t("actions.addCredits")}
+                          )}
+                          <DropdownMenuItem onSelect={() => toast.success(t("toasts.accessAsSoon", { name }))}>
+                            <UserCogIcon />
+                            {t("actions.accessAs")}
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem disabled={isMutating} onSelect={() => void handleToggleActivation(user)}>
+                            <PowerIcon />
+                            {isActive ? t("actions.deactivate") : t("actions.activate")}
+                          </DropdownMenuItem>
+                          {/* Admin accounts can't be deleted from the console. */}
+                          {user.role !== "admin" && (
+                            <DropdownMenuItem variant="destructive" onSelect={() => setDeleteUser(user)}>
+                              <Trash2Icon />
+                              {t("actions.delete")}
                             </DropdownMenuItem>
-                            <DropdownMenuItem onSelect={() => setUpdateCreditUser(user)}>
-                              {t("actions.updateCredits")}
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem onSelect={() => setSubscriptionsUser(user)}>
-                              {t("actions.viewSubscriptions")}
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </TableCell>
                   </TableRow>
                 );
@@ -313,20 +322,11 @@ export function UsersTable({
         onUpdated={onUsersChanged}
       />
       <CreditsDialog
-        mode="add"
         isOpen={Boolean(addCreditUser)}
         user={addCreditUser}
         isSubmitting={isMutating}
         onClose={() => setAddCreditUser(null)}
         onSubmit={handleAddCredits}
-      />
-      <CreditsDialog
-        mode="update"
-        isOpen={Boolean(updateCreditUser)}
-        user={updateCreditUser}
-        isSubmitting={isMutating}
-        onClose={() => setUpdateCreditUser(null)}
-        onSubmit={handleUpdateCredits}
       />
       <LicenseDialog isOpen={Boolean(licenseUser)} user={licenseUser} onClose={() => setLicenseUser(null)} />
 
@@ -373,5 +373,23 @@ export function UsersTable({
         </DialogContent>
       </Dialog>
     </>
+  );
+}
+
+/** Available credits, with any still held for running tasks underneath. */
+function CreditsCell({ wallet, loading }: { wallet: AdminUserCredits | undefined; loading: boolean }) {
+  const t = useTranslations("admin.users");
+  const format = useFormatter();
+  if (loading && !wallet) return <Skeleton className="ms-auto h-4 w-12" />;
+  if (!wallet) return <span className="text-fg-3">{t("creditsUnknown")}</span>;
+  return (
+    <span className="flex flex-col items-end">
+      <span>{format.number(wallet.available_credits, "integer")}</span>
+      {wallet.reserved_credits > 0 && (
+        <span className="text-caption font-normal text-fg-3">
+          {t("creditsHeld", { count: format.number(wallet.reserved_credits, "integer") })}
+        </span>
+      )}
+    </span>
   );
 }

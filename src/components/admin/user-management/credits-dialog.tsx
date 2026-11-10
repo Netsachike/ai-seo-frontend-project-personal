@@ -16,65 +16,88 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
+/** The backend's limits for one grant. */
+const MIN_CREDITS = 1;
+const MAX_CREDITS = 1_000_000_000;
+
 /**
- * `add` adds credits to the balance (amount > 0, default 100); `update` sets
- * a new balance (amount ≥ 0, default 0).
+ * Adds API credits to a user's wallet (`POST /admin/users/add-api-credits`).
+ * Whole numbers only; the reason is optional and shows in the wallet history.
+ * Replaces the old "Add credits" and "Set credit balance" token dialogs.
  */
 export function CreditsDialog({
-  mode,
   isOpen,
   user,
   isSubmitting = false,
   onClose,
   onSubmit,
 }: {
-  mode: "add" | "update";
   isOpen: boolean;
   user: User | null;
   isSubmitting?: boolean;
   onClose: () => void;
-  onSubmit: (amount: number) => Promise<void>;
+  onSubmit: (credits: number, description: string | null) => Promise<void>;
 }) {
-  const t = useTranslations(`admin.users.credits.${mode}`);
+  const t = useTranslations("admin.users.credits");
   const tCommon = useTranslations("common");
-  const initial = mode === "add" ? "100" : "0";
-  const [amount, setAmount] = React.useState(initial);
+  const [amount, setAmount] = React.useState("100");
+  const [reason, setReason] = React.useState("");
+  const [error, setError] = React.useState<string | null>(null);
 
-  // Start from the default each time the dialog opens.
+  // Start from the defaults each time the dialog opens.
   const [openFor, setOpenFor] = React.useState<User | null>(null);
   if (isOpen && user && openFor !== user) {
     setOpenFor(user);
-    setAmount(initial);
+    setAmount("100");
+    setReason("");
+    setError(null);
   }
   if (!isOpen && openFor) setOpenFor(null);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const parsed = Number(amount);
-    if (!Number.isFinite(parsed) || (mode === "add" ? parsed <= 0 : parsed < 0)) return;
-    await onSubmit(parsed);
+    const credits = Number(amount);
+    if (!Number.isInteger(credits) || credits < MIN_CREDITS || credits > MAX_CREDITS) {
+      setError(t("invalid"));
+      return;
+    }
+    setError(null);
+    await onSubmit(credits, reason.trim() || null);
   }
 
   return (
     <Dialog open={isOpen && Boolean(user)} onOpenChange={(next) => !next && !isSubmitting && onClose()}>
       <DialogContent className="max-w-[420px]">
-        <form className="flex flex-col gap-5" onSubmit={handleSubmit}>
+        <form className="flex flex-col gap-5" onSubmit={handleSubmit} noValidate>
           <DialogHeader>
             <DialogTitle>{t("title")}</DialogTitle>
             <DialogDescription dir="ltr" className="text-start">
               {user?.email}
             </DialogDescription>
           </DialogHeader>
-          <FormField label={t("label")}>
+          <FormField label={t("label")} helper={t("helper")} error={error ?? undefined}>
             {(props) => (
               <Input
                 {...props}
                 type="number"
                 inputMode="numeric"
-                min={mode === "add" ? 1 : 0}
+                min={MIN_CREDITS}
+                max={MAX_CREDITS}
+                step={1}
                 className="num"
                 value={amount}
                 onChange={(event) => setAmount(event.target.value)}
+              />
+            )}
+          </FormField>
+          <FormField label={t("reason")} helper={t("reasonHelper")}>
+            {(props) => (
+              <Input
+                {...props}
+                maxLength={255}
+                placeholder={t("reasonPlaceholder")}
+                value={reason}
+                onChange={(event) => setReason(event.target.value)}
               />
             )}
           </FormField>

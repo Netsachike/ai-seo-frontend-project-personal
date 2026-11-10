@@ -19,6 +19,7 @@ info:
     `supports_credentials` is `true`.
 
     ## Changelog
+    - **2026-11-10**: Added the admin endpoint `GET /admin/users-with-credits`, a paginated list of users with their API credit balances.
     - **2026-11-02**: Added **API credits** (see the section below). Paid DataForSEO calls are now billed in credits to the workspace owner's wallet.
       Added `GET /credits/balance` and the admin endpoint `POST /admin/users/add-api-credits`.
       `POST /sites/{site}/keywords/discover` (when `seed_keywords` are sent) and `POST /sites/{site}/serp/research` can now return **402** `insufficient_api_credits`, and accept an optional `Idempotency-Key` header.
@@ -47,7 +48,7 @@ info:
     - **Billed endpoints:** `POST /sites/{site}/keywords/discover` (only when `seed_keywords` are sent; one task per seed, max 5) and `POST /sites/{site}/serp/research` (one task per keyword, max 10).
     - **Reserve, then settle:** each task first reserves **10 credits** (`API_CREDIT_RESERVATION`). After the call the real charge is `ceil(provider_cost_usd × 1.5 / 0.01)` (`API_CREDIT_MARKUP`, `API_USD_PER_CREDIT`), and the unused part of the reservation goes back to the balance. If the provider cost is unknown or higher than the reservation, the whole reservation stays held (`reserved_credits`) until someone reconciles it.
     - **Not enough credits →** **402** `{"success": false, "message": "Insufficient API credits. Please top up your account.", "code": "insufficient_api_credits"}`. Show a top-up prompt and link to `GET /credits/balance` → `top_up_url`.
-    - New accounts start with **0 credits**. There's no self-serve top-up endpoint yet. Admins add credits with `POST /admin/users/add-api-credits`.
+    - New accounts start with **0 credits**. There's no self-serve top-up endpoint yet. Admins add credits with `POST /admin/users/add-api-credits` and can see every user's balance with `GET /admin/users-with-credits`.
     - These credits are separate from the AI token balance (`/user/add-tokens`, `/user/update-tokens`).
 
     ## Workspaces
@@ -4972,6 +4973,45 @@ paths:
         '401': { $ref: '#/components/responses/Unauthenticated' }
         '403': { $ref: '#/components/responses/AdminForbidden' }
         '422': { $ref: '#/components/responses/ValidationError' }
+        '500': { $ref: '#/components/responses/ServerError' }
+
+  /admin/users-with-credits:
+    get:
+      tags: [Admin]
+      summary: List users with their API credit balances (20 per page)
+      operationId: adminListUsersWithCredits
+      description: |
+        All users, newest first, with the balance of their API credit wallet. Users without a wallet show `0`.
+        Use it to find a user before calling `POST /admin/users/add-api-credits`.
+        ⚠️ Like the add-credits endpoint, this uses the `success` envelope, and the paginator is under `users` (not `data`).
+      parameters:
+        - $ref: '#/components/parameters/Page'
+      responses:
+        '200':
+          description: Paginated users
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  users:
+                    allOf:
+                      - $ref: '#/components/schemas/LaravelPaginator'
+                      - type: object
+                        properties:
+                          data:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                id: { type: integer, example: 40 }
+                                name: { type: string, example: Jane Doe }
+                                email: { type: string, format: email, example: jane@example.com }
+                                available_credits: { type: integer, example: 500, description: Wallet `balance_credits` }
+                                reserved_credits: { type: integer, example: 10 }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/AdminForbidden' }
         '500': { $ref: '#/components/responses/ServerError' }
 
   /user/add-tokens:

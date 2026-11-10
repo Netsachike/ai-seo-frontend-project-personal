@@ -1,10 +1,9 @@
 import api from "./api/api";
-import type { ApiSuccess, CreditBalance, UserCreditsPayload, UserCreditsResponse } from "@/types/types";
+import type { AddApiCreditsPayload, AddApiCreditsResponse, ApiSuccess, CreditBalance } from "@/types/types";
 
 /**
- * API credits (the wallet paid DataForSEO calls spend) and the older AI token
- * balances (admin). The token routes call the user `id`.
- * ⚠️ Both token routes currently return 500 on the backend (TokenBillingService is missing).
+ * API credits: the wallet that paid DataForSEO calls spend (keyword discovery,
+ * SERP research). Admins top it up with addApiCredits.
  */
 const creditsService = {
   /**
@@ -17,28 +16,14 @@ const creditsService = {
     return response.data.data;
   },
 
-  addCreditsForUsers: async (payload: UserCreditsPayload): Promise<UserCreditsResponse> => {
-    try {
-      const response = await api.post<UserCreditsResponse>("/user/add-tokens", {
-        id: payload.user_id,
-        amount: payload.amount,
-      });
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
-  },
-
-  updateCreditForUsers: async (payload: UserCreditsPayload): Promise<UserCreditsResponse> => {
-    try {
-      const response = await api.post<UserCreditsResponse>("/user/update-tokens", {
-        id: payload.user_id,
-        amount: payload.amount,
-      });
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
+  /**
+   * Admin only (admin or support role): adds credits to a user's wallet,
+   * creating it if needed, and records a `grant` in its history. Replaces the
+   * old AI token routes (/user/add-tokens, /user/update-tokens), which 500.
+   */
+  addApiCredits: async (payload: AddApiCreditsPayload): Promise<AddApiCreditsResponse> => {
+    const response = await api.post<AddApiCreditsResponse>("/admin/users/add-api-credits", payload);
+    return response.data;
   },
 };
 
