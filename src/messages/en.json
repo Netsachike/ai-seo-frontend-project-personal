@@ -2719,7 +2719,8 @@
         "edit": "Edit details",
         "viewLicense": "View license key",
         "accessAs": "Sign in as this user",
-        "delete": "Delete account"
+        "delete": "Delete account",
+        "setCredits": "Set credit balance"
       },
       "pagination": {
         "label": "User pages",
@@ -2787,14 +2788,24 @@
         "savePassword": "Update password"
       },
       "credits": {
-        "title": "Add credits",
-        "label": "Credits to add",
-        "helper": "A whole number from 1 to 1,000,000,000. Give credits to the workspace owner: their wallet pays for the workspace.",
         "reason": "Reason (optional)",
         "reasonHelper": "Shown in the wallet history.",
-        "reasonPlaceholder": "e.g. Launch bonus",
-        "submit": "Add credits",
-        "invalid": "Enter a whole number from 1 to 1,000,000,000."
+        "add": {
+          "title": "Add credits",
+          "label": "Credits to add",
+          "helper": "A whole number from 1 to 1,000,000,000. Give credits to the workspace owner: their wallet pays for the workspace.",
+          "reasonPlaceholder": "e.g. Launch bonus",
+          "submit": "Add credits",
+          "invalid": "Enter a whole number from 1 to 1,000,000,000."
+        },
+        "set": {
+          "title": "Set credit balance",
+          "label": "New available balance",
+          "helper": "Replaces the current balance. A whole number from 0 to 1,000,000,000. Credits held for running tasks aren't changed.",
+          "reasonPlaceholder": "e.g. Correcting a wrong grant",
+          "submit": "Set balance",
+          "invalid": "Enter a whole number from 0 to 1,000,000,000."
+        }
       },
       "license": {
         "title": "AppSumo licence",
@@ -2845,7 +2856,10 @@
         "creditsAdded": "Added {added} credits. New balance: {balance}.",
         "creditsAddFailed": "Couldn't add credits.",
         "accessAsSoon": "Signing in as {name} is coming soon.",
-        "creditsAddedPlain": "Credits added."
+        "creditsAddedPlain": "Credits added.",
+        "creditsSet": "Credit balance set to {balance}.",
+        "creditsSetPlain": "Credit balance updated.",
+        "creditsSetFailed": "Couldn't update the credit balance."
       },
       "creditsUnknown": "—",
       "creditsHeld": "{count} held"

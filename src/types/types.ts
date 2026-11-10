@@ -319,6 +319,19 @@ export interface AddApiCreditsPayload {
   description?: string | null;
 }
 
+/** `PUT /users/{user}/credits` (admin only): sets the exact available balance. Held credits are untouched. */
+export interface SetUserCreditsPayload {
+  /** 0 to 1,000,000,000. */
+  credits: number;
+  description?: string | null;
+}
+
+export interface SetUserCreditsResponse {
+  success: boolean;
+  message: string;
+  data: { user_id: number; credits: number; reserved_credits: number };
+}
+
 /** One row of `GET /admin/users-with-credits`. No wallet yet means 0 and 0. */
 export interface AdminUserCredits {
   id: number;

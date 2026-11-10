@@ -9,6 +9,7 @@ import {
   MoreHorizontalIcon,
   PencilIcon,
   PowerIcon,
+  SlidersHorizontalIcon,
   Trash2Icon,
   UserCogIcon,
   UsersIcon,
@@ -78,6 +79,7 @@ export function UsersTable({
   const [isMutating, setIsMutating] = React.useState(false);
   const [editUser, setEditUser] = React.useState<User | null>(null);
   const [addCreditUser, setAddCreditUser] = React.useState<User | null>(null);
+  const [setCreditUser, setSetCreditUser] = React.useState<User | null>(null);
   const [deleteUser, setDeleteUser] = React.useState<User | null>(null);
   const [subscriptionsUser, setSubscriptionsUser] = React.useState<User | null>(null);
   const [licenseUser, setLicenseUser] = React.useState<User | null>(null);
@@ -141,6 +143,20 @@ export function UsersTable({
       t("toasts.creditsAddFailed"),
     );
     if (ok) setAddCreditUser(null);
+  }
+
+  /** Sets the exact balance through PUT /users/{user}/credits; the toast confirms it. */
+  async function handleSetCredits(credits: number, description: string | null) {
+    if (!setCreditUser) return;
+    const ok = await run(
+      async () => {
+        const result = await creditService.setUserCredits(setCreditUser.id, { credits, description });
+        return { message: t("toasts.creditsSet", { balance: format.number(result.data.credits, "integer") }) };
+      },
+      t("toasts.creditsSetPlain"),
+      t("toasts.creditsSetFailed"),
+    );
+    if (ok) setSetCreditUser(null);
   }
 
   const billingLabel = (value: string | null) =>
@@ -254,6 +270,10 @@ export function UsersTable({
                             <CoinsIcon />
                             {t("actions.addCredits")}
                           </DropdownMenuItem>
+                          <DropdownMenuItem onSelect={() => setSetCreditUser(user)}>
+                            <SlidersHorizontalIcon />
+                            {t("actions.setCredits")}
+                          </DropdownMenuItem>
                           <DropdownMenuItem onSelect={() => setSubscriptionsUser(user)}>
                             <ListChecksIcon />
                             {t("actions.viewSubscriptions")}
@@ -322,6 +342,16 @@ export function UsersTable({
         onUpdated={onUsersChanged}
       />
       <CreditsDialog
+        mode="set"
+        isOpen={Boolean(setCreditUser)}
+        user={setCreditUser}
+        currentBalance={setCreditUser ? credits?.get(setCreditUser.id)?.available_credits : undefined}
+        isSubmitting={isMutating}
+        onClose={() => setSetCreditUser(null)}
+        onSubmit={handleSetCredits}
+      />
+      <CreditsDialog
+        mode="add"
         isOpen={Boolean(addCreditUser)}
         user={addCreditUser}
         isSubmitting={isMutating}

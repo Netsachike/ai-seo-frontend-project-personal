@@ -1,5 +1,12 @@
 import api from "./api/api";
-import type { AddApiCreditsPayload, AddApiCreditsResponse, ApiSuccess, CreditBalance } from "@/types/types";
+import type {
+  AddApiCreditsPayload,
+  AddApiCreditsResponse,
+  ApiSuccess,
+  CreditBalance,
+  SetUserCreditsPayload,
+  SetUserCreditsResponse,
+} from "@/types/types";
 
 /**
  * API credits: the wallet that paid DataForSEO calls spend (keyword discovery,
@@ -23,6 +30,15 @@ const creditsService = {
    */
   addApiCredits: async (payload: AddApiCreditsPayload): Promise<AddApiCreditsResponse> => {
     const response = await api.post<AddApiCreditsResponse>("/admin/users/add-api-credits", payload);
+    return response.data;
+  },
+
+  /**
+   * Admin only: sets a user's available balance to an exact number (0 allowed),
+   * recorded as an `adjustment`. Note the path has no `/admin` prefix.
+   */
+  setUserCredits: async (userId: number, payload: SetUserCreditsPayload): Promise<SetUserCreditsResponse> => {
+    const response = await api.put<SetUserCreditsResponse>(`/users/${userId}/credits`, payload);
     return response.data;
   },
 };

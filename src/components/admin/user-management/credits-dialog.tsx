@@ -16,31 +16,38 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-/** The backend's limits for one grant. */
-const MIN_CREDITS = 1;
+/** The backend's largest value for both calls. */
 const MAX_CREDITS = 1_000_000_000;
 
 /**
- * Adds API credits to a user's wallet (`POST /admin/users/add-api-credits`).
- * Whole numbers only; the reason is optional and shows in the wallet history.
- * Replaces the old "Add credits" and "Set credit balance" token dialogs.
+ * - `add`: adds to the balance (`POST /admin/users/add-api-credits`), 1 or more, default 100.
+ * - `set`: sets the exact balance (`PUT /users/{user}/credits`), 0 or more, starting from the current one.
+ * Whole numbers only. The reason is optional and shows in the wallet history.
  */
 export function CreditsDialog({
+  mode,
   isOpen,
   user,
+  currentBalance,
   isSubmitting = false,
   onClose,
   onSubmit,
 }: {
+  mode: "add" | "set";
   isOpen: boolean;
   user: User | null;
+  /** The user's available credits, when known: the starting value for `set`. */
+  currentBalance?: number;
   isSubmitting?: boolean;
   onClose: () => void;
   onSubmit: (credits: number, description: string | null) => Promise<void>;
 }) {
-  const t = useTranslations("admin.users.credits");
+  const t = useTranslations(`admin.users.credits.${mode}`);
+  const tShared = useTranslations("admin.users.credits");
   const tCommon = useTranslations("common");
-  const [amount, setAmount] = React.useState("100");
+  const min = mode === "add" ? 1 : 0;
+  const initial = mode === "add" ? "100" : String(currentBalance ?? 0);
+  const [amount, setAmount] = React.useState(initial);
   const [reason, setReason] = React.useState("");
   const [error, setError] = React.useState<string | null>(null);
 
@@ -48,7 +55,7 @@ export function CreditsDialog({
   const [openFor, setOpenFor] = React.useState<User | null>(null);
   if (isOpen && user && openFor !== user) {
     setOpenFor(user);
-    setAmount("100");
+    setAmount(initial);
     setReason("");
     setError(null);
   }
@@ -57,7 +64,7 @@ export function CreditsDialog({
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const credits = Number(amount);
-    if (!Number.isInteger(credits) || credits < MIN_CREDITS || credits > MAX_CREDITS) {
+    if (amount.trim() === "" || !Number.isInteger(credits) || credits < min || credits > MAX_CREDITS) {
       setError(t("invalid"));
       return;
     }
@@ -81,7 +88,7 @@ export function CreditsDialog({
                 {...props}
                 type="number"
                 inputMode="numeric"
-                min={MIN_CREDITS}
+                min={min}
                 max={MAX_CREDITS}
                 step={1}
                 className="num"
@@ -90,7 +97,7 @@ export function CreditsDialog({
               />
             )}
           </FormField>
-          <FormField label={t("reason")} helper={t("reasonHelper")}>
+          <FormField label={tShared("reason")} helper={tShared("reasonHelper")}>
             {(props) => (
               <Input
                 {...props}
