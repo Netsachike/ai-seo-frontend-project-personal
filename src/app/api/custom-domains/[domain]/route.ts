@@ -1,6 +1,13 @@
 import { NextResponse, type NextRequest } from "next/server";
 
-import { VERCEL_PROJECT_ID, VERCEL_TOKEN, demoVercel, isVercelConfigured, isVercelDemo, vercelUrl } from "@/lib/vercel-domains";
+import {
+  VERCEL_PROJECT_ID,
+  VERCEL_TOKEN,
+  demoVercel,
+  isVercelConfigured,
+  isVercelDemo,
+  vercelUrl,
+} from "@/lib/vercel-domains";
 
 const missingConfig = () => NextResponse.json({ error: "Vercel configuration is missing" }, { status: 500 });
 

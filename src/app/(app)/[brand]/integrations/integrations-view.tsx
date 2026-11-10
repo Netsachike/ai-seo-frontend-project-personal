@@ -23,7 +23,9 @@ import {
 } from "@/features/integrations/catalog";
 import { useProviderAccounts, type ProviderAccount } from "@/features/integrations/connections";
 import { workspaceRole } from "@/features/workspace/hooks";
+import { videoForProvider } from "@/features/help/content";
 import { ConnectDialog } from "@/components/integrations/connect-dialog";
+import { WatchDemoButton } from "@/components/help/video-dialog";
 import { IntegrationRow } from "@/components/brand/integration-row";
 import { engineMonogram } from "@/components/brand/engine-icon";
 import { brandHref } from "@/components/layout/nav";
@@ -204,14 +206,16 @@ function ProviderRow({
   const t = useTranslations("integrations");
   const meta = PROVIDERS[provider];
   const connected = accounts.length > 0;
-  const status = meta.soon ? "comingSoon" : connected ? "connected" : "notConnected";
+  const isFeed = meta.method === "feed";
+  const demo = videoForProvider(provider);
+  const status = meta.soon ? "comingSoon" : isFeed ? "ready" : connected ? "connected" : "notConnected";
 
   // One connection per platform per site for now, so a connected platform shows Manage only.
   // A platform whose only connection failed its test offers Reconnect instead.
   const working = accounts.some((a) => !a.status || a.status === "active");
   const connectButton = (
     <Button size="sm" variant="primary" disabled={!canConnect} onClick={onConnect}>
-      {connected ? t("reconnect") : t("connect")}
+      {isFeed ? t("feed.open") : connected ? t("reconnect") : t("connect")}
     </Button>
   );
   // Kept for when several connections per platform come back:
@@ -239,6 +243,7 @@ function ProviderRow({
         action={
           meta.soon ? null : (
             <>
+              {demo && <WatchDemoButton video={demo} />}
               {connected && (
                 <Button asChild size="sm" variant="ghost">
                   <Link href={brandHref(brandSlug, `integrations/${provider}`)}>

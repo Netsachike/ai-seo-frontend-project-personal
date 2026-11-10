@@ -3,7 +3,7 @@
  * products, so links and redirects from the backend (emails, OAuth callbacks)
  * work the same way here.
  */
-export const SETTINGS_TABS = ["profile", "workspaces", "subscriptions", "team-members"] as const;
+export const SETTINGS_TABS = ["profile", "workspaces", "subscriptions", "credits", "team-members"] as const;
 export type SettingsTab = (typeof SETTINGS_TABS)[number];
 
 export function normalizeSettingsTab(tab: string | null | undefined): SettingsTab {
@@ -18,6 +18,8 @@ export const accountHref = {
   upgrade: (tab?: "whitelabel") => (tab ? `/upgrade?tab=${tab}` : "/upgrade"),
   resellers: () => "/resellers",
   agency: () => "/agency",
+  /** Help center: demo videos (default) and contact. */
+  help: (tab?: "contact") => (tab ? `/help?tab=${tab}` : "/help"),
   admin: () => "/admin/user-management",
 } as const;
 
@@ -28,4 +30,5 @@ export const legacySettingsTab: Record<string, SettingsTab> = {
   workspace: "workspaces",
   team: "team-members",
   billing: "subscriptions",
+  credits: "credits",
 };

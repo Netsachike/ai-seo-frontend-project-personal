@@ -33,6 +33,16 @@ info:
     `supports_credentials` is `true`.
 
     ## Changelog
+    - **2026-11-02**: Added **API credits** (see the section below). Paid DataForSEO calls are now billed in credits to the workspace owner's wallet.
+      Added `GET /credits/balance` and the admin endpoint `POST /admin/users/add-api-credits`.
+      `POST /sites/{site}/keywords/discover` (when `seed_keywords` are sent) and `POST /sites/{site}/serp/research` can now return **402** `insufficient_api_credits`, and accept an optional `Idempotency-Key` header.
+      `POST /sites/{site}/serp/research` now returns a `billing` block with the credits charged and the remaining balance.
+      New sites now store the creating user in `user_id`.
+    - **2026-10-22**: Added `PATCH /sites/{site}/publishing/connections/{connection}/shopify-blog` to save the chosen Shopify blog on the connection.
+      The WordPress.com OAuth callback is fixed. Its redirect now carries `site_id` and `sites` (a JSON-encoded list of the user's WordPress.com sites), so the frontend can show the site picker.
+      The Search Console callback now redirects to `{FRONTEND_URL}/sites/{site_id}/setup/google-search-console?connected={site_id}`.
+      **Breaking:** `POST /sites/{site}/serp/research` now requires `keyword_ids` (1 to 10 distinct IDs of accepted keywords on the site). `limit` and `results` are no longer accepted. Returns **403** if the site is not in the active workspace.
+      `POST /sites/{site}/topical-map/build` now re-clusters the accepted keywords before it builds the map, and `core_topic` values are now Title Case.
     - **2026-10-20**: Added `DELETE /sites/{site}` (permanent, cascades to all site data).
       The WordPress.com OAuth callback now redirects to `{FRONTEND_URL}/settings/wordpress-com?connected=pending&pending_key=…` instead of returning JSON. ⚠️ It currently fails with 500, see that endpoint.
     - **2026-10-19**: Added **Workspaces** (6), **Account** (3), **Team** (5), **Reseller** (6) and **Admin** (14) endpoints. These use the `status` envelope (see below).
@@ -45,6 +55,14 @@ info:
       Added `GET /sites/{site}/authority/backlinks/summary`, `GET /sites/{site}/authority/backlinks` and `POST /sites/{site}/authority/backlink-prospects` (DataForSEO, can return **502**).
       CORS is now restricted to an allow-list (see above).
     - **2026-10-12**: Initial contract.
+
+    ## API credits
+    Paid DataForSEO calls are billed in **credits** from a wallet. The wallet belongs to the **owner of the site's workspace**, so team members spend the owner's credits.
+    - **Billed endpoints:** `POST /sites/{site}/keywords/discover` (only when `seed_keywords` are sent; one task per seed, max 5) and `POST /sites/{site}/serp/research` (one task per keyword, max 10).
+    - **Reserve, then settle:** each task first reserves **10 credits** (`API_CREDIT_RESERVATION`). After the call the real charge is `ceil(provider_cost_usd × 1.5 / 0.01)` (`API_CREDIT_MARKUP`, `API_USD_PER_CREDIT`), and the unused part of the reservation goes back to the balance. If the provider cost is unknown or higher than the reservation, the whole reservation stays held (`reserved_credits`) until someone reconciles it.
+    - **Not enough credits →** **402** `{"success": false, "message": "Insufficient API credits. Please top up your account.", "code": "insufficient_api_credits"}`. Show a top-up prompt and link to `GET /credits/balance` → `top_up_url`.
+    - New accounts start with **0 credits**. There's no self-serve top-up endpoint yet. Admins add credits with `POST /admin/users/add-api-credits`.
+    - These credits are separate from the AI token balance (`/user/add-tokens`, `/user/update-tokens`).
 
     ## Workspaces
     Every authenticated user has an *active workspace*. Site-scoped endpoints resolve it automatically from the token.
@@ -76,6 +94,7 @@ info:
     | Code | When | Body |
     |---|---|---|
     | 401 | Missing/invalid/expired Bearer token | `{"message": "Unauthenticated."}` |
+    | 402 | Not enough API credits for a paid DataForSEO call | `{"success": false, "message": "...", "code": "insufficient_api_credits"}` |
     | 403 | No workspace, or OAuth state mismatch | `{"message": "..."}` or `{"success": false, "message": "..."}` |
     | 404 | Route-bound model id does not exist | `{"message": "No query results for model [App\\Models\\Site] 99"}` |
     | 422 | Validation failed | `{"message": "...", "errors": {"field": ["..."]}}` |
@@ -142,6 +161,8 @@ tags:
     description: Client accounts created by a reseller
   - name: Admin
     description: Platform administration. Requires role admin or support.
+  - name: Credits
+    description: API credit wallet used to pay for DataForSEO calls
   - name: Free Tools
     description: Public, unauthenticated SEO utilities
 
@@ -528,8 +549,13 @@ paths:
       tags: [Keywords]
       summary: Discover keywords from the latest crawl (plus optional seeds)
       operationId: discoverKeywords
+      description: |
+        Discovery from the crawl is free. Sending `seed_keywords` also asks DataForSEO for suggestions on the first 5 unique seeds, which **costs API credits** (see *API credits*).
+        Credits for all of those seeds are reserved together before any call is made (10 per seed by default). If the wallet can't cover all of them, nothing is called and the request returns **402**.
+        A seed that fails at DataForSEO doesn't fail the request. Its suggestions are just missing from `dataforseo` counts.
       parameters:
         - $ref: '#/components/parameters/SiteId'
+        - $ref: '#/components/parameters/IdempotencyKey'
       requestBody:
         required: false
         content:
@@ -567,6 +593,7 @@ paths:
                           provider: { type: string, example: dataforseo }
                           sandbox: { type: boolean, example: false, description: True when using the DataForSEO sandbox (test data) }
         '401': { $ref: '#/components/responses/Unauthenticated' }
+        '402': { $ref: '#/components/responses/InsufficientApiCredits' }
         '403': { $ref: '#/components/responses/NoWorkspaceAvailable' }
         '404': { $ref: '#/components/responses/SiteNotFound' }
         '422': { $ref: '#/components/responses/ValidationOrWorkspace' }
@@ -646,7 +673,10 @@ paths:
       tags: [Topical Maps]
       summary: Build (or rebuild) the topical map from keywords
       operationId: buildTopicalMap
-      description: When the site has no usable keywords, `topical_map` is `null` and the counts are `0` (no `coverage_score`).
+      description: |
+        Re-runs keyword clustering on the site's accepted keywords first, so `cluster_name` on keywords can change, then rebuilds the map.
+        Each cluster's `core_topic` is a Title Case phrase of up to 4 words taken from the cluster name (or from its top keyword), for example `Emergency Plumbing Services`.
+        When the site has no usable keywords, `topical_map` is `null` and the counts are `0` (no `coverage_score`).
       parameters:
         - $ref: '#/components/parameters/SiteId'
       responses:
@@ -776,7 +806,7 @@ paths:
       operationId: gscConnect
       description: |
         Redirect the browser to `data.authorization_url`. After consent Google calls `GET /google/search-console/callback`,
-        which redirects the browser to `{FRONTEND_URL}/settings/search-console?connected={site_id}`.
+        which redirects the browser to `{FRONTEND_URL}/sites/{site_id}/setup/google-search-console?connected={site_id}`.
         `connected` holds the ID of the site that was connected, so read it to know which site to refresh. The authorization link expires after **15 minutes**.
         `FRONTEND_URL` defaults to `http://localhost:3000`.
         Then call `GET /properties` and `POST /property`.
@@ -821,10 +851,10 @@ paths:
           schema: { type: string }
       responses:
         '302':
-          description: Success. Redirects to `{FRONTEND_URL}/settings/search-console?connected={site_id}`
+          description: Success. Redirects to `{FRONTEND_URL}/sites/{site_id}/setup/google-search-console?connected={site_id}`
           headers:
             Location:
-              schema: { type: string, example: 'https://app.example.com/settings/search-console?connected=1' }
+              schema: { type: string, example: 'https://app.example.com/sites/1/setup/google-search-console?connected=1' }
         '400':
           description: Invalid or expired state
           content:
@@ -1015,25 +1045,31 @@ paths:
       tags: [SERP Research]
       summary: Run SERP research for keywords
       operationId: serpResearch
+      description: |
+        The user must pick the keywords. Every ID must be a keyword on this site with `quality_status = accepted`, otherwise the whole request is rejected with **422**.
+        Each keyword is one paid DataForSEO call that **costs API credits** (see *API credits*), so keep the selection small (max 10).
+        Credits are reserved one keyword at a time, just before each call. ⚠️ If the wallet runs out partway through, the request returns **402** and the run is saved as `failed`. Keywords already called are still charged, but their results are not saved. Check the balance before a large run.
+        Location comes from the server's `DATAFORSEO_LOCATION_CODE`, and language from the site's `language` (falls back to `en`). If the server has no valid location code, the run is saved as `failed` and the request returns **500**.
+        The `Idempotency-Key` header is accepted but currently has no effect here: every request starts a new run and is billed again.
       parameters:
         - $ref: '#/components/parameters/SiteId'
+        - $ref: '#/components/parameters/IdempotencyKey'
       requestBody:
-        required: false
+        required: true
         content:
           application/json:
             schema:
               type: object
+              required: [keyword_ids]
               properties:
                 keyword_ids:
                   type: array
-                  items: { type: integer }
-                  description: Defaults to the top keywords when empty
+                  minItems: 1
+                  maxItems: 10
+                  uniqueItems: true
+                  items: { type: integer, minimum: 1 }
+                  description: IDs of accepted keywords on this site (1 to 10, no duplicates)
                   example: [12, 15, 18]
-                limit: { type: integer, minimum: 1, maximum: 100, default: 50 }
-                results:
-                  type: array
-                  description: Manual SERP rows (only used by the `manual` provider)
-                  items: { type: object, additionalProperties: true }
       responses:
         '200':
           description: Research summary
@@ -1048,14 +1084,47 @@ paths:
                     properties:
                       run: { $ref: '#/components/schemas/SerpResearchRun' }
                       provider: { type: string, example: dataforseo }
-                      keywords_processed: { type: integer, example: 50 }
-                      results_found: { type: integer, example: 500 }
+                      keywords_processed: { type: integer, example: 3 }
+                      results_found: { type: integer, example: 30 }
                       competitors: { type: integer, example: 27 }
                       content_gaps: { type: integer, example: 19 }
+                      billing:
+                        type: object
+                        description: Credits charged for this run and the wallet afterwards. All zeros when nothing was billed (for example with the `manual` provider).
+                        properties:
+                          credits_charged: { type: integer, example: 5, description: Sum charged for this run's completed DataForSEO tasks }
+                          charge_value_usd: { type: number, example: 0.05, description: '`credits_charged × usd_per_credit`, rounded to 2 decimals' }
+                          balance_credits: { type: integer, example: 495, description: Wallet balance available to spend }
+                          reserved_credits: { type: integer, example: 0, description: Credits still held for tasks with an unknown cost }
+                          currency: { type: string, example: USD }
+                          top_up_required: { type: boolean, example: false, description: True when `balance_credits` is 5 or less }
         '401': { $ref: '#/components/responses/Unauthenticated' }
-        '403': { $ref: '#/components/responses/NoWorkspaceAvailable' }
+        '402': { $ref: '#/components/responses/InsufficientApiCredits' }
+        '403':
+          description: No workspace available, or the site is not in the active workspace
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/FrameworkError'
+                  - $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                noWorkspace: { value: { message: No workspace available. } }
+                site: { value: { success: false, message: The selected site is not available in your active workspace. } }
         '404': { $ref: '#/components/responses/ModelNotFound' }
-        '422': { $ref: '#/components/responses/ValidationOrWorkspace' }
+        '422':
+          description: Validation failed, a keyword is not accepted or not on this site, or no active workspace
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/ValidationErrorBody'
+                  - $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                required: { value: { message: The keyword ids field is required., errors: { keyword_ids: [The keyword ids field is required.] } } }
+                tooMany: { value: { message: The keyword ids field must not have more than 10 items., errors: { keyword_ids: [The keyword ids field must not have more than 10 items.] } } }
+                invalidKeywords: { value: { success: false, message: 'One or more selected keywords are invalid, not accepted, or do not belong to this site.' } }
+                workspace: { value: { success: false, message: No active workspace found. } }
         '500': { $ref: '#/components/responses/ServerError' }
 
   /sites/{site}/serp/runs:
@@ -2194,7 +2263,7 @@ paths:
       summary: List blogs in a connected Shopify store
       operationId: listShopifyBlogs
       description: |
-        Use this to let the user pick a blog. Shopify publishing needs a `blog_id`, either saved in the connection `config.blog_id` or sent as `options.blog_id` when publishing.
+        Use this to let the user pick a blog, then save it with `PATCH .../shopify-blog`. Shopify publishing needs a `blog_id`, either saved in the connection `config.blog_id` or sent as `options.blog_id` when publishing.
         Works only for Shopify connections with `method = api`.
       parameters:
         - $ref: '#/components/parameters/SiteId'
@@ -2237,6 +2306,73 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/ErrorEnvelope' }
               example: { success: false, message: 'Shopify GraphQL request failed: [API] Invalid API key or access token' }
+        '500': { $ref: '#/components/responses/ServerError' }
+
+  /sites/{site}/publishing/connections/{connection}/shopify-blog:
+    patch:
+      tags: [Publishing]
+      summary: Save the Shopify blog to publish to
+      operationId: selectShopifyBlog
+      description: |
+        Stores `blog_id` and `blog_name` in the connection's `config`, so later publishes don't need `options.blog_id`. Get the values from `GET .../shopify-blogs` (`id` and `title`).
+        Works only for Shopify connections with `method = api`. Sending it again replaces the saved blog; leaving out `blog_name` clears it to `null`.
+      parameters:
+        - $ref: '#/components/parameters/SiteId'
+        - name: connection
+          in: path
+          required: true
+          schema: { type: integer, example: 4 }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [blog_id]
+              properties:
+                blog_id: { type: string, maxLength: 255, example: 'gid://shopify/Blog/123456789' }
+                blog_name: { type: string, maxLength: 255, nullable: true, example: News }
+      responses:
+        '200':
+          description: Blog saved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  message: { type: string, example: Shopify blog selected successfully. }
+                  data:
+                    type: object
+                    properties:
+                      connection_id: { type: integer, example: 4 }
+                      blog_id: { type: string, example: 'gid://shopify/Blog/123456789' }
+                      blog_name: { type: string, nullable: true, example: News }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/NoWorkspaceAvailable' }
+        '404':
+          description: Site not in the active workspace, or the connection is missing, on another site, or not a Shopify API connection
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/ErrorEnvelope'
+                  - $ref: '#/components/schemas/FrameworkError'
+              examples:
+                site: { value: { success: false, message: Site not found in the active workspace. } }
+                notShopify: { value: { success: false, message: Shopify connection does not belong to this site. } }
+                missing: { value: { message: 'No query results for model [App\Modules\Publishing\Models\PublishingConnection] 4' } }
+        '422':
+          description: Validation failed, or no active workspace
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/ValidationErrorBody'
+                  - $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                validation: { value: { message: The blog id field is required., errors: { blog_id: [The blog id field is required.] } } }
+                workspace: { value: { success: false, message: No active workspace found. } }
         '500': { $ref: '#/components/responses/ServerError' }
 
   /sites/{site}/publishing/publications:
@@ -2282,8 +2418,8 @@ paths:
       description: |
         **Flow**
         1. Call this endpoint and redirect the browser to `authorization_url` (valid for 10 minutes).
-        2. WordPress.com redirects to `GET /publishing/wordpress-com/callback`, which redirects the browser to `{FRONTEND_URL}/settings/wordpress-com?connected=pending&pending_key=…` (⚠️ currently returns 500, see the callback).
-        3. On that page, call `POST /sites/{site}/publishing/wordpress-com/complete` with `pending_key` and the chosen `wordpress_site_id`.
+        2. WordPress.com redirects to `GET /publishing/wordpress-com/callback`, which redirects the browser to `{FRONTEND_URL}/settings/wordpress-com?connected=pending&pending_key=…&site_id=…&sites=…`.
+        3. On that page, show the sites from `sites` and call `POST /sites/{site}/publishing/wordpress-com/complete` with `pending_key` and the chosen `wordpress_site_id`.
       parameters:
         - $ref: '#/components/parameters/SiteId'
       responses:
@@ -2374,13 +2510,17 @@ paths:
       operationId: wpcomCallback
       security: []
       description: |
-        WordPress.com sends the browser here after consent. On success the backend now **redirects the browser** (302) to the frontend instead of returning JSON:
-        `{FRONTEND_URL}/settings/wordpress-com?connected=pending&pending_key=<key>&sites_id=<…>`
-        The `/settings/wordpress-com` page should read `pending_key` from the query string and call `POST /sites/{site}/publishing/wordpress-com/complete` within 10 minutes.
+        WordPress.com sends the browser here after consent. On success the backend **redirects the browser** (302) to the frontend:
+        `{FRONTEND_URL}/settings/wordpress-com?connected=pending&pending_key=<key>&site_id=<rankoya site id>&sites=<url-encoded JSON>`
 
-        ⚠️ **Currently broken after a successful token exchange.** The redirect builds `sites_id` from `$sites->id`, but `$sites` is a list of sites, not one site. That throws, the generic handler catches it, and the browser gets **500** `An unexpected error occurred during WordPress.com authorization.` (as JSON, not a redirect).
-        ⚠️ The site list is no longer returned anywhere, so the frontend has no way to show which WordPress.com site to pick for `wordpress_site_id` in `/complete`. The backend needs to either put the site list on the redirect or add an endpoint that returns it for a `pending_key`.
-        Error cases (400/403/500/502) still return JSON.
+        | Query param | Meaning |
+        |---|---|
+        | `connected` | Always `pending`. |
+        | `pending_key` | Send to `/complete`. Single-use, expires after **10 minutes**. |
+        | `site_id` | The Rankoya site that started the flow. Use it as `{site}` in `/complete`. |
+        | `sites` | JSON array of the user's WordPress.com sites: `[{"id":"123456789","name":"My Blog","url":"https://myblog.wordpress.com"}]`. Parse with `JSON.parse(searchParams.get('sites'))`. `id` is a string; send it as `wordpress_site_id`. Can be `[]`. |
+
+        The access token is never put on the URL. Error cases (400/403/500/502) still return JSON. If `FRONTEND_URL` is not configured on the server, the callback returns **500**.
       parameters:
         - name: code
           in: query
@@ -2392,12 +2532,12 @@ paths:
           schema: { type: string }
       responses:
         '302':
-          description: Intended success. Redirects to the frontend settings page (not reachable until the bug above is fixed).
+          description: Success. Redirects to the frontend settings page.
           headers:
             Location:
               schema:
                 type: string
-                example: 'https://app.rankoya.uk/settings/wordpress-com?connected=pending&pending_key=3sK9...64chars&sites_id=123456789'
+                example: 'https://app.rankoya.uk/settings/wordpress-com?connected=pending&pending_key=3sK9...64chars&site_id=7&sites=%5B%7B%22id%22%3A%22123456789%22%2C%22name%22%3A%22My+Blog%22%2C%22url%22%3A%22https%3A%5C%2F%5C%2Fmyblog.wordpress.com%22%7D%5D'
         '400':
           description: Missing code or state
           content:
@@ -3722,6 +3862,40 @@ paths:
         '422': { $ref: '#/components/responses/FreeToolError' }
         '500': { $ref: '#/components/responses/ServerError' }
 
+  # ───────────────────────────── CREDITS ─────────────────────────────
+  /credits/balance:
+    get:
+      tags: [Credits]
+      summary: Get the user's API credit balance and recent usage
+      operationId: getCreditBalance
+      description: |
+        Returns the wallet of the **logged-in user**. Paid calls are billed to the workspace owner, so a team member sees their own wallet (usually empty) and their own usage, not the owner's.
+        Users without a wallet yet get zeros; this call does not create one.
+      responses:
+        '200':
+          description: Balance and usage
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  data:
+                    type: object
+                    properties:
+                      balance_credits: { type: integer, example: 495, description: Available to spend }
+                      reserved_credits: { type: integer, example: 10, description: Held for in-flight or unreconciled tasks }
+                      usd_per_credit: { type: number, example: 0.01 }
+                      total_api_cost_usd: { type: number, example: 0.0315, description: Total provider cost of completed tasks billed to this user (6 decimals) }
+                      total_credits_charged: { type: integer, example: 5 }
+                      recent_usage:
+                        type: array
+                        description: Last 10 usage records, newest first
+                        items: { $ref: '#/components/schemas/ApiUsageLog' }
+                      top_up_url: { type: string, example: /billing/credits, description: Frontend path for the top-up page }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '500': { $ref: '#/components/responses/ServerError' }
+
   # ───────────────────────────── WORKSPACES ─────────────────────────────
   /workspace:
     get:
@@ -4775,6 +4949,45 @@ paths:
               example: { message: 'No query results for model [App\Models\User] 40' }
         '500': { $ref: '#/components/responses/ServerError' }
 
+  /admin/users/add-api-credits:
+    post:
+      tags: [Admin]
+      summary: Add API credits to a user's wallet
+      operationId: adminAddApiCredits
+      description: |
+        Adds credits to the user's API credit wallet (creates it if needed) and records a `grant` transaction.
+        Grant credits to the **workspace owner**, since that's whose wallet pays for the workspace's DataForSEO calls.
+        ⚠️ Unlike the other admin endpoints, this one uses the `success` envelope and puts the fields at the top level (no `data` key).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [user_id, credits]
+              properties:
+                user_id: { type: integer, example: 40, description: Must be an existing user }
+                credits: { type: integer, minimum: 1, maximum: 1000000000, example: 500 }
+                description: { type: string, maxLength: 255, nullable: true, example: Launch bonus, description: 'Defaults to "Manual API credit grant by administrator"' }
+      responses:
+        '200':
+          description: Credits added
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  message: { type: string, example: API credits added successfully. }
+                  user_id: { type: integer, example: 40 }
+                  credits_added: { type: integer, example: 500 }
+                  available_credits: { type: integer, example: 500, description: New `balance_credits` }
+                  reserved_credits: { type: integer, example: 0 }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/AdminForbidden' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+        '500': { $ref: '#/components/responses/ServerError' }
+
   /user/add-tokens:
     post:
       tags: [Admin]
@@ -4936,6 +5149,14 @@ components:
       required: true
       description: Site ID
       schema: { type: integer, example: 1 }
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: false
+      description: |
+        Optional unique key (for example a UUID) for a paid request. On keyword discovery, retrying with the same key and the same seeds is not charged again.
+        ⚠️ Reusing a key for a different request currently returns **500** (the intended **409** `duplicate_idempotency_key` is never sent).
+      schema: { type: string, maxLength: 255, example: 3f2b8c1e-5d4a-4c9b-9f1e-2a7d6b8c0e11 }
     Page:
       name: page
       in: query
@@ -5096,6 +5317,16 @@ components:
         application/json:
           schema: { $ref: '#/components/schemas/StatusEnvelope' }
           example: { status: error, message: Unable to complete request }
+    InsufficientApiCredits:
+      description: The workspace owner's wallet doesn't have enough API credits for the reservation
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success: { type: boolean, example: false }
+              message: { type: string, example: Insufficient API credits. Please top up your account. }
+              code: { type: string, enum: [insufficient_api_credits] }
     AdminForbidden:
       description: Logged in, but role is not admin or support
       content:
@@ -5651,6 +5882,19 @@ components:
         updated_at: { type: string, format: date-time }
 
     # ---- SERP ----
+    ApiUsageLog:
+      type: object
+      description: One paid provider task
+      properties:
+        id: { type: integer, example: 12 }
+        operation: { type: string, enum: [google_organic_live_advanced, google_keyword_suggestions_live], description: SERP research or keyword suggestions }
+        provider: { type: string, example: dataforseo }
+        keyword: { type: string, example: emergency plumber london }
+        api_cost_usd: { type: string, nullable: true, example: '0.00200000', description: Provider cost as a decimal string (8 places); null until settled }
+        credits_reserved: { type: integer, example: 10 }
+        credits_charged: { type: integer, example: 3 }
+        status: { type: string, enum: [reserved, completed, failed, released, unresolved, reconciled], description: '`unresolved` means the cost is unknown and the reservation is still held' }
+        created_at: { type: string, format: date-time }
     SerpResearchRun:
       type: object
       properties:

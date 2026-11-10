@@ -38,7 +38,15 @@ export function IntegrationTile({
   );
 }
 
-export type IntegrationStatus = "connected" | "notConnected" | "comingSoon" | "connecting" | "tracking" | "paused";
+export type IntegrationStatus =
+  | "connected"
+  | "notConnected"
+  | "comingSoon"
+  | "connecting"
+  | "tracking"
+  | "paused"
+  /** Nothing to connect, it already works (the RSS feed). */
+  | "ready";
 
 export function IntegrationStatusBadge({ status }: { status: IntegrationStatus }) {
   const t = useTranslations("integrationStatus");
@@ -51,6 +59,7 @@ export function IntegrationStatusBadge({ status }: { status: IntegrationStatus }
     );
   if (status === "comingSoon") return <Badge variant="neutral">{t("comingSoon")}</Badge>;
   if (status === "connecting") return <Badge variant="blue">{t("connecting")}</Badge>;
+  if (status === "ready") return <Badge variant="blue">{t("ready")}</Badge>;
   if (status === "paused") return <Badge variant="outline">{t("paused")}</Badge>;
   return <Badge variant="outline">{t("notConnected")}</Badge>;
 }

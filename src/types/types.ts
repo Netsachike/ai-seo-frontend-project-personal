@@ -1644,9 +1644,13 @@ export interface PublishingConnection {
  * wordpress: credentials.site_url, username, application_password ·
  * shopify: credentials.store_domain, access_token ·
  * webflow: credentials.access_token, config.collection_id ·
- * wix: credentials.access_token, site_id ·
+ * wix: credentials.access_token, site_id (API key) — or instance_id + site_id when installed
+ *   through Rankoya's Wix app (/api/integrations/wix/*; backend support pending) ·
  * ghost: credentials.admin_api_key, config.site_url ·
+ * duda: credentials.username, password, site_name, host (backend support pending) ·
  * wordpress_com: not allowed, use the OAuth flow.
+ * method = webhook (Make, Lovable, Replit): platform `custom`, credentials.webhook_url + secret,
+ *   config.provider (backend support pending; see docs/integrations-testing.md).
  */
 export interface CreatePublishingConnectionPayload {
   name: string;
@@ -1660,12 +1664,26 @@ export interface CreatePublishingConnectionPayload {
     access_token?: string;
     site_id?: string;
     admin_api_key?: string;
+    /** Wix app installs: the app instance; tokens are minted from it. */
+    instance_id?: string;
+    /** Duda API password. */
+    password?: string;
+    /** Duda site name (its site ID). */
+    site_name?: string;
+    /** Duda API host: api.duda.co or api.eu.duda.co. */
+    host?: string;
+    /** method = webhook: where each published article is POSTed. */
+    webhook_url?: string;
+    /** method = webhook: the HMAC key for X-Rankoya-Signature (`whsec_…`). */
+    secret?: string;
   } | null;
   config?: {
     collection_id?: string;
     site_url?: string;
     blog_id?: string;
     author_name?: string;
+    /** method = webhook: which card it belongs to (make, lovable, replit); platform is `custom`. */
+    provider?: string;
     field_mapping?: { title?: string; content?: string; slug?: string; meta_description?: string };
   } | null;
 }
@@ -2351,3 +2369,37 @@ export const SITE_SETUP_STEPS = [
   "done",
 ] as const;
 export type SiteSetupStep = (typeof SITE_SETUP_STEPS)[number];
+
+// ── API credits (GET /credits/balance) ──
+
+/** Paid provider operations the backend bills in credits. */
+export type ApiUsageOperation = "google_organic_live_advanced" | "google_keyword_suggestions_live" | (string & {});
+
+export type ApiUsageStatus = "reserved" | "completed" | "failed" | "released" | "unresolved" | "reconciled";
+
+/** One paid provider task. */
+export interface ApiUsageLog {
+  id: number;
+  operation: ApiUsageOperation;
+  provider: string;
+  keyword: string | null;
+  /** Decimal string (8 places); null until settled. */
+  api_cost_usd: string | null;
+  credits_reserved: number;
+  credits_charged: number;
+  status: ApiUsageStatus | (string & {});
+  created_at: string;
+}
+
+export interface CreditBalance {
+  /** Available to spend. */
+  balance_credits: number;
+  /** Held for in-flight or unreconciled tasks. */
+  reserved_credits: number;
+  usd_per_credit: number;
+  total_api_cost_usd: number;
+  total_credits_charged: number;
+  /** Last 10 records, newest first. */
+  recent_usage: ApiUsageLog[];
+  top_up_url: string;
+}

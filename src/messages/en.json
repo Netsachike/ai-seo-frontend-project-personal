@@ -551,7 +551,8 @@
       "upgrade": "Upgrade plan",
       "admin": "Admin console",
       "tour": "Page tour",
-      "machineLanguages": "More languages (translated by Google)"
+      "machineLanguages": "More languages (translated by Google)",
+      "helpCenter": "Help center"
     },
     "command": {
       "title": "Command menu",
@@ -623,6 +624,11 @@
       "addBody": "This page shows data for one site. Add your website to get started.",
       "add": "Add a site",
       "later": "Not now"
+    },
+    "credits": {
+      "label": "{count, plural, one {# credit left} other {# credits left}}",
+      "low": "Running low: {count, plural, one {# credit left} other {# credits left}}",
+      "empty": "No credits left"
     }
   },
   "auth": {
@@ -766,7 +772,8 @@
     "comingSoon": "Coming soon",
     "connecting": "Connecting",
     "tracking": "Tracking",
-    "paused": "Paused"
+    "paused": "Paused",
+    "ready": "Ready"
   },
   "insights": {
     "range": {
@@ -927,7 +934,8 @@
         "published": "Article published"
       }
     },
-    "noAnswers": "No AI answers in the last {days} days. Run a scan to measure where you appear."
+    "noAnswers": "No AI answers in the last {days} days. Run a scan to measure where you appear.",
+    "helpCenter": "Help center"
   },
   "visibility": {
     "title": "AI visibility",
@@ -1970,6 +1978,7 @@
         "profile": "Profile",
         "workspaces": "Workspaces",
         "subscriptions": "Plan and billing",
+        "credits": "Credits",
         "team-members": "Team members"
       }
     },
@@ -2560,6 +2569,10 @@
         "legal": "Legal"
       },
       "resources": {
+        "websiteTemplate": {
+          "title": "Agency website template",
+          "description": "A ready-to-publish React and Tailwind site for selling SEO and AI visibility, with pricing, contact form and setup guide."
+        },
         "reportTemplate": {
           "title": "Monthly client report",
           "description": "A report layout for AI visibility, rankings and work done, ready to fill from Rankoya's exports."
@@ -2603,6 +2616,57 @@
         "managePlan": "Manage plan",
         "contact": "Contact agency support"
       }
+    },
+    "credits": {
+      "title": "Credits",
+      "description": "Tools that look up live search data use credits. Here's what you have and what you've spent.",
+      "refresh": "Refresh",
+      "retry": "Try again",
+      "available": "Credits left",
+      "ofReceived": "{pct}% of {received} received",
+      "remainingLabel": "{pct}% of your credits left",
+      "reserved": "On hold",
+      "reservedHint": "Held for tasks still running",
+      "used": "Used",
+      "usedHint": "Spent on finished tasks",
+      "received": "Received",
+      "receivedHint": "Everything added to your account",
+      "lowTitle": "You have {pct}% of your credits left",
+      "lowBody": "Top up soon so rank checks and keyword research keep running.",
+      "emptyTitle": "You're out of credits",
+      "emptyBody": "Tools that need live search data are paused until you add credits.",
+      "rules": {
+        "failed": "Failed or empty lookups don't use credits.",
+        "expire": "Credits don't expire.",
+        "owner": "Work in a shared workspace uses the workspace owner's credits."
+      },
+      "historyTitle": "Recent activity",
+      "historyDescription": "Your last 10 tasks that used credits.",
+      "historyEmptyTitle": "No credits used yet",
+      "historyEmptyBody": "Rank checks and keyword suggestions will show up here.",
+      "columns": {
+        "date": "Date",
+        "action": "Action",
+        "keyword": "Keyword",
+        "status": "Status",
+        "credits": "Credits"
+      },
+      "operations": {
+        "google_organic_live_advanced": "Rank check",
+        "google_keyword_suggestions_live": "Keyword suggestions"
+      },
+      "statuses": {
+        "reserved": "Running",
+        "completed": "Done",
+        "failed": "Failed, not charged",
+        "released": "Not charged",
+        "unresolved": "On hold",
+        "reconciled": "Done"
+      },
+      "unavailableTitle": "Sign in to see your credits",
+      "unavailableBody": "Your credit balance appears here once you're signed in.",
+      "errorTitle": "Couldn't load your credits",
+      "errorBody": "Check your connection and try again."
     }
   },
   "admin": {
@@ -3029,7 +3093,7 @@
         "name": "Wix",
         "description": "Rankoya publishes approved articles to your Wix blog.",
         "facts": {
-          "access": "A Wix API key",
+          "access": "Rankoya's Wix app, installed on your site",
           "data": "Blog posts",
           "control": "Every change needs approval"
         },
@@ -3074,6 +3138,56 @@
           "control": "You paste each one in"
         },
         "disconnectBody": "{account}"
+      },
+      "duda": {
+        "name": "Duda",
+        "description": "Rankoya publishes approved articles to your Duda site's blog.",
+        "facts": {
+          "access": "Duda API credentials",
+          "data": "Blog posts",
+          "control": "Every change needs approval"
+        },
+        "disconnectBody": "{account}"
+      },
+      "lovable": {
+        "name": "Lovable",
+        "description": "Rankoya sends each published article to your Lovable app, which shows it on its blog.",
+        "facts": {
+          "access": "A webhook endpoint in your app",
+          "data": "Published articles",
+          "control": "Every change needs approval"
+        },
+        "disconnectBody": "{account}"
+      },
+      "replit": {
+        "name": "Replit",
+        "description": "Rankoya sends each published article to your Replit app, which shows it on its blog.",
+        "facts": {
+          "access": "A webhook endpoint in your app",
+          "data": "Published articles",
+          "control": "Every change needs approval"
+        },
+        "disconnectBody": "{account}"
+      },
+      "make": {
+        "name": "Make",
+        "description": "Each published article starts a Make scenario, so you can send it anywhere Make connects to.",
+        "facts": {
+          "access": "A Make webhook URL",
+          "data": "Published articles",
+          "control": "Every change needs approval"
+        },
+        "disconnectBody": "{account}"
+      },
+      "rss": {
+        "name": "RSS feed",
+        "description": "A private feed of your published articles, for feed readers, automations and apps.",
+        "facts": {
+          "access": "A private feed link",
+          "data": "Published articles",
+          "control": "Read only"
+        },
+        "disconnectBody": "{account}"
       }
     },
     "select": {
@@ -3095,7 +3209,10 @@
       "accessToken": "Access token",
       "collectionId": "Collection ID",
       "wixSiteId": "Wix site ID",
-      "adminApiKey": "Admin API key"
+      "adminApiKey": "Admin API key",
+      "dudaUsername": "API username",
+      "dudaPassword": "API password",
+      "dudaSiteName": "Site name"
     },
     "wpcom": {
       "title": "Connect WordPress.com",
@@ -3176,12 +3293,13 @@
         "note": "You need to be an administrator of that WordPress.com site."
       },
       "shopify": {
-        "s1": "Open the <link>Shopify Dev Dashboard</link> and create an app for your store.",
-        "s2": "In the app's settings, add the scopes <code>read_content</code> and <code>write_content</code>, then release a version.",
-        "s3": "Install the app on your store from the app's overview page.",
-        "s4": "In the app's <b>Settings</b>, copy the <b>Client ID</b> and <b>Client secret</b>.",
-        "s5": "Paste them below with your store's address ending in <code>.myshopify.com</code>, then click <b>Get access token</b> and <b>Connect</b>.",
-        "note": "Shopify's tokens for these apps last 24 hours. If publishing stops working, get a new token and reconnect."
+        "s1": "Open the <link>Shopify Dev Dashboard</link>, click <b>Create app</b> and name it <code>Rankoya</code>.",
+        "s2": "Create a version. Under <b>Access scopes</b>, add <code>read_content</code> and <code>write_content</code>, then click <b>Release</b>.",
+        "s3": "On the app's overview page, click <b>Install app</b>, pick your store and approve.",
+        "s4": "Open the app's <b>Settings</b> and copy the <b>Client ID</b> and <b>Client secret</b>.",
+        "s5": "Below, enter your store address ending in <code>.myshopify.com</code>, paste both values and click <b>Get access token</b>.",
+        "s6": "Click <b>Connect</b>, then choose the blog Rankoya should publish to.",
+        "note": "Find your .myshopify.com address in Shopify admin under Settings → Domains. Shopify's tokens for these apps last 24 hours, so if publishing stops, get a new token and reconnect."
       },
       "webflow": {
         "s1": "Open your site in the <link>Webflow dashboard</link> and go to <b>Site settings › Apps & integrations</b>.",
@@ -3192,12 +3310,10 @@
         "note": "The collection needs fields for the post's title, slug and body. Ask your developer if you're not sure which collection is your blog."
       },
       "wix": {
-        "s1": "Open the <link>Wix API Keys page</link> and click <b>Generate API Key</b>.",
-        "s2": "Name it <code>Rankoya</code>, pick your site and allow the <b>Blog</b> permissions, then generate it.",
-        "s3": "Copy the key. It's only shown once.",
-        "s4": "Open your site's dashboard: the site ID is the code in the address bar right after <code>/dashboard/</code>.",
-        "s5": "Paste the key and the site ID here.",
-        "note": "You need to be the site owner, or have API key permissions on the Wix account."
+        "s1": "Click <b>Continue to Wix</b> and sign in to Wix if asked.",
+        "s2": "Pick the site Rankoya should publish to and approve access.",
+        "s3": "Wix sends you back here and the connection is checked straight away.",
+        "note": "Your site needs Wix Blog. You can remove the Rankoya app any time from your Wix dashboard."
       },
       "ghost": {
         "s1": "In Ghost Admin, go to <b>Settings › Integrations</b>.",
@@ -3225,6 +3341,42 @@
         "s2": "When an article is ready, open it in Rankoya and click <b>Publish</b>. Rankoya prepares it to copy.",
         "s3": "Copy it into your site's editor, with the title, meta description and URL slug Rankoya gives you, and publish it there.",
         "note": "Works with any site, including Lovable, Replit and site builders Rankoya doesn't connect to yet."
+      },
+      "duda": {
+        "s1": "In your Duda dashboard, open <b>API Access</b> (under your account or team settings) and create API credentials.",
+        "s2": "Copy the <b>API username</b> and <b>API password</b>. The password is only shown once.",
+        "s3": "Open the site in Duda: the <b>site name</b> is the code in the editor address (for example <code>a1b2c3d4</code>).",
+        "s4": "Paste all three here. Rankoya checks them with Duda before saving.",
+        "note": "Duda API access is available on Duda custom and partner plans. Not sure? Ask your Duda account manager."
+      },
+      "wixApiKey": {
+        "s1": "Open the <link>Wix API Keys page</link> and click <b>Generate API Key</b>.",
+        "s2": "Name it <code>Rankoya</code>, pick your site and allow the <b>Blog</b> permissions, then generate it.",
+        "s3": "Copy the key. It's only shown once.",
+        "s4": "Open your site's dashboard: the site ID is the code in the address bar right after <code>/dashboard/</code>.",
+        "s5": "Paste the key and the site ID here.",
+        "note": "You need to be the site owner, or have API key permissions on the Wix account."
+      },
+      "make": {
+        "s1": "In Make, create a scenario and add <b>Webhooks → Custom webhook</b> as the first module.",
+        "s2": "Click <b>Add</b>, name it <code>Rankoya</code>, and copy the webhook URL Make shows.",
+        "s3": "Paste the URL below and click <b>Send test article</b>. Make should show <b>Successfully determined</b>.",
+        "s4": "Add the modules that use the article, then save the connection here and turn the scenario on.",
+        "note": "Make's free plan includes webhooks. Every published article runs the scenario once."
+      },
+      "lovable": {
+        "s1": "Copy the prompt below and paste it into your Lovable project's chat.",
+        "s2": "When Lovable asks for <code>RANKOYA_WEBHOOK_SECRET</code>, paste the signing secret below.",
+        "s3": "Once Lovable has published the change, copy the endpoint URL it gives you and paste it below.",
+        "s4": "Click <b>Send test article</b>, then save the connection.",
+        "note": "Lovable needs Supabase (Lovable Cloud) turned on to run the endpoint."
+      },
+      "replit": {
+        "s1": "Copy the prompt below and paste it into Replit Agent in your app.",
+        "s2": "Add <code>RANKOYA_WEBHOOK_SECRET</code> under <b>Secrets</b>, with the signing secret below as its value.",
+        "s3": "Deploy the app, then paste the endpoint's public URL below. The dev URL stops working when the workspace sleeps.",
+        "s4": "Click <b>Send test article</b>, then save the connection.",
+        "note": "Use a deployment (Autoscale or Reserved VM) so the endpoint is always reachable."
       }
     },
     "shopifyToken": {
@@ -3239,6 +3391,75 @@
       "generated": "Token added below. Shopify tokens like this work for 24 hours, so connect now.",
       "failed": "We couldn't get a token from Shopify. Check the details and try again.",
       "tokenHelper": "Filled in for you above, or paste your own. Valid for 24 hours."
+    },
+    "dudaErrors": {
+      "duda_auth": "Duda didn't accept that API username and password.",
+      "duda_site_not_found": "Those credentials work, but no site with that site name was found on the account.",
+      "duda_unavailable": "We couldn't reach Duda. Try again in a moment."
+    },
+    "wixApp": {
+      "title": "Install the Rankoya app (recommended)",
+      "body": "Pick your site in Wix and approve access. No API key to copy, and you can remove it any time from your Wix dashboard.",
+      "install": "Install on Wix",
+      "orApiKey": "Or connect with a Wix API key instead, using the steps below.",
+      "errors": {
+        "cancelled": "The Wix install was cancelled. Nothing was connected.",
+        "signature": "Wix sent back details we couldn't verify. Try connecting again.",
+        "token": "Wix didn't give Rankoya access to your site. Try connecting again.",
+        "no_blog": "Add Wix Blog to your site, then connect again.",
+        "not_configured": "Connecting Wix isn't set up yet. Try again later.",
+        "state": "The connection link expired. Start again from Integrations.",
+        "site": "Pick a site before connecting Wix.",
+        "save": "Wix is installed, but we couldn't save the connection. Try again."
+      }
+    },
+    "webhook": {
+      "promptTitle": "Prompt for {name}",
+      "promptBody": "It adds an endpoint that receives your articles and checks they really come from Rankoya, plus /blog pages to show them.",
+      "copyPrompt": "Copy prompt",
+      "secretTitle": "Signing secret",
+      "copySecret": "Copy secret",
+      "secretBuilder": "Your app uses this to check that each request comes from Rankoya. Keep it private.",
+      "secretMake": "Optional in Make. Each request carries an X-Rankoya-Signature header made with this secret.",
+      "urlLabel": {
+        "make": "Make webhook URL",
+        "lovable": "Endpoint URL",
+        "replit": "Endpoint URL"
+      },
+      "urlHelper": "Must start with https://",
+      "test": "Send test article",
+      "testAgain": "Send again",
+      "delivered": "Test article delivered. Check it arrived, then save the connection.",
+      "save": "Save connection",
+      "saved": "{name} connected. Published articles will be sent there.",
+      "errors": {
+        "webhook_url": "Enter a full https:// URL.",
+        "webhook_private": "That address isn't reachable from the internet. Use your app's public URL.",
+        "webhook_dns": "We couldn't find that address. Check the URL and try again.",
+        "webhook_unreachable": "We couldn't reach that URL. Check it's deployed and public, then try again.",
+        "webhook_rejected": "The URL answered with error {status}. Check the endpoint and the signing secret, then try again.",
+        "site": "You don't have access to this site.",
+        "unauthenticated": "Your session ended. Sign in again.",
+        "save": "The test worked, but we couldn't save the connection. Try again.",
+        "make_not_listening": "Make isn't listening on this webhook. Open the scenario, click the webhook module so it says it's waiting for data (or click Run once), then send the test again."
+      },
+      "previewPrompt": "Preview prompt",
+      "hidePrompt": "Hide prompt"
+    },
+    "feed": {
+      "open": "Get feed link",
+      "done": "Done",
+      "rss": {
+        "title": "RSS feed",
+        "body": "For feed readers and Make's RSS module."
+      },
+      "json": {
+        "title": "JSON feed",
+        "body": "For apps, like a blog page in Lovable or Replit."
+      },
+      "notLive": "This feed isn't live yet. The links stay the same once it is.",
+      "private": "Anyone with these links can read your published articles. Share them only with tools you trust.",
+      "failed": "We couldn't load your feed links. Try again."
     }
   },
   "legal": {
@@ -3544,6 +3765,11 @@
           "name": "Next.js app",
           "detail": "No publishing API? Copy and paste",
           "help": "Rankoya prepares each approved article for you to copy into your Next.js app."
+        },
+        "duda": {
+          "name": "Duda",
+          "detail": "Duda Blog",
+          "help": "Enter your Duda API username, password and site name."
         }
       },
       "fields": {
@@ -3627,7 +3853,8 @@
           "wix": "Wix",
           "ghost": "Ghost",
           "manual": "Copy and paste",
-          "nextjs": "Next.js app (copy and paste)"
+          "nextjs": "Next.js app (copy and paste)",
+          "duda": "Duda"
         },
         "mode": {
           "review": "you approve each one",
@@ -4289,5 +4516,73 @@
     "researchingKeyword": "Researching “{keyword}” for an article…",
     "findingKeywords": "Finding keywords…",
     "buildingMap": "Building your topical map…"
+  },
+  "help": {
+    "title": "Help center",
+    "description": "Short videos that show you how Rankoya works, and every way to reach our team.",
+    "tabsLabel": "Help center sections",
+    "tabs": {
+      "videos": "Demo videos",
+      "contact": "Contact us"
+    },
+    "videos": {
+      "watchDemo": "Watch demo",
+      "empty": "Videos for this part of Rankoya are on their way.",
+      "categories": {
+        "integrations": {
+          "title": "Integrations",
+          "description": "Connect your website, store and tools to Rankoya."
+        },
+        "articles": {
+          "title": "Articles",
+          "description": "Plan, write, review and publish articles."
+        },
+        "keywords": {
+          "title": "Keywords",
+          "description": "Find the searches worth winning and track your rankings."
+        },
+        "visibility": {
+          "title": "AI visibility",
+          "description": "See how AI assistants like ChatGPT talk about your brand."
+        },
+        "account": {
+          "title": "Account and billing",
+          "description": "Your profile, team, workspaces, plan and credits."
+        }
+      },
+      "items": {
+        "shopifyConnect": {
+          "title": "Connect your Shopify store",
+          "description": "Create a Shopify app with blog access, get your access token, and choose the blog Rankoya publishes to."
+        }
+      }
+    },
+    "contact": {
+      "emailTitle": "Email us",
+      "emails": {
+        "support": {
+          "title": "Support",
+          "body": "Questions, problems, or something not working the way you expect."
+        },
+        "agency": {
+          "title": "Agencies and partnerships",
+          "body": "White label, reselling Rankoya, or working together."
+        }
+      },
+      "sendEmail": "Send email",
+      "copyEmail": "Copy address",
+      "messageTitle": "Send us a message",
+      "messageBody": "Describe what you need and we'll get back to you by email.",
+      "messageCta": "Write a message",
+      "socialsTitle": "Follow Rankoya",
+      "socialsBody": "Product updates, tips and new features.",
+      "socials": {
+        "x": "X (Twitter)",
+        "linkedin": "LinkedIn",
+        "instagram": "Instagram",
+        "youtube": "YouTube",
+        "facebook": "Facebook"
+      }
+    }
   }
 }

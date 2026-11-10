@@ -8,6 +8,7 @@ import { useUiStore } from "@/lib/store/ui";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/brand/logo";
 import { WorkspaceSwitcher } from "./context-switcher";
+import { CreditBalance } from "./credit-balance";
 import { Shortcut } from "./kbd";
 import { LanguageSwitcher } from "./language-switcher";
 import { ProfileMenu } from "./profile-menu";
@@ -46,6 +47,7 @@ export function Topbar({ variant = "app" }: { variant?: "app" | "sites" }) {
       <WorkspaceSwitcher />
       <div className="flex-1" />
 
+      <CreditBalance />
       <LanguageSwitcher compact className="hidden md:flex" />
       <ThemeToggle className="hidden md:inline-flex" />
       {/* No notifications endpoint yet; restore when the backend ships one. */}

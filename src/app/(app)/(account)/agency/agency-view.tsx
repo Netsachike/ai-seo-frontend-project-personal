@@ -9,6 +9,7 @@ import {
   ExternalLinkIcon,
   FileBarChart2Icon,
   FileSignatureIcon,
+  GlobeIcon,
   LayoutTemplateIcon,
   MailIcon,
   PhoneCallIcon,
@@ -32,6 +33,7 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 type Category = "reports" | "sales" | "delivery" | "legal";
 type ResourceId =
+  | "websiteTemplate"
   | "reportTemplate"
   | "auditDeck"
   | "proposal"
@@ -59,6 +61,15 @@ type AgencyResource = {
  * the published assets (under /public/agency or a shared drive).
  */
 const agencyResources: AgencyResource[] = [
+  {
+    // Built from agency/rankoya_agency_page with `npm run agency:zip`.
+    id: "websiteTemplate",
+    category: "sales",
+    version: "v1.0",
+    icon: GlobeIcon,
+    downloadUrl: "/agency/rankoya-agency-template.zip",
+    isNew: true,
+  },
   {
     id: "reportTemplate",
     category: "reports",
