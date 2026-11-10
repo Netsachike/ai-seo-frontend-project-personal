@@ -18,7 +18,8 @@ import { Input } from "@/components/ui/input";
 const EMPTY_STATS = { total_users: 0, users_today: 0, users_this_week: 0 };
 
 /**
- * Paged `GET /admin` with a debounced search. While searching, every match
+ * Paged `GET /admin` with a debounced search, plus each user's credit
+ * wallet from `GET /admin/users-with-credits`. While searching, every match
  * is listed (all pages fetched) and pagination is off.
  */
 export function UserManagementView() {
@@ -70,13 +71,27 @@ export function UserManagementView() {
     },
   });
 
+  // Credit wallets come from their own endpoint, so a failure there never hides the users.
+  // Same order and page size as GET /admin, so page N matches; rows are matched by id anyway.
+  const credits = useQuery({
+    queryKey: accountKeys.adminUserCredits(isSearching ? "all" : currentPage),
+    placeholderData: keepPreviousData,
+    retry: 1,
+    queryFn: async () => {
+      const rows = isSearching
+        ? await adminService.allUsersWithCredits()
+        : (await adminService.usersWithCredits(currentPage)).rows;
+      return new Map(rows.map((row) => [row.id, row]));
+    },
+  });
+
   // Stats come from the paged (non-search) call; keep the last ones while searching.
   const [stats, setStats] = React.useState(EMPTY_STATS);
   const latestStats = query.data?.stats;
   if (latestStats && latestStats !== stats) setStats(latestStats);
 
   const refreshUsers = async () => {
-    await query.refetch();
+    await Promise.all([query.refetch(), credits.refetch()]);
   };
 
   return (
@@ -114,7 +129,10 @@ export function UserManagementView() {
       </div>
 
       <div className="relative md:max-w-sm">
-        <SearchIcon aria-hidden className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-fg-3" />
+        <SearchIcon
+          aria-hidden
+          className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-fg-3"
+        />
         <Input
           type="search"
           value={searchQuery}
@@ -134,6 +152,8 @@ export function UserManagementView() {
         total={query.data?.total ?? 0}
         onPageChange={setCurrentPage}
         onUsersChanged={refreshUsers}
+        credits={credits.data}
+        creditsLoading={credits.isPending || (credits.isFetching && credits.isPlaceholderData)}
       />
 
       {isSearching && <p className="text-caption font-normal text-fg-3">{t("searchNote")}</p>}

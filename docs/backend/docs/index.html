@@ -33,6 +33,8 @@ info:
     `supports_credentials` is `true`.
 
     ## Changelog
+    - **2026-11-10**: Added the admin endpoints `GET /admin/users-with-credits` (paginated list of users with their API credit balances) and `PUT /users/{user}/credits` (set a user's balance to an exact value).
+      `POST /sites/{site}/copilot/ask` now forces the model to reply in a fixed JSON format, so `actions` items always have the same 6 fields. It returns **500** if the answer is cut off by the token limit.
     - **2026-11-02**: Added **API credits** (see the section below). Paid DataForSEO calls are now billed in credits to the workspace owner's wallet.
       Added `GET /credits/balance` and the admin endpoint `POST /admin/users/add-api-credits`.
       `POST /sites/{site}/keywords/discover` (when `seed_keywords` are sent) and `POST /sites/{site}/serp/research` can now return **402** `insufficient_api_credits`, and accept an optional `Idempotency-Key` header.
@@ -61,7 +63,7 @@ info:
     - **Billed endpoints:** `POST /sites/{site}/keywords/discover` (only when `seed_keywords` are sent; one task per seed, max 5) and `POST /sites/{site}/serp/research` (one task per keyword, max 10).
     - **Reserve, then settle:** each task first reserves **10 credits** (`API_CREDIT_RESERVATION`). After the call the real charge is `ceil(provider_cost_usd × 1.5 / 0.01)` (`API_CREDIT_MARKUP`, `API_USD_PER_CREDIT`), and the unused part of the reservation goes back to the balance. If the provider cost is unknown or higher than the reservation, the whole reservation stays held (`reserved_credits`) until someone reconciles it.
     - **Not enough credits →** **402** `{"success": false, "message": "Insufficient API credits. Please top up your account.", "code": "insufficient_api_credits"}`. Show a top-up prompt and link to `GET /credits/balance` → `top_up_url`.
-    - New accounts start with **0 credits**. There's no self-serve top-up endpoint yet. Admins add credits with `POST /admin/users/add-api-credits`.
+    - New accounts start with **0 credits**. There's no self-serve top-up endpoint yet. Admins add credits with `POST /admin/users/add-api-credits`, set an exact balance with `PUT /users/{user}/credits`, and can see every user's balance with `GET /admin/users-with-credits`.
     - These credits are separate from the AI token balance (`/user/add-tokens`, `/user/update-tokens`).
 
     ## Workspaces
@@ -3345,6 +3347,7 @@ paths:
       description: |
         ⚠️ **No auth middleware is applied to the Copilot routes.** Send the Bearer token anyway. Without it the message is stored with `user_id = null`.
         Response is **not** wrapped. Pass the returned `conversation.id` as `conversation_id` to continue the thread.
+        The model is forced to reply in a fixed JSON format (`answer` + `actions`). The configured OpenRouter model must support structured outputs, otherwise every request fails with **500**.
       parameters:
         - $ref: '#/components/parameters/SiteId'
       requestBody:
@@ -3371,14 +3374,27 @@ paths:
                   answer: { type: string, example: 'Start with /seo-audit. It has the highest commercial score but is missing a meta description…' }
                   actions:
                     type: array
-                    items: { type: object, additionalProperties: true }
+                    maxItems: 8
+                    description: Suggested next steps. Actions that point to a record that doesn't exist on this site are dropped.
+                    items:
+                      type: object
+                      properties:
+                        action: { type: string, example: fix_meta_description, description: Short action name chosen by the model (not a fixed list) }
+                        title: { type: string, example: Add a meta description to /seo-audit }
+                        priority: { type: string, enum: [high, medium, low] }
+                        reason: { type: string, example: Highest commercial score page with a missing meta description. }
+                        entity_type:
+                          type: string
+                          nullable: true
+                          enum: [seo_opportunity, site_guard_issue, money_page, keyword, competitor, content_gap, article, authority_opportunity, ai_visibility_result, article_research]
+                        entity_id: { type: integer, nullable: true, example: 17, description: ID of the record named by `entity_type` }
                   focus: { type: string, nullable: true, example: money_pages, description: 'Detected topic of the question. business_profile is used for "describe my website/business" questions.' }
                   provider: { type: string, example: openrouter }
                   model: { type: string, example: anthropic/claude-sonnet-4.5 }
                   usage:
                     type: object
                     additionalProperties: true
-                    example: { prompt_tokens: 3120, completion_tokens: 410, total_tokens: 3530 }
+                    example: { input_tokens: 3120, output_tokens: 410, total_tokens: 3530 }
         '404':
           description: Site or conversation (for this site) not found
           content:
@@ -3387,7 +3403,7 @@ paths:
               example: { message: 'No query results for model [App\Modules\Copilot\Models\CopilotConversation].' }
         '422': { $ref: '#/components/responses/ValidationError' }
         '500':
-          description: LLM provider failure or misconfiguration
+          description: LLM provider failure, misconfiguration, a model without structured-output support, or an answer cut off by the token limit
           content:
             application/json:
               schema: { $ref: '#/components/schemas/FrameworkError' }
@@ -4985,6 +5001,97 @@ paths:
                   reserved_credits: { type: integer, example: 0 }
         '401': { $ref: '#/components/responses/Unauthenticated' }
         '403': { $ref: '#/components/responses/AdminForbidden' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+        '500': { $ref: '#/components/responses/ServerError' }
+
+  /admin/users-with-credits:
+    get:
+      tags: [Admin]
+      summary: List users with their API credit balances (20 per page)
+      operationId: adminListUsersWithCredits
+      description: |
+        All users, newest first, with the balance of their API credit wallet. Users without a wallet show `0`.
+        Use it to find a user before calling `POST /admin/users/add-api-credits`.
+        ⚠️ Like the add-credits endpoint, this uses the `success` envelope, and the paginator is under `users` (not `data`).
+      parameters:
+        - $ref: '#/components/parameters/Page'
+      responses:
+        '200':
+          description: Paginated users
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  users:
+                    allOf:
+                      - $ref: '#/components/schemas/LaravelPaginator'
+                      - type: object
+                        properties:
+                          data:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                id: { type: integer, example: 40 }
+                                name: { type: string, example: Jane Doe }
+                                email: { type: string, format: email, example: jane@example.com }
+                                available_credits: { type: integer, example: 500, description: Wallet `balance_credits` }
+                                reserved_credits: { type: integer, example: 10 }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/AdminForbidden' }
+        '500': { $ref: '#/components/responses/ServerError' }
+
+  /users/{user}/credits:
+    put:
+      tags: [Admin]
+      summary: Set a user's API credit balance
+      operationId: adminSetUserCredits
+      description: |
+        **Replaces** the user's available balance with `credits` (it doesn't add to it; use `POST /admin/users/add-api-credits` for that). Creates the wallet if needed and records an `adjustment` transaction.
+        `reserved_credits` is not changed. Sending `0` empties the wallet.
+        Note the path has no `/admin` prefix, but it still requires role admin or support.
+      parameters:
+        - name: user
+          in: path
+          required: true
+          description: User ID
+          schema: { type: integer, example: 40 }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [credits]
+              properties:
+                credits: { type: integer, minimum: 0, maximum: 1000000000, example: 1000, description: New available balance }
+                description: { type: string, maxLength: 255, nullable: true, example: Corrected after support ticket, description: 'Defaults to "Admin manually updated credit balance"' }
+      responses:
+        '200':
+          description: Balance updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  message: { type: string, example: User credit balance updated successfully. }
+                  data:
+                    type: object
+                    properties:
+                      user_id: { type: integer, example: 40 }
+                      credits: { type: integer, example: 1000, description: New `balance_credits` }
+                      reserved_credits: { type: integer, example: 0 }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/AdminForbidden' }
+        '404':
+          description: User does not exist
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FrameworkError' }
+              example: { message: 'No query results for model [App\Models\User] 40' }
         '422': { $ref: '#/components/responses/ValidationError' }
         '500': { $ref: '#/components/responses/ServerError' }
 

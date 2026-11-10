@@ -15,9 +15,31 @@ import {
   UpdateNewUserFromAdminResponse,
   UpdateAddonsPayload,
   UpdateAddonsResponse,
+  AdminUserCredits,
+  AdminUsersWithCreditsResponse,
 } from "@/types/types";
 
 const adminService = {
+  /** Credit wallets for one page of users (`GET /admin/users-with-credits?page=`), keyed by user id. */
+  usersWithCredits: async (page: number): Promise<{ rows: AdminUserCredits[]; lastPage: number }> => {
+    const response = await api.get<AdminUsersWithCreditsResponse>("/admin/users-with-credits", { params: { page } });
+    return { rows: response.data.users?.data ?? [], lastPage: response.data.users?.last_page ?? page };
+  },
+
+  /** Every user's wallet, for search results (which span all pages). */
+  allUsersWithCredits: async (): Promise<AdminUserCredits[]> => {
+    const rows: AdminUserCredits[] = [];
+    let page = 1;
+    let lastPage = 1;
+    do {
+      const result = await adminService.usersWithCredits(page);
+      rows.push(...result.rows);
+      lastPage = result.lastPage;
+      page += 1;
+    } while (page <= lastPage);
+    return rows;
+  },
+
   getAllUsers: async (page?: number, search?: string): Promise<getAdminDashboardResponse["users"] | User[]> => {
     try {
       if (typeof page === "number") {

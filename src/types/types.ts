@@ -310,14 +310,52 @@ export interface updateUserPasswordPayload {
   password_confirmation: string;
 }
 
-export interface UserCreditsPayload {
+/** `POST /admin/users/add-api-credits`. Give credits to the workspace owner: their wallet pays for paid calls. */
+export interface AddApiCreditsPayload {
   user_id: number;
-  amount: number;
+  /** 1 to 1,000,000,000. */
+  credits: number;
+  /** Shown in the wallet history. Defaults to "Manual API credit grant by administrator". */
+  description?: string | null;
 }
 
-export interface UserCreditsResponse {
-  status: string;
+/** `PUT /users/{user}/credits` (admin only): sets the exact available balance. Held credits are untouched. */
+export interface SetUserCreditsPayload {
+  /** 0 to 1,000,000,000. */
+  credits: number;
+  description?: string | null;
+}
+
+export interface SetUserCreditsResponse {
+  success: boolean;
   message: string;
+  data: { user_id: number; credits: number; reserved_credits: number };
+}
+
+/** One row of `GET /admin/users-with-credits`. No wallet yet means 0 and 0. */
+export interface AdminUserCredits {
+  id: number;
+  name: string;
+  email: string;
+  available_credits: number;
+  reserved_credits: number;
+}
+
+/** `GET /admin/users-with-credits`: 20 per page, newest first (same order as `GET /admin`). No search. */
+export interface AdminUsersWithCreditsResponse {
+  success: boolean;
+  users: LaravelPaginator<AdminUserCredits>;
+}
+
+/** Success envelope with the fields at the top level (no `data` key). */
+export interface AddApiCreditsResponse {
+  success: boolean;
+  message: string;
+  user_id: number;
+  credits_added: number;
+  /** The new `balance_credits`. */
+  available_credits: number;
+  reserved_credits: number;
 }
 
 export interface createEmailCampaignPayload {

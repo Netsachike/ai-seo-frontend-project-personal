@@ -2715,8 +2715,12 @@
         "activate": "Activate",
         "deactivate": "Deactivate",
         "addCredits": "Add credits",
-        "updateCredits": "Set credit balance",
-        "viewSubscriptions": "View subscriptions"
+        "viewSubscriptions": "View subscriptions",
+        "edit": "Edit details",
+        "viewLicense": "View license key",
+        "accessAs": "Sign in as this user",
+        "delete": "Delete account",
+        "setCredits": "Set credit balance"
       },
       "pagination": {
         "label": "User pages",
@@ -2784,15 +2788,23 @@
         "savePassword": "Update password"
       },
       "credits": {
+        "reason": "Reason (optional)",
+        "reasonHelper": "Shown in the wallet history.",
         "add": {
           "title": "Add credits",
           "label": "Credits to add",
-          "submit": "Add credits"
+          "helper": "A whole number from 1 to 1,000,000,000. Give credits to the workspace owner: their wallet pays for the workspace.",
+          "reasonPlaceholder": "e.g. Launch bonus",
+          "submit": "Add credits",
+          "invalid": "Enter a whole number from 1 to 1,000,000,000."
         },
-        "update": {
+        "set": {
           "title": "Set credit balance",
-          "label": "New credit balance",
-          "submit": "Update balance"
+          "label": "New available balance",
+          "helper": "Replaces the current balance. A whole number from 0 to 1,000,000,000. Credits held for running tasks aren't changed.",
+          "reasonPlaceholder": "e.g. Correcting a wrong grant",
+          "submit": "Set balance",
+          "invalid": "Enter a whole number from 0 to 1,000,000,000."
         }
       },
       "license": {
@@ -2841,12 +2853,16 @@
         "activationFailed": "Couldn't change the account status.",
         "deleted": "Account deleted.",
         "deleteFailed": "Couldn't delete the account.",
-        "creditsAdded": "Credits added.",
+        "creditsAdded": "Added {added} credits. New balance: {balance}.",
         "creditsAddFailed": "Couldn't add credits.",
-        "creditsUpdated": "Credit balance updated.",
-        "creditsUpdateFailed": "Couldn't update the credit balance.",
-        "accessAsSoon": "Signing in as {name} is coming soon."
-      }
+        "accessAsSoon": "Signing in as {name} is coming soon.",
+        "creditsAddedPlain": "Credits added.",
+        "creditsSet": "Credit balance set to {balance}.",
+        "creditsSetPlain": "Credit balance updated.",
+        "creditsSetFailed": "Couldn't update the credit balance."
+      },
+      "creditsUnknown": "—",
+      "creditsHeld": "{count} held"
     },
     "statistics": {
       "title": "Statistics",
