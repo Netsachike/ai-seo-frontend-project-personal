@@ -28,6 +28,7 @@ import { dur, ease } from "../motion";
 import { patchDraft } from "../store";
 import { StepHeading } from "./step-heading";
 import { ConnectGuide } from "@/components/integrations/connect-guide";
+import { useConnectReturn } from "@/components/integrations/connect-dialog";
 import { setupPath } from "../steps";
 
 /**
@@ -62,6 +63,7 @@ export function IntegrationStep({ site, onContinue }: { site: Site; onContinue: 
   const t = useTranslations("siteSetup.integration");
   const tFields = useTranslations("integrations.fields");
   const tToken = useTranslations("integrations.shopifyToken");
+  const tWix = useTranslations("integrations.wixApp");
   const connections = usePublishingConnections(site.id);
   const create = useCreateConnection(site.id);
   const existing = connections.data?.find((c) => c.status === "active");
@@ -70,6 +72,8 @@ export function IntegrationStep({ site, onContinue }: { site: Site; onContinue: 
   const [error, setError] = React.useState<string | null>(null);
   const [hosting, setHosting] = React.useState<WordpressHosting>("selfHosted");
   const [redirecting, setRedirecting] = React.useState(false);
+  // Back from installing the Wix app: toast the result (?connected=wix / ?error=wix_*) and refresh.
+  useConnectReturn(site.id);
   // Back from WordPress.com sign-in: the site still has to be picked.
   const wpcom = useWpcomAuthorization(site.id);
   const connected: PublishPlatform | null = existing
@@ -256,12 +260,22 @@ export function IntegrationStep({ site, onContinue }: { site: Site; onContinue: 
                 })}
               </div>
             )}
+            {/* Wix: install Rankoya's Wix app; the API-key fields are off for now (PUBLISHING_FIELDS.wix). */}
+            {choice === "wix" && (
+              <Button variant="primary" className="self-start" asChild>
+                <a
+                  href={`/api/integrations/wix/start?site=${site.id}&returnTo=${encodeURIComponent(setupPath(site.id, "integration"))}`}
+                >
+                  {tWix("install")}
+                </a>
+              </Button>
+            )}
             {error && (
               <p role="alert" className="text-small text-danger">
                 {error}
               </p>
             )}
-            {!(isWpcom && wpcom.auth) && (
+            {!(isWpcom && wpcom.auth) && choice !== "wix" && (
               <Button
                 type="submit"
                 variant="primary"

@@ -1,6 +1,13 @@
 import { NextResponse, type NextRequest } from "next/server";
 
-import { VERCEL_PROJECT_ID, VERCEL_TOKEN, demoVercel, isVercelConfigured, isVercelDemo, vercelUrl } from "@/lib/vercel-domains";
+import {
+  VERCEL_PROJECT_ID,
+  VERCEL_TOKEN,
+  demoVercel,
+  isVercelConfigured,
+  isVercelDemo,
+  vercelUrl,
+} from "@/lib/vercel-domains";
 
 /** Adds a White Label domain to the Vercel project so its DNS records exist. */
 export async function POST(request: NextRequest) {

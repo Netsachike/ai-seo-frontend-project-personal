@@ -10,10 +10,16 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 const GUIDES = {
   wordpress: { steps: 5, links: {} },
   wordpressCom: { steps: 3, links: {} },
-  shopify: { steps: 5, links: { 1: "https://dev.shopify.com/dashboard" } },
+  shopify: { steps: 6, links: { 1: "https://dev.shopify.com/dashboard" } },
   webflow: { steps: 5, links: { 1: "https://webflow.com/dashboard" } },
-  wix: { steps: 5, links: { 1: "https://manage.wix.com/account/api-keys" } },
+  wix: { steps: 3, links: {} },
+  // The API-key steps, off with the API-key form:
+  // wixApiKey: { steps: 5, links: { 1: "https://manage.wix.com/account/api-keys" } },
   ghost: { steps: 4, links: {} },
+  // duda: { steps: 4, links: {} }, // off until there's a paid Duda account to test with
+  make: { steps: 4, links: {} },
+  lovable: { steps: 4, links: {} },
+  replit: { steps: 4, links: {} },
   searchConsole: { steps: 4, links: { 1: "https://search.google.com/search-console/welcome" } },
   nextjs: { steps: 4, links: {} },
   manual: { steps: 3, links: {} },

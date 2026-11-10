@@ -7,8 +7,12 @@ import ghost from "@/assets/icons/platforms/ghost.png";
 import google from "@/assets/icons/platforms/google.png";
 import googleAnalytics from "@/assets/icons/platforms/google-analytics.png";
 import googleMaps from "@/assets/icons/platforms/google-maps.png";
+import lovable from "@/assets/icons/platforms/lovable.png";
+import make from "@/assets/icons/platforms/make.png";
 import nextjs from "@/assets/icons/platforms/nextjs.png";
 import perplexity from "@/assets/icons/platforms/perplexity.png";
+import replit from "@/assets/icons/platforms/replit.png";
+import rss from "@/assets/icons/platforms/rss.png";
 import searchConsole from "@/assets/icons/platforms/search-console.png";
 import shopify from "@/assets/icons/platforms/shopify.png";
 import telegram from "@/assets/icons/platforms/telegram.png";
@@ -39,6 +43,10 @@ export const platformLogos: Partial<Record<string, StaticImageData>> = {
   wix,
   ghost,
   nextjs,
+  lovable,
+  replit,
+  make,
+  rss,
   telegram,
 };
 

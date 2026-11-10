@@ -9,6 +9,7 @@ import { useTeamMembers } from "@/features/account/use-team-members";
 import { useWorkspaceStore } from "@/stores/workspace-store";
 import { PageHeader } from "@/components/layout/page-header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { CreditsTab } from "./credits-tab";
 import { ProfileTab } from "./profile-tab";
 import { SubscriptionsTab } from "./subscriptions-tab";
 import { TeamTab } from "./team-tab";
@@ -83,6 +84,7 @@ function SettingsContent({ urlTab, workspaceModalParam }: { urlTab: SettingsTab;
           <TabsTrigger value="profile">{t("tabs.profile")}</TabsTrigger>
           <TabsTrigger value="workspaces">{t("tabs.workspaces")}</TabsTrigger>
           <TabsTrigger value="subscriptions">{t("tabs.subscriptions")}</TabsTrigger>
+          <TabsTrigger value="credits">{t("tabs.credits")}</TabsTrigger>
           <TabsTrigger value="team-members">{t("tabs.team-members")}</TabsTrigger>
         </TabsList>
 
@@ -98,6 +100,9 @@ function SettingsContent({ urlTab, workspaceModalParam }: { urlTab: SettingsTab;
         </TabsContent>
         <TabsContent value="subscriptions">
           <SubscriptionsTab />
+        </TabsContent>
+        <TabsContent value="credits">
+          <CreditsTab />
         </TabsContent>
         <TabsContent value="team-members">
           <TeamTab team={team} />

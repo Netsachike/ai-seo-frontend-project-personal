@@ -7,6 +7,7 @@ export const PUBLISHING_PLATFORMS = [
   "webflow",
   "wix",
   "ghost",
+  // "duda", // needs a paid Duda plan; off until there's an account to test with
 ] as const satisfies readonly PublishingPlatform[];
 export type ApiPublishingPlatform = (typeof PUBLISHING_PLATFORMS)[number];
 
@@ -29,7 +30,10 @@ export type PublishingField = {
     | "accessToken"
     | "collectionId"
     | "wixSiteId"
-    | "adminApiKey";
+    | "adminApiKey"
+    | "dudaUsername"
+    | "dudaPassword"
+    | "dudaSiteName";
   input: "url" | "text" | "secret";
 };
 
@@ -48,14 +52,22 @@ export const PUBLISHING_FIELDS: Record<ApiPublishingPlatform, PublishingField[]>
     { group: "credentials", key: "access_token", label: "accessToken", input: "secret" },
     { group: "config", key: "collection_id", label: "collectionId", input: "text" },
   ],
-  wix: [
-    { group: "credentials", key: "access_token", label: "accessToken", input: "secret" },
-    { group: "credentials", key: "site_id", label: "wixSiteId", input: "text" },
-  ],
+  // Wix connects by installing Rankoya's Wix app (/api/integrations/wix/start), so there's no form.
+  // The API-key fields, off for now:
+  // { group: "credentials", key: "access_token", label: "accessToken", input: "secret" },
+  // { group: "credentials", key: "site_id", label: "wixSiteId", input: "text" },
+  wix: [],
   ghost: [
     { group: "config", key: "site_url", label: "siteUrl", input: "url" },
     { group: "credentials", key: "admin_api_key", label: "adminApiKey", input: "secret" },
   ],
+  // Checked against Duda by /api/integrations/duda/verify before saving; that also finds the API host.
+  // Off with Duda (see PUBLISHING_PLATFORMS):
+  /* duda: [
+    { group: "credentials", key: "username", label: "dudaUsername", input: "text" },
+    { group: "credentials", key: "password", label: "dudaPassword", input: "secret" },
+    { group: "credentials", key: "site_name", label: "dudaSiteName", input: "text" },
+  ], */
 };
 
 /** Builds the create-connection body from the form values. URLs get https:// when typed bare. */

@@ -68,7 +68,7 @@ export function ProfileMenu() {
   const router = useRouter();
   const locale = useLocale() as Locale;
   const mounted = useMounted();
-  const { me, workspace, openHelp, openFeedback } = useShell();
+  const { me, workspace, openFeedback } = useShell();
   const session = useSessionUser();
   const profileImage = useProfileImage();
   const plan = getActivePlan(session?.subscriptions);
@@ -224,9 +224,9 @@ export function ProfileMenu() {
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem onSelect={openHelp}>
+          <DropdownMenuItem onSelect={() => go(accountHref.help())}>
             <LifeBuoyIcon />
-            {t("help")}
+            {t("helpCenter")}
           </DropdownMenuItem>
           <DropdownMenuItem onSelect={openFeedback}>
             <MessageSquarePlusIcon />

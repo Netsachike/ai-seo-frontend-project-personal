@@ -43,9 +43,24 @@ api.interceptors.request.use(
 /** Fired when the backend rejects the token, so the app can send the user to sign in. */
 export const SESSION_EXPIRED_EVENT = "rankoya:session-expired";
 
+/** Fired after a call that may have moved the credit balance, so the balance refetches. */
+export const CREDITS_CHANGED_EVENT = "rankoya:credits-changed";
+
+/** Endpoints the backend bills in credits (openapi.yaml → "API credits"). */
+const BILLED_PATH = /\/sites\/\d+\/(keywords\/discover|serp\/research)$/;
+
+function notifyCreditsChanged(url: string | undefined, status: number | undefined) {
+  if (typeof window === "undefined") return;
+  if (status === 402 || BILLED_PATH.test(url ?? "")) window.dispatchEvent(new Event(CREDITS_CHANGED_EVENT));
+}
+
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    notifyCreditsChanged(response.config.url, response.status);
+    return response;
+  },
   (error: unknown) => {
+    if (error instanceof AxiosError) notifyCreditsChanged(error.config?.url, error.response?.status);
     const isAuthCall = error instanceof AxiosError && /\/(login|register)$/.test(error.config?.url ?? "");
     if (error instanceof AxiosError && error.response?.status === 401 && !isAuthCall) {
       clearSession();

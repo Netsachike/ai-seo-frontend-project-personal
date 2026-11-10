@@ -8,6 +8,7 @@ import {
   FileTextIcon,
   GlobeIcon,
   HeadsetIcon,
+  LifeBuoyIcon,
   LightbulbIcon,
   PlusIcon,
   RocketIcon,
@@ -22,6 +23,7 @@ import { useFormatter, useNow, useTranslations } from "next-intl";
 import type { Site } from "@/types/types";
 import { cn } from "@/lib/utils";
 import { NEW_SITE_PATH } from "@/features/site-setup/steps";
+import { accountHref } from "@/features/account/routes";
 import { GROWTH_STEPS, useGrowthProgress, useRunAiScan } from "@/features/insights/hooks";
 import { useOverview, type ActivityItem, type OverviewPlatform, type PlatformGlance } from "@/features/overview/hooks";
 import { useRange } from "@/features/insights/url-state";
@@ -73,9 +75,23 @@ export function OverviewView() {
     <div className="flex flex-col gap-6">
       <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(0,560px)]">
         <header className="flex min-w-0 flex-col gap-1 pt-1">
-          <h1 className="text-[28px] leading-[34px] font-semibold tracking-[-0.02em] text-fg sm:text-[32px] sm:leading-[38px]">
-            {t("welcome", { name: firstName })}
-          </h1>
+          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+            <h1 className="text-[28px] leading-[34px] font-semibold tracking-[-0.02em] text-fg sm:text-[32px] sm:leading-[38px]">
+              {t("welcome", { name: firstName })}
+            </h1>
+            {/* Same light blue and blue text as the profile avatar. */}
+            <Button
+              asChild
+              variant="ghost"
+              size="sm"
+              className="shrink-0 bg-blue-bg text-blue-ink hover:bg-blue-bg hover:text-blue-ink hover:brightness-95 dark:hover:brightness-125"
+            >
+              <Link href={accountHref.help()}>
+                <LifeBuoyIcon />
+                {t("helpCenter")}
+              </Link>
+            </Button>
+          </div>
           <p className="text-body-lg text-fg-2">{t("descriptionV2", { brand: brand.name })}</p>
         </header>
         <PromoBanner />

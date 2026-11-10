@@ -25,7 +25,7 @@ export type ProviderAccount = {
 const publishingAccount = (c: PublishingConnection): ProviderAccount => ({
   id: String(c.id),
   name: c.name,
-  detail: typeof c.config?.site_url === "string" ? c.config.site_url : c.platform,
+  detail: typeof c.config?.site_url === "string" ? c.config.site_url : c.method === "webhook" ? "" : c.platform,
   connectedAt: c.created_at,
   status: c.status,
   lastError: c.last_error,
@@ -62,6 +62,17 @@ export function useProviderAccounts(siteId: number | undefined, brandSlug: strin
             .map(publishingAccount),
         ];
       }
+      // Webhooks are saved as platform `custom`; config.provider says which card they belong to.
+      if (PROVIDERS[provider].method === "webhook") {
+        return [
+          provider,
+          (publishing.data ?? [])
+            .filter((c) => c.method === "webhook" && c.config?.provider === provider)
+            .map(publishingAccount),
+        ];
+      }
+      // The feed is a link, not a connection.
+      if (provider === "rss") return [provider, []];
       if (provider === "wordpressCom") {
         return [provider, (publishing.data ?? []).filter((c) => c.platform === "wordpress_com").map(publishingAccount)];
       }
