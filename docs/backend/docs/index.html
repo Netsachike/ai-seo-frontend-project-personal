@@ -33,6 +33,11 @@ info:
     `supports_credentials` is `true`.
 
     ## Changelog
+    - **2026-11-12**: Added **Wix app installation**: `POST /sites/{site}/publishing/wix/authorize` and the public callback `GET /integrations/wix/callback`. ⚠️ The callback is currently unreachable, see that endpoint.
+      Added `DELETE /sites/{site}/publishing/connections/{connection}` (works for any platform).
+      Manual Wix connections now need `credentials.instance_id` + `config.auth = app` instead of `credentials.access_token`. Webflow's `config.collection_id` is no longer checked on create.
+      Wix publishing (`options.category_ids`) always publishes live.
+      **Content calendar autopilot:** a scheduler now researches, writes and publishes due calendar items on plans with `autopilot_enabled`. Calendar items have new fields `article_research_id`, `article_id` and new statuses.
     - **2026-11-10**: Added the admin endpoints `GET /admin/users-with-credits` (paginated list of users with their API credit balances) and `PUT /users/{user}/credits` (set a user's balance to an exact value).
       `POST /sites/{site}/copilot/ask` now forces the model to reply in a fixed JSON format, so `actions` items always have the same 6 fields. It returns **500** if the answer is cut off by the token limit.
     - **2026-11-02**: Added **API credits** (see the section below). Paid DataForSEO calls are now billed in credits to the workspace owner's wallet.
@@ -1590,7 +1595,12 @@ paths:
                   items: { type: string, format: date }
                   example: ['2026-11-27']
                 publish_time: { type: string, pattern: '^\d{2}:\d{2}$', example: '09:00' }
-                autopilot_enabled: { type: boolean, example: false }
+                autopilot_enabled:
+                  type: boolean
+                  example: false
+                  description: |
+                    When `true`, a scheduler (every minute) picks up each `planned` item once its `scheduled_date` + time (item time, else plan `publish_time`, in the item/plan timezone) has passed. It researches the keyword, writes the article and publishes it to **every active publishing connection** on the site, then sets the item's status.
+                    Needs the queue worker and the scheduler running on the server. Items without a keyword, or sites without an active connection, end as `failed`.
       responses:
         '200':
           description: Plan created
@@ -2070,8 +2080,8 @@ paths:
         |---|---|
         | wordpress | `credentials.site_url`, `credentials.username`, `credentials.application_password` |
         | shopify | `credentials.store_domain` (`*.myshopify.com`), `credentials.access_token`. Publishing also needs `config.blog_id` or `options.blog_id`, which you can get from `GET .../shopify-blogs`. |
-        | webflow | `credentials.access_token`, `config.collection_id` |
-        | wix | `credentials.access_token`, `credentials.site_id` |
+        | webflow | `credentials.access_token`. `config.collection_id` is no longer validated here, but `/test` and publishing still need it. |
+        | wix | Use the install flow instead (`POST wix/authorize`). Manual create needs `credentials.instance_id` and `config.auth: "app"`; `credentials.site_id` and `config.author_member_id` are optional. |
         | ghost | `credentials.admin_api_key`, `config.site_url` |
         | wordpress_com | ❌ Not allowed here. Use the OAuth flow (`GET wordpress-com/authorize`). |
 
@@ -2131,6 +2141,54 @@ paths:
                   value: { success: false, message: This publishing integration is not available yet. }
                 noWorkspace:
                   value: { success: false, message: No active workspace found. }
+        '500': { $ref: '#/components/responses/ServerError' }
+
+  /sites/{site}/publishing/connections/{connection}:
+    delete:
+      tags: [Publishing]
+      summary: Permanently delete a publishing connection
+      operationId: deletePublishingConnection
+      description: |
+        Hard delete for a connection of **any platform**. Ask the user to confirm first.
+        Past publications are kept; their `publishing_connection_id` becomes `null`.
+        The 404 message says "Wix integration not found." for every platform.
+      parameters:
+        - $ref: '#/components/parameters/SiteId'
+        - name: connection
+          in: path
+          required: true
+          schema: { type: integer, example: 4 }
+      responses:
+        '200':
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  message: { type: string, example: Publishing integration permanently deleted. }
+                  data:
+                    type: object
+                    properties:
+                      id: { type: integer, example: 4 }
+                      platform: { type: string, example: wix }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/NoWorkspaceAvailable' }
+        '404':
+          description: Site not in the active workspace, or connection not found on this site
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorEnvelope' }
+              examples:
+                site: { value: { success: false, message: Site not found in the active workspace. } }
+                connection: { value: { success: false, message: Wix integration not found. } }
+        '409':
+          description: Another record still references the connection
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorEnvelope' }
+              example: { success: false, message: Unable to delete this integration because related records may still reference it. }
         '500': { $ref: '#/components/responses/ServerError' }
 
   /sites/{site}/publishing/connections/{connection}/test:
@@ -2208,7 +2266,9 @@ paths:
                 options:
                   type: object
                   additionalProperties: true
-                  description: Provider-specific options (for example `status draft|publish`)
+                  description: |
+                    Provider-specific options (for example `status draft|publish`).
+                    Wix: optional `category_ids` (array of Wix Blog category IDs). Wix posts are always published live; there is no draft option.
       responses:
         '200':
           description: Published, or prepared for manual publishing
@@ -2412,6 +2472,62 @@ paths:
         '404': { $ref: '#/components/responses/ModelNotFound' }
         '500': { $ref: '#/components/responses/ServerError' }
 
+  /sites/{site}/publishing/wix/authorize:
+    post:
+      tags: [Publishing]
+      summary: Start the Wix app installation
+      operationId: wixAuthorize
+      description: |
+        **Flow**
+        1. Call this endpoint and send the browser to `authorization_url` (the Wix app installer). The link is valid for **15 minutes** and works once.
+        2. After the user installs the app, Wix sends the browser to `GET /integrations/wix/callback`.
+        3. The callback creates the connection, tests it and redirects to `{WIX_FRONTEND_URL}{return_to}?connected=wix&connection_id={id}`, or `?error=<message>` on failure.
+
+        The Wix site must have the **Wix Blog** app installed.
+        ⚠️ Step 2 is currently broken, see `GET /integrations/wix/callback`.
+      parameters:
+        - $ref: '#/components/parameters/SiteId'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                return_to:
+                  type: string
+                  maxLength: 500
+                  default: /integrations
+                  example: /sites/1/settings/publishing
+                  description: Frontend path to come back to. Must start with a single `/` (no full URLs). Don't include a query string; the callback appends `?connected=…` itself.
+      responses:
+        '200':
+          description: Installer URL (no `data` wrapper)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  authorization_url: { type: string, format: uri, example: 'https://www.wix.com/app-installer?appId=…&shareUrlId=…&postInstallationUrl=…' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '404':
+          description: No active workspace, or the site is not in it
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorEnvelope' }
+              example: { success: false, message: Site not found in the active workspace. }
+        '422':
+          description: '`return_to` is not a relative path, or validation failed'
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/ErrorEnvelope'
+                  - $ref: '#/components/schemas/ValidationErrorBody'
+              example: { success: false, message: Invalid return URL. }
+        '500': { $ref: '#/components/responses/ServerError' }
+
   /sites/{site}/publishing/wordpress-com/authorize:
     get:
       tags: [Publishing]
@@ -2570,12 +2686,47 @@ paths:
                 noToken: { value: { success: false, message: WordPress.com did not return an access token. } }
                 sites: { value: { success: false, message: Unable to retrieve WordPress.com sites. } }
 
+  /integrations/wix/callback:
+    get:
+      tags: [Publishing OAuth & Webhooks]
+      summary: Wix app installation callback (called by Wix, not the front end)
+      operationId: wixInstallCallback
+      security: []
+      description: |
+        Always answers with a **302 redirect** to the frontend, never JSON.
+        - **Success:** `{WIX_FRONTEND_URL}{return_to}?connected=wix&connection_id={id}`. The connection is created and tested right away. If the test failed it is saved with `status: error` and `last_error`, but the redirect still says `connected=wix`, so reload the connection and check `status`.
+        - **Failure:** `{WIX_FRONTEND_URL}{return_to}?error=<message>` (or `/integrations` when the state is missing or expired). Show `error` to the user.
+
+        Common errors: `Missing Wix installation information.`, `Wix installation session expired. Please try again.`, `Wix Blog is not installed on this site. Please install Wix Blog and try again.`
+        `WIX_FRONTEND_URL` falls back to `APP_URL` (the backend URL) when it isn't set.
+
+        ⚠️ **Currently unreachable.** The installer's return link is built from the route name `publishing.wix.callback`, but the older stub `GET /publishing/wix/callback` (in `routes/api.php`) is registered later with the same name. So Wix sends the user to the stub, which returns **501** JSON, and no connection is created. The backend needs to rename one of the two routes. The duplicate name also makes `php artisan route:cache` fail.
+      parameters:
+        - name: state
+          in: query
+          required: true
+          schema: { type: string }
+        - name: signedInstance
+          in: query
+          required: true
+          description: Signed instance token from Wix
+          schema: { type: string }
+      responses:
+        '302':
+          description: Redirect to the frontend (success or error)
+          headers:
+            Location:
+              schema:
+                type: string
+                example: 'https://app.rankoya.uk/integrations?connected=wix&connection_id=12'
+
   /publishing/wix/callback:
     get:
       tags: [Publishing OAuth & Webhooks]
-      summary: Wix OAuth redirect (not implemented)
+      summary: Old Wix OAuth redirect (not implemented)
       operationId: wixCallback
       security: []
+      description: Stub that still answers **501**. It shares its route name with `GET /integrations/wix/callback`, which currently sends Wix installs here by mistake.
       responses:
         '501':
           description: Not implemented
@@ -6175,12 +6326,23 @@ components:
         scheduled_date: { type: string, format: date-time, example: '2026-11-14T00:00:00.000000Z' }
         scheduled_time: { type: string, nullable: true, example: '09:00' }
         timezone: { type: string, nullable: true }
-        status: { type: string, example: planned, description: 'removed after the /remove endpoint' }
+        status:
+          type: string
+          example: planned
+          description: |
+            `planned` until it's due. `removed` after the /remove endpoint.
+            Autopilot statuses: `processing` (being researched, written and published), `published` (live on every active connection), `completed` (at least one connection saved a draft), `ready_for_manual_publish` (a manual connection is involved), `partially_published` (some connections failed), `failed` (see `metadata.autopilot.last_error`).
+        article_research_id: { type: integer, nullable: true, description: Research used by autopilot }
+        article_id: { type: integer, nullable: true, description: Article written by autopilot }
         position: { type: integer, nullable: true }
         priority_score: { type: string, example: '72.50' }
         article_type: { type: string, nullable: true, example: blog_post }
         notes: { type: string, nullable: true }
-        metadata: { type: object, nullable: true, additionalProperties: true }
+        metadata:
+          type: object
+          nullable: true
+          additionalProperties: true
+          description: 'Autopilot writes `metadata.autopilot`: `completed_at` or `last_error` / `last_attempt_at` / `failed_at`, and `connections` (`[{connection_id, platform, status}]`).'
         created_at: { type: string, format: date-time }
         updated_at: { type: string, format: date-time }
 

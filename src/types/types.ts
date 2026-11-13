@@ -1481,15 +1481,46 @@ export interface ContentCalendarItem {
   scheduled_date: DateTime;
   scheduled_time: string | null;
   timezone: string | null;
-  /** e.g. planned; `removed` after the /remove endpoint */
-  status: string;
+  /**
+   * `planned` until it's due; `removed` after the /remove endpoint. Autopilot:
+   * `processing` (being researched, written and published), `published` (live
+   * on every active connection), `completed` (at least one connection saved a
+   * draft), `ready_for_manual_publish` (a manual connection is involved),
+   * `partially_published` (some connections failed), `failed`.
+   */
+  status: ContentCalendarItemStatus;
+  /** Research used by autopilot. */
+  article_research_id?: number | null;
+  /** Article written by autopilot. */
+  article_id?: number | null;
   position: number | null;
   priority_score: Decimal;
   article_type: string | null;
   notes: string | null;
+  /** Autopilot writes `metadata.autopilot` (see `CalendarAutopilotMeta`). */
   metadata: JsonObject | null;
   created_at: DateTime;
   updated_at: DateTime;
+}
+
+export type ContentCalendarItemStatus =
+  | "planned"
+  | "removed"
+  | "processing"
+  | "published"
+  | "completed"
+  | "ready_for_manual_publish"
+  | "partially_published"
+  | "failed"
+  | (string & {});
+
+/** `ContentCalendarItem.metadata.autopilot`, written by the autopilot scheduler. */
+export interface CalendarAutopilotMeta {
+  completed_at?: DateTime;
+  last_error?: string;
+  last_attempt_at?: DateTime;
+  failed_at?: DateTime;
+  connections?: { connection_id: number; platform: string; status: string }[];
 }
 
 export interface ContentPlanWithItems extends ContentPlan {
@@ -1682,8 +1713,8 @@ export interface PublishingConnection {
  * wordpress: credentials.site_url, username, application_password ·
  * shopify: credentials.store_domain, access_token ·
  * webflow: credentials.access_token, config.collection_id ·
- * wix: credentials.access_token, site_id (API key) — or instance_id + site_id when installed
- *   through Rankoya's Wix app (/api/integrations/wix/*; backend support pending) ·
+ * wix: installed through the backend (POST publishing/wix/authorize); a manual create needs
+ *   credentials.instance_id + config.auth "app" ·
  * ghost: credentials.admin_api_key, config.site_url ·
  * duda: credentials.username, password, site_name, host (backend support pending) ·
  * wordpress_com: not allowed, use the OAuth flow.

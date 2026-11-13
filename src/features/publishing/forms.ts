@@ -52,7 +52,7 @@ export const PUBLISHING_FIELDS: Record<ApiPublishingPlatform, PublishingField[]>
     { group: "credentials", key: "access_token", label: "accessToken", input: "secret" },
     { group: "config", key: "collection_id", label: "collectionId", input: "text" },
   ],
-  // Wix connects by installing Rankoya's Wix app (/api/integrations/wix/start), so there's no form.
+  // Wix connects by installing Rankoya's Wix app (the backend's publishing/wix/authorize), so there's no form.
   // The API-key fields, off for now:
   // { group: "credentials", key: "access_token", label: "accessToken", input: "secret" },
   // { group: "credentials", key: "site_id", label: "wixSiteId", input: "text" },

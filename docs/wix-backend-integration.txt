@@ -1,0 +1,337 @@
+RANKOYA x WIX: WHAT NEXT DOES TODAY, AND WHAT LARAVEL NEEDS TO DO
+==================================================================
+Date: 11 November 2026
+Status: install, token and publish to Wix Blog were tested end to end from
+Next against a real Wix site. Laravel now needs to save the connection and
+do the publishing.
+
+
+0. ENV (fill in the blanks before sending)
+------------------------------------------------------------------
+
+
+Next .env (for reference, backend does not need these):
+
+  WIX_APP_ID=74a52ba9-2490-4bd0-b629-1c9196bd0251
+  WIX_APP_SECRET=4e9c9236-0554-49d5-8a42-78b97fe425e5
+  WIX_SHARE_URL_ID=5f616edd-530a-4fb8-b671-0bba457739de
+  INTEGRATIONS_STATE_SECRET=dfBQfr4AW02WWpSti8YZq8O43eV14IvC3qUFw3tVUMo=     # Next only, signs the state cookie
+  APP_URL=https://app.rankoya.uk                  # Wix redirects back here
+  BACKEND_INTERNAL_URL=https://api.rankoya.uk/api # must be the Laravel API, not the app host
+
+Test install used to confirm the flow (not secrets on their own):
+
+  instance_id       = 143684d1-02b1-47b7-b7a2-c6a278b52a4c
+  site_id           = db8d97c6-3e98-43b2-8d76-7225ce45885a   (Wix metaSiteId)
+  author_member_id  = 3ee49955-4263-4ad5-84bb-42a2f3710c8b   (Wix siteOwnerId)
+  Laravel site id   = 23
+  Test article id   = 14
+
+
+1. THE FLOW IN ONE PAGE
+------------------------------------------------------------------
+
+  Step  Who      What
+  ----  -------  ----------------------------------------------------------
+  1     Next     User clicks "Continue to Wix". Next sets a signed state
+                 cookie and redirects to Wix's app installer.
+  2     Wix      User picks a site and installs the Rankoya app. Wix
+                 redirects to Next's callback with ?state=...&signedInstance=...
+  3     Next     Checks the state cookie, verifies signedInstance with the
+                 app secret, reads instanceId / metaSiteId / siteOwnerId.
+  4     Next     Gets a Wix access token for that instance and checks Wix
+                 Blog is on the site.
+  5     Next     POST /api/sites/{site}/publishing/connections   -> LARAVEL SAVES
+  6     Next     POST /api/sites/{site}/publishing/connections/{id}/test
+                                                                 -> LARAVEL TESTS
+  7     Laravel  On publish: token -> HTML to rich content -> create and
+                 publish a Wix Blog post -> save post id and live URL.
+                                                                 -> LARAVEL PUBLISHES
+
+Steps 1 to 4 stay in Next. Steps 5 to 7 are the backend work (sections 3 to 5).
+Step 7 currently only exists in Next as a test tool (section 6).
+
+
+2. WHAT NEXT DOES (reference code, no backend work)
+------------------------------------------------------------------
+
+2.1 Start: redirect to the Wix installer
+    File: src/app/api/integrations/wix/start/route.ts
+
+    GET /api/integrations/wix/start?site=<laravel site id>&returnTo=<path>
+
+      const { state, cookie } = createState({ provider: "wix", siteId, returnTo });
+      const callback = new URL("/api/integrations/wix/callback", APP_URL);
+      callback.searchParams.set("state", state.nonce);
+
+      // redirect to:
+      https://www.wix.com/app-installer
+          ?appId=<WIX_APP_ID>
+          &shareUrlId=<WIX_SHARE_URL_ID>          (only while unlisted)
+          &postInstallationUrl=<callback url>
+
+2.2 Callback: verify signedInstance
+    Files: src/app/api/integrations/wix/callback/route.ts
+           src/lib/integrations/connectors/wix.ts
+
+    Wix calls: GET /api/integrations/wix/callback?state=<nonce>&signedInstance=<sig>.<data>
+
+    signedInstance is "<signature>.<data>". It is signed, not encrypted:
+      data      = base64url of a JSON object
+      signature = base64url( HMAC-SHA256( data, WIX_APP_SECRET ) )
+
+      export function verifySignedInstance(signed: string): WixInstance {
+        const [sig, data] = signed.split(".");
+        const expected = createHmac("sha256", appSecret).update(data).digest("base64url");
+        const a = Buffer.from(sig.replace(/=+$/, ""));   // some installs pad with "="
+        const b = Buffer.from(expected);
+        if (a.length !== b.length || !timingSafeEqual(a, b)) throw new IntegrationError("signature", 400);
+        return JSON.parse(Buffer.from(data, "base64url").toString());
+      }
+
+    Decoded data from the test install:
+
+      {
+        "instanceId":  "143684d1-02b1-47b7-b7a2-c6a278b52a4c",
+        "appDefId":    "<the Wix App ID>",
+        "signDate":    "2026-11-11T08:40:31.819Z",
+        "permissions": "",
+        "demoMode":    false,
+        "siteOwnerId": "3ee49955-4263-4ad5-84bb-42a2f3710c8b",
+        "metaSiteId":  "db8d97c6-3e98-43b2-8d76-7225ce45885a"
+      }
+
+2.3 Callback: token and blog check (same calls Laravel needs, see section 4)
+
+      const token = await wixToken(instanceId);
+      await assertBlogInstalled(token);   // GET /blog/v3/categories?paging.limit=1
+
+2.4 Callback: save in Laravel, then activate
+
+      const created = await backend(`/sites/${siteId}/publishing/connections`, {
+        method: "POST",
+        body: JSON.stringify({
+          name: "Wix",
+          platform: "wix",
+          method: "api",
+          credentials: { instance_id: instanceId, site_id: instance.metaSiteId ?? "" },
+          config: { auth: "app", author_member_id: instance.siteOwnerId ?? "" },
+        }),
+      });
+      await backend(`/sites/${siteId}/publishing/connections/${created.data.id}/test`, { method: "POST" });
+
+    Both calls carry the signed-in user's own Sanctum token
+    (Authorization: Bearer <token>), so workspace scoping is unchanged.
+    The user then lands back on the integrations page with ?connected=wix.
+
+
+3. BACKEND: SAVE THE CONNECTION
+------------------------------------------------------------------
+
+  POST /api/sites/{site}/publishing/connections
+  Authorization: Bearer <user's Sanctum token>
+  Content-Type: application/json
+
+  {
+    "name": "Wix",
+    "platform": "wix",
+    "method": "api",
+    "credentials": {
+      "instance_id": "143684d1-02b1-47b7-b7a2-c6a278b52a4c",
+      "site_id": "db8d97c6-3e98-43b2-8d76-7225ce45885a"
+    },
+    "config": {
+      "auth": "app",
+      "author_member_id": "3ee49955-4263-4ad5-84bb-42a2f3710c8b"
+    }
+  }
+
+  Validation when platform = wix and config.auth = app:
+
+    credentials.instance_id    required, string, max 255
+    credentials.site_id        optional, string (informational)
+    config.auth                in:app
+    config.author_member_id    optional, string, max 255 (the post author)
+    credentials.access_token   NOT required
+    config.collection_id       NOT required
+
+  No token is stored. Tokens last about 4 hours, so make one per publish.
+
+  Expected response: 201, { success: true, data: { id, ... } }, status "pending".
+  Also needed: register WixPublishingProvider in PublishingProviderManager,
+  otherwise every Wix connection gets "This publishing integration is not
+  available yet." (422).
+
+
+4. BACKEND: TOKEN AND CONNECTION TEST
+------------------------------------------------------------------
+
+4.1 Token (WixOAuthService::createAccessToken($instanceId) already does this)
+
+  POST https://www.wixapis.com/oauth2/token
+  Content-Type: application/json
+
+  {
+    "grant_type": "client_credentials",
+    "client_id": "<WIX_CLIENT_ID>",
+    "client_secret": "<WIX_CLIENT_SECRET>",
+    "instance_id": "<credentials.instance_id>"
+  }
+
+  -> 200 { "access_token": "..." }
+
+  Send it on every Wix call as:   Authorization: <access_token>
+  There is NO "Bearer" prefix.
+
+  Next reference:
+
+      export async function wixToken(instanceId: string): Promise<string> {
+        const res = await fetch("https://www.wixapis.com/oauth2/token", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Accept: "application/json" },
+          body: JSON.stringify({
+            grant_type: "client_credentials",
+            client_id: config.appId,
+            client_secret: config.appSecret,
+            instance_id: instanceId,
+          }),
+        });
+        const body = await res.json();
+        if (!res.ok || !body?.access_token) throw new IntegrationError("token", 502);
+        return body.access_token;
+      }
+
+4.2 POST /api/sites/{site}/publishing/connections/{id}/test
+
+  No change to the request or response. For Wix with config.auth = app:
+
+    1. Make a token (4.1).
+    2. GET https://www.wixapis.com/blog/v3/categories?paging.limit=1
+       Authorization: <access_token>
+    3. 2xx        -> status "active".
+       403 / 404  -> Wix Blog isn't on the site -> status "error".
+       Token call fails -> the app was removed or the instance id is wrong.
+
+
+5. BACKEND: PUBLISH AN ARTICLE
+------------------------------------------------------------------
+
+  POST /api/sites/{site}/publishing/articles/{article}/publish   (existing route)
+
+  Publish to Wix BLOG. The current provider writes to Wix CMS
+  (/wix-data/v2/items), which is the wrong place.
+
+5.1 Token: as in 4.1.
+
+5.2 Article HTML -> Wix rich content ("Ricos")
+
+  POST https://www.wixapis.com/ricos/v1/ricos-document/convert/to-ricos
+  Authorization: <access_token>
+  Content-Type: application/json
+
+  { "html": "<article html>" }
+
+  -> 200 { "document": { "nodes": [ ... ] } }
+
+  OPEN ISSUE: this call returns 403 for our app today. The test post went
+  out through the fallback below, as plain paragraphs (no headings, bold,
+  links or images). Either the app needs the permission for this endpoint
+  added in the Wix dev center (then users reinstall), or Laravel builds the
+  rich content itself.
+
+  Fallback document shape (one paragraph per block of text):
+
+      {
+        "nodes": [
+          {
+            "type": "PARAGRAPH",
+            "id": "p0",
+            "nodes": [
+              { "type": "TEXT", "id": "", "nodes": [],
+                "textData": { "text": "First paragraph.", "decorations": [] } }
+            ],
+            "paragraphData": {}
+          }
+        ]
+      }
+
+5.3 Create and publish the post in one call
+
+  POST https://www.wixapis.com/blog/v3/draft-posts
+  Authorization: <access_token>
+  Content-Type: application/json
+
+  {
+    "draftPost": {
+      "title": "<article title, max 200 chars>",
+      "richContent": { "nodes": [ ... ] },
+      "excerpt": "<meta description, max 500 chars>",
+      "memberId": "<config.author_member_id>"
+    },
+    "publish": true
+  }
+
+  -> 200 { "draftPost": { "id": "<wix post id>", ... } }
+
+  Save draftPost.id as external_id.
+  On failure Wix returns { "message": "...", "details": { ... } }; store the
+  status and message on the publication.
+
+  Next reference:
+
+      const res = await fetch(`${WIX_API}/blog/v3/draft-posts`, {
+        method: "POST",
+        headers: { Authorization: token, "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify({
+          draftPost: {
+            title: post.title.slice(0, 200),
+            richContent: document,
+            ...(post.excerpt ? { excerpt: post.excerpt.slice(0, 500) } : {}),
+            ...(post.memberId ? { memberId: post.memberId } : {}),
+          },
+          publish: true,
+        }),
+      });
+      if (!res.ok) throw new IntegrationError(await wixError(res), 502);
+      const postId = (await res.json()).draftPost?.id;
+
+5.4 Live URL (best effort, may not exist the instant after publishing)
+
+  GET https://www.wixapis.com/blog/v3/posts/{postId}?fieldsets=URL
+  Authorization: <access_token>
+
+  -> 200 { "post": { "url": { "base": "https://site.com", "path": "/post/slug" } } }
+
+  Save base + path as published_url.
+
+
+6. THE NEXT TEST TOOL (to be switched off once Laravel publishes)
+------------------------------------------------------------------
+
+  Section 5 currently runs in Next, only as a test tool:
+
+    src/app/api/integrations/wix/test-publish/route.ts   POST route
+    src/features/publishing/wix-test.ts                  browser helper
+    src/components/integrations/wix-test-publish.tsx     "Test publish" dialog
+    src/lib/integrations/test-tools.ts                   on/off switch
+
+  It is off unless both of these are set to "enabled":
+
+    INTEGRATION_TEST_TOOLS=__________
+    NEXT_PUBLIC_INTEGRATION_TEST_TOOLS=__________
+
+  Leave both empty in production. Nothing here stores anything in Laravel.
+
+
+7. BACKEND CHECKLIST
+------------------------------------------------------------------
+
+  [ ] Set WIX_CLIENT_ID and WIX_CLIENT_SECRET in Laravel's .env
+  [ ] Register WixPublishingProvider in PublishingProviderManager
+  [ ] storeConnection: accept the body in section 3 (config.auth = app)
+  [ ] /test: token + blog categories check (section 4)
+  [ ] Publish to Wix Blog draft-posts, not Wix CMS (section 5)
+  [ ] Use config.author_member_id as memberId
+  [ ] Save external_id (post id) and published_url
+  [ ] Decide how to produce rich content (5.2 open issue)
+  [ ] Optional: on Wix "App Removed" webhook, mark the connection "error"

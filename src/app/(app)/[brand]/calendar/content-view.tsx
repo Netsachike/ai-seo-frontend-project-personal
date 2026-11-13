@@ -45,12 +45,13 @@ import { CalendarItemMenu } from "./item-actions";
 import { PlansPanel } from "./planning-panels";
 
 const views = ["calendar", "list", "plans"] as const;
-const legend: ArticleStatus[] = ["published", "scheduled", "needsApproval", "draft"];
+const legend: ArticleStatus[] = ["published", "scheduled", "needsApproval", "draft", "failed"];
 const dotClass: Record<ArticleStatus, string> = {
   published: "bg-success",
   scheduled: "bg-blue",
   needsApproval: "bg-warning",
   draft: "bg-fg-3",
+  failed: "bg-danger",
 };
 
 const monthKey = (d: Date) => formatDate(d, "yyyy-MM");
@@ -274,12 +275,21 @@ function MonthGrid({ month, articles, brandSlug }: { month: Date; articles: Cale
                   <Link
                     key={a.id}
                     href={brandHref(brandSlug, `articles/${a.id}`)}
-                    title={`${a.title} · ${t(`status.${a.status}`)}`}
+                    title={[a.title, a.processing ? t("status.writing") : t(`status.${a.status}`), a.problem]
+                      .filter(Boolean)
+                      .join(" · ")}
                     className="flex items-center gap-1.5 rounded-sm bg-surface-2 px-1.5 py-1 text-caption font-normal text-fg hover:bg-border"
                   >
-                    <span aria-hidden className={cn("size-1.5 shrink-0 rounded-full", dotClass[a.status])} />
+                    <span
+                      aria-hidden
+                      className={cn(
+                        "size-1.5 shrink-0 rounded-full",
+                        dotClass[a.status],
+                        a.processing && "motion-safe:animate-pulse",
+                      )}
+                    />
                     <span className="truncate">{a.title}</span>
-                    <span className="sr-only">{t(`status.${a.status}`)}</span>
+                    <span className="sr-only">{a.processing ? t("status.writing") : t(`status.${a.status}`)}</span>
                   </Link>
                 ))}
               </div>
@@ -338,7 +348,17 @@ function ArticleTable({
         accessorKey: "status",
         header: t("status"),
         meta: { label: t("status"), csv: (r) => tContent(`status.${(r as ArticleSummary).status}`) },
-        cell: ({ row }) => <StatusBadge status={row.original.status} />,
+        cell: ({ row }) => (
+          <span className="flex flex-col gap-0.5">
+            <StatusBadge status={row.original.status} />
+            {row.original.processing && (
+              <span className="text-caption font-normal text-fg-3">{tContent("status.writing")}</span>
+            )}
+            {row.original.problem && (
+              <span className="max-w-64 text-caption font-normal text-danger">{row.original.problem}</span>
+            )}
+          </span>
+        ),
       },
       {
         accessorKey: "date",

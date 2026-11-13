@@ -66,7 +66,7 @@ export const PROVIDERS: Record<IntegrationProvider, ProviderMeta> = {
   analytics: { monogram: "GA", category: "analytics", method: "oauth", scope: "brand", backend: false, soon: true },
   shopify: { monogram: "SH", category: "platforms", method: "credentials", scope: "brand", backend: true },
   webflow: { monogram: "WF", category: "platforms", method: "credentials", scope: "brand", backend: true },
-  // Installed as Rankoya's Wix app (/api/integrations/wix/*). The API-key form is off for now:
+  // Installed as Rankoya's Wix app, through the backend (publishing/wix/authorize). The API-key form is off for now:
   // wix: { monogram: "WX", category: "platforms", method: "credentials", scope: "brand", backend: true },
   wix: { monogram: "WX", category: "platforms", method: "oauth", scope: "brand", backend: true },
   ghost: { monogram: "GH", category: "platforms", method: "credentials", scope: "brand", backend: true },

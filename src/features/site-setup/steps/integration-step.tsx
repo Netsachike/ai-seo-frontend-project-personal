@@ -15,6 +15,7 @@ import {
   type ApiPublishingPlatform,
 } from "@/features/publishing/forms";
 import { ConnectionTestError, useCreateConnection, usePublishingConnections } from "@/features/publishing/hooks";
+import { startWixConnect } from "@/features/publishing/wix";
 import { startWpcomConnect } from "@/features/publishing/wpcom";
 import { WpcomSitePicker, useWpcomAuthorization } from "@/features/publishing/wpcom-site-picker";
 import { SelectField } from "@/components/forms/select-field";
@@ -72,7 +73,7 @@ export function IntegrationStep({ site, onContinue }: { site: Site; onContinue: 
   const [error, setError] = React.useState<string | null>(null);
   const [hosting, setHosting] = React.useState<WordpressHosting>("selfHosted");
   const [redirecting, setRedirecting] = React.useState(false);
-  // Back from installing the Wix app: toast the result (?connected=wix / ?error=wix_*) and refresh.
+  // Back from installing the Wix app: toast the result (?connected=wix / ?error=<message>) and refresh.
   useConnectReturn(site.id);
   // Back from WordPress.com sign-in: the site still has to be picked.
   const wpcom = useWpcomAuthorization(site.id);
@@ -102,6 +103,18 @@ export function IntegrationStep({ site, onContinue }: { site: Site; onContinue: 
     setRedirecting(true);
     try {
       await startWpcomConnect({ siteId: site.id, returnTo: setupPath(site.id, "integration") });
+    } catch (err) {
+      setError(getErrorMessage(err, t("failed")));
+      setRedirecting(false);
+    }
+  };
+
+  /** The backend returns Wix's installer link; its callback brings the user back to this step. */
+  const installWix = async () => {
+    setError(null);
+    setRedirecting(true);
+    try {
+      await startWixConnect({ siteId: site.id, returnTo: setupPath(site.id, "integration") });
     } catch (err) {
       setError(getErrorMessage(err, t("failed")));
       setRedirecting(false);
@@ -262,12 +275,14 @@ export function IntegrationStep({ site, onContinue }: { site: Site; onContinue: 
             )}
             {/* Wix: install Rankoya's Wix app; the API-key fields are off for now (PUBLISHING_FIELDS.wix). */}
             {choice === "wix" && (
-              <Button variant="primary" className="self-start" asChild>
-                <a
-                  href={`/api/integrations/wix/start?site=${site.id}&returnTo=${encodeURIComponent(setupPath(site.id, "integration"))}`}
-                >
-                  {tWix("install")}
-                </a>
+              <Button
+                type="button"
+                variant="primary"
+                className="self-start"
+                loading={redirecting}
+                onClick={() => void installWix()}
+              >
+                {tWix("install")}
               </Button>
             )}
             {error && (

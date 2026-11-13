@@ -1693,7 +1693,9 @@
       "published": "Published",
       "scheduled": "Scheduled",
       "needsApproval": "Needs approval",
-      "draft": "Draft"
+      "draft": "Draft",
+      "failed": "Failed",
+      "writing": "Writing now"
     },
     "emptyTitle": "Nothing planned for {month}",
     "emptyDescription": "Ask Rankoya to plan the month. It picks articles from questions AI assistants don't mention you for, and searches you're close to winning.",
@@ -3001,7 +3003,8 @@
       "testFailed": "Saved, but activating it failed: {message}. Fix the details and connect again, or submit the same details to retry.",
       "connectFailed": "Couldn't connect. Check the details and try again.",
       "fieldsRequired": "Fill in every field.",
-      "syncFailed": "Couldn't pull Search Console data. Try again."
+      "syncFailed": "Couldn't pull Search Console data. Try again.",
+      "disconnectFailed": "Couldn't disconnect. Try again."
     },
     "toasts": {
       "connected": "{name} connected.",
@@ -3041,7 +3044,8 @@
       "sync": "Sync now",
       "gscChooseTitle": "Choose your site in Search Console",
       "gscChooseBody": "You're signed in with Google. Pick the Search Console property for {domain} so Rankoya can read its search data.",
-      "wpcomChooseTitle": "Finishing your WordPress.com connection"
+      "wpcomChooseTitle": "Finishing your WordPress.com connection",
+      "disconnectBody": "Rankoya stops publishing to it straight away. Articles already published stay where they are, and you can connect again any time."
     },
     "providers": {
       "telegram": {
@@ -3419,14 +3423,7 @@
       "install": "Install on Wix",
       "orApiKey": "Or connect with a Wix API key instead, using the steps below.",
       "errors": {
-        "cancelled": "The Wix install was cancelled. Nothing was connected.",
-        "signature": "Wix sent back details we couldn't verify. Try connecting again.",
-        "token": "Wix didn't give Rankoya access to your site. Try connecting again.",
-        "no_blog": "Add Wix Blog to your site, then connect again.",
-        "not_configured": "Connecting Wix isn't set up yet. Try again later.",
-        "state": "The connection link expired. Start again from Integrations.",
-        "site": "Pick a site before connecting Wix.",
-        "save": "Wix is installed, but we couldn't save the connection. Try again."
+        "save": "Couldn't connect Wix. Try again."
       }
     },
     "webhook": {
