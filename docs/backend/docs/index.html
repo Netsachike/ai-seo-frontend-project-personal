@@ -33,6 +33,8 @@ info:
     `supports_credentials` is `true`.
 
     ## Changelog
+    - **2026-11-13**: Added a private **RSS feed** per site: `GET`/`POST /sites/{site}/publishing/rss`, `PATCH .../rss/settings`, `POST .../rss/regenerate`, `POST .../rss/toggle`, and the public feed `GET /rss/{token}.xml`.
+      Content calendar autopilot now publishes only to active **API** connections; manual connections are skipped.
     - **2026-11-12**: Added **Wix app installation**: `POST /sites/{site}/publishing/wix/authorize` and the public callback `GET /integrations/wix/callback`. ⚠️ The callback is currently unreachable, see that endpoint.
       Added `DELETE /sites/{site}/publishing/connections/{connection}` (works for any platform).
       Manual Wix connections now need `credentials.instance_id` + `config.auth = app` instead of `credentials.access_token`. Webflow's `config.collection_id` is no longer checked on create.
@@ -1599,8 +1601,8 @@ paths:
                   type: boolean
                   example: false
                   description: |
-                    When `true`, a scheduler (every minute) picks up each `planned` item once its `scheduled_date` + time (item time, else plan `publish_time`, in the item/plan timezone) has passed. It researches the keyword, writes the article and publishes it to **every active publishing connection** on the site, then sets the item's status.
-                    Needs the queue worker and the scheduler running on the server. Items without a keyword, or sites without an active connection, end as `failed`.
+                    When `true`, a scheduler (every minute) picks up each `planned` item once its `scheduled_date` + time (item time, else plan `publish_time`, in the item/plan timezone) has passed. It researches the keyword, writes the article and publishes it to **every active API connection** on the site (manual connections are skipped), then sets the item's status.
+                    Needs the queue worker and the scheduler running on the server. Items without a keyword, or sites without an active API connection, end as `failed`.
       responses:
         '200':
           description: Plan created
@@ -2472,6 +2474,142 @@ paths:
         '404': { $ref: '#/components/responses/ModelNotFound' }
         '500': { $ref: '#/components/responses/ServerError' }
 
+  /sites/{site}/publishing/rss:
+    get:
+      tags: [Publishing]
+      summary: Get the site's RSS feed settings
+      operationId: getRssFeed
+      description: |
+        Each site has at most one private RSS feed. When none exists yet, `data` is just `{ "exists": false, "is_active": false }`.
+        `feed_url` contains a secret token. Anyone with the URL can read the feed, so treat it like a password.
+      parameters:
+        - $ref: '#/components/parameters/SiteId'
+      responses:
+        '200':
+          description: Feed settings
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  data: { $ref: '#/components/schemas/RssFeedSettings' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '404': { $ref: '#/components/responses/RssSiteNotFound' }
+    post:
+      tags: [Publishing]
+      summary: Create the site's RSS feed
+      operationId: createRssFeed
+      description: |
+        Creates the feed with defaults: name `"{site name} Articles"`, active, full content, 50 items. If the feed already exists it's returned unchanged with **200**.
+      parameters:
+        - $ref: '#/components/parameters/SiteId'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RssFeedCreateResponse' }
+        '200':
+          description: Already existed
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RssFeedCreateResponse' }
+              example: { success: true, message: Your RSS feed already exists., data: { id: 3, name: Example Inc Articles, is_active: true, feed_url: 'https://api.rankoya.uk/api/rss/Ab3…64chars.xml', items_limit: 50 } }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '404': { $ref: '#/components/responses/RssSiteNotFound' }
+
+  /sites/{site}/publishing/rss/settings:
+    patch:
+      tags: [Publishing]
+      summary: Update RSS feed settings
+      operationId: updateRssFeed
+      description: Send only the fields to change.
+      parameters:
+        - $ref: '#/components/parameters/SiteId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: { type: string, maxLength: 255, example: Example Inc Articles, description: Can't be empty when sent }
+                description: { type: string, maxLength: 1000, nullable: true }
+                include_full_content: { type: boolean, description: Adds the full article HTML (`content:encoded`) to each item }
+                items_limit: { type: integer, minimum: 1, maximum: 100, example: 50 }
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  message: { type: string, example: RSS feed settings updated. }
+                  data:
+                    type: object
+                    properties:
+                      name: { type: string }
+                      description: { type: string, nullable: true }
+                      include_full_content: { type: boolean }
+                      items_limit: { type: integer }
+                      feed_url: { type: string, format: uri }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '404': { $ref: '#/components/responses/RssFeedNotFound' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+
+  /sites/{site}/publishing/rss/regenerate:
+    post:
+      tags: [Publishing]
+      summary: Generate a new RSS feed URL
+      operationId: regenerateRssFeedUrl
+      description: Replaces the secret token. **The old URL stops working immediately**, so warn the user that subscribed readers must be updated.
+      parameters:
+        - $ref: '#/components/parameters/SiteId'
+      responses:
+        '200':
+          description: New URL
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  message: { type: string, example: Your RSS feed URL has been regenerated. The previous URL is now invalid. }
+                  data:
+                    type: object
+                    properties:
+                      feed_url: { type: string, format: uri }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '404': { $ref: '#/components/responses/RssFeedNotFound' }
+
+  /sites/{site}/publishing/rss/toggle:
+    post:
+      tags: [Publishing]
+      summary: Enable or disable the RSS feed
+      operationId: toggleRssFeed
+      description: Flips `is_active` (no body). A disabled feed's URL returns **404** until it's enabled again; the URL itself doesn't change.
+      parameters:
+        - $ref: '#/components/parameters/SiteId'
+      responses:
+        '200':
+          description: New state
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  message: { type: string, enum: [RSS feed enabled., RSS feed disabled.] }
+                  data:
+                    type: object
+                    properties:
+                      is_active: { type: boolean }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '404': { $ref: '#/components/responses/RssFeedNotFound' }
+
   /sites/{site}/publishing/wix/authorize:
     post:
       tags: [Publishing]
@@ -2685,6 +2823,42 @@ paths:
                 token: { value: { success: false, message: WordPress.com authorization could not be completed. } }
                 noToken: { value: { success: false, message: WordPress.com did not return an access token. } }
                 sites: { value: { success: false, message: Unable to retrieve WordPress.com sites. } }
+
+  /rss/{token}.xml:
+    get:
+      tags: [Publishing OAuth & Webhooks]
+      summary: Public RSS 2.0 feed (for feed readers, not the front end)
+      operationId: publicRssFeed
+      security: []
+      description: |
+        Use the `feed_url` returned by the RSS endpoints; don't build it yourself.
+        Lists the site's articles with `status = published`, newest first, up to `items_limit`. An article becomes `published` after a successful publish through an API connection, so a site that only uses manual publishing gets an empty feed.
+        Each item's `link` is the article's recorded published URL, or `{site url}/blog/{slug}` when there isn't one. `content:encoded` (full HTML) is included when `include_full_content` is on.
+      parameters:
+        - name: token
+          in: path
+          required: true
+          description: 64 letters and digits
+          schema: { type: string, pattern: '^[A-Za-z0-9]{64}$' }
+      responses:
+        '200':
+          description: RSS XML
+          content:
+            application/rss+xml:
+              schema: { type: string }
+              example: |
+                <?xml version="1.0" encoding="UTF-8"?>
+                <rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom">
+                  <channel><title>Example Inc Articles</title><link>https://example.com</link>
+                    <item><title>Technical SEO checklist</title><link>https://example.com/blog/technical-seo-checklist</link><pubDate>Thu, 12 Nov 2026 09:00:00 +0000</pubDate></item>
+                  </channel>
+                </rss>
+        '404':
+          description: 'Unknown token, or the feed is disabled (JSON only when the client sends `Accept: application/json`; feed readers get the HTML 404 page)'
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FrameworkError' }
+              example: { message: RSS feed not found or disabled. }
 
   /integrations/wix/callback:
     get:
@@ -5575,6 +5749,18 @@ components:
         application/json:
           schema: { $ref: '#/components/schemas/StatusEnvelope' }
           example: { status: error, message: Unable to complete request }
+    RssSiteNotFound:
+      description: No active workspace, or the site isn't in it (plain `abort(404)`, so `message` carries no detail)
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/FrameworkError' }
+          example: { message: '' }
+    RssFeedNotFound:
+      description: The site has no RSS feed yet (call `POST /sites/{site}/publishing/rss` first), or the site isn't in the active workspace
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/FrameworkError' }
+          example: { message: 'No query results for model [App\Models\RssFeed].' }
     InsufficientApiCredits:
       description: The workspace owner's wallet doesn't have enough API credits for the reservation
       content:
@@ -6140,6 +6326,32 @@ components:
         updated_at: { type: string, format: date-time }
 
     # ---- SERP ----
+    RssFeedSettings:
+      type: object
+      properties:
+        exists: { type: boolean, example: true, description: False when the site has no feed yet; then only `is_active` (false) is also present }
+        id: { type: integer, example: 3 }
+        name: { type: string, example: Example Inc Articles }
+        description: { type: string, nullable: true, example: Latest published articles from Example Inc }
+        is_active: { type: boolean, example: true }
+        include_full_content: { type: boolean, example: true }
+        items_limit: { type: integer, example: 50 }
+        feed_url: { type: string, format: uri, example: 'https://api.rankoya.uk/api/rss/Ab3…64chars.xml', description: Secret URL for feed readers }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+    RssFeedCreateResponse:
+      type: object
+      properties:
+        success: { type: boolean, example: true }
+        message: { type: string, example: Your RSS feed has been created. }
+        data:
+          type: object
+          properties:
+            id: { type: integer, example: 3 }
+            name: { type: string, example: Example Inc Articles }
+            is_active: { type: boolean, example: true }
+            feed_url: { type: string, format: uri }
+            items_limit: { type: integer, example: 50 }
     ApiUsageLog:
       type: object
       description: One paid provider task

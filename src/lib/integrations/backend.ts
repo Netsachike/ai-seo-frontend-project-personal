@@ -35,21 +35,3 @@ export async function backend<T>(path: string, init: RequestInit = {}): Promise<
   }
   return (await res.json()) as T;
 }
-
-/**
- * Calls Laravel as Rankoya itself, for public routes with no signed-in user
- * (the RSS / JSON feeds). Needs `BACKEND_SERVICE_TOKEN`, issued by the backend
- * team for `GET /internal/sites/{site}/feed`. Sent both ways the brief allows:
- * the shared-secret header and a Sanctum bearer token.
- */
-export async function serviceBackend<T>(path: string): Promise<T> {
-  const token = process.env.BACKEND_SERVICE_TOKEN?.trim();
-  if (!token) throw new IntegrationError("service_token_missing", 503);
-  const res = await fetch(`${backendUrl()}${path.startsWith("/") ? path : `/${path}`}`, {
-    headers: { Accept: "application/json", Authorization: `Bearer ${token}`, "X-Internal-Token": token },
-    cache: "no-store",
-    signal: AbortSignal.timeout(20_000),
-  });
-  if (!res.ok) throw new IntegrationError(`backend_${res.status}`, res.status === 404 ? 404 : 502);
-  return (await res.json()) as T;
-}

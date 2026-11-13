@@ -14,7 +14,9 @@ import {
   connectionPayload,
   type ApiPublishingPlatform,
 } from "@/features/publishing/forms";
+import { manualBuilderOf } from "@/features/integrations/connections";
 import { ConnectionTestError, useCreateConnection, usePublishingConnections } from "@/features/publishing/hooks";
+import { useRssFeed } from "@/features/publishing/rss";
 import { startWixConnect } from "@/features/publishing/wix";
 import { startWpcomConnect } from "@/features/publishing/wpcom";
 import { WpcomSitePicker, useWpcomAuthorization } from "@/features/publishing/wpcom-site-picker";
@@ -29,18 +31,35 @@ import { dur, ease } from "../motion";
 import { patchDraft } from "../store";
 import { StepHeading } from "./step-heading";
 import { ConnectGuide } from "@/components/integrations/connect-guide";
+import { FeedLinks } from "@/components/integrations/feed-links";
+import { WebhookConnect } from "@/components/integrations/webhook-connect";
 import { useConnectReturn } from "@/components/integrations/connect-dialog";
 import { setupPath } from "../steps";
 
 /**
- * The API platforms, then the ones without a publishing API: a Next.js app
- * and any other site. Both are copy-and-paste (a `manual` connection,
- * active straight away): Rankoya prepares each article to paste in.
+ * The API platforms, then:
+ * - Make: a webhook; articles are sent to it from Rankoya (nothing is saved yet);
+ * - RSS: the site's private feed, which other tools read;
+ * - Lovable, Replit, a Next.js app and any other site: copy and paste (a
+ *   `manual` connection, active straight away). Rankoya prepares each article
+ *   to paste in.
  */
-export const PUBLISH_PLATFORMS = [...PUBLISHING_PLATFORMS, "nextjs", "manual"] as const;
+export const PUBLISH_PLATFORMS = [
+  ...PUBLISHING_PLATFORMS,
+  "make",
+  "rss",
+  "lovable",
+  "replit",
+  "nextjs",
+  "manual",
+] as const;
 export type PublishPlatform = (typeof PUBLISH_PLATFORMS)[number];
-type CopyPastePlatform = "nextjs" | "manual";
-const isCopyPaste = (p: PublishPlatform | null): p is CopyPastePlatform => p === "nextjs" || p === "manual";
+type CopyPastePlatform = "lovable" | "replit" | "nextjs" | "manual";
+const isCopyPaste = (p: PublishPlatform | null): p is CopyPastePlatform =>
+  p === "lovable" || p === "replit" || p === "nextjs" || p === "manual";
+/** Set up in their own panel (a webhook to send to, a feed to create), with no connection to save. */
+type SelfServePlatform = "make" | "rss";
+const isSelfServe = (p: PublishPlatform | null): p is SelfServePlatform => p === "make" || p === "rss";
 
 /** WordPress is one card: self-hosted connects with an application password, WordPress.com signs in. */
 type WordpressHosting = "selfHosted" | "wordpressCom";
@@ -51,6 +70,10 @@ const MONOGRAMS: Record<PublishPlatform, string> = {
   webflow: "WF",
   wix: "WX",
   ghost: "GH",
+  make: "MK",
+  rss: "RSS",
+  lovable: "LV",
+  replit: "RP",
   nextjs: "N",
   manual: "</>",
 };
@@ -77,11 +100,12 @@ export function IntegrationStep({ site, onContinue }: { site: Site; onContinue: 
   useConnectReturn(site.id);
   // Back from WordPress.com sign-in: the site still has to be picked.
   const wpcom = useWpcomAuthorization(site.id);
+  // Make and the feed save no connection: a delivered test, or an existing feed, is what lets the user continue.
+  const rss = useRssFeed(site.id);
+  const [makeDelivered, setMakeDelivered] = React.useState(false);
   const connected: PublishPlatform | null = existing
     ? existing.method === "manual"
-      ? existing.platform === "nextjs"
-        ? "nextjs"
-        : "manual"
+      ? (manualBuilderOf(existing) ?? (existing.platform === "nextjs" ? "nextjs" : "manual"))
       : existing.platform === "wordpress_com"
         ? "wordpress"
         : (existing.platform as PublishPlatform)
@@ -95,7 +119,8 @@ export function IntegrationStep({ site, onContinue }: { site: Site; onContinue: 
   }
 
   const isWpcom = choice === "wordpress" && hosting === "wordpressCom";
-  const fields = choice && !isCopyPaste(choice) && !isWpcom ? PUBLISHING_FIELDS[choice] : [];
+  const fields = choice && !isCopyPaste(choice) && !isSelfServe(choice) && !isWpcom ? PUBLISHING_FIELDS[choice] : [];
+  const selfServeReady = (choice === "make" && makeDelivered) || (choice === "rss" && Boolean(rss.data?.exists));
   const canConnect = isCopyPaste(choice) || (fields.length > 0 && fields.every((f) => (values[f.key] ?? "").trim()));
 
   const signInWithWpcom = async () => {
@@ -127,11 +152,17 @@ export function IntegrationStep({ site, onContinue }: { site: Site; onContinue: 
       if (!wpcom.auth) void signInWithWpcom();
       return;
     }
-    if (!choice || !canConnect) return;
+    if (!choice || !canConnect || isSelfServe(choice)) return;
     setError(null);
     const name = t(`platform.${choice}.name`);
     const payload = isCopyPaste(choice)
-      ? { name, platform: choice === "nextjs" ? ("nextjs" as const) : ("custom" as const), method: "manual" as const }
+      ? {
+          name,
+          platform: choice === "nextjs" ? ("nextjs" as const) : ("custom" as const),
+          method: "manual" as const,
+          // Lovable and Replit: the tag that puts the connection on its own card.
+          ...(choice === "lovable" || choice === "replit" ? { config: { provider: choice } } : {}),
+        }
       : connectionPayload(choice as ApiPublishingPlatform, `${name} · ${site.domain}`, values);
     create.mutate(payload, {
       onSuccess: () =>
@@ -186,7 +217,37 @@ export function IntegrationStep({ site, onContinue }: { site: Site; onContinue: 
       </div>
 
       <AnimatePresence initial={false}>
-        {choice && !connected && (
+        {/* Make and the feed have forms of their own, so they sit outside the connect form. */}
+        {isSelfServe(choice) && !connected && (
+          <motion.div
+            key={choice}
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: dur.base, ease: ease.out }}
+            className="flex flex-col gap-4 rounded-xl border border-border bg-surface p-5 shadow-card"
+          >
+            <p className="text-small text-fg-2">{t(`platform.${choice}.help`)}</p>
+            {choice === "make" ? (
+              <>
+                <ConnectGuide provider="make" defaultOpen={false} />
+                <WebhookConnect
+                  provider="make"
+                  site={site}
+                  name={t("platform.make.name")}
+                  onSaved={() => undefined}
+                  onDelivered={() => {
+                    setMakeDelivered(true);
+                    patchDraft(site.id, { integration: { provider: "make", connectedAt: new Date().toISOString() } });
+                  }}
+                />
+              </>
+            ) : (
+              <FeedLinks siteId={site.id} />
+            )}
+          </motion.div>
+        )}
+        {choice && !isSelfServe(choice) && !connected && (
           <motion.form
             key={choice}
             onSubmit={connect}
@@ -306,10 +367,20 @@ export function IntegrationStep({ site, onContinue }: { site: Site; onContinue: 
       </AnimatePresence>
 
       <div className="mt-2 flex flex-col gap-3">
-        <Button variant="primary" size="lg" disabled={!connected} onClick={onContinue}>
+        <Button
+          variant="primary"
+          size="lg"
+          disabled={!connected && !selfServeReady}
+          onClick={() => {
+            if (!connected && choice === "rss") {
+              patchDraft(site.id, { integration: { provider: "rss", connectedAt: new Date().toISOString() } });
+            }
+            onContinue();
+          }}
+        >
           {t("continue")}
         </Button>
-        {!connected && (
+        {!connected && !selfServeReady && (
           <Button variant="secondary" size="lg" disabled={create.isPending} onClick={onContinue}>
             {t("skip")}
           </Button>

@@ -46,6 +46,8 @@ const scoreOf = (article: ArticleWithRelations) => {
 export type CalendarEntry = ArticleSummary & {
   itemId: number;
   keywordId: number | null;
+  /** HH:mm the item is due, when it has its own time. */
+  time: string | null;
   /** Autopilot is researching, writing or publishing this item right now. */
   processing: boolean;
   /** Why autopilot failed, or which connections it couldn't publish to. */
@@ -72,6 +74,7 @@ function summaryOf(item: ContentCalendarItem, article: ArticleWithRelations | un
   return {
     itemId: item.id,
     keywordId: item.keyword_id,
+    time: item.scheduled_time ? item.scheduled_time.slice(0, 5) : null,
     processing: item.status === "processing",
     problem:
       item.status === "failed"
@@ -125,7 +128,7 @@ export function useContentMonth(siteId: number | undefined, month: string) {
   };
 }
 
-/** Generates the content plan for a month (YYYY-MM). */
+/** Generates the content plan for a month (YYYY-MM), with autopilot on. */
 export function useGeneratePlan(siteId: number) {
   const queryClient = useQueryClient();
   return useMutation({
@@ -134,6 +137,8 @@ export function useGeneratePlan(siteId: number) {
         await contentPlannerService.generate(siteId, {
           month,
           timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+          // On by default until the backend's endpoint for switching it per plan is live.
+          autopilot_enabled: true,
         })
       ).data,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: contentKeys.all(siteId) }),

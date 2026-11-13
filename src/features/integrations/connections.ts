@@ -33,6 +33,13 @@ const publishingAccount = (c: PublishingConnection): ProviderAccount => ({
   blogId: typeof c.config?.blog_id === "string" ? c.config.blog_id : null,
 });
 
+/** The app builder a manual connection was made for (Lovable or Replit), or null. */
+export function manualBuilderOf(c: PublishingConnection): "lovable" | "replit" | null {
+  if (c.method !== "manual") return null;
+  const tag = typeof c.config?.provider === "string" ? c.config.provider : c.name.trim().toLowerCase();
+  return tag === "lovable" || tag === "replit" ? tag : null;
+}
+
 /**
  * Accounts per provider for one site: publishing connections and Search
  * Console from the backend, Analytics and Telegram from the browser store
@@ -53,12 +60,25 @@ export function useProviderAccounts(siteId: number | undefined, brandSlug: strin
             .map(publishingAccount),
         ];
       }
+      // Lovable and Replit, copy and paste for now: manual connections tagged with config.provider
+      // (or, if the backend didn't keep the tag, named after the card).
+      if (provider === "lovable" || provider === "replit") {
+        return [
+          provider,
+          (publishing.data ?? []).filter((c) => manualBuilderOf(c) === provider).map(publishingAccount),
+        ];
+      }
       // Copy and paste: Next.js apps on their own card, every other manual connection on the general one.
       if (provider === "nextjs" || provider === "manual") {
         return [
           provider,
           (publishing.data ?? [])
-            .filter((c) => c.method === "manual" && (c.platform === "nextjs") === (provider === "nextjs"))
+            .filter(
+              (c) =>
+                c.method === "manual" &&
+                manualBuilderOf(c) === null &&
+                (c.platform === "nextjs") === (provider === "nextjs"),
+            )
             .map(publishingAccount),
         ];
       }

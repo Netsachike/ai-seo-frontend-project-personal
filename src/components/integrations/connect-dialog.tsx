@@ -79,8 +79,9 @@ export function useConnectReturn(siteId: number | undefined, onConnected?: (prov
  * - WordPress.com: the backend's OAuth redirect; the site is picked back on its details page;
  * - copy and paste (Next.js, any other site): a `manual` connection, nothing to fill in;
  * - Wix: installing Rankoya's Wix app through the backend (`startWixConnect`); the API-key form is off for now;
- * - Make, Lovable, Replit: a webhook URL, sent a signed test article before it's saved;
- * - RSS: the site's signed feed links to copy; nothing is saved.
+ * - Make: a webhook URL; an article is picked and sent to it from here (nothing is saved yet);
+ * - Lovable, Replit: copy and paste for now (their webhook flow is off, see the catalog);
+ * - RSS: the site's private feed, created and managed through the backend.
  */
 export function ConnectDialog({
   provider,
@@ -142,7 +143,13 @@ export function ConnectDialog({
     if (!provider || !site) return;
     setError(null);
     createConnection.mutate(
-      { name, platform: provider === "nextjs" ? "nextjs" : "custom", method: "manual" },
+      {
+        name,
+        platform: provider === "nextjs" ? "nextjs" : "custom",
+        method: "manual",
+        // Lovable and Replit: the tag that puts the connection on its own card.
+        ...(provider === "lovable" || provider === "replit" ? { config: { provider } } : {}),
+      },
       {
         onSuccess: () => {
           toast.success(t("toasts.connected", { name }));

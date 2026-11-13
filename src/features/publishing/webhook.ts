@@ -1,7 +1,5 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
-
 /** Providers that receive articles by webhook; saved as platform `custom` with config.provider. */
 export type WebhookProvider = "make" | "lovable" | "replit";
 
@@ -12,6 +10,7 @@ export const WEBHOOK_ERRORS = [
   "webhook_dns",
   "webhook_unreachable",
   "webhook_rejected",
+  "webhook_no_content",
   "site",
   "unauthenticated",
 ] as const;
@@ -28,13 +27,55 @@ export function newWebhookSecret(): string {
 export async function sendWebhookTest(input: {
   siteId: number;
   url: string;
-  secret: string;
-}): Promise<{ ok: true; status: number } | { ok: false; error: WebhookError; status?: number }> {
+  /** Left out for Make, whose requests go unsigned for now. */
+  secret?: string;
+}): Promise<WebhookResult> {
+  return post("/api/integrations/webhook/test", { site_id: input.siteId, url: input.url.trim(), secret: input.secret });
+}
+
+/**
+ * STOPGAP: sends one real article to the webhook as `article.published`,
+ * through /api/integrations/webhook/publish. Nothing is saved in Rankoya.
+ */
+export async function publishToWebhook(input: {
+  siteId: number;
+  articleId: number;
+  url: string;
+  secret?: string;
+}): Promise<WebhookResult> {
+  return post("/api/integrations/webhook/publish", {
+    site_id: input.siteId,
+    article_id: input.articleId,
+    url: input.url.trim(),
+    secret: input.secret,
+  });
+}
+
+/** The webhook URL last used for a site and provider, kept in this browser so it needn't be pasted again. */
+const urlKey = (siteId: number, provider: WebhookProvider) => `rankoya:webhook-url:${siteId}:${provider}`;
+export function readWebhookUrl(siteId: number, provider: WebhookProvider): string {
   try {
-    const res = await fetch("/api/integrations/webhook/test", {
+    return window.localStorage.getItem(urlKey(siteId, provider)) ?? "";
+  } catch {
+    return "";
+  }
+}
+export function rememberWebhookUrl(siteId: number, provider: WebhookProvider, url: string) {
+  try {
+    window.localStorage.setItem(urlKey(siteId, provider), url);
+  } catch {
+    // Storage blocked: the URL just has to be pasted again next time.
+  }
+}
+
+export type WebhookResult = { ok: true; status: number } | { ok: false; error: WebhookError; status?: number };
+
+async function post(path: string, payload: Record<string, unknown>): Promise<WebhookResult> {
+  try {
+    const res = await fetch(path, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ site_id: input.siteId, url: input.url.trim(), secret: input.secret }),
+      body: JSON.stringify(payload),
     });
     const body = (await res.json().catch(() => null)) as { code?: string; status?: number } | null;
     if (res.ok) return { ok: true, status: body?.status ?? res.status };
@@ -47,22 +88,6 @@ export async function sendWebhookTest(input: {
   } catch {
     return { ok: false, error: "webhook_unreachable" };
   }
-}
-
-export type FeedLinks = { rss: string; json: string; ready: boolean };
-
-/** The site's signed RSS and JSON feed links. */
-export function useFeedLinks(siteId: number | undefined) {
-  return useQuery({
-    queryKey: ["integrations", "feed", siteId ?? 0],
-    enabled: Boolean(siteId),
-    staleTime: Infinity,
-    queryFn: async (): Promise<FeedLinks> => {
-      const res = await fetch(`/api/integrations/rss?site=${siteId}`);
-      if (!res.ok) throw new Error(`feed_${res.status}`);
-      return (await res.json()) as FeedLinks;
-    },
-  });
 }
 
 /**

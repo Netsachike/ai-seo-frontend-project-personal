@@ -71,8 +71,12 @@ export const PROVIDERS: Record<IntegrationProvider, ProviderMeta> = {
   wix: { monogram: "WX", category: "platforms", method: "oauth", scope: "brand", backend: true },
   ghost: { monogram: "GH", category: "platforms", method: "credentials", scope: "brand", backend: true },
   // duda: { monogram: "DU", category: "platforms", method: "credentials", scope: "brand", backend: true },
-  lovable: { monogram: "LV", category: "platforms", method: "webhook", scope: "brand", backend: true },
-  replit: { monogram: "RP", category: "platforms", method: "webhook", scope: "brand", backend: true },
+  // Lovable and Replit are copy and paste for now (a `manual` connection with config.provider).
+  // Their webhook flow (WebhookConnect: builder prompt, signing secret, test send) comes back with:
+  // lovable: { monogram: "LV", category: "platforms", method: "webhook", scope: "brand", backend: true },
+  // replit: { monogram: "RP", category: "platforms", method: "webhook", scope: "brand", backend: true },
+  lovable: { monogram: "LV", category: "platforms", method: "manual", scope: "brand", backend: true },
+  replit: { monogram: "RP", category: "platforms", method: "manual", scope: "brand", backend: true },
   make: { monogram: "MK", category: "platforms", method: "webhook", scope: "brand", backend: true },
   rss: { monogram: "RSS", category: "platforms", method: "feed", scope: "brand", backend: true },
   nextjs: { monogram: "N", category: "platforms", method: "manual", scope: "brand", backend: true },

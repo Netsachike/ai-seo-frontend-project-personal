@@ -1751,10 +1751,37 @@ export interface CreatePublishingConnectionPayload {
     site_url?: string;
     blog_id?: string;
     author_name?: string;
-    /** method = webhook: which card it belongs to (make, lovable, replit); platform is `custom`. */
+    /** Which card a `custom` connection belongs to: make (webhook), lovable or replit (manual, for now). */
     provider?: string;
     field_mapping?: { title?: string; content?: string; slug?: string; meta_description?: string };
   } | null;
+}
+
+/**
+ * `GET /sites/{site}/publishing/rss` → `data`. Without a feed yet, only
+ * `exists: false` and `is_active: false` are present.
+ */
+export interface RssFeedSettings {
+  exists: boolean;
+  is_active: boolean;
+  id?: number;
+  name?: string;
+  description?: string | null;
+  /** Adds each article's full HTML to the feed, not only its summary. */
+  include_full_content?: boolean;
+  /** 1 to 100. */
+  items_limit?: number;
+  /** Secret link for feed readers; anyone holding it can read the feed. */
+  feed_url?: string;
+  created_at?: DateTime;
+  updated_at?: DateTime;
+}
+
+export interface UpdateRssFeedPayload {
+  name?: string;
+  description?: string | null;
+  include_full_content?: boolean;
+  items_limit?: number;
 }
 
 /** `POST /connections/{id}/test` → `data`. Check `success`: a 200 can still be a rejection. */
@@ -2432,7 +2459,7 @@ export const SITE_SETUP_STEPS = [
   "details",
   "google-search-console",
   "core-topics",
-  "billing",
+  // "billing", // the free trial / plan screen is off for now (see setup-flow.tsx)
   "integration",
   "preferences",
   "done",

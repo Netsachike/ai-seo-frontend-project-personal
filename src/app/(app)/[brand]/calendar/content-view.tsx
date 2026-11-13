@@ -32,6 +32,7 @@ import { useContentMonth, useGeneratePlan, type CalendarEntry } from "@/features
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DataTable, type DataColumn } from "@/components/data-table/data-table";
 import { EmptyState } from "@/components/brand/empty-state";
@@ -164,7 +165,7 @@ export function ContentView() {
               description={t("emptyDescription")}
             />
           ) : view === "calendar" ? (
-            <MonthGrid month={monthDate} articles={articles} brandSlug={brandSlug} />
+            <MonthGrid month={monthDate} articles={articles} brandSlug={brandSlug} siteId={brand.id} />
           ) : (
             <ArticleTable articles={articles} brandSlug={brandSlug} siteId={brand.id} />
           )}
@@ -225,7 +226,17 @@ export function ContentView() {
 }
 
 /** Week start follows the UI locale (Sunday in en-US, Saturday in ar, Monday in de/fr). */
-function MonthGrid({ month, articles, brandSlug }: { month: Date; articles: CalendarEntry[]; brandSlug: string }) {
+function MonthGrid({
+  month,
+  articles,
+  brandSlug,
+  siteId,
+}: {
+  month: Date;
+  articles: CalendarEntry[];
+  brandSlug: string;
+  siteId: number;
+}) {
   const t = useTranslations("content");
   const format = useFormatter();
   const locale = useLocale();
@@ -237,9 +248,18 @@ function MonthGrid({ month, articles, brandSlug }: { month: Date; articles: Cale
   }).map(atNoon);
   const byDay = (d: Date) => articles.filter((a) => a.date === formatDate(d, "yyyy-MM-dd"));
   const today = formatDate(now, "yyyy-MM-dd");
+  // The day whose full schedule is open in the dialog.
+  const [openDay, setOpenDay] = React.useState<Date | null>(null);
 
   return (
     <>
+      <DayDialog
+        day={openDay}
+        entries={openDay ? byDay(openDay) : []}
+        brandSlug={brandSlug}
+        siteId={siteId}
+        onClose={() => setOpenDay(null)}
+      />
       {/* Desktop: month grid */}
       <div className="hidden md:block">
         <div role="row" className="grid grid-cols-7 border-b border-border pb-2">
@@ -257,20 +277,27 @@ function MonthGrid({ month, articles, brandSlug }: { month: Date; articles: Cale
             return (
               <div
                 key={d.toISOString()}
+                // Anywhere on the day opens its schedule; the article links keep going to the article.
+                onClick={(event) => {
+                  if (!(event.target as HTMLElement).closest("a, button")) setOpenDay(d);
+                }}
                 className={cn(
-                  "flex min-h-28 flex-col gap-1 border-e border-b border-border p-1.5 [&:nth-child(7n)]:border-e-0",
+                  "flex min-h-28 cursor-pointer flex-col gap-1 border-e border-b border-border p-1.5 transition-colors hover:bg-surface-2/60 [&:nth-child(7n)]:border-e-0",
                   !inMonth && "bg-bg",
                 )}
               >
-                <span
+                <button
+                  type="button"
+                  onClick={() => setOpenDay(d)}
+                  aria-label={t("day.open", { date: format.dateTime(d, { dateStyle: "full" }) })}
                   className={cn(
-                    "grid size-6 place-items-center rounded-full num text-caption",
+                    "grid size-6 place-items-center rounded-full num text-caption outline-none focus-visible:ring-2 focus-visible:ring-blue",
                     isToday ? "bg-ink font-semibold text-ink-fg" : inMonth ? "text-fg-2" : "text-fg-3",
                   )}
                   aria-current={isToday ? "date" : undefined}
                 >
                   {format.number(d.getDate(), "integer")}
-                </span>
+                </button>
                 {items.map((a) => (
                   <Link
                     key={a.id}
@@ -314,6 +341,60 @@ function MonthGrid({ month, articles, brandSlug }: { month: Date; articles: Cale
         ))}
       </ol>
     </>
+  );
+}
+
+/** One day's full schedule: every article due that day, with its status and actions. */
+function DayDialog({
+  day,
+  entries,
+  brandSlug,
+  siteId,
+  onClose,
+}: {
+  day: Date | null;
+  entries: CalendarEntry[];
+  brandSlug: string;
+  siteId: number;
+  onClose: () => void;
+}) {
+  const t = useTranslations("content");
+  const format = useFormatter();
+  return (
+    <Dialog open={day !== null} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="max-h-[85dvh] max-w-[560px] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>{day ? format.dateTime(day, { dateStyle: "full" }) : ""}</DialogTitle>
+          <DialogDescription>{t("day.count", { count: entries.length })}</DialogDescription>
+        </DialogHeader>
+        {entries.length === 0 ? (
+          <p className="rounded-md bg-bg p-4 text-small text-fg-2">{t("day.empty")}</p>
+        ) : (
+          <ul className="flex flex-col divide-y divide-border">
+            {entries.map((a) => (
+              <li key={a.id} className="flex items-start gap-3 py-3 first:pt-0 last:pb-0">
+                <div className="flex min-w-0 flex-1 flex-col gap-1">
+                  <Link
+                    href={brandHref(brandSlug, `articles/${a.id}`)}
+                    className="text-body font-medium text-fg hover:text-blue hover:underline"
+                  >
+                    {a.title}
+                  </Link>
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-caption font-normal text-fg-3">
+                    <StatusBadge status={a.status} />
+                    {a.processing && <span>{t("status.writing")}</span>}
+                    {a.time && <span className="num">{t("day.time", { time: a.time })}</span>}
+                    {a.keyword && <span dir="auto">{t("day.keyword", { keyword: a.keyword })}</span>}
+                  </div>
+                  {a.problem && <p className="text-caption font-normal text-danger">{a.problem}</p>}
+                </div>
+                <CalendarItemMenu siteId={siteId} entry={a} />
+              </li>
+            ))}
+          </ul>
+        )}
+      </DialogContent>
+    </Dialog>
   );
 }
 

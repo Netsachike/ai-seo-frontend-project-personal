@@ -1,7 +1,7 @@
 # Rankoya: technical walkthrough
 
 **Branch:** `feat/backend-wiring` · **Updated:** 2026-10-14
-**API contract:** `docs/backend/docs/openapi.yaml` (synced from the backend repo; open `docs/backend/docs/index.html` for Swagger UI). 134 operations.
+**API contract:** `docs/backend/docs/openapi.yaml` (synced from the backend repo; open `docs/backend/docs/index.html` for Swagger UI). 140 operations.
 
 This guide follows a user through the app screen by screen. For each screen it lists the backend endpoints called, what triggers each call, and what has no endpoint yet. Use it to run a demo, to check what is integrated, and to test.
 
