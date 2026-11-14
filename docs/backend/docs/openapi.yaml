@@ -19,6 +19,8 @@ info:
     `supports_credentials` is `true`.
 
     ## Changelog
+    - **2026-11-14**: Two new publishing platforms for `POST /sites/{site}/publishing/connections`: **Make.com** (`platform: make`, `method: webhook`, `credentials.webhook_url`) and **Lovable** (`platform: lovable`, `method: api`, `credentials.base_url` + `credentials.api_key`). See that endpoint for what Rankoya sends to each.
+      Autopilot publishes to Lovable connections but skips Make.com ones (they use the `webhook` method).
     - **2026-11-13**: Added a private **RSS feed** per site: `GET`/`POST /sites/{site}/publishing/rss`, `PATCH .../rss/settings`, `POST .../rss/regenerate`, `POST .../rss/toggle`, and the public feed `GET /rss/{token}.xml`.
       Content calendar autopilot now publishes only to active **API** connections; manual connections are skipped.
     - **2026-11-12**: Added **Wix app installation**: `POST /sites/{site}/publishing/wix/authorize` and the public callback `GET /integrations/wix/callback`. ⚠️ The callback is currently unreachable, see that endpoint.
@@ -1587,7 +1589,7 @@ paths:
                   type: boolean
                   example: false
                   description: |
-                    When `true`, a scheduler (every minute) picks up each `planned` item once its `scheduled_date` + time (item time, else plan `publish_time`, in the item/plan timezone) has passed. It researches the keyword, writes the article and publishes it to **every active API connection** on the site (manual connections are skipped), then sets the item's status.
+                    When `true`, a scheduler (every minute) picks up each `planned` item once its `scheduled_date` + time (item time, else plan `publish_time`, in the item/plan timezone) has passed. It researches the keyword, writes the article and publishes it to **every active API connection** on the site (manual and webhook connections such as Make.com are skipped), then sets the item's status.
                     Needs the queue worker and the scheduler running on the server. Items without a keyword, or sites without an active API connection, end as `failed`.
       responses:
         '200':
@@ -2062,10 +2064,12 @@ paths:
       summary: Create a publishing connection
       operationId: createPublishingConnection
       description: |
-        Required `credentials` / `config` keys depend on `platform` + `method` (only when `method = api`):
+        Required `credentials` / `config` keys depend on `platform` + `method` (`method = api`, plus `make` with `method = webhook`):
 
         | Platform | Required keys |
         |---|---|
+        | make | `method: webhook` only. `credentials.webhook_url`: an `https://` URL. Only Make.com hook URLs (`hook.make.com` or `hook.<region>.make.com`) work: other https URLs are saved, but `/test` and publishing fail. Optional `config.send_full_content` (default `true`) controls whether the article HTML is sent. |
+        | lovable | `method: api` only. `credentials.base_url`: the `https://` URL of the Lovable site. `credentials.api_key`: 32–255 characters, the key the Lovable site expects. |
         | wordpress | `credentials.site_url`, `credentials.username`, `credentials.application_password` |
         | shopify | `credentials.store_domain` (`*.myshopify.com`), `credentials.access_token`. Publishing also needs `config.blog_id` or `options.blog_id`, which you can get from `GET .../shopify-blogs`. |
         | webflow | `credentials.access_token`. `config.collection_id` is no longer validated here, but `/test` and publishing still need it. |
@@ -2073,7 +2077,17 @@ paths:
         | ghost | `credentials.admin_api_key`, `config.site_url` |
         | wordpress_com | ❌ Not allowed here. Use the OAuth flow (`GET wordpress-com/authorize`). |
 
-        `manual` connections are created as `active`. API connections are created as `pending`; call `/test` to activate them.
+        `manual` connections are created as `active`. API and webhook connections are created as `pending`; call `/test` to activate them.
+
+        **Make.com.** `/test` POSTs `{event: "rankoya.connection.test", source, message, delivery_id, sent_at}` to the webhook. Publishing POSTs `{event: "article.published" | "article.updated", source: "rankoya", delivery_id, sent_at, target_status: "draft" | "publish", site: {id, name, domain, url}, article: {id, title, slug, meta_title, meta_description, status, published_at, url, content}}`. Both carry the headers `X-Rankoya-Event` and `X-Rankoya-Delivery-ID`. Any 2xx counts as success.
+        `target_status` comes from the publish `options.status` (default `publish`) and only tells the Make scenario what to do. Rankoya records every successful delivery as `published` and marks the article published, even when `target_status` is `draft`. `published_url` is only set if you pass `options.url`.
+
+        **Lovable.** The Lovable site must expose these routes, each checking the `X-Rankoya-API-Key` header:
+        - `GET {base_url}/api/public/rankoya/health` for `/test` (any 2xx).
+        - `POST {base_url}/api/public/rankoya/articles` to publish.
+        - `PUT {base_url}/api/public/rankoya/articles/{rankoya article id}` to update.
+
+        Article requests send the same envelope as Make, plus `article.excerpt` and `article.cover_image_url` (always with `content`). `article.status` is `published` or `draft`. The site must answer `{success: true, data: {id, status: "published" | "draft", url, slug}}`. `data.status` decides whether the publication is `published` or `draft`, and `data.url` becomes the `published_url`.
       parameters:
         - $ref: '#/components/parameters/SiteId'
       requestBody:
@@ -2088,6 +2102,18 @@ paths:
                   platform: wordpress
                   method: api
                   credentials: { site_url: 'https://blog.example.com', username: admin, application_password: 'abcd efgh ijkl mnop' }
+              make:
+                value:
+                  name: Make.com scenario
+                  platform: make
+                  method: webhook
+                  credentials: { webhook_url: 'https://hook.eu2.make.com/abc123xyz' }
+              lovable:
+                value:
+                  name: Lovable site
+                  platform: lovable
+                  method: api
+                  credentials: { base_url: 'https://my-site.lovable.app', api_key: 'your-lovable-api-key' }
               manual:
                 value: { name: Copy & paste, platform: custom, method: manual }
       responses:
@@ -2256,6 +2282,7 @@ paths:
                   additionalProperties: true
                   description: |
                     Provider-specific options (for example `status draft|publish`).
+                    Make.com and Lovable: `status` (`draft` or `publish`, default `publish`; anything else fails) and `url`. Lovable also accepts `cover_image_url`.
                     Wix: optional `category_ids` (array of Wix Blog category IDs). Wix posts are always published live; there is no draft option.
       responses:
         '200':
@@ -5938,8 +5965,8 @@ components:
       required: [name, platform, method]
       properties:
         name: { type: string, maxLength: 255 }
-        platform: { type: string, enum: [wordpress, wordpress_com, wix, shopify, webflow, ghost, duda, nextjs, custom] }
-        method: { type: string, enum: [api, webhook, manual] }
+        platform: { type: string, enum: [wordpress, wordpress_com, wix, shopify, webflow, ghost, duda, nextjs, custom, make, lovable] }
+        method: { type: string, enum: [api, webhook, manual], description: '`make` needs `webhook`; every other automated platform uses `api`' }
         credentials:
           type: object
           nullable: true
@@ -5951,6 +5978,9 @@ components:
             access_token: { type: string, maxLength: 2048 }
             site_id: { type: string }
             admin_api_key: { type: string }
+            webhook_url: { type: string, format: uri, maxLength: 2048, example: 'https://hook.eu2.make.com/abc123xyz', description: 'Make.com: must start with https://' }
+            base_url: { type: string, format: uri, maxLength: 255, example: 'https://my-site.lovable.app', description: 'Lovable: must start with https://' }
+            api_key: { type: string, minLength: 32, maxLength: 255, description: Lovable }
         config:
           type: object
           nullable: true
@@ -5959,6 +5989,7 @@ components:
             site_url: { type: string, format: uri }
             blog_id: { type: string }
             author_name: { type: string }
+            send_full_content: { type: boolean, default: true, description: 'Make.com: include `article.content` (HTML) in the webhook payload' }
             field_mapping:
               type: object
               properties:

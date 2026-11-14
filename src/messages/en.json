@@ -3178,11 +3178,11 @@
       },
       "lovable": {
         "name": "Lovable",
-        "description": "Rankoya prepares each finished article for you to copy into your Lovable app.",
+        "description": "Rankoya publishes finished articles straight to the blog in your Lovable app.",
         "facts": {
-          "access": "Nothing to connect",
-          "data": "Articles ready to copy",
-          "control": "You paste each one in"
+          "access": "An API key your app creates",
+          "data": "Articles and their SEO details",
+          "control": "Remove the key any time"
         },
         "disconnectBody": "{account}"
       },
@@ -3239,7 +3239,22 @@
       "adminApiKey": "Admin API key",
       "dudaUsername": "API username",
       "dudaPassword": "API password",
-      "dudaSiteName": "Site name"
+      "dudaSiteName": "Site name",
+      "lovableUrl": "Website URL",
+      "lovableApiKey": "Rankoya API secret from Lovable"
+    },
+    "placeholders": {
+      "lovableUrl": "https://mywebsite.lovable.app",
+      "lovableApiKey": "Paste your RANKOYA_API_KEY"
+    },
+    "lovable": {
+      "promptTitle": "Setup prompt for Lovable",
+      "promptBody": "Paste it into your existing Lovable project. It adds the endpoints Rankoya publishes to and shows you a RANKOYA_API_KEY to paste below.",
+      "viewPrompt": "View prompt",
+      "hidePrompt": "Hide prompt",
+      "copyPrompt": "Copy prompt",
+      "testAndConnect": "Test and connect",
+      "validates": "Rankoya validates the credentials before activating the connection."
     },
     "wpcom": {
       "title": "Connect WordPress.com",
@@ -3392,11 +3407,11 @@
         "note": "Make's free plan includes webhooks. Every published article runs the scenario once."
       },
       "lovable": {
-        "s1": "Choose <b>Connect</b>. There's nothing to fill in.",
-        "s2": "When an article is ready, open it in Rankoya and click <b>Publish</b>. Rankoya prepares it to copy.",
-        "s3": "Copy the HTML (or the text) and paste it into your Lovable app, for example by asking Lovable to add it as a new blog post.",
-        "s4": "Use the title, meta description and URL slug Rankoya gives you, then publish your app.",
-        "note": "Sending articles to Lovable automatically is coming later. For now each article is pasted in by hand."
+        "s1": "Click <b>Copy prompt</b> and paste it into the chat of your existing Lovable project.",
+        "s2": "Let Lovable finish. It adds the Rankoya endpoints to your app, tests them and deploys.",
+        "s3": "Copy your website's public URL and the <code>RANKOYA_API_KEY</code> Lovable shows you. It's only shown once.",
+        "s4": "Paste both below and click <b>Test and connect</b>.",
+        "note": "Lovable keeps the key as a server-side secret, so it never reaches your visitors."
       },
       "replit": {
         "s1": "Choose <b>Connect</b>. There's nothing to fill in.",
@@ -3837,8 +3852,8 @@
         },
         "lovable": {
           "name": "Lovable",
-          "detail": "Copy and paste into your app",
-          "help": "Rankoya prepares each approved article for you to copy into your Lovable app."
+          "detail": "Publish to your app's blog",
+          "help": "Copy the prompt into your Lovable project. When Lovable finishes, paste your website URL and the RANKOYA_API_KEY it shows you."
         },
         "replit": {
           "name": "Replit",

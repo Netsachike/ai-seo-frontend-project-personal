@@ -24,6 +24,7 @@ import { PasswordInput } from "@/components/forms/password-input";
 import { IntegrationTile } from "@/components/brand/integration-row";
 import { ConnectGuide } from "./connect-guide";
 import { FeedLinks } from "./feed-links";
+import { LovablePrompt } from "./lovable-prompt";
 import { WebhookConnect } from "./webhook-connect";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -80,7 +81,8 @@ export function useConnectReturn(siteId: number | undefined, onConnected?: (prov
  * - copy and paste (Next.js, any other site): a `manual` connection, nothing to fill in;
  * - Wix: installing Rankoya's Wix app through the backend (`startWixConnect`); the API-key form is off for now;
  * - Make: a webhook URL; an article is picked and sent to it from here (nothing is saved yet);
- * - Lovable, Replit: copy and paste for now (their webhook flow is off, see the catalog);
+ * - Lovable: a setup prompt to paste into the project, then its URL and RANKOYA_API_KEY, created and tested
+ *   through the backend like the other credentials forms ("Test and connect");
  * - RSS: the site's private feed, created and managed through the backend.
  */
 export function ConnectDialog({
@@ -147,8 +149,8 @@ export function ConnectDialog({
         name,
         platform: provider === "nextjs" ? "nextjs" : "custom",
         method: "manual",
-        // Lovable and Replit: the tag that puts the connection on its own card.
-        ...(provider === "lovable" || provider === "replit" ? { config: { provider } } : {}),
+        // Replit (hidden for now): the tag that puts the connection on its own card.
+        // ...(provider === "replit" ? { config: { provider } } : {}),
       },
       {
         onSuccess: () => {
@@ -224,11 +226,16 @@ export function ConnectDialog({
             {/* Wix: the API-key form is off for now; the footer button installs Rankoya's Wix app.
             {provider === "wix" && site && ( … "Install on Wix" card with an API-key fallback … )} */}
 
-            {shopifyConnection === null && <ConnectGuide provider={provider} defaultOpen={meta.method !== "webhook"} />}
+            {/* Lovable: the prompt that adds Rankoya's routes to the user's project comes first. */}
+            {provider === "lovable" && <LovablePrompt />}
+
+            {shopifyConnection === null && (
+              <ConnectGuide provider={provider} defaultOpen={meta.method !== "webhook" && provider !== "lovable"} />
+            )}
 
             {meta.method === "webhook" &&
               site &&
-              (provider === "make" || provider === "lovable" || provider === "replit") && (
+              provider === "make" /* || provider === "replit" */ && (
                 <WebhookConnect
                   provider={provider}
                   site={site}
@@ -275,13 +282,26 @@ export function ConnectDialog({
                       }
                     >
                       {(props) =>
-                        field.input === "url" ? (
+                        field.input === "url" && provider === "lovable" ? (
+                          // A full URL, as Lovable gives it (https://mywebsite.lovable.app).
+                          <Input
+                            {...props}
+                            dir="ltr"
+                            type="url"
+                            inputMode="url"
+                            autoComplete="off"
+                            placeholder={field.placeholder ? t(`placeholders.${field.placeholder}`) : undefined}
+                            value={value}
+                            onChange={(event) => set(event.target.value)}
+                          />
+                        ) : field.input === "url" ? (
                           <DomainInput {...props} value={value} placeholder={site?.domain} onChange={set} />
                         ) : field.input === "secret" ? (
                           <PasswordInput
                             {...props}
                             dir="ltr"
                             autoComplete="off"
+                            placeholder={field.placeholder ? t(`placeholders.${field.placeholder}`) : undefined}
                             value={value}
                             onChange={(event) => set(event.target.value)}
                           />
@@ -298,6 +318,9 @@ export function ConnectDialog({
                     </FormField>
                   );
                 })}
+                {provider === "lovable" && (
+                  <p className="text-caption font-normal text-fg-3">{t("lovable.validates")}</p>
+                )}
               </form>
             )}
 
@@ -330,7 +353,7 @@ export function ConnectDialog({
               )}
               {meta.method === "credentials" && shopifyConnection === null && (
                 <Button type="submit" form="connect-credentials" variant="primary" loading={createConnection.isPending}>
-                  {t("connect")}
+                  {provider === "lovable" ? t("lovable.testAndConnect") : t("connect")}
                 </Button>
               )}
             </DialogFooter>

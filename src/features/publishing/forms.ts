@@ -7,6 +7,7 @@ export const PUBLISHING_PLATFORMS = [
   "webflow",
   "wix",
   "ghost",
+  "lovable",
   // "duda", // needs a paid Duda plan; off until there's an account to test with
 ] as const satisfies readonly PublishingPlatform[];
 export type ApiPublishingPlatform = (typeof PUBLISHING_PLATFORMS)[number];
@@ -33,8 +34,12 @@ export type PublishingField = {
     | "adminApiKey"
     | "dudaUsername"
     | "dudaPassword"
-    | "dudaSiteName";
+    | "dudaSiteName"
+    | "lovableUrl"
+    | "lovableApiKey";
   input: "url" | "text" | "secret";
+  /** Message key under integrations.placeholders. */
+  placeholder?: "lovableUrl" | "lovableApiKey";
 };
 
 /** Required keys per platform when `method = api`, from the backend contract. */
@@ -61,6 +66,11 @@ export const PUBLISHING_FIELDS: Record<ApiPublishingPlatform, PublishingField[]>
     { group: "config", key: "site_url", label: "siteUrl", input: "url" },
     { group: "credentials", key: "admin_api_key", label: "adminApiKey", input: "secret" },
   ],
+  // Lovable: the site's URL and the RANKOYA_API_KEY its setup prompt generated (see ./lovable).
+  lovable: [
+    { group: "credentials", key: "base_url", label: "lovableUrl", input: "url", placeholder: "lovableUrl" },
+    { group: "credentials", key: "api_key", label: "lovableApiKey", input: "secret", placeholder: "lovableApiKey" },
+  ],
   // Checked against Duda by /api/integrations/duda/verify before saving; that also finds the API host.
   // Off with Duda (see PUBLISHING_PLATFORMS):
   /* duda: [
@@ -81,6 +91,8 @@ export function connectionPayload(
   for (const field of PUBLISHING_FIELDS[platform]) {
     let value = (values[field.key] ?? "").trim();
     if (field.input === "url" && value && !/^https?:\/\//.test(value)) value = `https://${value}`;
+    // Lovable wants the site's root; Rankoya adds /api/public/rankoya/… to it.
+    if (field.key === "base_url") value = value.replace(/\/+$/, "");
     (field.group === "credentials" ? credentials : config)[field.key] = value;
   }
   return {

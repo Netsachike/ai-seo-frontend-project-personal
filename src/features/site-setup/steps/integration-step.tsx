@@ -33,6 +33,7 @@ import { StepHeading } from "./step-heading";
 import { ConnectGuide } from "@/components/integrations/connect-guide";
 import { FeedLinks } from "@/components/integrations/feed-links";
 import { WebhookConnect } from "@/components/integrations/webhook-connect";
+import { LovablePrompt } from "@/components/integrations/lovable-prompt";
 import { useConnectReturn } from "@/components/integrations/connect-dialog";
 import { setupPath } from "../steps";
 
@@ -40,7 +41,8 @@ import { setupPath } from "../steps";
  * The API platforms, then:
  * - Make: a webhook; articles are sent to it from Rankoya (nothing is saved yet);
  * - RSS: the site's private feed, which other tools read;
- * - Lovable, Replit, a Next.js app and any other site: copy and paste (a
+ * - Lovable is one of the API platforms: a setup prompt, then its URL and RANKOYA_API_KEY;
+ * - a Next.js app and any other site: copy and paste (a
  *   `manual` connection, active straight away). Rankoya prepares each article
  *   to paste in.
  */
@@ -48,15 +50,15 @@ export const PUBLISH_PLATFORMS = [
   ...PUBLISHING_PLATFORMS,
   "make",
   "rss",
-  "lovable",
-  "replit",
+  // Lovable is an API platform now (in PUBLISHING_PLATFORMS): a setup prompt, then its URL and RANKOYA_API_KEY.
+  // Replit's API needs a paid plan; hidden for now.
+  // "replit",
   "nextjs",
   "manual",
 ] as const;
 export type PublishPlatform = (typeof PUBLISH_PLATFORMS)[number];
-type CopyPastePlatform = "lovable" | "replit" | "nextjs" | "manual";
-const isCopyPaste = (p: PublishPlatform | null): p is CopyPastePlatform =>
-  p === "lovable" || p === "replit" || p === "nextjs" || p === "manual";
+type CopyPastePlatform = "nextjs" | "manual"; // | "replit" (hidden for now)
+const isCopyPaste = (p: PublishPlatform | null): p is CopyPastePlatform => p === "nextjs" || p === "manual";
 /** Set up in their own panel (a webhook to send to, a feed to create), with no connection to save. */
 type SelfServePlatform = "make" | "rss";
 const isSelfServe = (p: PublishPlatform | null): p is SelfServePlatform => p === "make" || p === "rss";
@@ -73,7 +75,7 @@ const MONOGRAMS: Record<PublishPlatform, string> = {
   make: "MK",
   rss: "RSS",
   lovable: "LV",
-  replit: "RP",
+  // replit: "RP",
   nextjs: "N",
   manual: "</>",
 };
@@ -88,6 +90,8 @@ export function IntegrationStep({ site, onContinue }: { site: Site; onContinue: 
   const tFields = useTranslations("integrations.fields");
   const tToken = useTranslations("integrations.shopifyToken");
   const tWix = useTranslations("integrations.wixApp");
+  const tLovable = useTranslations("integrations.lovable");
+  const tPlaceholders = useTranslations("integrations.placeholders");
   const connections = usePublishingConnections(site.id);
   const create = useCreateConnection(site.id);
   const existing = connections.data?.find((c) => c.status === "active");
@@ -160,8 +164,8 @@ export function IntegrationStep({ site, onContinue }: { site: Site; onContinue: 
           name,
           platform: choice === "nextjs" ? ("nextjs" as const) : ("custom" as const),
           method: "manual" as const,
-          // Lovable and Replit: the tag that puts the connection on its own card.
-          ...(choice === "lovable" || choice === "replit" ? { config: { provider: choice } } : {}),
+          // Replit (hidden for now): the tag that puts the connection on its own card.
+          // ...(choice === "replit" ? { config: { provider: choice } } : {}),
         }
       : connectionPayload(choice as ApiPublishingPlatform, `${name} · ${site.domain}`, values);
     create.mutate(payload, {
@@ -275,6 +279,7 @@ export function IntegrationStep({ site, onContinue }: { site: Site; onContinue: 
             <p className="text-small text-fg-2">
               {isWpcom ? t("hosting.wordpressComHelp") : t(`platform.${choice}.help`)}
             </p>
+            {choice === "lovable" && <LovablePrompt />}
             <ConnectGuide provider={isWpcom ? "wordpressCom" : choice} defaultOpen={false} />
             {isWpcom && wpcom.auth && (
               <WpcomSitePicker
@@ -315,6 +320,7 @@ export function IntegrationStep({ site, onContinue }: { site: Site; onContinue: 
                             {...props}
                             dir="ltr"
                             autoComplete="off"
+                            placeholder={field.placeholder ? tPlaceholders(field.placeholder) : undefined}
                             value={value}
                             onChange={(e) => set(e.target.value)}
                           />
@@ -324,6 +330,7 @@ export function IntegrationStep({ site, onContinue }: { site: Site; onContinue: 
                             dir="ltr"
                             autoComplete="off"
                             inputMode={field.input === "url" ? "url" : undefined}
+                            placeholder={field.placeholder ? tPlaceholders(field.placeholder) : undefined}
                             value={value}
                             onChange={(e) => set(e.target.value)}
                           />
@@ -346,6 +353,7 @@ export function IntegrationStep({ site, onContinue }: { site: Site; onContinue: 
                 {tWix("install")}
               </Button>
             )}
+            {choice === "lovable" && <p className="text-caption font-normal text-fg-3">{tLovable("validates")}</p>}
             {error && (
               <p role="alert" className="text-small text-danger">
                 {error}
@@ -359,7 +367,7 @@ export function IntegrationStep({ site, onContinue }: { site: Site; onContinue: 
                 disabled={!isWpcom && !canConnect}
                 className="self-start"
               >
-                {isWpcom ? t("hosting.continue") : t("connect")}
+                {isWpcom ? t("hosting.continue") : choice === "lovable" ? tLovable("testAndConnect") : t("connect")}
               </Button>
             )}
           </motion.form>

@@ -34,10 +34,11 @@ const publishingAccount = (c: PublishingConnection): ProviderAccount => ({
 });
 
 /** The app builder a manual connection was made for (Lovable or Replit), or null. */
-export function manualBuilderOf(c: PublishingConnection): "lovable" | "replit" | null {
+// Replit is hidden for now (its API needs a paid plan); its connections fall back to the general copy-and-paste card.
+export function manualBuilderOf(c: PublishingConnection): "lovable" | null {
   if (c.method !== "manual") return null;
   const tag = typeof c.config?.provider === "string" ? c.config.provider : c.name.trim().toLowerCase();
-  return tag === "lovable" || tag === "replit" ? tag : null;
+  return tag === "lovable" /* || tag === "replit" */ ? tag : null;
 }
 
 /**
@@ -56,18 +57,16 @@ export function useProviderAccounts(siteId: number | undefined, brandSlug: strin
         return [
           provider,
           (publishing.data ?? [])
-            .filter((c) => c.platform === provider && c.method !== "manual")
+            // Lovable also keeps the copy-and-paste connections made before its API connection existed:
+            // manual connections tagged with config.provider (or, without the tag, named after the card).
+            .filter((c) => (c.platform === provider && c.method !== "manual") || manualBuilderOf(c) === provider)
             .map(publishingAccount),
         ];
       }
-      // Lovable and Replit, copy and paste for now: manual connections tagged with config.provider
-      // (or, if the backend didn't keep the tag, named after the card).
-      if (provider === "lovable" || provider === "replit") {
-        return [
-          provider,
-          (publishing.data ?? []).filter((c) => manualBuilderOf(c) === provider).map(publishingAccount),
-        ];
-      }
+      // Replit, copy and paste (hidden for now):
+      // if (provider === "replit") {
+      //   return [provider, (publishing.data ?? []).filter((c) => manualBuilderOf(c) === provider).map(publishingAccount)];
+      // }
       // Copy and paste: Next.js apps on their own card, every other manual connection on the general one.
       if (provider === "nextjs" || provider === "manual") {
         return [
