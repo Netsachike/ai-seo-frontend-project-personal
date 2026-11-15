@@ -1,5 +1,6 @@
 "use client";
 
+// Make connects as a saved webhook connection (platform `make`) and publishes from the article page.
 import * as React from "react";
 import { CheckCircle2Icon, ChevronDownIcon, EyeIcon, PlugZapIcon, SendIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
