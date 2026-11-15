@@ -80,7 +80,7 @@ export function useConnectReturn(siteId: number | undefined, onConnected?: (prov
  * - WordPress.com: the backend's OAuth redirect; the site is picked back on its details page;
  * - copy and paste (Next.js, any other site): a `manual` connection, nothing to fill in;
  * - Wix: installing Rankoya's Wix app through the backend (`startWixConnect`); the API-key form is off for now;
- * - Make: a webhook URL; an article is picked and sent to it from here (nothing is saved yet);
+ * - Make: a webhook URL, saved and tested through the backend ("Test and connect"); articles publish from the article page;
  * - Lovable: a setup prompt to paste into the project, then its URL and RANKOYA_API_KEY, created and tested
  *   through the backend like the other credentials forms ("Test and connect");
  * - RSS: the site's private feed, created and managed through the backend.

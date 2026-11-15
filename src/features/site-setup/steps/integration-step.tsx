@@ -39,7 +39,7 @@ import { setupPath } from "../steps";
 
 /**
  * The API platforms, then:
- * - Make: a webhook; articles are sent to it from Rankoya (nothing is saved yet);
+ * - Make: a webhook, saved and tested as a connection; articles publish to it from the article page;
  * - RSS: the site's private feed, which other tools read;
  * - Lovable is one of the API platforms: a setup prompt, then its URL and RANKOYA_API_KEY;
  * - a Next.js app and any other site: copy and paste (a
