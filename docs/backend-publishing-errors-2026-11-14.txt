@@ -1,0 +1,159 @@
+RANKOYA: PUBLISHING ERRORS FOR THE BACKEND (LOVABLE + WIX)
+==================================================================
+Date: 14 November 2026
+Environment: production API (https://api.rankoya.uk/api), site 23
+
+
+==================================================================
+1. LOVABLE: PUBLISHING FAILS WITH HTTP 400 "Invalid request data"
+==================================================================
+
+1.1 What happened
+------------------------------------------------------------------
+
+  The connection was created and tested fine: /test (health check) passes.
+  Publishing an article then fails.
+
+  Request:   POST https://api.rankoya.uk/api/sites/23/publishing/articles/15/publish
+  Response:  {"success":false,"message":"Lovable publishing failed. HTTP 400: Invalid request data"}
+
+  Test credentials (the connection on site 23):
+
+    base_url  = https://pixel-perfect-snapshot-2187.lovable.app
+    api_key   = C3cxCexpXggfjLnswT9ONBYwF7icpCcQJUOA1AEukpVUQkl9
+
+  (This is a test site's key. Rotate it once this is fixed.)
+
+
+1.2 Cause (reproduced directly against the Lovable site)
+------------------------------------------------------------------
+
+  The Lovable site expects the article fields at the TOP LEVEL of the JSON
+  body. The backend sends them NESTED inside "article" (the same envelope
+  as Make.com, per openapi.yaml). The Lovable site's validator rejects that.
+
+  a) Health check works (auth is fine):
+
+     GET /api/public/rankoya/health   X-Rankoya-API-Key: <key>
+     -> 200 {"success":true,"message":"Rankoya publishing API is operational"}
+
+     Same with a wrong key -> 401 {"success":false,"message":"Invalid or missing API key"}
+
+  b) The backend's current (nested) shape is rejected:
+
+     POST /api/public/rankoya/articles
+     {
+       "event": "article.published", "source": "rankoya",
+       "delivery_id": "...", "sent_at": "...", "target_status": "draft",
+       "site": { "id": 23 },
+       "article": { "id": 15, "title": "...", "slug": "...", "status": "draft", "content": "<p>...</p>" }
+     }
+
+     -> 400 {"success":false,"message":"Invalid request data","errors":[
+              {"field":"rankoya_article_id","message":"Required"},
+              {"field":"title","message":"Required"},
+              {"field":"content","message":"Required"}]}
+
+     (POST {} gives exactly the same three errors.)
+
+
+1.3 The contract the Lovable sites are built to (please match this)
+------------------------------------------------------------------
+
+  Every customer's Lovable site is built from the setup prompt Rankoya
+  gives them (frontend: src/features/publishing/lovable.ts). That prompt
+  defines these fields, FLAT, not nested. Since it is already deployed on
+  customers' sites, the backend should send this shape rather than us
+  changing the prompt.
+
+  Header on every request:   X-Rankoya-API-Key: <api_key>
+                             Content-Type: application/json
+
+  Create / publish:   POST {base_url}/api/public/rankoya/articles
+  Update:             PUT  {base_url}/api/public/rankoya/articles/{rankoya_article_id}
+
+  Body (both):
+
+    {
+      "rankoya_article_id": "15",              // required. Rankoya's article id
+      "delivery_id": "<uuid>",                 // idempotency key, new per delivery
+      "title": "Article title",                // required
+      "slug": "article-title",
+      "content": "<p>Full article HTML</p>",   // required
+      "excerpt": "Short summary",
+      "meta_title": "SEO title",
+      "meta_description": "SEO description",
+      "cover_image_url": "https://...",        // omit or null when there is none
+      "target_status": "publish"               // "draft" or "publish" (from options.status)
+    }
+
+  Notes:
+  - Send rankoya_article_id as a string (safest; the site's validator may
+    reject a number).
+  - Extra fields (event, source, sent_at, site, the X-Rankoya-Event and
+    X-Rankoya-Delivery-ID headers) are fine to keep sending, but the fields
+    above must be at the top level.
+  - The prompt makes POST idempotent on rankoya_article_id (an existing
+    article is updated), so POST for both create and update is also safe.
+
+
+1.4 Response: please read it loosely (likely the next failure)
+------------------------------------------------------------------
+
+  openapi.yaml says the backend expects:
+    {"success": true, "data": {"id", "status": "published"|"draft", "url", "slug"}}
+
+  The prompt only tells Lovable to "return a JSON response containing
+  success, message, article ID, rankoya_article_id, slug, status and public
+  article URL", so each site will name and place those fields slightly
+  differently. Most will put them at the top level, not inside "data".
+
+  Suggested parsing (first one that exists wins):
+
+    body      = response.data ?? response.article ?? response
+    url       = body.url ?? body.public_url ?? body.article_url ?? body.public_article_url
+    status    = body.status          // "published" | "publish" | "draft"
+    remote_id = body.id ?? body.article_id
+    slug      = body.slug
+
+  Treat any 2xx with success != false as success. Map status "publish" and
+  "published" to published, and if status is missing use target_status.
+  Don't fail the publication just because url is missing.
+
+  (Not verified against this site: verifying would mean creating a real
+  article on it. Once the request shape is fixed, publish to a draft and log
+  the raw response body.)
+
+
+==================================================================
+2. WIX: INSTALL CALLBACK NEVER CREATES THE CONNECTION (501)
+==================================================================
+
+  After installing the Rankoya app on Wix, the user is sent to the backend
+  callback, which answers 501 JSON. No connection is created and the user
+  doesn't come back to the app.
+
+  Cause (from openapi.yaml, GET /integrations/wix/callback):
+
+  - The install link's return URL is built from the route name
+    "publishing.wix.callback".
+  - The older stub GET /publishing/wix/callback in routes/api.php is
+    registered LATER with the SAME route name, so it wins.
+  - Wix therefore returns the user to the stub, which returns 501.
+  - The duplicate name also makes "php artisan route:cache" fail.
+
+  Fix: remove the old stub, or rename one of the two routes so
+  route('publishing.wix.callback') resolves to the real handler
+  (GET /integrations/wix/callback). Then check:
+
+    POST /sites/23/publishing/wix/authorize -> install on Wix ->
+    302 to {WIX_FRONTEND_URL}{return_to}?connected=wix&connection_id=<id>
+
+  Also check that WIX_FRONTEND_URL is set to https://app.rankoya.uk. If it
+  isn't set it falls back to APP_URL (the API host), and the user lands on
+  the API instead of the app.
+
+  Test install details (from docs/wix-backend-integration.txt):
+    instance_id = 143684d1-02b1-47b7-b7a2-c6a278b52a4c
+    site_id     = db8d97c6-3e98-43b2-8d76-7225ce45885a
+    Laravel site id = 23, test article id = 14

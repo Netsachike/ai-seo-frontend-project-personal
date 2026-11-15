@@ -1,7 +1,7 @@
 # Rankoya: technical walkthrough
 
 **Branch:** `feat/backend-wiring` · **Updated:** 2026-10-14
-**API contract:** `docs/backend/docs/openapi.yaml` (synced from the backend repo; open `docs/backend/docs/index.html` for Swagger UI). 131 operations.
+**API contract:** `docs/backend/docs/openapi.yaml` (synced from the backend repo; open `docs/backend/docs/index.html` for Swagger UI). 140 operations.
 
 This guide follows a user through the app screen by screen. For each screen it lists the backend endpoints called, what triggers each call, and what has no endpoint yet. Use it to run a demo, to check what is integrated, and to test.
 
@@ -281,6 +281,8 @@ The crawl run id comes from `rankoya:crawl-runs`, the setup draft, or the newest
 |---|---|
 | **Website platform** card: detected vs confirmed, change it | `PATCH sites/{site}/platform` `{ platform }` |
 | WordPress, Shopify, Webflow, Wix, Ghost | `GET/POST publishing/connections`, `POST publishing/connections/{id}/test` |
+| Make.com (backend ready, not in the UI yet) | `POST publishing/connections` with `platform: make, method: webhook, credentials.webhook_url` → `POST publishing/connections/{id}/test` |
+| **Lovable**: setup prompt (view / copy) → Website URL + RANKOYA_API_KEY → **Test and connect** | `POST publishing/connections` `{ platform: lovable, method: api, credentials: { base_url, api_key } }` → `POST publishing/connections/{id}/test` (calls `{base_url}/api/public/rankoya/health`) |
 | **WordPress.com** (new) | `GET publishing/wordpress-com/authorize` → WordPress.com → `/integrations/wordpress-com/callback` → `GET publishing/wordpress-com/callback?code&state` → pick a site → `POST publishing/wordpress-com/complete` → `POST publishing/connections/{id}/test` |
 | Search Console | OAuth as in setup; **Sync**: `POST search-console/sync` |
 | AI engines tab | Read-only list of the 4 engines every scan tests |

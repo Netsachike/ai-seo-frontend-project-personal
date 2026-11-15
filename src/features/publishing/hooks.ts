@@ -45,8 +45,8 @@ async function activate(siteId: number, connectionId: number) {
  * activate it. Only an `active` connection can publish.
  *
  * When the test fails, submitting the same details again re-tests the
- * connection already saved instead of creating a duplicate (the API has no
- * update or delete for connections). Changed details create a new one.
+ * connection already saved instead of creating a duplicate. Changed details
+ * create a new one.
  */
 export function useCreateConnection(siteId: number) {
   const queryClient = useQueryClient();
@@ -73,6 +73,15 @@ export function useTestConnection(siteId: number) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (connectionId: number) => (await publishingService.testConnection(siteId, connectionId)).data,
+    onSettled: () => queryClient.invalidateQueries({ queryKey: publishingKeys.all(siteId) }),
+  });
+}
+
+/** Permanently deletes a connection (any platform). Past publications are kept. */
+export function useDeleteConnection(siteId: number) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (connectionId: number) => (await publishingService.deleteConnection(siteId, connectionId)).data,
     onSettled: () => queryClient.invalidateQueries({ queryKey: publishingKeys.all(siteId) }),
   });
 }

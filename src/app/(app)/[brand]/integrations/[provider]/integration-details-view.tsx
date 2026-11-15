@@ -2,14 +2,14 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { ChevronLeftIcon, PlugIcon, RefreshCwIcon } from "lucide-react";
+import { ChevronLeftIcon, PlugIcon, RefreshCwIcon, Trash2Icon } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
 
 import { toast } from "@/lib/toast";
 import { getErrorMessage } from "@/lib/errors";
 import { PROVIDERS, type IntegrationProvider } from "@/features/integrations/catalog";
 import { useProviderAccounts, type ProviderAccount } from "@/features/integrations/connections";
-import { useTestConnection } from "@/features/publishing/hooks";
+import { useDeleteConnection, useTestConnection } from "@/features/publishing/hooks";
 import { ShopifyBlogPicker } from "@/features/publishing/shopify-blog-picker";
 import { WpcomSitePicker, useWpcomAuthorization } from "@/features/publishing/wpcom-site-picker";
 import { useGscOverview, useSyncGsc } from "@/features/search-console/hooks";
@@ -23,11 +23,19 @@ import { brandHref } from "@/components/layout/nav";
 import { useShell } from "@/components/layout/shell-context";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 /**
  * Connected accounts for one provider. Publishing connections can be
- * re-tested and Search Console re-synced through the backend. The backend has
- * no endpoint to remove a connection, so there is no Disconnect here.
+ * re-tested, disconnected (a permanent delete in the backend) and Search
+ * Console re-synced. Search Console has no disconnect endpoint yet.
  */
 export function IntegrationDetailsView({ provider }: { provider: IntegrationProvider }) {
   const t = useTranslations("integrations");
@@ -54,6 +62,18 @@ export function IntegrationDetailsView({ provider }: { provider: IntegrationProv
     !accounts.some((a) => !a.status || a.status === "active");
 
   const [connecting, setConnecting] = React.useState(false);
+  const deleteConnection = useDeleteConnection(brand?.id ?? 0);
+  const [removing, setRemoving] = React.useState<ProviderAccount | null>(null);
+  function handleDisconnect() {
+    if (!removing?.connectionId) return;
+    deleteConnection.mutate(removing.connectionId, {
+      onSuccess: () => {
+        toast.success(t("toasts.disconnected", { name: removing.name }));
+        setRemoving(null);
+      },
+      onError: (error) => toast.error(getErrorMessage(error, t("errors.disconnectFailed"))),
+    });
+  }
   function handleTest(account: ProviderAccount) {
     if (!account.connectionId) return;
     testConnection.mutate(account.connectionId, {
@@ -204,6 +224,12 @@ export function IntegrationDetailsView({ provider }: { provider: IntegrationProv
                         {t("details.sync")}
                       </Button>
                     )}
+                    {account.connectionId !== undefined && (
+                      <Button size="sm" variant="ghost" onClick={() => setRemoving(account)}>
+                        <Trash2Icon />
+                        {t("details.disconnect")}
+                      </Button>
+                    )}
                   </div>
                 )}
               </Card>
@@ -215,6 +241,23 @@ export function IntegrationDetailsView({ provider }: { provider: IntegrationProv
       {provider === "searchConsole" && brand && accounts.length > 0 && (
         <GscPerformanceCard siteId={brand.id} connectHref={brandHref(brandSlug, "integrations/searchConsole")} />
       )}
+
+      <Dialog open={removing !== null} onOpenChange={(open) => !open && !deleteConnection.isPending && setRemoving(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("details.disconnectTitle", { name: removing?.name ?? name })}</DialogTitle>
+            <DialogDescription>{t("details.disconnectBody")}</DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="secondary" disabled={deleteConnection.isPending} onClick={() => setRemoving(null)}>
+              {t("cancel")}
+            </Button>
+            <Button variant="destructive" loading={deleteConnection.isPending} onClick={handleDisconnect}>
+              {t("details.disconnect")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <ConnectDialog
         provider={connecting ? provider : null}

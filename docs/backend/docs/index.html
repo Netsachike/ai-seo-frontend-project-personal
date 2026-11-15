@@ -33,6 +33,15 @@ info:
     `supports_credentials` is `true`.
 
     ## Changelog
+    - **2026-11-14**: Two new publishing platforms for `POST /sites/{site}/publishing/connections`: **Make.com** (`platform: make`, `method: webhook`, `credentials.webhook_url`) and **Lovable** (`platform: lovable`, `method: api`, `credentials.base_url` + `credentials.api_key`). See that endpoint for what Rankoya sends to each.
+      Autopilot publishes to Lovable connections but skips Make.com ones (they use the `webhook` method).
+    - **2026-11-13**: Added a private **RSS feed** per site: `GET`/`POST /sites/{site}/publishing/rss`, `PATCH .../rss/settings`, `POST .../rss/regenerate`, `POST .../rss/toggle`, and the public feed `GET /rss/{token}.xml`.
+      Content calendar autopilot now publishes only to active **API** connections; manual connections are skipped.
+    - **2026-11-12**: Added **Wix app installation**: `POST /sites/{site}/publishing/wix/authorize` and the public callback `GET /integrations/wix/callback`. ⚠️ The callback is currently unreachable, see that endpoint.
+      Added `DELETE /sites/{site}/publishing/connections/{connection}` (works for any platform).
+      Manual Wix connections now need `credentials.instance_id` + `config.auth = app` instead of `credentials.access_token`. Webflow's `config.collection_id` is no longer checked on create.
+      Wix publishing (`options.category_ids`) always publishes live.
+      **Content calendar autopilot:** a scheduler now researches, writes and publishes due calendar items on plans with `autopilot_enabled`. Calendar items have new fields `article_research_id`, `article_id` and new statuses.
     - **2026-11-10**: Added the admin endpoints `GET /admin/users-with-credits` (paginated list of users with their API credit balances) and `PUT /users/{user}/credits` (set a user's balance to an exact value).
       `POST /sites/{site}/copilot/ask` now forces the model to reply in a fixed JSON format, so `actions` items always have the same 6 fields. It returns **500** if the answer is cut off by the token limit.
     - **2026-11-02**: Added **API credits** (see the section below). Paid DataForSEO calls are now billed in credits to the workspace owner's wallet.
@@ -1590,7 +1599,12 @@ paths:
                   items: { type: string, format: date }
                   example: ['2026-11-27']
                 publish_time: { type: string, pattern: '^\d{2}:\d{2}$', example: '09:00' }
-                autopilot_enabled: { type: boolean, example: false }
+                autopilot_enabled:
+                  type: boolean
+                  example: false
+                  description: |
+                    When `true`, a scheduler (every minute) picks up each `planned` item once its `scheduled_date` + time (item time, else plan `publish_time`, in the item/plan timezone) has passed. It researches the keyword, writes the article and publishes it to **every active API connection** on the site (manual and webhook connections such as Make.com are skipped), then sets the item's status.
+                    Needs the queue worker and the scheduler running on the server. Items without a keyword, or sites without an active API connection, end as `failed`.
       responses:
         '200':
           description: Plan created
@@ -2064,18 +2078,30 @@ paths:
       summary: Create a publishing connection
       operationId: createPublishingConnection
       description: |
-        Required `credentials` / `config` keys depend on `platform` + `method` (only when `method = api`):
+        Required `credentials` / `config` keys depend on `platform` + `method` (`method = api`, plus `make` with `method = webhook`):
 
         | Platform | Required keys |
         |---|---|
+        | make | `method: webhook` only. `credentials.webhook_url`: an `https://` URL. Only Make.com hook URLs (`hook.make.com` or `hook.<region>.make.com`) work: other https URLs are saved, but `/test` and publishing fail. Optional `config.send_full_content` (default `true`) controls whether the article HTML is sent. |
+        | lovable | `method: api` only. `credentials.base_url`: the `https://` URL of the Lovable site. `credentials.api_key`: 32–255 characters, the key the Lovable site expects. |
         | wordpress | `credentials.site_url`, `credentials.username`, `credentials.application_password` |
         | shopify | `credentials.store_domain` (`*.myshopify.com`), `credentials.access_token`. Publishing also needs `config.blog_id` or `options.blog_id`, which you can get from `GET .../shopify-blogs`. |
-        | webflow | `credentials.access_token`, `config.collection_id` |
-        | wix | `credentials.access_token`, `credentials.site_id` |
+        | webflow | `credentials.access_token`. `config.collection_id` is no longer validated here, but `/test` and publishing still need it. |
+        | wix | Use the install flow instead (`POST wix/authorize`). Manual create needs `credentials.instance_id` and `config.auth: "app"`; `credentials.site_id` and `config.author_member_id` are optional. |
         | ghost | `credentials.admin_api_key`, `config.site_url` |
         | wordpress_com | ❌ Not allowed here. Use the OAuth flow (`GET wordpress-com/authorize`). |
 
-        `manual` connections are created as `active`. API connections are created as `pending`; call `/test` to activate them.
+        `manual` connections are created as `active`. API and webhook connections are created as `pending`; call `/test` to activate them.
+
+        **Make.com.** `/test` POSTs `{event: "rankoya.connection.test", source, message, delivery_id, sent_at}` to the webhook. Publishing POSTs `{event: "article.published" | "article.updated", source: "rankoya", delivery_id, sent_at, target_status: "draft" | "publish", site: {id, name, domain, url}, article: {id, title, slug, meta_title, meta_description, status, published_at, url, content}}`. Both carry the headers `X-Rankoya-Event` and `X-Rankoya-Delivery-ID`. Any 2xx counts as success.
+        `target_status` comes from the publish `options.status` (default `publish`) and only tells the Make scenario what to do. Rankoya records every successful delivery as `published` and marks the article published, even when `target_status` is `draft`. `published_url` is only set if you pass `options.url`.
+
+        **Lovable.** The Lovable site must expose these routes, each checking the `X-Rankoya-API-Key` header:
+        - `GET {base_url}/api/public/rankoya/health` for `/test` (any 2xx).
+        - `POST {base_url}/api/public/rankoya/articles` to publish.
+        - `PUT {base_url}/api/public/rankoya/articles/{rankoya article id}` to update.
+
+        Article requests send the same envelope as Make, plus `article.excerpt` and `article.cover_image_url` (always with `content`). `article.status` is `published` or `draft`. The site must answer `{success: true, data: {id, status: "published" | "draft", url, slug}}`. `data.status` decides whether the publication is `published` or `draft`, and `data.url` becomes the `published_url`.
       parameters:
         - $ref: '#/components/parameters/SiteId'
       requestBody:
@@ -2090,6 +2116,18 @@ paths:
                   platform: wordpress
                   method: api
                   credentials: { site_url: 'https://blog.example.com', username: admin, application_password: 'abcd efgh ijkl mnop' }
+              make:
+                value:
+                  name: Make.com scenario
+                  platform: make
+                  method: webhook
+                  credentials: { webhook_url: 'https://hook.eu2.make.com/abc123xyz' }
+              lovable:
+                value:
+                  name: Lovable site
+                  platform: lovable
+                  method: api
+                  credentials: { base_url: 'https://my-site.lovable.app', api_key: 'your-lovable-api-key' }
               manual:
                 value: { name: Copy & paste, platform: custom, method: manual }
       responses:
@@ -2131,6 +2169,54 @@ paths:
                   value: { success: false, message: This publishing integration is not available yet. }
                 noWorkspace:
                   value: { success: false, message: No active workspace found. }
+        '500': { $ref: '#/components/responses/ServerError' }
+
+  /sites/{site}/publishing/connections/{connection}:
+    delete:
+      tags: [Publishing]
+      summary: Permanently delete a publishing connection
+      operationId: deletePublishingConnection
+      description: |
+        Hard delete for a connection of **any platform**. Ask the user to confirm first.
+        Past publications are kept; their `publishing_connection_id` becomes `null`.
+        The 404 message says "Wix integration not found." for every platform.
+      parameters:
+        - $ref: '#/components/parameters/SiteId'
+        - name: connection
+          in: path
+          required: true
+          schema: { type: integer, example: 4 }
+      responses:
+        '200':
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  message: { type: string, example: Publishing integration permanently deleted. }
+                  data:
+                    type: object
+                    properties:
+                      id: { type: integer, example: 4 }
+                      platform: { type: string, example: wix }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/NoWorkspaceAvailable' }
+        '404':
+          description: Site not in the active workspace, or connection not found on this site
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorEnvelope' }
+              examples:
+                site: { value: { success: false, message: Site not found in the active workspace. } }
+                connection: { value: { success: false, message: Wix integration not found. } }
+        '409':
+          description: Another record still references the connection
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorEnvelope' }
+              example: { success: false, message: Unable to delete this integration because related records may still reference it. }
         '500': { $ref: '#/components/responses/ServerError' }
 
   /sites/{site}/publishing/connections/{connection}/test:
@@ -2208,7 +2294,10 @@ paths:
                 options:
                   type: object
                   additionalProperties: true
-                  description: Provider-specific options (for example `status draft|publish`)
+                  description: |
+                    Provider-specific options (for example `status draft|publish`).
+                    Make.com and Lovable: `status` (`draft` or `publish`, default `publish`; anything else fails) and `url`. Lovable also accepts `cover_image_url`.
+                    Wix: optional `category_ids` (array of Wix Blog category IDs). Wix posts are always published live; there is no draft option.
       responses:
         '200':
           description: Published, or prepared for manual publishing
@@ -2412,6 +2501,198 @@ paths:
         '404': { $ref: '#/components/responses/ModelNotFound' }
         '500': { $ref: '#/components/responses/ServerError' }
 
+  /sites/{site}/publishing/rss:
+    get:
+      tags: [Publishing]
+      summary: Get the site's RSS feed settings
+      operationId: getRssFeed
+      description: |
+        Each site has at most one private RSS feed. When none exists yet, `data` is just `{ "exists": false, "is_active": false }`.
+        `feed_url` contains a secret token. Anyone with the URL can read the feed, so treat it like a password.
+      parameters:
+        - $ref: '#/components/parameters/SiteId'
+      responses:
+        '200':
+          description: Feed settings
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  data: { $ref: '#/components/schemas/RssFeedSettings' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '404': { $ref: '#/components/responses/RssSiteNotFound' }
+    post:
+      tags: [Publishing]
+      summary: Create the site's RSS feed
+      operationId: createRssFeed
+      description: |
+        Creates the feed with defaults: name `"{site name} Articles"`, active, full content, 50 items. If the feed already exists it's returned unchanged with **200**.
+      parameters:
+        - $ref: '#/components/parameters/SiteId'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RssFeedCreateResponse' }
+        '200':
+          description: Already existed
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RssFeedCreateResponse' }
+              example: { success: true, message: Your RSS feed already exists., data: { id: 3, name: Example Inc Articles, is_active: true, feed_url: 'https://api.rankoya.uk/api/rss/Ab3…64chars.xml', items_limit: 50 } }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '404': { $ref: '#/components/responses/RssSiteNotFound' }
+
+  /sites/{site}/publishing/rss/settings:
+    patch:
+      tags: [Publishing]
+      summary: Update RSS feed settings
+      operationId: updateRssFeed
+      description: Send only the fields to change.
+      parameters:
+        - $ref: '#/components/parameters/SiteId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: { type: string, maxLength: 255, example: Example Inc Articles, description: Can't be empty when sent }
+                description: { type: string, maxLength: 1000, nullable: true }
+                include_full_content: { type: boolean, description: Adds the full article HTML (`content:encoded`) to each item }
+                items_limit: { type: integer, minimum: 1, maximum: 100, example: 50 }
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  message: { type: string, example: RSS feed settings updated. }
+                  data:
+                    type: object
+                    properties:
+                      name: { type: string }
+                      description: { type: string, nullable: true }
+                      include_full_content: { type: boolean }
+                      items_limit: { type: integer }
+                      feed_url: { type: string, format: uri }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '404': { $ref: '#/components/responses/RssFeedNotFound' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+
+  /sites/{site}/publishing/rss/regenerate:
+    post:
+      tags: [Publishing]
+      summary: Generate a new RSS feed URL
+      operationId: regenerateRssFeedUrl
+      description: Replaces the secret token. **The old URL stops working immediately**, so warn the user that subscribed readers must be updated.
+      parameters:
+        - $ref: '#/components/parameters/SiteId'
+      responses:
+        '200':
+          description: New URL
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  message: { type: string, example: Your RSS feed URL has been regenerated. The previous URL is now invalid. }
+                  data:
+                    type: object
+                    properties:
+                      feed_url: { type: string, format: uri }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '404': { $ref: '#/components/responses/RssFeedNotFound' }
+
+  /sites/{site}/publishing/rss/toggle:
+    post:
+      tags: [Publishing]
+      summary: Enable or disable the RSS feed
+      operationId: toggleRssFeed
+      description: Flips `is_active` (no body). A disabled feed's URL returns **404** until it's enabled again; the URL itself doesn't change.
+      parameters:
+        - $ref: '#/components/parameters/SiteId'
+      responses:
+        '200':
+          description: New state
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  message: { type: string, enum: [RSS feed enabled., RSS feed disabled.] }
+                  data:
+                    type: object
+                    properties:
+                      is_active: { type: boolean }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '404': { $ref: '#/components/responses/RssFeedNotFound' }
+
+  /sites/{site}/publishing/wix/authorize:
+    post:
+      tags: [Publishing]
+      summary: Start the Wix app installation
+      operationId: wixAuthorize
+      description: |
+        **Flow**
+        1. Call this endpoint and send the browser to `authorization_url` (the Wix app installer). The link is valid for **15 minutes** and works once.
+        2. After the user installs the app, Wix sends the browser to `GET /integrations/wix/callback`.
+        3. The callback creates the connection, tests it and redirects to `{WIX_FRONTEND_URL}{return_to}?connected=wix&connection_id={id}`, or `?error=<message>` on failure.
+
+        The Wix site must have the **Wix Blog** app installed.
+        ⚠️ Step 2 is currently broken, see `GET /integrations/wix/callback`.
+      parameters:
+        - $ref: '#/components/parameters/SiteId'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                return_to:
+                  type: string
+                  maxLength: 500
+                  default: /integrations
+                  example: /sites/1/settings/publishing
+                  description: Frontend path to come back to. Must start with a single `/` (no full URLs). Don't include a query string; the callback appends `?connected=…` itself.
+      responses:
+        '200':
+          description: Installer URL (no `data` wrapper)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  authorization_url: { type: string, format: uri, example: 'https://www.wix.com/app-installer?appId=…&shareUrlId=…&postInstallationUrl=…' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '404':
+          description: No active workspace, or the site is not in it
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorEnvelope' }
+              example: { success: false, message: Site not found in the active workspace. }
+        '422':
+          description: '`return_to` is not a relative path, or validation failed'
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/ErrorEnvelope'
+                  - $ref: '#/components/schemas/ValidationErrorBody'
+              example: { success: false, message: Invalid return URL. }
+        '500': { $ref: '#/components/responses/ServerError' }
+
   /sites/{site}/publishing/wordpress-com/authorize:
     get:
       tags: [Publishing]
@@ -2570,12 +2851,83 @@ paths:
                 noToken: { value: { success: false, message: WordPress.com did not return an access token. } }
                 sites: { value: { success: false, message: Unable to retrieve WordPress.com sites. } }
 
+  /rss/{token}.xml:
+    get:
+      tags: [Publishing OAuth & Webhooks]
+      summary: Public RSS 2.0 feed (for feed readers, not the front end)
+      operationId: publicRssFeed
+      security: []
+      description: |
+        Use the `feed_url` returned by the RSS endpoints; don't build it yourself.
+        Lists the site's articles with `status = published`, newest first, up to `items_limit`. An article becomes `published` after a successful publish through an API connection, so a site that only uses manual publishing gets an empty feed.
+        Each item's `link` is the article's recorded published URL, or `{site url}/blog/{slug}` when there isn't one. `content:encoded` (full HTML) is included when `include_full_content` is on.
+      parameters:
+        - name: token
+          in: path
+          required: true
+          description: 64 letters and digits
+          schema: { type: string, pattern: '^[A-Za-z0-9]{64}$' }
+      responses:
+        '200':
+          description: RSS XML
+          content:
+            application/rss+xml:
+              schema: { type: string }
+              example: |
+                <?xml version="1.0" encoding="UTF-8"?>
+                <rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom">
+                  <channel><title>Example Inc Articles</title><link>https://example.com</link>
+                    <item><title>Technical SEO checklist</title><link>https://example.com/blog/technical-seo-checklist</link><pubDate>Thu, 12 Nov 2026 09:00:00 +0000</pubDate></item>
+                  </channel>
+                </rss>
+        '404':
+          description: 'Unknown token, or the feed is disabled (JSON only when the client sends `Accept: application/json`; feed readers get the HTML 404 page)'
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FrameworkError' }
+              example: { message: RSS feed not found or disabled. }
+
+  /integrations/wix/callback:
+    get:
+      tags: [Publishing OAuth & Webhooks]
+      summary: Wix app installation callback (called by Wix, not the front end)
+      operationId: wixInstallCallback
+      security: []
+      description: |
+        Always answers with a **302 redirect** to the frontend, never JSON.
+        - **Success:** `{WIX_FRONTEND_URL}{return_to}?connected=wix&connection_id={id}`. The connection is created and tested right away. If the test failed it is saved with `status: error` and `last_error`, but the redirect still says `connected=wix`, so reload the connection and check `status`.
+        - **Failure:** `{WIX_FRONTEND_URL}{return_to}?error=<message>` (or `/integrations` when the state is missing or expired). Show `error` to the user.
+
+        Common errors: `Missing Wix installation information.`, `Wix installation session expired. Please try again.`, `Wix Blog is not installed on this site. Please install Wix Blog and try again.`
+        `WIX_FRONTEND_URL` falls back to `APP_URL` (the backend URL) when it isn't set.
+
+        ⚠️ **Currently unreachable.** The installer's return link is built from the route name `publishing.wix.callback`, but the older stub `GET /publishing/wix/callback` (in `routes/api.php`) is registered later with the same name. So Wix sends the user to the stub, which returns **501** JSON, and no connection is created. The backend needs to rename one of the two routes. The duplicate name also makes `php artisan route:cache` fail.
+      parameters:
+        - name: state
+          in: query
+          required: true
+          schema: { type: string }
+        - name: signedInstance
+          in: query
+          required: true
+          description: Signed instance token from Wix
+          schema: { type: string }
+      responses:
+        '302':
+          description: Redirect to the frontend (success or error)
+          headers:
+            Location:
+              schema:
+                type: string
+                example: 'https://app.rankoya.uk/integrations?connected=wix&connection_id=12'
+
   /publishing/wix/callback:
     get:
       tags: [Publishing OAuth & Webhooks]
-      summary: Wix OAuth redirect (not implemented)
+      summary: Old Wix OAuth redirect (not implemented)
       operationId: wixCallback
       security: []
+      description: Stub that still answers **501**. It shares its route name with `GET /integrations/wix/callback`, which currently sends Wix installs here by mistake.
       responses:
         '501':
           description: Not implemented
@@ -5424,6 +5776,18 @@ components:
         application/json:
           schema: { $ref: '#/components/schemas/StatusEnvelope' }
           example: { status: error, message: Unable to complete request }
+    RssSiteNotFound:
+      description: No active workspace, or the site isn't in it (plain `abort(404)`, so `message` carries no detail)
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/FrameworkError' }
+          example: { message: '' }
+    RssFeedNotFound:
+      description: The site has no RSS feed yet (call `POST /sites/{site}/publishing/rss` first), or the site isn't in the active workspace
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/FrameworkError' }
+          example: { message: 'No query results for model [App\Models\RssFeed].' }
     InsufficientApiCredits:
       description: The workspace owner's wallet doesn't have enough API credits for the reservation
       content:
@@ -5615,8 +5979,8 @@ components:
       required: [name, platform, method]
       properties:
         name: { type: string, maxLength: 255 }
-        platform: { type: string, enum: [wordpress, wordpress_com, wix, shopify, webflow, ghost, duda, nextjs, custom] }
-        method: { type: string, enum: [api, webhook, manual] }
+        platform: { type: string, enum: [wordpress, wordpress_com, wix, shopify, webflow, ghost, duda, nextjs, custom, make, lovable] }
+        method: { type: string, enum: [api, webhook, manual], description: '`make` needs `webhook`; every other automated platform uses `api`' }
         credentials:
           type: object
           nullable: true
@@ -5628,6 +5992,9 @@ components:
             access_token: { type: string, maxLength: 2048 }
             site_id: { type: string }
             admin_api_key: { type: string }
+            webhook_url: { type: string, format: uri, maxLength: 2048, example: 'https://hook.eu2.make.com/abc123xyz', description: 'Make.com: must start with https://' }
+            base_url: { type: string, format: uri, maxLength: 255, example: 'https://my-site.lovable.app', description: 'Lovable: must start with https://' }
+            api_key: { type: string, minLength: 32, maxLength: 255, description: Lovable }
         config:
           type: object
           nullable: true
@@ -5636,6 +6003,7 @@ components:
             site_url: { type: string, format: uri }
             blog_id: { type: string }
             author_name: { type: string }
+            send_full_content: { type: boolean, default: true, description: 'Make.com: include `article.content` (HTML) in the webhook payload' }
             field_mapping:
               type: object
               properties:
@@ -5989,6 +6357,32 @@ components:
         updated_at: { type: string, format: date-time }
 
     # ---- SERP ----
+    RssFeedSettings:
+      type: object
+      properties:
+        exists: { type: boolean, example: true, description: False when the site has no feed yet; then only `is_active` (false) is also present }
+        id: { type: integer, example: 3 }
+        name: { type: string, example: Example Inc Articles }
+        description: { type: string, nullable: true, example: Latest published articles from Example Inc }
+        is_active: { type: boolean, example: true }
+        include_full_content: { type: boolean, example: true }
+        items_limit: { type: integer, example: 50 }
+        feed_url: { type: string, format: uri, example: 'https://api.rankoya.uk/api/rss/Ab3…64chars.xml', description: Secret URL for feed readers }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+    RssFeedCreateResponse:
+      type: object
+      properties:
+        success: { type: boolean, example: true }
+        message: { type: string, example: Your RSS feed has been created. }
+        data:
+          type: object
+          properties:
+            id: { type: integer, example: 3 }
+            name: { type: string, example: Example Inc Articles }
+            is_active: { type: boolean, example: true }
+            feed_url: { type: string, format: uri }
+            items_limit: { type: integer, example: 50 }
     ApiUsageLog:
       type: object
       description: One paid provider task
@@ -6175,12 +6569,23 @@ components:
         scheduled_date: { type: string, format: date-time, example: '2026-11-14T00:00:00.000000Z' }
         scheduled_time: { type: string, nullable: true, example: '09:00' }
         timezone: { type: string, nullable: true }
-        status: { type: string, example: planned, description: 'removed after the /remove endpoint' }
+        status:
+          type: string
+          example: planned
+          description: |
+            `planned` until it's due. `removed` after the /remove endpoint.
+            Autopilot statuses: `processing` (being researched, written and published), `published` (live on every active connection), `completed` (at least one connection saved a draft), `ready_for_manual_publish` (a manual connection is involved), `partially_published` (some connections failed), `failed` (see `metadata.autopilot.last_error`).
+        article_research_id: { type: integer, nullable: true, description: Research used by autopilot }
+        article_id: { type: integer, nullable: true, description: Article written by autopilot }
         position: { type: integer, nullable: true }
         priority_score: { type: string, example: '72.50' }
         article_type: { type: string, nullable: true, example: blog_post }
         notes: { type: string, nullable: true }
-        metadata: { type: object, nullable: true, additionalProperties: true }
+        metadata:
+          type: object
+          nullable: true
+          additionalProperties: true
+          description: 'Autopilot writes `metadata.autopilot`: `completed_at` or `last_error` / `last_attempt_at` / `failed_at`, and `connections` (`[{connection_id, platform, status}]`).'
         created_at: { type: string, format: date-time }
         updated_at: { type: string, format: date-time }
 

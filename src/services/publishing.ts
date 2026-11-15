@@ -44,6 +44,31 @@ const publishingService = {
     return response.data;
   },
 
+  /**
+   * Permanently deletes a connection of any platform; confirm with the user
+   * first. Past publications are kept. 409 when something still references it.
+   */
+  deleteConnection: async (siteId: number, connectionId: number) => {
+    const response = await api.delete<ApiSuccess<{ id: number; platform: string }>>(
+      sitePath(siteId, `publishing/connections/${connectionId}`),
+    );
+    return response.data;
+  },
+
+  /**
+   * Wix install step 1: send the browser to `authorization_url` (valid 15
+   * minutes, works once). Laravel's callback then creates and tests the
+   * connection and redirects to `{return_to}?connected=wix&connection_id=…`
+   * or `?error=<message>`. `returnTo` is a path with no query string.
+   */
+  wixAuthorize: async (siteId: number, returnTo: string) => {
+    const response = await api.post<{ success: boolean; authorization_url: string }>(
+      sitePath(siteId, "publishing/wix/authorize"),
+      { return_to: returnTo },
+    );
+    return response.data;
+  },
+
   /** Publishes, or prepares the article for manual publishing on a `manual` connection. */
   publishArticle: async (siteId: number, articleId: number, payload: PublishArticlePayload) => {
     const response = await api.post<ApiSuccess<Publication & { article: Article; connection: PublishingConnection }>>(

@@ -16,7 +16,9 @@ export const isSetupStep = (value: string): value is SiteSetupStep =>
   (SITE_SETUP_STEPS as readonly string[]).includes(value);
 
 /** Steps that drop the image pane and use the full width. */
-export const WIDE_STEPS: readonly ProgressStep[] = ["billing"];
+// The billing step was the only wide one; it's off for now.
+// export const WIDE_STEPS: readonly ProgressStep[] = ["billing"];
+export const WIDE_STEPS: readonly ProgressStep[] = [];
 
 export const NEW_SITE_PATH = "/sites/new";
 export const SITES_PATH = "/sites";

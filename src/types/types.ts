@@ -1481,15 +1481,46 @@ export interface ContentCalendarItem {
   scheduled_date: DateTime;
   scheduled_time: string | null;
   timezone: string | null;
-  /** e.g. planned; `removed` after the /remove endpoint */
-  status: string;
+  /**
+   * `planned` until it's due; `removed` after the /remove endpoint. Autopilot:
+   * `processing` (being researched, written and published), `published` (live
+   * on every active connection), `completed` (at least one connection saved a
+   * draft), `ready_for_manual_publish` (a manual connection is involved),
+   * `partially_published` (some connections failed), `failed`.
+   */
+  status: ContentCalendarItemStatus;
+  /** Research used by autopilot. */
+  article_research_id?: number | null;
+  /** Article written by autopilot. */
+  article_id?: number | null;
   position: number | null;
   priority_score: Decimal;
   article_type: string | null;
   notes: string | null;
+  /** Autopilot writes `metadata.autopilot` (see `CalendarAutopilotMeta`). */
   metadata: JsonObject | null;
   created_at: DateTime;
   updated_at: DateTime;
+}
+
+export type ContentCalendarItemStatus =
+  | "planned"
+  | "removed"
+  | "processing"
+  | "published"
+  | "completed"
+  | "ready_for_manual_publish"
+  | "partially_published"
+  | "failed"
+  | (string & {});
+
+/** `ContentCalendarItem.metadata.autopilot`, written by the autopilot scheduler. */
+export interface CalendarAutopilotMeta {
+  completed_at?: DateTime;
+  last_error?: string;
+  last_attempt_at?: DateTime;
+  failed_at?: DateTime;
+  connections?: { connection_id: number; platform: string; status: string }[];
 }
 
 export interface ContentPlanWithItems extends ContentPlan {
@@ -1657,7 +1688,7 @@ export interface UpdateArticlePayload {
 // ── Publishing ───────────────────────────────────────────────────────────
 
 export type PublishingPlatform =
-  "wordpress" | "wordpress_com" | "wix" | "shopify" | "webflow" | "ghost" | "duda" | "nextjs" | "custom";
+  "wordpress" | "wordpress_com" | "wix" | "shopify" | "webflow" | "ghost" | "duda" | "nextjs" | "lovable" | "custom";
 export type PublishingMethod = "api" | "webhook" | "manual";
 export type PublishingConnectionStatus = "pending" | "active" | "error";
 
@@ -1682,10 +1713,12 @@ export interface PublishingConnection {
  * wordpress: credentials.site_url, username, application_password ·
  * shopify: credentials.store_domain, access_token ·
  * webflow: credentials.access_token, config.collection_id ·
- * wix: credentials.access_token, site_id (API key) — or instance_id + site_id when installed
- *   through Rankoya's Wix app (/api/integrations/wix/*; backend support pending) ·
+ * wix: installed through the backend (POST publishing/wix/authorize); a manual create needs
+ *   credentials.instance_id + config.auth "app" ·
  * ghost: credentials.admin_api_key, config.site_url ·
  * duda: credentials.username, password, site_name, host (backend support pending) ·
+ * lovable: credentials.base_url (the site's https:// URL), credentials.api_key (32–255 chars, the
+ *   RANKOYA_API_KEY Lovable generated); `/test` calls {base_url}/api/public/rankoya/health ·
  * wordpress_com: not allowed, use the OAuth flow.
  * method = webhook (Make, Lovable, Replit): platform `custom`, credentials.webhook_url + secret,
  *   config.provider (backend support pending; see docs/integrations-testing.md).
@@ -1710,6 +1743,10 @@ export interface CreatePublishingConnectionPayload {
     site_name?: string;
     /** Duda API host: api.duda.co or api.eu.duda.co. */
     host?: string;
+    /** Lovable: the site's https:// URL. */
+    base_url?: string;
+    /** Lovable: the RANKOYA_API_KEY the site checks in X-Rankoya-API-Key. */
+    api_key?: string;
     /** method = webhook: where each published article is POSTed. */
     webhook_url?: string;
     /** method = webhook: the HMAC key for X-Rankoya-Signature (`whsec_…`). */
@@ -1720,10 +1757,37 @@ export interface CreatePublishingConnectionPayload {
     site_url?: string;
     blog_id?: string;
     author_name?: string;
-    /** method = webhook: which card it belongs to (make, lovable, replit); platform is `custom`. */
+    /** Which card a `custom` connection belongs to: make (webhook), lovable or replit (manual, for now). */
     provider?: string;
     field_mapping?: { title?: string; content?: string; slug?: string; meta_description?: string };
   } | null;
+}
+
+/**
+ * `GET /sites/{site}/publishing/rss` → `data`. Without a feed yet, only
+ * `exists: false` and `is_active: false` are present.
+ */
+export interface RssFeedSettings {
+  exists: boolean;
+  is_active: boolean;
+  id?: number;
+  name?: string;
+  description?: string | null;
+  /** Adds each article's full HTML to the feed, not only its summary. */
+  include_full_content?: boolean;
+  /** 1 to 100. */
+  items_limit?: number;
+  /** Secret link for feed readers; anyone holding it can read the feed. */
+  feed_url?: string;
+  created_at?: DateTime;
+  updated_at?: DateTime;
+}
+
+export interface UpdateRssFeedPayload {
+  name?: string;
+  description?: string | null;
+  include_full_content?: boolean;
+  items_limit?: number;
 }
 
 /** `POST /connections/{id}/test` → `data`. Check `success`: a 200 can still be a rejection. */
@@ -2401,7 +2465,7 @@ export const SITE_SETUP_STEPS = [
   "details",
   "google-search-console",
   "core-topics",
-  "billing",
+  // "billing", // the free trial / plan screen is off for now (see setup-flow.tsx)
   "integration",
   "preferences",
   "done",

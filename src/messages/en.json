@@ -1693,7 +1693,9 @@
       "published": "Published",
       "scheduled": "Scheduled",
       "needsApproval": "Needs approval",
-      "draft": "Draft"
+      "draft": "Draft",
+      "failed": "Failed",
+      "writing": "Writing now"
     },
     "emptyTitle": "Nothing planned for {month}",
     "emptyDescription": "Ask Rankoya to plan the month. It picks articles from questions AI assistants don't mention you for, and searches you're close to winning.",
@@ -1751,6 +1753,13 @@
       "status": "Status",
       "emptyTitle": "No content plans yet",
       "emptyBody": "Generate a plan for a month from the calendar view."
+    },
+    "day": {
+      "open": "See the schedule for {date}",
+      "count": "{count, plural, =0 {Nothing scheduled} one {# article scheduled} other {# articles scheduled}}",
+      "empty": "Nothing is scheduled for this day.",
+      "time": "Due {time}",
+      "keyword": "Keyword: {keyword}"
     }
   },
   "editor": {
@@ -3001,7 +3010,8 @@
       "testFailed": "Saved, but activating it failed: {message}. Fix the details and connect again, or submit the same details to retry.",
       "connectFailed": "Couldn't connect. Check the details and try again.",
       "fieldsRequired": "Fill in every field.",
-      "syncFailed": "Couldn't pull Search Console data. Try again."
+      "syncFailed": "Couldn't pull Search Console data. Try again.",
+      "disconnectFailed": "Couldn't disconnect. Try again."
     },
     "toasts": {
       "connected": "{name} connected.",
@@ -3041,7 +3051,8 @@
       "sync": "Sync now",
       "gscChooseTitle": "Choose your site in Search Console",
       "gscChooseBody": "You're signed in with Google. Pick the Search Console property for {domain} so Rankoya can read its search data.",
-      "wpcomChooseTitle": "Finishing your WordPress.com connection"
+      "wpcomChooseTitle": "Finishing your WordPress.com connection",
+      "disconnectBody": "Rankoya stops publishing to it straight away. Articles already published stay where they are, and you can connect again any time."
     },
     "providers": {
       "telegram": {
@@ -3167,21 +3178,21 @@
       },
       "lovable": {
         "name": "Lovable",
-        "description": "Rankoya sends each published article to your Lovable app, which shows it on its blog.",
+        "description": "Rankoya publishes finished articles straight to the blog in your Lovable app.",
         "facts": {
-          "access": "A webhook endpoint in your app",
-          "data": "Published articles",
-          "control": "Every change needs approval"
+          "access": "An API key your app creates",
+          "data": "Articles and their SEO details",
+          "control": "Remove the key any time"
         },
         "disconnectBody": "{account}"
       },
       "replit": {
         "name": "Replit",
-        "description": "Rankoya sends each published article to your Replit app, which shows it on its blog.",
+        "description": "Rankoya prepares each finished article for you to copy into your Replit app.",
         "facts": {
-          "access": "A webhook endpoint in your app",
-          "data": "Published articles",
-          "control": "Every change needs approval"
+          "access": "Nothing to connect",
+          "data": "Articles ready to copy",
+          "control": "You paste each one in"
         },
         "disconnectBody": "{account}"
       },
@@ -3228,7 +3239,22 @@
       "adminApiKey": "Admin API key",
       "dudaUsername": "API username",
       "dudaPassword": "API password",
-      "dudaSiteName": "Site name"
+      "dudaSiteName": "Site name",
+      "lovableUrl": "Website URL",
+      "lovableApiKey": "Rankoya API secret from Lovable"
+    },
+    "placeholders": {
+      "lovableUrl": "https://mywebsite.lovable.app",
+      "lovableApiKey": "Paste your RANKOYA_API_KEY"
+    },
+    "lovable": {
+      "promptTitle": "Setup prompt for Lovable",
+      "promptBody": "Paste it into your existing Lovable project. It adds the endpoints Rankoya publishes to and shows you a RANKOYA_API_KEY to paste below.",
+      "viewPrompt": "View prompt",
+      "hidePrompt": "Hide prompt",
+      "copyPrompt": "Copy prompt",
+      "testAndConnect": "Test and connect",
+      "validates": "Rankoya validates the credentials before activating the connection."
     },
     "wpcom": {
       "title": "Connect WordPress.com",
@@ -3381,18 +3407,18 @@
         "note": "Make's free plan includes webhooks. Every published article runs the scenario once."
       },
       "lovable": {
-        "s1": "Copy the prompt below and paste it into your Lovable project's chat.",
-        "s2": "When Lovable asks for <code>RANKOYA_WEBHOOK_SECRET</code>, paste the signing secret below.",
-        "s3": "Once Lovable has published the change, copy the endpoint URL it gives you and paste it below.",
-        "s4": "Click <b>Send test article</b>, then save the connection.",
-        "note": "Lovable needs Supabase (Lovable Cloud) turned on to run the endpoint."
+        "s1": "Click <b>Copy prompt</b> and paste it into the chat of your existing Lovable project.",
+        "s2": "Let Lovable finish. It adds the Rankoya endpoints to your app, tests them and deploys.",
+        "s3": "Copy your website's public URL and the <code>RANKOYA_API_KEY</code> Lovable shows you. It's only shown once.",
+        "s4": "Paste both below and click <b>Test and connect</b>.",
+        "note": "Lovable keeps the key as a server-side secret, so it never reaches your visitors."
       },
       "replit": {
-        "s1": "Copy the prompt below and paste it into Replit Agent in your app.",
-        "s2": "Add <code>RANKOYA_WEBHOOK_SECRET</code> under <b>Secrets</b>, with the signing secret below as its value.",
-        "s3": "Deploy the app, then paste the endpoint's public URL below. The dev URL stops working when the workspace sleeps.",
-        "s4": "Click <b>Send test article</b>, then save the connection.",
-        "note": "Use a deployment (Autoscale or Reserved VM) so the endpoint is always reachable."
+        "s1": "Choose <b>Connect</b>. There's nothing to fill in.",
+        "s2": "When an article is ready, open it in Rankoya and click <b>Publish</b>. Rankoya prepares it to copy.",
+        "s3": "Copy the HTML (or the text) and paste it into your Replit app, for example by asking Replit to add it as a new blog post.",
+        "s4": "Use the title, meta description and URL slug Rankoya gives you, then publish your app.",
+        "note": "Sending articles to Replit automatically is coming later. For now each article is pasted in by hand."
       }
     },
     "shopifyToken": {
@@ -3419,14 +3445,7 @@
       "install": "Install on Wix",
       "orApiKey": "Or connect with a Wix API key instead, using the steps below.",
       "errors": {
-        "cancelled": "The Wix install was cancelled. Nothing was connected.",
-        "signature": "Wix sent back details we couldn't verify. Try connecting again.",
-        "token": "Wix didn't give Rankoya access to your site. Try connecting again.",
-        "no_blog": "Add Wix Blog to your site, then connect again.",
-        "not_configured": "Connecting Wix isn't set up yet. Try again later.",
-        "state": "The connection link expired. Start again from Integrations.",
-        "site": "Pick a site before connecting Wix.",
-        "save": "Wix is installed, but we couldn't save the connection. Try again."
+        "save": "Couldn't connect Wix. Try again."
       }
     },
     "webhook": {
@@ -3453,29 +3472,63 @@
         "webhook_private": "That address isn't reachable from the internet. Use your app's public URL.",
         "webhook_dns": "We couldn't find that address. Check the URL and try again.",
         "webhook_unreachable": "We couldn't reach that URL. Check it's deployed and public, then try again.",
-        "webhook_rejected": "The URL answered with error {status}. Check the endpoint and the signing secret, then try again.",
+        "webhook_rejected": "The URL answered with error {status}. Check the endpoint, then try again.",
         "site": "You don't have access to this site.",
         "unauthenticated": "Your session ended. Sign in again.",
         "save": "The test worked, but we couldn't save the connection. Try again.",
-        "make_not_listening": "Make isn't listening on this webhook. Open the scenario, click the webhook module so it says it's waiting for data (or click Run once), then send the test again."
+        "make_not_listening": "Make isn't listening on this webhook. Open the scenario, click the webhook module so it says it's waiting for data (or click Run once), then send the test again.",
+        "webhook_no_content": "That article has no content yet. Choose one that's been written."
       },
       "previewPrompt": "Preview prompt",
-      "hidePrompt": "Hide prompt"
+      "hidePrompt": "Hide prompt",
+      "articleLabel": "Article to send",
+      "articleHelper": "Sent to the webhook exactly as it is now. Nothing changes in Rankoya.",
+      "articleLoading": "Loading articles…",
+      "articleEmpty": "No written articles yet",
+      "articlePlaceholder": "Choose an article",
+      "deliveredMake": "Test article delivered. Now choose an article and send it.",
+      "publish": "Send to {name}",
+      "published": "Article sent to {name}.",
+      "publishedBody": "\"{title}\" was sent to {name}. Check it arrived in your scenario."
     },
     "feed": {
-      "open": "Get feed link",
+      "open": "Manage feed",
       "done": "Done",
-      "rss": {
-        "title": "RSS feed",
-        "body": "For feed readers and Make's RSS module."
-      },
-      "json": {
-        "title": "JSON feed",
-        "body": "For apps, like a blog page in Lovable or Replit."
-      },
-      "notLive": "This feed isn't live yet. The links stay the same once it is.",
-      "private": "Anyone with these links can read your published articles. Share them only with tools you trust.",
-      "failed": "We couldn't load your feed links. Try again."
+      "failed": "We couldn't load your feed. Try again.",
+      "retry": "Try again",
+      "actionFailed": "That didn't work. Try again.",
+      "createTitle": "You don't have a feed yet",
+      "createBody": "Create a private link that always lists your latest published articles. Paste it into a feed reader, Make, Zapier or your own app, and they pick up each new article by themselves.",
+      "create": "Create feed",
+      "created": "Your feed is ready. Copy the link below.",
+      "linkTitle": "Your feed link",
+      "linkBody": "Paste this into your feed reader or automation tool. It checks the link and picks up new articles.",
+      "on": "Feed is on",
+      "off": "Feed is off",
+      "onBody": "Tools using your link can read your published articles.",
+      "offBody": "The link shows nothing until you turn the feed back on. The link itself stays the same.",
+      "turnedOn": "Feed turned on.",
+      "turnedOff": "Feed turned off. Your link shows nothing until you turn it back on.",
+      "settingsTitle": "What's in the feed",
+      "name": "Feed name",
+      "nameHelper": "Shown as the feed's title in readers.",
+      "limit": "Articles to list",
+      "limitHelper": "Newest first.",
+      "limitError": "Enter a number from 1 to 100.",
+      "fullContent": "Include the full article",
+      "fullContentOn": "Each item carries the whole article, so tools can publish it without visiting your site.",
+      "fullContentOff": "Each item carries only the title, link and summary.",
+      "save": "Save changes",
+      "saved": "Feed settings saved.",
+      "regenerateTitle": "Replace the link",
+      "regenerateBody": "Use this if the link was shared with someone who shouldn't have it.",
+      "regenerate": "Get a new link",
+      "regenerateWarning": "The current link stops working straight away. Every reader and automation using it has to be given the new link.",
+      "regenerateConfirm": "Replace link",
+      "keep": "Keep current link",
+      "regenerated": "New link created. The old one no longer works.",
+      "whatsIncluded": "The feed lists articles Rankoya has published to a connected platform, such as WordPress, Wix or Shopify. Articles you publish by copy and paste don't appear in it.",
+      "private": "Anyone with this link can read the feed, so treat it like a password."
     }
   },
   "legal": {
@@ -3765,7 +3818,7 @@
         "wix": {
           "name": "Wix",
           "detail": "Wix Blog",
-          "help": "Enter an API key with Blog permissions and your Wix site ID."
+          "help": "Install the Rankoya app on your Wix site. Your site needs Wix Blog."
         },
         "ghost": {
           "name": "Ghost",
@@ -3786,6 +3839,26 @@
           "name": "Duda",
           "detail": "Duda Blog",
           "help": "Enter your Duda API username, password and site name."
+        },
+        "make": {
+          "name": "Make",
+          "detail": "Send articles to a Make scenario",
+          "help": "Paste your Make webhook address and send a test article. You can send finished articles to it from Integrations."
+        },
+        "rss": {
+          "name": "RSS feed",
+          "detail": "A private link other tools read",
+          "help": "Create a private feed of your published articles for feed readers, Make, Zapier or your own app."
+        },
+        "lovable": {
+          "name": "Lovable",
+          "detail": "Publish to your app's blog",
+          "help": "Copy the prompt into your Lovable project. When Lovable finishes, paste your website URL and the RANKOYA_API_KEY it shows you."
+        },
+        "replit": {
+          "name": "Replit",
+          "detail": "Copy and paste into your app",
+          "help": "Rankoya prepares each approved article for you to copy into your Replit app."
         }
       },
       "fields": {
@@ -3870,7 +3943,11 @@
           "ghost": "Ghost",
           "manual": "Copy and paste",
           "nextjs": "Next.js app (copy and paste)",
-          "duda": "Duda"
+          "duda": "Duda",
+          "make": "Make",
+          "rss": "RSS feed",
+          "lovable": "Lovable (copy and paste)",
+          "replit": "Replit (copy and paste)"
         },
         "mode": {
           "review": "you approve each one",

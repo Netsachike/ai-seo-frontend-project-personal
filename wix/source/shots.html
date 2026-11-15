@@ -1,0 +1,257 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+@font-face { font-family: Geist; src: url("FONT_SANS") format("woff2"); font-weight: 100 900; }
+@font-face { font-family: GeistMonoX; src: url("FONT_MONO") format("woff2"); font-weight: 100 900; }
+:root {
+  --blue: #2563EB; --navy: #0F1B33; --violet: #5B47F5; --midnight: #0B1220; --frost: #EEF2F8;
+  --mist: #F5F8FD; --ink: #0E1A33; --ink2: #4B5A74; --muted: #64748B; --s2: #EFF3F9;
+  --border: #E3E9F2; --border2: #CBD5E3; --green: #15803D; --red: #C42B2B;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: Geist, system-ui, sans-serif; color: var(--ink); background: #ccc; }
+.shot { width: 1200px; height: 900px; position: relative; overflow: hidden; display: flex; flex-direction: column; gap: 40px; padding: 60px 72px 0; background: var(--mist); }
+.shot + .shot { margin-top: 20px; }
+.dark { background: linear-gradient(135deg, #16233F 0%, #0B1220 70%); color: var(--frost); }
+.copy { width: 100%; flex: none; }
+.logo { height: 34px; display: block; margin-bottom: 36px; }
+.over { font-size: 15px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--blue); margin-bottom: 20px; }
+.dark .over { color: #7AA2FF; }
+h1 { font-size: 50px; line-height: 1.08; font-weight: 600; letter-spacing: -0.03em; margin-bottom: 18px; max-width: 980px; }
+.sub { font-size: 21px; line-height: 1.45; color: var(--ink2); max-width: 900px; }
+.dark .sub { color: #A8B3C7; }
+.points { margin-top: 22px; display: flex; gap: 28px; }
+.pt { display: flex; gap: 10px; align-items: center; font-size: 17px; font-weight: 500; color: var(--ink); }
+.dark .pt { color: var(--frost); }
+.tick { width: 26px; height: 26px; border-radius: 50%; background: var(--blue); color: #fff; display: grid; place-items: center; font-size: 15px; flex: none; }
+.stage { flex: 1; position: relative; }
+.win { position: absolute; background: #fff; border: 1px solid var(--border); border-radius: 16px; box-shadow: 0 24px 60px -24px rgba(15, 27, 51, .35), 0 2px 6px rgba(15, 27, 51, .06); overflow: hidden; color: var(--ink); }
+.bar { height: 44px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; padding: 0 18px; background: #FBFCFE; }
+.bar i { width: 11px; height: 11px; border-radius: 50%; background: var(--border2); display: block; }
+.bar span { margin-left: 14px; font-size: 13px; color: var(--muted); font-family: Geist; font-variant-numeric: tabular-nums; }
+.app { display: flex; height: calc(100% - 44px); }
+.side { width: 210px; background: var(--navy); color: #A8B3C7; padding: 22px 16px; font-size: 14px; flex: none; }
+.side img { height: 22px; margin: 0 0 26px 6px; display: block; }
+.side .grp { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: #64748B; margin: 18px 8px 8px; font-weight: 600; }
+.side .it { padding: 9px 10px; border-radius: 8px; margin-bottom: 2px; }
+.side .on { background: rgba(37, 99, 235, .22); color: #fff; }
+.main { flex: 1; padding: 28px 30px; background: var(--mist); }
+.h { font-size: 22px; font-weight: 600; letter-spacing: -0.02em; margin-bottom: 4px; }
+.hs { font-size: 14px; color: var(--muted); margin-bottom: 22px; }
+.card { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+.lbl { font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.num { font-family: Geist; font-variant-numeric: tabular-nums; font-variant-numeric: tabular-nums; }
+.up { color: var(--green); font-weight: 600; }
+.down { color: var(--red); font-weight: 600; }
+.row { display: flex; align-items: center; gap: 12px; }
+.dot { width: 10px; height: 10px; border-radius: 50%; flex: none; }
+.track { flex: 1; height: 10px; background: var(--s2); border-radius: 6px; overflow: hidden; }
+.fill { height: 100%; border-radius: 6px; background: var(--blue); }
+.pill { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 600; padding: 5px 10px; border-radius: 999px; }
+.p-green { background: #E7F6EC; color: var(--green); }
+.p-gray { background: var(--s2); color: var(--ink2); }
+.p-blue { background: #E6EEFD; color: var(--blue); }
+.p-violet { background: #ECE9FE; color: var(--violet); }
+.btn { display: inline-flex; align-items: center; justify-content: center; height: 40px; padding: 0 18px; border-radius: 9px; font-size: 15px; font-weight: 600; }
+.b-blue { background: var(--blue); color: #fff; }
+.b-out { border: 1px solid var(--border2); color: var(--ink); background: #fff; }
+.b-violet { background: var(--violet); color: #fff; }
+table { width: 100%; border-collapse: collapse; font-size: 14.5px; }
+td, th { text-align: left; padding: 12px 10px; border-bottom: 1px solid var(--border); }
+th { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 600; }
+.foot { position: absolute; right: 72px; top: 62px; background: rgba(255,255,255,.85); padding: 4px 10px; border-radius: 6px; font-size: 13px; color: var(--muted); }
+.dark .foot { color: #64748B; }
+</style>
+</head>
+<body>
+
+<!-- 01: hero -->
+<section class="shot dark" id="s1">
+  <div class="copy">
+    <img class="logo" src="LOGO_DARKBG" alt="">
+    <div class="over">AI SEO for Wix</div>
+    <h1>Be the answer on Google and in AI search.</h1>
+    <p class="sub">Rankoya finds the questions your customers ask, writes the articles, and publishes them to your Wix Blog once you approve.</p>
+  </div>
+  <div class="stage">
+    <div class="win" style="left:0; top:0; width:1056px; height:640px;">
+      <div class="bar"><i></i><i></i><i></i><span>app.rankoya.uk/overview</span></div>
+      <div class="app">
+        <div class="side">
+          <img src="LOGO_DARKBG" alt="">
+          <div class="grp">Insights</div>
+          <div class="it on">Overview</div><div class="it">AI visibility</div><div class="it">Rankings</div><div class="it">Competitors</div>
+          <div class="grp">Grow</div>
+          <div class="it">Keywords</div><div class="it">Articles</div><div class="it">Ask Rankoya</div>
+        </div>
+        <div class="main">
+          <div class="h">Overview</div>
+          <div class="hs">Northwind Roasters · last 30 days</div>
+          <div style="display:grid; grid-template-columns: 260px 1fr; gap:16px;">
+            <div class="card" style="text-align:center;">
+              <div class="lbl" style="text-align:left">AI visibility score</div>
+              <svg width="150" height="150" viewBox="0 0 150 150" style="margin:14px auto 6px; display:block">
+                <circle cx="75" cy="75" r="60" fill="none" stroke="#EFF3F9" stroke-width="14"/>
+                <circle cx="75" cy="75" r="60" fill="none" stroke="#2563EB" stroke-width="14" stroke-linecap="round" stroke-dasharray="271 377" transform="rotate(-90 75 75)"/>
+                <text x="75" y="86" text-anchor="middle" font-family="Geist" font-size="38" font-weight="600" fill="#0E1A33">72</text>
+              </svg>
+              <div class="up num" style="font-size:15px">▲ 4 this month</div>
+            </div>
+            <div class="card">
+              <div class="lbl" style="margin-bottom:16px">Mentioned in answers</div>
+              <div style="display:grid; gap:15px; font-size:14.5px;">
+                <div class="row"><span class="dot" style="background:#8B5CF6"></span><span style="width:96px">ChatGPT</span><div class="track"><div class="fill" style="width:64%"></div></div><span class="num" style="width:44px;text-align:right">64%</span></div>
+                <div class="row"><span class="dot" style="background:#EA580C"></span><span style="width:96px">Claude</span><div class="track"><div class="fill" style="width:51%"></div></div><span class="num" style="width:44px;text-align:right">51%</span></div>
+                <div class="row"><span class="dot" style="background:#3B82F6"></span><span style="width:96px">Gemini</span><div class="track"><div class="fill" style="width:47%"></div></div><span class="num" style="width:44px;text-align:right">47%</span></div>
+                <div class="row"><span class="dot" style="background:#0D9488"></span><span style="width:96px">Perplexity</span><div class="track"><div class="fill" style="width:58%"></div></div><span class="num" style="width:44px;text-align:right">58%</span></div>
+                <div class="row"><span class="dot" style="background:#16A34A"></span><span style="width:96px">Google</span><div class="track"><div class="fill" style="width:39%"></div></div><span class="num" style="width:44px;text-align:right">39%</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="card" style="margin-top:16px; display:flex; align-items:center; gap:16px;">
+            <span class="pill p-violet">Next action</span>
+            <span style="font-size:15px; flex:1">Write “How to brew pour-over coffee at home” to rank for 3 tracked keywords</span>
+            <span class="btn b-blue" style="height:36px">Review draft</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 02: visibility -->
+<section class="shot" id="s2">
+  <div class="copy">
+    <div class="over">Measure</div>
+    <h1>See where your business shows up.</h1>
+    <p class="sub">Track your Google rankings and whether ChatGPT, Claude, Gemini and Perplexity mention you, side by side with your competitors.</p>
+    <div class="points">
+      <div class="pt"><span class="tick">✓</span>Keyword positions on Google</div>
+      <div class="pt"><span class="tick">✓</span>Mentions in AI answers</div>
+      <div class="pt"><span class="tick">✓</span>Share of voice against competitors</div>
+    </div>
+  </div>
+  <div class="stage">
+    <div class="win" style="left:0; top:0; width:1056px; height:640px;">
+      <div class="bar"><i></i><i></i><i></i><span>app.rankoya.uk/ai-visibility</span></div>
+      <div class="main" style="height:calc(100% - 44px)">
+        <div class="h">AI visibility</div>
+        <div class="hs">Questions your customers ask AI assistants</div>
+        <div class="card" style="padding:6px 14px">
+          <table>
+            <tr><th>Question</th><th>ChatGPT</th><th>Claude</th><th>Gemini</th><th>Position</th></tr>
+            <tr><td>Best specialty coffee roaster in Leeds</td><td><span class="pill p-green">Mentioned</span></td><td><span class="pill p-green">Mentioned</span></td><td><span class="pill p-gray">Not yet</span></td><td class="num">#2</td></tr>
+            <tr><td>Where to buy fresh coffee beans online</td><td><span class="pill p-green">Mentioned</span></td><td><span class="pill p-gray">Not yet</span></td><td><span class="pill p-green">Mentioned</span></td><td class="num">#4</td></tr>
+            <tr><td>Single origin coffee subscription UK</td><td><span class="pill p-gray">Not yet</span></td><td><span class="pill p-green">Mentioned</span></td><td><span class="pill p-green">Mentioned</span></td><td class="num">#3</td></tr>
+            <tr><td>Ethiopian vs Colombian coffee beans</td><td><span class="pill p-green">Mentioned</span></td><td><span class="pill p-green">Mentioned</span></td><td><span class="pill p-green">Mentioned</span></td><td class="num">#1</td></tr>
+            <tr><td>Coffee roaster wholesale for cafes</td><td><span class="pill p-gray">Not yet</span></td><td><span class="pill p-gray">Not yet</span></td><td><span class="pill p-gray">Not yet</span></td><td class="num" style="color:var(--muted)">–</td></tr>
+          </table>
+        </div>
+        <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:16px">
+          <div class="card"><div class="lbl">Share of voice</div><div class="num" style="font-size:30px; font-weight:600; margin-top:6px">38%</div><div class="up num" style="font-size:13px">▲ 6 pts</div></div>
+          <div class="card"><div class="lbl">Avg. Google position</div><div class="num" style="font-size:30px; font-weight:600; margin-top:6px">7.4</div><div class="up num" style="font-size:13px">▲ 2.1</div></div>
+          <div class="card"><div class="lbl">Keywords in top 10</div><div class="num" style="font-size:30px; font-weight:600; margin-top:6px">18</div><div class="up num" style="font-size:13px">▲ 5</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="foot">Sample data shown for illustration.</div>
+</section>
+
+<!-- 03: approve -->
+<section class="shot" id="s3">
+  <div class="copy">
+    <div class="over">Write and approve</div>
+    <h1>Nothing goes live until you say so.</h1>
+    <p class="sub">Rankoya drafts SEO articles in your brand's voice. Read, edit or reject each one. Only what you approve is published.</p>
+    <div class="points">
+      <div class="pt"><span class="tick">✓</span>Articles planned from real search data</div>
+      <div class="pt"><span class="tick">✓</span>Edit anything before it's published</div>
+      <div class="pt"><span class="tick">✓</span>Schedule posts on a content calendar</div>
+    </div>
+  </div>
+  <div class="stage">
+    <div class="win" style="left:0; top:0; width:660px; height:640px;">
+      <div class="bar"><i></i><i></i><i></i><span>app.rankoya.uk/articles</span></div>
+      <div style="padding:30px 36px;">
+        <span class="pill p-blue">Draft · 1,450 words</span>
+        <div style="font-size:30px; font-weight:600; letter-spacing:-0.02em; line-height:1.2; margin:16px 0 14px">How to brew pour-over coffee at home: a step-by-step guide</div>
+        <div style="font-size:15px; color:var(--muted); margin-bottom:22px">Target keyword: <b style="color:var(--ink)">pour over coffee guide</b> · 2,400 searches / month</div>
+        <div style="display:grid; gap:12px">
+          <div style="height:12px; background:var(--s2); border-radius:6px; width:100%"></div>
+          <div style="height:12px; background:var(--s2); border-radius:6px; width:94%"></div>
+          <div style="height:12px; background:var(--s2); border-radius:6px; width:97%"></div>
+          <div style="height:12px; background:var(--s2); border-radius:6px; width:72%"></div>
+        </div>
+        <div style="font-size:19px; font-weight:600; margin:26px 0 12px">What you need</div>
+        <div style="display:grid; gap:12px">
+          <div style="height:12px; background:var(--s2); border-radius:6px; width:88%"></div>
+          <div style="height:12px; background:var(--s2); border-radius:6px; width:96%"></div>
+          <div style="height:12px; background:var(--s2); border-radius:6px; width:60%"></div>
+        </div>
+        <div style="font-size:19px; font-weight:600; margin:26px 0 12px">Step 1: Weigh and grind</div>
+        <div style="display:grid; gap:12px">
+          <div style="height:12px; background:var(--s2); border-radius:6px; width:92%"></div>
+          <div style="height:12px; background:var(--s2); border-radius:6px; width:80%"></div>
+        </div>
+      </div>
+    </div>
+    <div class="win" style="left:560px; top:170px; width:496px; padding:26px; border-color:#D9D3FD;">
+      <div class="row" style="margin-bottom:14px">
+        <span style="width:34px;height:34px;border-radius:50%;background:var(--violet);display:grid;place-items:center;color:#fff;font-weight:600">R</span>
+        <div><div style="font-weight:600; font-size:16px">Rankoya</div><div style="font-size:13px;color:var(--muted)">Ready for your approval</div></div>
+      </div>
+      <div style="font-size:16px; line-height:1.5; margin-bottom:16px">I've finished the article. Publish it to your Wix Blog on <b>Tue 18 Nov, 09:00</b>?</div>
+      <div class="row" style="gap:10px">
+        <span class="btn b-violet">Approve</span><span class="btn b-out">Edit</span><span class="btn b-out">Reject</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 04: wix blog -->
+<section class="shot" id="s4">
+  <div class="copy">
+    <div class="over">Publish</div>
+    <h1>Published straight to your Wix Blog.</h1>
+    <p class="sub">Install Rankoya on your Wix site once. Approved articles appear as Wix Blog posts, with no copying and pasting.</p>
+  </div>
+  <div class="stage">
+    <div class="card" style="position:absolute; left:0; top:20px; width:420px; padding:26px; box-shadow:0 24px 60px -24px rgba(15,27,51,.25)">
+      <div class="lbl" style="margin-bottom:20px">How it works</div>
+      <div style="display:grid; gap:22px">
+        <div class="row" style="align-items:flex-start"><span class="num" style="width:32px;height:32px;border-radius:50%;background:var(--navy);color:#fff;display:grid;place-items:center;font-weight:600;flex:none">1</span><div><div style="font-weight:600;font-size:17px">Install the app</div><div style="font-size:14.5px;color:var(--ink2);margin-top:3px">Add Rankoya to the Wix site that has Wix Blog.</div></div></div>
+        <div class="row" style="align-items:flex-start"><span class="num" style="width:32px;height:32px;border-radius:50%;background:var(--navy);color:#fff;display:grid;place-items:center;font-weight:600;flex:none">2</span><div><div style="font-weight:600;font-size:17px">Approve articles</div><div style="font-size:14.5px;color:var(--ink2);margin-top:3px">Review each draft in Rankoya.</div></div></div>
+        <div class="row" style="align-items:flex-start"><span class="num" style="width:32px;height:32px;border-radius:50%;background:var(--blue);color:#fff;display:grid;place-items:center;font-weight:600;flex:none">3</span><div><div style="font-weight:600;font-size:17px">Live on your blog</div><div style="font-size:14.5px;color:var(--ink2);margin-top:3px">Rankoya publishes the post and records its live link.</div></div></div>
+      </div>
+      <div class="row" style="margin-top:26px; padding-top:20px; border-top:1px solid var(--border)">
+        <span class="dot" style="background:var(--green)"></span><span style="font-size:15px;font-weight:600">Wix connected</span><span style="margin-left:auto" class="pill p-green">Active</span>
+      </div>
+    </div>
+    <div class="win" style="left:470px; top:0; width:586px; height:640px;">
+      <div class="bar"><i></i><i></i><i></i><span>northwindroasters.com/post/…</span></div>
+      <div style="height:200px; background:linear-gradient(135deg,#3B2A20,#8A5A3C 60%,#C79B6D);"></div>
+      <div style="padding:24px 26px">
+        <div style="font-size:13px; color:var(--muted); margin-bottom:10px">Northwind Roasters · 18 Nov · 6 min read</div>
+        <div style="font-size:25px; font-weight:600; line-height:1.22; letter-spacing:-0.02em; margin-bottom:16px">How to brew pour-over coffee at home: a step-by-step guide</div>
+        <div style="display:grid; gap:11px">
+          <div style="height:11px; background:var(--s2); border-radius:6px; width:100%"></div>
+          <div style="height:11px; background:var(--s2); border-radius:6px; width:93%"></div>
+          <div style="height:11px; background:var(--s2); border-radius:6px; width:97%"></div>
+          <div style="height:11px; background:var(--s2); border-radius:6px; width:68%"></div>
+        </div>
+        <div style="font-size:18px; font-weight:600; margin:22px 0 11px">What you need</div>
+        <div style="display:grid; gap:11px">
+          <div style="height:11px; background:var(--s2); border-radius:6px; width:90%"></div>
+          <div style="height:11px; background:var(--s2); border-radius:6px; width:80%"></div>
+        </div>
+      </div>
+      <div style="position:absolute; right:18px; top:62px;" class="pill p-green">✓ Published by Rankoya</div>
+    </div>
+  </div>
+</section>
+
+</body>
+</html>

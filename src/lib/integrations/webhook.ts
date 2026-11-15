@@ -114,8 +114,12 @@ export async function assertPublicHttpsUrl(value: string): Promise<URL> {
   return url;
 }
 
-/** Sends one signed event. Redirects aren't followed. Returns the receiver's status code. */
-export async function sendWebhook(url: URL, secret: string, body: WebhookBody): Promise<number> {
+/**
+ * Sends one event, signed when there's a secret (the signature header is left
+ * off without one: Make, for now). Redirects aren't followed. Returns the
+ * receiver's status code.
+ */
+export async function sendWebhook(url: URL, secret: string | null, body: WebhookBody): Promise<number> {
   const raw = JSON.stringify(body);
   const timestamp = Math.floor(Date.now() / 1000);
   try {
@@ -126,7 +130,7 @@ export async function sendWebhook(url: URL, secret: string, body: WebhookBody): 
         "User-Agent": "Rankoya-Webhooks/1.0",
         "X-Rankoya-Event": body.event,
         "X-Rankoya-Timestamp": String(timestamp),
-        "X-Rankoya-Signature": signWebhook(secret, timestamp, raw),
+        ...(secret ? { "X-Rankoya-Signature": signWebhook(secret, timestamp, raw) } : {}),
       },
       body: raw,
       redirect: "manual",

@@ -3,7 +3,7 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
-import type { SiteSetupStep } from "@/types/types";
+import { SITE_SETUP_STEPS, type SiteSetupStep } from "@/types/types";
 
 /**
  * The furthest setup step each site has reached. The backend has no setup
@@ -34,7 +34,11 @@ export const useSetupProgress = create<ProgressState>()(
 
 /** The step to resume at, or null once setup is finished. */
 export function useSetupStep(siteId: number): SiteSetupStep | null {
-  return useSetupProgress((s) => s.steps[siteId] ?? null);
+  return useSetupProgress((s) => {
+    const step = s.steps[siteId] ?? null;
+    // A browser that stopped on a step since removed ("billing") resumes at the one after it.
+    return step && !(SITE_SETUP_STEPS as readonly string[]).includes(step) ? "integration" : step;
+  });
 }
 
 export const setSetupStep = (siteId: number, step: SiteSetupStep | null) =>

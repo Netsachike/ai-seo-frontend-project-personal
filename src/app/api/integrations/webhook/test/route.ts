@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import type { Site } from "@/types/types";
 import { backend } from "@/lib/integrations/backend";
 import { IntegrationError } from "@/lib/integrations/errors";
-import { assertPublicHttpsUrl, newWebhookSecret, sampleArticle, sendWebhook } from "@/lib/integrations/webhook";
+import { assertPublicHttpsUrl, sampleArticle, sendWebhook } from "@/lib/integrations/webhook";
 
 /**
  * POST { site_id, url, secret? } → { secret, status }
@@ -24,8 +24,8 @@ export async function POST(request: NextRequest) {
     if (!Number.isInteger(siteId) || siteId <= 0 || typeof input?.url !== "string") {
       throw new IntegrationError("webhook_fields", 400);
     }
-    const secret =
-      typeof input.secret === "string" && /^whsec_[\w-]{20,}$/.test(input.secret) ? input.secret : newWebhookSecret();
+    // Signed when a secret is sent (Lovable, Replit); unsigned without one (Make, for now).
+    const secret = typeof input.secret === "string" && /^whsec_[\w-]{20,}$/.test(input.secret) ? input.secret : null;
 
     const url = await assertPublicHttpsUrl(input.url);
     // Also proves the user can open this site.

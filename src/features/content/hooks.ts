@@ -3,7 +3,13 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { endOfMonth, format as formatDate, parse } from "date-fns";
 
-import type { ArticleWithRelations, ContentCalendarItem, ReschedulePayload, UpdateArticlePayload } from "@/types/types";
+import type {
+  ArticleWithRelations,
+  CalendarAutopilotMeta,
+  ContentCalendarItem,
+  ReschedulePayload,
+  UpdateArticlePayload,
+} from "@/types/types";
 import type { ArticleDetail, ArticleStatus, ArticleSummary } from "@/lib/mocks/ui-data-work";
 import { contentKeys } from "@/lib/api/query-keys";
 import { toNumber } from "@/services/api/helpers";
@@ -37,15 +43,48 @@ const scoreOf = (article: ArticleWithRelations) => {
 };
 
 /** A calendar entry: the shared summary plus the calendar item it comes from. */
-export type CalendarEntry = ArticleSummary & { itemId: number; keywordId: number | null };
+export type CalendarEntry = ArticleSummary & {
+  itemId: number;
+  keywordId: number | null;
+  /** HH:mm the item is due, when it has its own time. */
+  time: string | null;
+  /** Autopilot is researching, writing or publishing this item right now. */
+  processing: boolean;
+  /** Why autopilot failed, or which connections it couldn't publish to. */
+  problem: string | null;
+};
+
+const autopilotOf = (item: ContentCalendarItem) =>
+  (item.metadata?.autopilot ?? null) as CalendarAutopilotMeta | null;
+
+/**
+ * What autopilot did with the item, when it has run. `completed` (a draft
+ * saved on the site) and `ready_for_manual_publish` both still need the user.
+ */
+function autopilotStatusOf(status: string): ArticleStatus | null {
+  if (status === "published" || status === "partially_published") return "published";
+  if (status === "completed" || status === "ready_for_manual_publish") return "needsApproval";
+  if (status === "failed") return "failed";
+  return null;
+}
 
 function summaryOf(item: ContentCalendarItem, article: ArticleWithRelations | undefined): CalendarEntry {
+  const autopilot = autopilotOf(item);
+  const failedOn = (autopilot?.connections ?? []).filter((c) => c.status === "failed").map((c) => c.platform);
   return {
     itemId: item.id,
     keywordId: item.keyword_id,
+    time: item.scheduled_time ? item.scheduled_time.slice(0, 5) : null,
+    processing: item.status === "processing",
+    problem:
+      item.status === "failed"
+        ? (autopilot?.last_error ?? null)
+        : item.status === "partially_published" && failedOn.length
+          ? failedOn.join(", ")
+          : null,
     id: article ? String(article.id) : `${ITEM_PREFIX}${item.id}`,
     title: article?.title ?? item.title,
-    status: article ? articleStatusOf(article.status) : "scheduled",
+    status: autopilotStatusOf(item.status) ?? (article ? articleStatusOf(article.status) : "scheduled"),
     date: item.scheduled_date.slice(0, 10),
     score: article ? scoreOf(article) : Math.round(toNumber(item.priority_score) ?? 0),
     keyword: item.keyword ?? article?.keyword?.keyword ?? "",
@@ -77,7 +116,9 @@ export function useContentMonth(siteId: number | undefined, month: string) {
             .map((item) =>
               summaryOf(
                 item,
-                articles.data.find((a) => item.keyword_id !== null && a.keyword_id === item.keyword_id),
+                // Autopilot records the article it wrote; older items are matched by keyword.
+                articles.data.find((a) => a.id === item.article_id) ??
+                  articles.data.find((a) => item.keyword_id !== null && a.keyword_id === item.keyword_id),
               ),
             )
         : undefined,
@@ -87,7 +128,7 @@ export function useContentMonth(siteId: number | undefined, month: string) {
   };
 }
 
-/** Generates the content plan for a month (YYYY-MM). */
+/** Generates the content plan for a month (YYYY-MM), with autopilot on. */
 export function useGeneratePlan(siteId: number) {
   const queryClient = useQueryClient();
   return useMutation({
@@ -96,6 +137,8 @@ export function useGeneratePlan(siteId: number) {
         await contentPlannerService.generate(siteId, {
           month,
           timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+          // On by default until the backend's endpoint for switching it per plan is live.
+          autopilot_enabled: true,
         })
       ).data,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: contentKeys.all(siteId) }),

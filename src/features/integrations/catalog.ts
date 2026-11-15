@@ -16,7 +16,8 @@ export const INTEGRATION_PROVIDERS = [
   // Duda's API needs a paid plan; hidden until there's an account to test with (see /api/integrations/duda/verify).
   // "duda",
   "lovable",
-  "replit",
+  // Replit's API needs a paid plan; hidden for now.
+  // "replit",
   "make",
   "rss",
   "nextjs",
@@ -66,13 +67,20 @@ export const PROVIDERS: Record<IntegrationProvider, ProviderMeta> = {
   analytics: { monogram: "GA", category: "analytics", method: "oauth", scope: "brand", backend: false, soon: true },
   shopify: { monogram: "SH", category: "platforms", method: "credentials", scope: "brand", backend: true },
   webflow: { monogram: "WF", category: "platforms", method: "credentials", scope: "brand", backend: true },
-  // Installed as Rankoya's Wix app (/api/integrations/wix/*). The API-key form is off for now:
+  // Installed as Rankoya's Wix app, through the backend (publishing/wix/authorize). The API-key form is off for now:
   // wix: { monogram: "WX", category: "platforms", method: "credentials", scope: "brand", backend: true },
   wix: { monogram: "WX", category: "platforms", method: "oauth", scope: "brand", backend: true },
   ghost: { monogram: "GH", category: "platforms", method: "credentials", scope: "brand", backend: true },
   // duda: { monogram: "DU", category: "platforms", method: "credentials", scope: "brand", backend: true },
-  lovable: { monogram: "LV", category: "platforms", method: "webhook", scope: "brand", backend: true },
-  replit: { monogram: "RP", category: "platforms", method: "webhook", scope: "brand", backend: true },
+  // Lovable: the user pastes Rankoya's setup prompt (features/publishing/lovable) into their project, then
+  // enters the site URL and the RANKOYA_API_KEY Lovable generated (platform `lovable`, method `api`).
+  // Earlier it was copy and paste (a `manual` connection with config.provider); those still show on its card.
+  // lovable: { monogram: "LV", category: "platforms", method: "manual", scope: "brand", backend: true },
+  // Replit's webhook flow (WebhookConnect: builder prompt, signing secret, test send) comes back with:
+  // replit: { monogram: "RP", category: "platforms", method: "webhook", scope: "brand", backend: true },
+  lovable: { monogram: "LV", category: "platforms", method: "credentials", scope: "brand", backend: true },
+  // Hidden for now (Replit's API needs a paid plan):
+  // replit: { monogram: "RP", category: "platforms", method: "manual", scope: "brand", backend: true },
   make: { monogram: "MK", category: "platforms", method: "webhook", scope: "brand", backend: true },
   rss: { monogram: "RSS", category: "platforms", method: "feed", scope: "brand", backend: true },
   nextjs: { monogram: "N", category: "platforms", method: "manual", scope: "brand", backend: true },

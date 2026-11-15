@@ -20,7 +20,8 @@ import { Interstitial } from "./shell/interstitial";
 import { StepTransition } from "./shell/step-transition";
 import { SITES_PATH } from "./steps";
 import { useSetupStore } from "./store";
-import { BillingStep } from "./steps/billing-step";
+// The free trial / plan screen is off for now: core topics goes straight to the integration step.
+// import { BillingStep } from "./steps/billing-step";
 import { CoreTopicsStep } from "./steps/core-topics/core-topics-step";
 import { DetailsStep } from "./steps/details/details-step";
 import { DoneStep } from "./steps/done-step";
@@ -156,9 +157,11 @@ export function SetupFlow({ siteId: siteParam }: { siteId: string }) {
       case "google-search-console":
         return <GscStep site={site} onContinue={() => advance("core-topics")} />;
       case "core-topics":
-        return <CoreTopicsStep site={site} onContinue={() => advance("billing")} />;
-      case "billing":
-        return <BillingStep site={site} onContinue={() => advance("integration")} />;
+        return <CoreTopicsStep site={site} onContinue={() => advance("integration")} />;
+      // Off for now, with "billing" in SITE_SETUP_STEPS (types.ts) and WIDE_STEPS (steps.ts):
+      // return <CoreTopicsStep site={site} onContinue={() => advance("billing")} />;
+      // case "billing":
+      //   return <BillingStep site={site} onContinue={() => advance("integration")} />;
       case "integration":
         return <IntegrationStep site={site} onContinue={() => advance("preferences")} />;
       case "preferences":

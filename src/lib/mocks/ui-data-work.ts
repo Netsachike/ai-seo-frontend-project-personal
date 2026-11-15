@@ -173,7 +173,7 @@ export function actionPlan(brandId: string, slug: string): { current: number; ca
 
 /* ───────────── Content ───────────── */
 
-export type ArticleStatus = "published" | "scheduled" | "needsApproval" | "draft";
+export type ArticleStatus = "published" | "scheduled" | "needsApproval" | "draft" | "failed";
 
 export type ArticleSummary = {
   id: string;

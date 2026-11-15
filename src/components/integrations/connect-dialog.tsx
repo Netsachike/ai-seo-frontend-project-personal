@@ -15,6 +15,7 @@ import { PROVIDERS, type IntegrationProvider } from "@/features/integrations/cat
 import { PUBLISHING_FIELDS, connectionPayload, isPublishingPlatform } from "@/features/publishing/forms";
 import { ConnectionTestError, useCreateConnection } from "@/features/publishing/hooks";
 import { startWpcomConnect } from "@/features/publishing/wpcom";
+import { startWixConnect } from "@/features/publishing/wix";
 import { ShopifyBlogPicker } from "@/features/publishing/shopify-blog-picker";
 import { ShopifyTokenGenerator } from "@/features/publishing/shopify-token-generator";
 import { startGscConnect } from "@/features/search-console/hooks";
@@ -23,6 +24,7 @@ import { PasswordInput } from "@/components/forms/password-input";
 import { IntegrationTile } from "@/components/brand/integration-row";
 import { ConnectGuide } from "./connect-guide";
 import { FeedLinks } from "./feed-links";
+import { LovablePrompt } from "./lovable-prompt";
 import { WebhookConnect } from "./webhook-connect";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -35,18 +37,19 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-/** Wix callback error codes (`?error=wix_<code>`) that have their own message. */
-const WIX_ERRORS = ["cancelled", "signature", "token", "no_blog", "not_configured", "state", "site", "save"] as const;
-type WixError = (typeof WIX_ERRORS)[number];
 /**
- * Finishes redirect flows that come back to this page: `?connected=<provider>`
- * or `?error=<provider>_<code>`. Shows a toast once, refreshes the
- * connections, then strips the params.
+ * Finishes the Wix install, which comes back to this page from the backend's
+ * callback: `?connected=wix&connection_id=<id>` or `?error=<message>`. Shows
+ * a toast once, refreshes the connections, then strips the params.
+ *
+ * `connected=wix` only means the connection was saved: when its test failed
+ * it has status `error`, which the refreshed card and details page show.
  */
 export function useConnectReturn(siteId: number | undefined, onConnected?: (provider: IntegrationProvider) => void) {
   const t = useTranslations("integrations");
   const queryClient = useQueryClient();
   const [connected, setConnected] = useQueryState("connected");
+  const [, setConnectionId] = useQueryState("connection_id");
   const [error, setError] = useQueryState("error");
   // Each param is handled once, even if the effect re-runs before the URL updates.
   const handled = React.useRef<string | null>(null);
@@ -58,13 +61,14 @@ export function useConnectReturn(siteId: number | undefined, onConnected?: (prov
     void queryClient.invalidateQueries({ queryKey: publishingKeys.all(siteId) });
     onConnected?.("wix");
     void setConnected(null);
-  }, [connected, siteId, t, queryClient, onConnected, setConnected]);
+    void setConnectionId(null);
+  }, [connected, siteId, t, queryClient, onConnected, setConnected, setConnectionId]);
 
   React.useEffect(() => {
-    if (!error?.startsWith("wix_") || handled.current === `e:${error}`) return;
+    if (!error || handled.current === `e:${error}`) return;
     handled.current = `e:${error}`;
-    const code = error.slice(4);
-    toast.error(t(`wixApp.errors.${(WIX_ERRORS as readonly string[]).includes(code) ? (code as WixError) : "save"}`));
+    // The backend sends a sentence to show as is (for example "Wix Blog is not installed on this site…").
+    toast.error(error.trim().includes(" ") ? error : t("wixApp.errors.save"));
     void setError(null);
   }, [error, t, setError]);
 }
@@ -75,9 +79,11 @@ export function useConnectReturn(siteId: number | undefined, onConnected?: (prov
  * - Search Console: the backend's Google OAuth redirect;
  * - WordPress.com: the backend's OAuth redirect; the site is picked back on its details page;
  * - copy and paste (Next.js, any other site): a `manual` connection, nothing to fill in;
- * - Wix: installing Rankoya's Wix app (/api/integrations/wix/start); the API-key form is off for now;
- * - Make, Lovable, Replit: a webhook URL, sent a signed test article before it's saved;
- * - RSS: the site's signed feed links to copy; nothing is saved.
+ * - Wix: installing Rankoya's Wix app through the backend (`startWixConnect`); the API-key form is off for now;
+ * - Make: a webhook URL; an article is picked and sent to it from here (nothing is saved yet);
+ * - Lovable: a setup prompt to paste into the project, then its URL and RANKOYA_API_KEY, created and tested
+ *   through the backend like the other credentials forms ("Test and connect");
+ * - RSS: the site's private feed, created and managed through the backend.
  */
 export function ConnectDialog({
   provider,
@@ -127,9 +133,7 @@ export function ConnectDialog({
       } else if (provider === "wordpressCom") {
         await startWpcomConnect({ siteId: site.id, returnTo: pathname });
       } else if (provider === "wix") {
-        // A plain navigation: the route sets the signed state cookie and sends the user on to Wix.
-        // eslint-disable-next-line @next/next/no-location-assign-relative-destination -- a route handler, not a page
-        window.location.assign(`/api/integrations/wix/start?site=${site.id}&returnTo=${encodeURIComponent(pathname)}`);
+        await startWixConnect({ siteId: site.id, returnTo: pathname });
       }
     } catch (err) {
       setError(getErrorMessage(err, t("errors.connectFailed")));
@@ -141,7 +145,13 @@ export function ConnectDialog({
     if (!provider || !site) return;
     setError(null);
     createConnection.mutate(
-      { name, platform: provider === "nextjs" ? "nextjs" : "custom", method: "manual" },
+      {
+        name,
+        platform: provider === "nextjs" ? "nextjs" : "custom",
+        method: "manual",
+        // Replit (hidden for now): the tag that puts the connection on its own card.
+        // ...(provider === "replit" ? { config: { provider } } : {}),
+      },
       {
         onSuccess: () => {
           toast.success(t("toasts.connected", { name }));
@@ -216,11 +226,16 @@ export function ConnectDialog({
             {/* Wix: the API-key form is off for now; the footer button installs Rankoya's Wix app.
             {provider === "wix" && site && ( … "Install on Wix" card with an API-key fallback … )} */}
 
-            {shopifyConnection === null && <ConnectGuide provider={provider} defaultOpen={meta.method !== "webhook"} />}
+            {/* Lovable: the prompt that adds Rankoya's routes to the user's project comes first. */}
+            {provider === "lovable" && <LovablePrompt />}
+
+            {shopifyConnection === null && (
+              <ConnectGuide provider={provider} defaultOpen={meta.method !== "webhook" && provider !== "lovable"} />
+            )}
 
             {meta.method === "webhook" &&
               site &&
-              (provider === "make" || provider === "lovable" || provider === "replit") && (
+              provider === "make" /* || provider === "replit" */ && (
                 <WebhookConnect
                   provider={provider}
                   site={site}
@@ -267,13 +282,26 @@ export function ConnectDialog({
                       }
                     >
                       {(props) =>
-                        field.input === "url" ? (
+                        field.input === "url" && provider === "lovable" ? (
+                          // A full URL, as Lovable gives it (https://mywebsite.lovable.app).
+                          <Input
+                            {...props}
+                            dir="ltr"
+                            type="url"
+                            inputMode="url"
+                            autoComplete="off"
+                            placeholder={field.placeholder ? t(`placeholders.${field.placeholder}`) : undefined}
+                            value={value}
+                            onChange={(event) => set(event.target.value)}
+                          />
+                        ) : field.input === "url" ? (
                           <DomainInput {...props} value={value} placeholder={site?.domain} onChange={set} />
                         ) : field.input === "secret" ? (
                           <PasswordInput
                             {...props}
                             dir="ltr"
                             autoComplete="off"
+                            placeholder={field.placeholder ? t(`placeholders.${field.placeholder}`) : undefined}
                             value={value}
                             onChange={(event) => set(event.target.value)}
                           />
@@ -290,6 +318,9 @@ export function ConnectDialog({
                     </FormField>
                   );
                 })}
+                {provider === "lovable" && (
+                  <p className="text-caption font-normal text-fg-3">{t("lovable.validates")}</p>
+                )}
               </form>
             )}
 
@@ -322,7 +353,7 @@ export function ConnectDialog({
               )}
               {meta.method === "credentials" && shopifyConnection === null && (
                 <Button type="submit" form="connect-credentials" variant="primary" loading={createConnection.isPending}>
-                  {t("connect")}
+                  {provider === "lovable" ? t("lovable.testAndConnect") : t("connect")}
                 </Button>
               )}
             </DialogFooter>
