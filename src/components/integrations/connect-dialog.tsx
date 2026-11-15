@@ -14,6 +14,7 @@ import { publishingKeys } from "@/lib/api/query-keys";
 import { PROVIDERS, type IntegrationProvider } from "@/features/integrations/catalog";
 import { PUBLISHING_FIELDS, connectionPayload, isPublishingPlatform } from "@/features/publishing/forms";
 import { ConnectionTestError, useCreateConnection } from "@/features/publishing/hooks";
+import { checkLovableHealth } from "@/features/publishing/lovable-health";
 import { startWpcomConnect } from "@/features/publishing/wpcom";
 import { startWixConnect } from "@/features/publishing/wix";
 import { ShopifyBlogPicker } from "@/features/publishing/shopify-blog-picker";
@@ -102,6 +103,8 @@ export function ConnectDialog({
   const pathname = usePathname();
   const createConnection = useCreateConnection(site?.id ?? 0);
   const [isWaiting, setIsWaiting] = React.useState(false);
+  // Lovable: the health check that runs before the connection is saved.
+  const [isChecking, setIsChecking] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [values, setValues] = React.useState<Record<string, string>>({});
   // Shopify: once connected, the blog articles go to is chosen before closing.
@@ -171,6 +174,19 @@ export function ConnectDialog({
     }
     setError(null);
     const payload = connectionPayload(provider, `${name} · ${site.domain}`, values);
+    // Lovable: check its health route with the user's key first, so a wrong key or a missing route isn't saved.
+    if (provider === "lovable") {
+      setIsChecking(true);
+      const health = await checkLovableHealth({
+        baseUrl: payload.credentials?.base_url ?? "",
+        apiKey: payload.credentials?.api_key ?? "",
+      });
+      setIsChecking(false);
+      if (!health.ok) {
+        setError(t(`lovable.errors.${health.error}`));
+        return;
+      }
+    }
     createConnection.mutate(payload, {
       onSuccess: (connectionId) => {
         toast.success(t("toasts.connected", { name }));
@@ -352,7 +368,12 @@ export function ConnectDialog({
                 </Button>
               )}
               {meta.method === "credentials" && shopifyConnection === null && (
-                <Button type="submit" form="connect-credentials" variant="primary" loading={createConnection.isPending}>
+                <Button
+                  type="submit"
+                  form="connect-credentials"
+                  variant="primary"
+                  loading={isChecking || createConnection.isPending}
+                >
                   {provider === "lovable" ? t("lovable.testAndConnect") : t("connect")}
                 </Button>
               )}

@@ -3254,7 +3254,14 @@
       "hidePrompt": "Hide prompt",
       "copyPrompt": "Copy prompt",
       "testAndConnect": "Test and connect",
-      "validates": "Rankoya validates the credentials before activating the connection."
+      "validates": "Rankoya validates the credentials before activating the connection.",
+      "errors": {
+        "lovable_url": "Enter your Lovable site's full https:// URL, like https://yourapp.lovable.app.",
+        "lovable_dns": "We couldn't find that site. Check the URL and that the app is published.",
+        "lovable_auth": "Your Lovable app rejected this API key. Copy the RANKOYA_API_KEY from Lovable again and paste it here.",
+        "lovable_not_found": "Your Lovable app doesn't have Rankoya's routes yet. Paste the setup prompt into your project, publish the app, then try again.",
+        "lovable_unavailable": "We couldn't reach your Lovable app. Check it's published, then try again."
+      }
     },
     "wpcom": {
       "title": "Connect WordPress.com",
