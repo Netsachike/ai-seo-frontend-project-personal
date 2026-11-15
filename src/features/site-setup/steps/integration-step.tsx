@@ -16,6 +16,7 @@ import {
 } from "@/features/publishing/forms";
 import { manualBuilderOf } from "@/features/integrations/connections";
 import { ConnectionTestError, useCreateConnection, usePublishingConnections } from "@/features/publishing/hooks";
+import { checkLovableHealth } from "@/features/publishing/lovable-health";
 import { useRssFeed } from "@/features/publishing/rss";
 import { startWixConnect } from "@/features/publishing/wix";
 import { startWpcomConnect } from "@/features/publishing/wpcom";
@@ -98,6 +99,8 @@ export function IntegrationStep({ site, onContinue }: { site: Site; onContinue: 
   const [choice, setChoice] = React.useState<PublishPlatform | null>(null);
   const [values, setValues] = React.useState<Record<string, string>>({});
   const [error, setError] = React.useState<string | null>(null);
+  // Lovable: the health check that runs before the connection is saved.
+  const [checking, setChecking] = React.useState(false);
   const [hosting, setHosting] = React.useState<WordpressHosting>("selfHosted");
   const [redirecting, setRedirecting] = React.useState(false);
   // Back from installing the Wix app: toast the result (?connected=wix / ?error=<message>) and refresh.
@@ -150,7 +153,7 @@ export function IntegrationStep({ site, onContinue }: { site: Site; onContinue: 
     }
   };
 
-  const connect = (event: React.FormEvent) => {
+  const connect = async (event: React.FormEvent) => {
     event.preventDefault();
     if (isWpcom) {
       if (!wpcom.auth) void signInWithWpcom();
@@ -168,6 +171,19 @@ export function IntegrationStep({ site, onContinue }: { site: Site; onContinue: 
           // ...(choice === "replit" ? { config: { provider: choice } } : {}),
         }
       : connectionPayload(choice as ApiPublishingPlatform, `${name} · ${site.domain}`, values);
+    // Lovable: check its health route with the user's key first, so a wrong key or a missing route isn't saved.
+    if (choice === "lovable") {
+      setChecking(true);
+      const health = await checkLovableHealth({
+        baseUrl: payload.credentials?.base_url ?? "",
+        apiKey: payload.credentials?.api_key ?? "",
+      });
+      setChecking(false);
+      if (!health.ok) {
+        setError(tLovable(`errors.${health.error}`));
+        return;
+      }
+    }
     create.mutate(payload, {
       onSuccess: () =>
         patchDraft(site.id, { integration: { provider: choice, connectedAt: new Date().toISOString() } }),
@@ -254,7 +270,7 @@ export function IntegrationStep({ site, onContinue }: { site: Site; onContinue: 
         {choice && !isSelfServe(choice) && !connected && (
           <motion.form
             key={choice}
-            onSubmit={connect}
+            onSubmit={(event) => void connect(event)}
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
@@ -363,7 +379,7 @@ export function IntegrationStep({ site, onContinue }: { site: Site; onContinue: 
               <Button
                 type="submit"
                 variant="primary"
-                loading={create.isPending || redirecting}
+                loading={checking || create.isPending || redirecting}
                 disabled={!isWpcom && !canConnect}
                 className="self-start"
               >
