@@ -14,7 +14,10 @@ Next .env (for reference, backend does not need these):
 
   WIX_APP_ID=74a52ba9-2490-4bd0-b629-1c9196bd0251
   WIX_APP_SECRET=4e9c9236-0554-49d5-8a42-78b97fe425e5
-  WIX_SHARE_URL_ID=5f616edd-530a-4fb8-b671-0bba457739de
+  WIX_SHARE_URL_ID=5f616edd-530a-4fb8-b671-0bba457739de	
+HgwRmxlBjbh9nJBYcTWRQcoTd3K2vDoX8KMvdfePGkVYqnBK
+i5XNnBJ5Oly5RUVgc6jG8qlGvS1imbX76DOQOKwhlP9s1tex
+vM6hHUAe6R7rMVe5rRwbmJ1MLDhvj4RaX5LUeUHmPfR44S8n
   INTEGRATIONS_STATE_SECRET=dfBQfr4AW02WWpSti8YZq8O43eV14IvC3qUFw3tVUMo=     # Next only, signs the state cookie
   APP_URL=https://app.rankoya.uk                  # Wix redirects back here
   BACKEND_INTERNAL_URL=https://api.rankoya.uk/api # must be the Laravel API, not the app host
