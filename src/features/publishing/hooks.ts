@@ -58,7 +58,8 @@ export function useCreateConnection(siteId: number) {
         untested.current?.key === key
           ? untested.current.id
           : (await publishingService.createConnection(siteId, payload)).data.id;
-      if (payload.method !== "api") return id;
+      // Manual connections are active straight away; API and webhook ones are activated by /test.
+      if (payload.method === "manual") return id;
       untested.current = { key, id };
       await activate(siteId, id);
       untested.current = null;

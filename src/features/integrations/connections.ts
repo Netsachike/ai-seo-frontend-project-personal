@@ -81,12 +81,12 @@ export function useProviderAccounts(siteId: number | undefined, brandSlug: strin
             .map(publishingAccount),
         ];
       }
-      // Webhooks are saved as platform `custom`; config.provider says which card they belong to.
+      // Make is saved as platform `make`; other webhooks as platform `custom` with config.provider naming the card.
       if (PROVIDERS[provider].method === "webhook") {
         return [
           provider,
           (publishing.data ?? [])
-            .filter((c) => c.method === "webhook" && c.config?.provider === provider)
+            .filter((c) => c.method === "webhook" && (c.platform === provider || c.config?.provider === provider))
             .map(publishingAccount),
         ];
       }

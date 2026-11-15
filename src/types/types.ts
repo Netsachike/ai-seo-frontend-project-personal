@@ -1688,7 +1688,7 @@ export interface UpdateArticlePayload {
 // ── Publishing ───────────────────────────────────────────────────────────
 
 export type PublishingPlatform =
-  "wordpress" | "wordpress_com" | "wix" | "shopify" | "webflow" | "ghost" | "duda" | "nextjs" | "lovable" | "custom";
+  "wordpress" | "wordpress_com" | "wix" | "shopify" | "webflow" | "ghost" | "duda" | "nextjs" | "lovable" | "make" | "custom";
 export type PublishingMethod = "api" | "webhook" | "manual";
 export type PublishingConnectionStatus = "pending" | "active" | "error";
 
@@ -1720,7 +1720,8 @@ export interface PublishingConnection {
  * lovable: credentials.base_url (the site's https:// URL), credentials.api_key (32–255 chars, the
  *   RANKOYA_API_KEY Lovable generated); `/test` calls {base_url}/api/public/rankoya/health ·
  * wordpress_com: not allowed, use the OAuth flow.
- * method = webhook (Make, Lovable, Replit): platform `custom`, credentials.webhook_url + secret,
+ * make: method `webhook`, credentials.webhook_url, config.send_full_content; `/test` activates it ·
+ * method = webhook (Lovable, Replit): platform `custom`, credentials.webhook_url + secret,
  *   config.provider (backend support pending; see docs/integrations-testing.md).
  */
 export interface CreatePublishingConnectionPayload {
@@ -1759,6 +1760,8 @@ export interface CreatePublishingConnectionPayload {
     author_name?: string;
     /** Which card a `custom` connection belongs to: make (webhook), lovable or replit (manual, for now). */
     provider?: string;
+    /** Make: send the full article body in each webhook request. */
+    send_full_content?: boolean;
     field_mapping?: { title?: string; content?: string; slug?: string; meta_description?: string };
   } | null;
 }

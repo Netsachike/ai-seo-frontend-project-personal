@@ -3463,6 +3463,8 @@
       },
       "urlHelper": "Must start with https://",
       "test": "Send test article",
+      "testAndConnect": "Test and connect",
+      "connectedMake": "{name} is connected. Publish articles to it from the article page.",
       "testAgain": "Send again",
       "delivered": "Test article delivered. Check it arrived, then save the connection.",
       "save": "Save connection",
@@ -3475,6 +3477,7 @@
         "webhook_rejected": "The URL answered with error {status}. Check the endpoint, then try again.",
         "site": "You don't have access to this site.",
         "unauthenticated": "Your session ended. Sign in again.",
+        "connect": "We couldn't connect this webhook. Check the URL and that your Make scenario is listening, then try again.",
         "save": "The test worked, but we couldn't save the connection. Try again.",
         "make_not_listening": "Make isn't listening on this webhook. Open the scenario, click the webhook module so it says it's waiting for data (or click Run once), then send the test again.",
         "webhook_no_content": "That article has no content yet. Choose one that's been written."

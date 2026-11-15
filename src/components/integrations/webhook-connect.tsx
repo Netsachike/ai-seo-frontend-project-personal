@@ -1,18 +1,19 @@
 "use client";
 
+// Make connects as a saved webhook connection (platform `make`) and publishes from the article page.
 import * as React from "react";
-import { CheckCircle2Icon, ChevronDownIcon, EyeIcon, SendIcon, UploadIcon } from "lucide-react";
+import { CheckCircle2Icon, ChevronDownIcon, EyeIcon, PlugZapIcon, SendIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import type { Site } from "@/types/types";
 import { toast } from "@/lib/toast";
 import { getErrorMessage } from "@/lib/errors";
-import { useArticlesPage } from "@/features/content/hooks";
+// import { useArticlesPage } from "@/features/content/hooks";
 import { useCreateConnection } from "@/features/publishing/hooks";
 import {
   builderPrompt,
   newWebhookSecret,
-  publishToWebhook,
+  // publishToWebhook,
   readWebhookUrl,
   rememberWebhookUrl,
   sendWebhookTest,
@@ -24,7 +25,7 @@ import { FormField } from "@/components/forms/form-field";
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+// import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 /**
  * Make, Lovable and Replit: the user gives a URL and Rankoya sends a test
@@ -32,10 +33,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
  * endpoint and the blog pages, sign every request with a secret, and save the
  * connection (platform `custom`, method `webhook`, config.provider).
  *
- * Make, for now: no signing secret and nothing saved. The backend has no
- * webhook publisher yet, so an article is picked here and sent straight from
- * Next (/api/integrations/webhook/publish). The URL is remembered in this
- * browser only.
+ * Make: one "Test and connect" button. It saves the webhook as a connection
+ * (platform `make`, method `webhook`, credentials.webhook_url,
+ * config.send_full_content) and the backend's /test activates it. Articles are
+ * then published to it from the article page like any other connection.
+ * No signing secret for Make.
  */
 export function WebhookConnect({
   provider,
@@ -66,12 +68,15 @@ export function WebhookConnect({
   const prompt = builderPrompt();
   const [previewOpen, setPreviewOpen] = React.useState(false);
 
-  // Sending a real article (stopgap): the newest 20 that have been written.
-  const articles = useArticlesPage(site.id, 1);
-  const written = (articles.data?.data ?? []).filter((a) => a.status !== "generating");
-  const [articleId, setArticleId] = React.useState("");
-  const [publishing, setPublishing] = React.useState(false);
-  const [sentTitle, setSentTitle] = React.useState<string | null>(null);
+  // Make: the connection was saved and passed the backend's test.
+  const [connected, setConnected] = React.useState(false);
+
+  // Sending one article from here is off: Make is a saved connection now and publishes from the article page.
+  // const articles = useArticlesPage(site.id, 1);
+  // const written = (articles.data?.data ?? []).filter((a) => a.status !== "generating");
+  // const [articleId, setArticleId] = React.useState("");
+  // const [publishing, setPublishing] = React.useState(false);
+  // const [sentTitle, setSentTitle] = React.useState<string | null>(null);
 
   const failure = (result: Extract<WebhookResult, { ok: false }>) =>
     // Make answers 410 when no scenario is listening on the webhook.
@@ -83,7 +88,6 @@ export function WebhookConnect({
 
   const test = async () => {
     setError(null);
-    setSentTitle(null);
     setTesting(true);
     const result = await sendWebhookTest({ siteId: site.id, url, secret });
     setTesting(false);
@@ -97,6 +101,34 @@ export function WebhookConnect({
     setError(failure(result));
   };
 
+  /** Make: save the webhook as a connection; the backend tests it and makes it active. */
+  const connectMake = () => {
+    const webhookUrl = url.trim();
+    if (!webhookUrl) return;
+    setError(null);
+    setConnected(false);
+    createConnection.mutate(
+      {
+        name: `${name} · ${site.domain}`,
+        platform: "make",
+        method: "webhook",
+        credentials: { webhook_url: webhookUrl },
+        config: { send_full_content: true },
+      },
+      {
+        onSuccess: () => {
+          rememberWebhookUrl(site.id, provider, webhookUrl);
+          setConnected(true);
+          toast.success(t("saved", { name }));
+          onDelivered?.();
+          onSaved();
+        },
+        onError: (err) => setError(getErrorMessage(err, t("errors.connect"))),
+      },
+    );
+  };
+
+  /* Sending one article from the modal (stopgap), off now that Make publishes from the article page.
   const publish = async () => {
     const article = written.find((a) => String(a.id) === articleId);
     if (!article || !url.trim()) return;
@@ -114,6 +146,7 @@ export function WebhookConnect({
     }
     setError(failure(result));
   };
+  */
 
   const save = () => {
     if (!secret) return;
@@ -190,7 +223,9 @@ export function WebhookConnect({
         className="flex flex-col gap-3"
         onSubmit={(event) => {
           event.preventDefault();
-          if (url.trim()) void test();
+          if (!url.trim()) return;
+          if (isBuilder) void test();
+          else connectMake();
         }}
       >
         <FormField label={t(`urlLabel.${provider}`)} helper={t("urlHelper")}>
@@ -203,11 +238,15 @@ export function WebhookConnect({
               autoComplete="off"
               placeholder="https://"
               value={url}
-              onChange={(event) => setUrl(event.target.value)}
+              onChange={(event) => {
+                setUrl(event.target.value);
+                setConnected(false);
+              }}
             />
           )}
         </FormField>
 
+        {/* Article picker, off: Make publishes from the article page now.
         <FormField label={t("articleLabel")} helper={t("articleHelper")}>
           {(props) => (
             <Select value={articleId} onValueChange={setArticleId} disabled={written.length === 0}>
@@ -232,17 +271,18 @@ export function WebhookConnect({
             </Select>
           )}
         </FormField>
+        */}
 
-        {tested && !sentTitle && (
+        {isBuilder && tested && (
           <p className="flex items-center gap-2 rounded-md bg-success-bg/40 px-3 py-2.5 text-small text-fg">
             <CheckCircle2Icon aria-hidden className="size-4 shrink-0 text-success" />
-            {isBuilder ? t("delivered") : t("deliveredMake")}
+            {t("delivered")}
           </p>
         )}
-        {sentTitle && (
+        {!isBuilder && connected && (
           <p className="flex items-center gap-2 rounded-md bg-success-bg/40 px-3 py-2.5 text-small text-fg">
             <CheckCircle2Icon aria-hidden className="size-4 shrink-0 text-success" />
-            {t("publishedBody", { title: sentTitle, name })}
+            {t("connectedMake", { name })}
           </p>
         )}
         {error && (
@@ -252,21 +292,23 @@ export function WebhookConnect({
         )}
 
         <div className="flex flex-wrap justify-end gap-2">
-          <Button type="submit" variant="secondary" loading={testing} disabled={!url.trim() || publishing}>
-            <SendIcon />
-            {tested ? t("testAgain") : t("test")}
-          </Button>
-          <Button
-            type="button"
-            variant="primary"
-            loading={publishing}
-            disabled={!url.trim() || !articleId || testing}
-            onClick={() => void publish()}
-          >
+          {isBuilder ? (
+            <Button type="submit" variant="secondary" loading={testing} disabled={!url.trim()}>
+              <SendIcon />
+              {tested ? t("testAgain") : t("test")}
+            </Button>
+          ) : (
+            <Button type="submit" variant="primary" loading={createConnection.isPending} disabled={!url.trim()}>
+              <PlugZapIcon />
+              {t("testAndConnect")}
+            </Button>
+          )}
+          {/* Sending one article from here is off: Make publishes from the article page now.
+          <Button type="button" variant="primary" loading={publishing} disabled={!url.trim() || !articleId || testing} onClick={() => void publish()}>
             <UploadIcon />
             {t("publish", { name })}
-          </Button>
-          {/* Saving is off for Make until the backend accepts webhook connections; Lovable and Replit keep it. */}
+          </Button> */}
+          {/* Make saves through "Test and connect" above; Lovable and Replit save after their test. */}
           {isBuilder && (
             <Button
               type="button"
