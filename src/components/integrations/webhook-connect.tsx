@@ -33,7 +33,7 @@ import { Input } from "@/components/ui/input";
  * endpoint and the blog pages, sign every request with a secret, and save the
  * connection (platform `custom`, method `webhook`, config.provider).
  *
- * Make: one "Test and connect" button. It saves the webhook as a connection
+ * Make: one "Connect" button. It saves the webhook as a connection
  * (platform `make`, method `webhook`, credentials.webhook_url,
  * config.send_full_content) and the backend's /test activates it. Articles are
  * then published to it from the article page like any other connection.
@@ -308,7 +308,7 @@ export function WebhookConnect({
             <UploadIcon />
             {t("publish", { name })}
           </Button> */}
-          {/* Make saves through "Test and connect" above; Lovable and Replit save after their test. */}
+          {/* Make saves through "Connect" above; Lovable and Replit save after their test. */}
           {isBuilder && (
             <Button
               type="button"

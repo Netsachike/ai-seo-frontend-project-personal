@@ -9,7 +9,7 @@ import { toast } from "@/lib/toast";
 import { getErrorMessage } from "@/lib/errors";
 import { PROVIDERS, type IntegrationProvider } from "@/features/integrations/catalog";
 import { useProviderAccounts, type ProviderAccount } from "@/features/integrations/connections";
-import { useDeleteConnection, useTestConnection } from "@/features/publishing/hooks";
+import { useDeleteConnection /* , useTestConnection */ } from "@/features/publishing/hooks";
 import { ShopifyBlogPicker } from "@/features/publishing/shopify-blog-picker";
 import { WpcomSitePicker, useWpcomAuthorization } from "@/features/publishing/wpcom-site-picker";
 import { useGscOverview, useSyncGsc } from "@/features/search-console/hooks";
@@ -42,7 +42,7 @@ export function IntegrationDetailsView({ provider }: { provider: IntegrationProv
   const format = useFormatter();
   const { brandSlug, brand, workspace } = useShell();
   const { accounts: byProvider } = useProviderAccounts(brand?.id, brandSlug);
-  const testConnection = useTestConnection(brand?.id ?? 0);
+  // const testConnection = useTestConnection(brand?.id ?? 0);
   const syncGsc = useSyncGsc(brand?.id ?? 0);
   const gsc = useGscOverview(provider === "searchConsole" ? brand?.id : undefined);
   const gscChoosing = provider === "searchConsole" && Boolean(gsc.data?.connection) && !gsc.data?.connection?.property;
@@ -74,16 +74,17 @@ export function IntegrationDetailsView({ provider }: { provider: IntegrationProv
       onError: (error) => toast.error(getErrorMessage(error, t("errors.disconnectFailed"))),
     });
   }
-  function handleTest(account: ProviderAccount) {
-    if (!account.connectionId) return;
-    testConnection.mutate(account.connectionId, {
-      onSuccess: (result) =>
-        result.success
-          ? toast.success(result.message)
-          : toast.error(t("errors.testFailed", { message: result.message })),
-      onError: (error) => toast.error(getErrorMessage(error, t("errors.connectFailed"))),
-    });
-  }
+  // "Test connection" is off: connecting tests in the background.
+  // function handleTest(account: ProviderAccount) {
+  //   if (!account.connectionId) return;
+  //   testConnection.mutate(account.connectionId, {
+  //     onSuccess: (result) =>
+  //       result.success
+  //         ? toast.success(result.message)
+  //         : toast.error(t("errors.testFailed", { message: result.message })),
+  //     onError: (error) => toast.error(getErrorMessage(error, t("errors.connectFailed"))),
+  //   });
+  // }
 
   function handleSync() {
     syncGsc.mutate(undefined, {
@@ -208,6 +209,7 @@ export function IntegrationDetailsView({ provider }: { provider: IntegrationProv
                 </div>
                 {canConnect && (
                   <div className="flex items-center gap-2">
+                    {/* "Test connection" is off: connecting tests in the background.
                     {account.connectionId !== undefined && meta.method !== "manual" && (
                       <Button
                         size="sm"
@@ -217,7 +219,7 @@ export function IntegrationDetailsView({ provider }: { provider: IntegrationProv
                         <RefreshCwIcon />
                         {t("details.test")}
                       </Button>
-                    )}
+                    )} */}
                     {provider === "searchConsole" && (
                       <Button size="sm" loading={syncGsc.isPending} onClick={handleSync}>
                         <RefreshCwIcon />

@@ -3253,7 +3253,7 @@
       "viewPrompt": "View prompt",
       "hidePrompt": "Hide prompt",
       "copyPrompt": "Copy prompt",
-      "testAndConnect": "Test and connect",
+      "testAndConnect": "Connect",
       "validates": "Rankoya validates the credentials before activating the connection.",
       "errors": {
         "lovable_url": "Enter your Lovable site's full https:// URL, like https://yourapp.lovable.app.",
@@ -3409,15 +3409,15 @@
       "make": {
         "s1": "In Make, create a scenario and add <b>Webhooks → Custom webhook</b> as the first module.",
         "s2": "Click <b>Add</b>, name it <code>Rankoya</code>, and copy the webhook URL Make shows.",
-        "s3": "Paste the URL below and click <b>Send test article</b>. Make should show <b>Successfully determined</b>.",
-        "s4": "Add the modules that use the article, then save the connection here and turn the scenario on.",
+        "s3": "Paste the URL below and click <b>Connect</b>. Make should show <b>Successfully determined</b>.",
+        "s4": "Add the modules that use the article, then turn the scenario on.",
         "note": "Make's free plan includes webhooks. Every published article runs the scenario once."
       },
       "lovable": {
         "s1": "Click <b>Copy prompt</b> and paste it into the chat of your existing Lovable project.",
         "s2": "Let Lovable finish. It adds the Rankoya endpoints to your app, tests them and deploys.",
         "s3": "Copy your website's public URL and the <code>RANKOYA_API_KEY</code> Lovable shows you. It's only shown once.",
-        "s4": "Paste both below and click <b>Test and connect</b>.",
+        "s4": "Paste both below and click <b>Connect</b>.",
         "note": "Lovable keeps the key as a server-side secret, so it never reaches your visitors."
       },
       "replit": {
@@ -3470,7 +3470,7 @@
       },
       "urlHelper": "Must start with https://",
       "test": "Send test article",
-      "testAndConnect": "Test and connect",
+      "testAndConnect": "Connect",
       "connectedMake": "{name} is connected. Publish articles to it from the article page.",
       "testAgain": "Send again",
       "delivered": "Test article delivered. Check it arrived, then save the connection.",
