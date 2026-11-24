@@ -14,7 +14,6 @@ import { publishingKeys } from "@/lib/api/query-keys";
 import { PROVIDERS, type IntegrationProvider } from "@/features/integrations/catalog";
 import { PUBLISHING_FIELDS, connectionPayload, isPublishingPlatform } from "@/features/publishing/forms";
 import { ConnectionTestError, useCreateConnection } from "@/features/publishing/hooks";
-import { checkLovableHealth } from "@/features/publishing/lovable-health";
 import { startWpcomConnect } from "@/features/publishing/wpcom";
 import { startWixConnect } from "@/features/publishing/wix";
 import { ShopifyBlogPicker } from "@/features/publishing/shopify-blog-picker";
@@ -25,7 +24,7 @@ import { PasswordInput } from "@/components/forms/password-input";
 import { IntegrationTile } from "@/components/brand/integration-row";
 import { ConnectGuide } from "./connect-guide";
 import { FeedLinks } from "./feed-links";
-import { LovablePrompt } from "./lovable-prompt";
+import { LovableConnect } from "./lovable-connect";
 import { WebhookConnect } from "./webhook-connect";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -82,8 +81,8 @@ export function useConnectReturn(siteId: number | undefined, onConnected?: (prov
  * - copy and paste (Next.js, any other site): a `manual` connection, nothing to fill in;
  * - Wix: installing Rankoya's Wix app through the backend (`startWixConnect`); the API-key form is off for now;
  * - Make: a webhook URL, saved and tested through the backend ("Connect"); articles publish from the article page;
- * - Lovable: a setup prompt to paste into the project, then its URL and RANKOYA_API_KEY, created and tested
- *   through the backend like the other credentials forms ("Connect");
+ * - Lovable: two prompts to paste into the project (the second unlocks once the site URL is in), then the
+ *   RANKOYA_API_KEY; the health endpoint is checked automatically and "Connect" saves it (LovableConnect);
  * - RSS: the site's private feed, created and managed through the backend.
  */
 export function ConnectDialog({
@@ -103,8 +102,6 @@ export function ConnectDialog({
   const pathname = usePathname();
   const createConnection = useCreateConnection(site?.id ?? 0);
   const [isWaiting, setIsWaiting] = React.useState(false);
-  // Lovable: the health check that runs before the connection is saved.
-  const [isChecking, setIsChecking] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [values, setValues] = React.useState<Record<string, string>>({});
   // Shopify: once connected, the blog articles go to is chosen before closing.
@@ -166,7 +163,7 @@ export function ConnectDialog({
     );
   };
 
-  const handleCredentialsConnect = async () => {
+  const handleCredentialsConnect = () => {
     if (!provider || !isPublishingPlatform(provider) || !site) return;
     if (fields.some((field) => !(values[field.key] ?? "").trim())) {
       setError(t("errors.fieldsRequired"));
@@ -174,19 +171,6 @@ export function ConnectDialog({
     }
     setError(null);
     const payload = connectionPayload(provider, `${name} · ${site.domain}`, values);
-    // Lovable: check its health route with the user's key first, so a wrong key or a missing route isn't saved.
-    if (provider === "lovable") {
-      setIsChecking(true);
-      const health = await checkLovableHealth({
-        baseUrl: payload.credentials?.base_url ?? "",
-        apiKey: payload.credentials?.api_key ?? "",
-      });
-      setIsChecking(false);
-      if (!health.ok) {
-        setError(t(`lovable.errors.${health.error}`));
-        return;
-      }
-    }
     createConnection.mutate(payload, {
       onSuccess: (connectionId) => {
         toast.success(t("toasts.connected", { name }));
@@ -242,26 +226,21 @@ export function ConnectDialog({
             {/* Wix: the API-key form is off for now; the footer button installs Rankoya's Wix app.
             {provider === "wix" && site && ( … "Install on Wix" card with an API-key fallback … )} */}
 
-            {/* Lovable: the prompt that adds Rankoya's routes to the user's project comes first. */}
-            {provider === "lovable" && <LovablePrompt />}
-
             {shopifyConnection === null && (
               <ConnectGuide provider={provider} defaultOpen={meta.method !== "webhook" && provider !== "lovable"} />
             )}
 
-            {meta.method === "webhook" &&
-              site &&
-              provider === "make" /* || provider === "replit" */ && (
-                <WebhookConnect
-                  provider={provider}
-                  site={site}
-                  name={name}
-                  onSaved={() => {
-                    onConnected?.(provider);
-                    onOpenChange(false);
-                  }}
-                />
-              )}
+            {meta.method === "webhook" && site && provider === "make" /* || provider === "replit" */ && (
+              <WebhookConnect
+                provider={provider}
+                site={site}
+                name={name}
+                onSaved={() => {
+                  onConnected?.(provider);
+                  onOpenChange(false);
+                }}
+              />
+            )}
 
             {meta.method === "feed" && site && <FeedLinks siteId={site.id} />}
 
@@ -273,13 +252,27 @@ export function ConnectDialog({
               />
             )}
 
-            {meta.method === "credentials" && shopifyConnection === null && (
+            {/* Lovable: step 1 prompt, the site URL, step 2 prompt (locked until the URL is in), then the key. */}
+            {provider === "lovable" && site && (
+              <LovableConnect
+                site={site}
+                name={name}
+                actionsClassName="justify-end"
+                onConnected={() => {
+                  toast.success(t("toasts.connected", { name }));
+                  onConnected?.(provider);
+                  onOpenChange(false);
+                }}
+              />
+            )}
+
+            {meta.method === "credentials" && shopifyConnection === null && provider !== "lovable" && (
               <form
                 id="connect-credentials"
                 className="flex flex-col gap-4"
                 onSubmit={(event) => {
                   event.preventDefault();
-                  void handleCredentialsConnect();
+                  handleCredentialsConnect();
                 }}
               >
                 {fields.map((field) => {
@@ -298,19 +291,7 @@ export function ConnectDialog({
                       }
                     >
                       {(props) =>
-                        field.input === "url" && provider === "lovable" ? (
-                          // A full URL, as Lovable gives it (https://mywebsite.lovable.app).
-                          <Input
-                            {...props}
-                            dir="ltr"
-                            type="url"
-                            inputMode="url"
-                            autoComplete="off"
-                            placeholder={field.placeholder ? t(`placeholders.${field.placeholder}`) : undefined}
-                            value={value}
-                            onChange={(event) => set(event.target.value)}
-                          />
-                        ) : field.input === "url" ? (
+                        field.input === "url" ? (
                           <DomainInput {...props} value={value} placeholder={site?.domain} onChange={set} />
                         ) : field.input === "secret" ? (
                           <PasswordInput
@@ -334,9 +315,6 @@ export function ConnectDialog({
                     </FormField>
                   );
                 })}
-                {provider === "lovable" && (
-                  <p className="text-caption font-normal text-fg-3">{t("lovable.validates")}</p>
-                )}
               </form>
             )}
 
@@ -367,14 +345,9 @@ export function ConnectDialog({
                   {t("connect")}
                 </Button>
               )}
-              {meta.method === "credentials" && shopifyConnection === null && (
-                <Button
-                  type="submit"
-                  form="connect-credentials"
-                  variant="primary"
-                  loading={isChecking || createConnection.isPending}
-                >
-                  {provider === "lovable" ? t("lovable.testAndConnect") : t("connect")}
+              {meta.method === "credentials" && shopifyConnection === null && provider !== "lovable" && (
+                <Button type="submit" form="connect-credentials" variant="primary" loading={createConnection.isPending}>
+                  {t("connect")}
                 </Button>
               )}
             </DialogFooter>

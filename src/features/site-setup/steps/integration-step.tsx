@@ -16,7 +16,6 @@ import {
 } from "@/features/publishing/forms";
 import { manualBuilderOf } from "@/features/integrations/connections";
 import { ConnectionTestError, useCreateConnection, usePublishingConnections } from "@/features/publishing/hooks";
-import { checkLovableHealth } from "@/features/publishing/lovable-health";
 import { useRssFeed } from "@/features/publishing/rss";
 import { startWixConnect } from "@/features/publishing/wix";
 import { startWpcomConnect } from "@/features/publishing/wpcom";
@@ -34,7 +33,7 @@ import { StepHeading } from "./step-heading";
 import { ConnectGuide } from "@/components/integrations/connect-guide";
 import { FeedLinks } from "@/components/integrations/feed-links";
 import { WebhookConnect } from "@/components/integrations/webhook-connect";
-import { LovablePrompt } from "@/components/integrations/lovable-prompt";
+import { LovableConnect } from "@/components/integrations/lovable-connect";
 import { useConnectReturn } from "@/components/integrations/connect-dialog";
 import { setupPath } from "../steps";
 
@@ -42,7 +41,8 @@ import { setupPath } from "../steps";
  * The API platforms, then:
  * - Make: a webhook, saved and tested as a connection; articles publish to it from the article page;
  * - RSS: the site's private feed, which other tools read;
- * - Lovable is one of the API platforms: a setup prompt, then its URL and RANKOYA_API_KEY;
+ * - Lovable is one of the API platforms: two prompts (the second unlocks once the site URL is in), then
+ *   its RANKOYA_API_KEY, in a form of its own (LovableConnect);
  * - a Next.js app and any other site: copy and paste (a
  *   `manual` connection, active straight away). Rankoya prepares each article
  *   to paste in.
@@ -91,7 +91,6 @@ export function IntegrationStep({ site, onContinue }: { site: Site; onContinue: 
   const tFields = useTranslations("integrations.fields");
   const tToken = useTranslations("integrations.shopifyToken");
   const tWix = useTranslations("integrations.wixApp");
-  const tLovable = useTranslations("integrations.lovable");
   const tPlaceholders = useTranslations("integrations.placeholders");
   const connections = usePublishingConnections(site.id);
   const create = useCreateConnection(site.id);
@@ -99,8 +98,6 @@ export function IntegrationStep({ site, onContinue }: { site: Site; onContinue: 
   const [choice, setChoice] = React.useState<PublishPlatform | null>(null);
   const [values, setValues] = React.useState<Record<string, string>>({});
   const [error, setError] = React.useState<string | null>(null);
-  // Lovable: the health check that runs before the connection is saved.
-  const [checking, setChecking] = React.useState(false);
   const [hosting, setHosting] = React.useState<WordpressHosting>("selfHosted");
   const [redirecting, setRedirecting] = React.useState(false);
   // Back from installing the Wix app: toast the result (?connected=wix / ?error=<message>) and refresh.
@@ -153,7 +150,7 @@ export function IntegrationStep({ site, onContinue }: { site: Site; onContinue: 
     }
   };
 
-  const connect = async (event: React.FormEvent) => {
+  const connect = (event: React.FormEvent) => {
     event.preventDefault();
     if (isWpcom) {
       if (!wpcom.auth) void signInWithWpcom();
@@ -171,19 +168,6 @@ export function IntegrationStep({ site, onContinue }: { site: Site; onContinue: 
           // ...(choice === "replit" ? { config: { provider: choice } } : {}),
         }
       : connectionPayload(choice as ApiPublishingPlatform, `${name} · ${site.domain}`, values);
-    // Lovable: check its health route with the user's key first, so a wrong key or a missing route isn't saved.
-    if (choice === "lovable") {
-      setChecking(true);
-      const health = await checkLovableHealth({
-        baseUrl: payload.credentials?.base_url ?? "",
-        apiKey: payload.credentials?.api_key ?? "",
-      });
-      setChecking(false);
-      if (!health.ok) {
-        setError(tLovable(`errors.${health.error}`));
-        return;
-      }
-    }
     create.mutate(payload, {
       onSuccess: () =>
         patchDraft(site.id, { integration: { provider: choice, connectedAt: new Date().toISOString() } }),
@@ -267,10 +251,32 @@ export function IntegrationStep({ site, onContinue }: { site: Site; onContinue: 
             )}
           </motion.div>
         )}
-        {choice && !isSelfServe(choice) && !connected && (
+        {/* Lovable: two prompts and the key, with its own Connect (see LovableConnect). */}
+        {choice === "lovable" && !connected && (
+          <motion.div
+            key={choice}
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: dur.base, ease: ease.out }}
+            className="flex flex-col gap-4 rounded-xl border border-border bg-surface p-5 shadow-card"
+          >
+            <p className="text-small text-fg-2">{t("platform.lovable.help")}</p>
+            <LovableConnect
+              site={site}
+              name={t("platform.lovable.name")}
+              actionsClassName="justify-start"
+              onConnected={() =>
+                patchDraft(site.id, { integration: { provider: "lovable", connectedAt: new Date().toISOString() } })
+              }
+            />
+            <ConnectGuide provider="lovable" defaultOpen={false} />
+          </motion.div>
+        )}
+        {choice && !isSelfServe(choice) && choice !== "lovable" && !connected && (
           <motion.form
             key={choice}
-            onSubmit={(event) => void connect(event)}
+            onSubmit={connect}
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
@@ -295,7 +301,6 @@ export function IntegrationStep({ site, onContinue }: { site: Site; onContinue: 
             <p className="text-small text-fg-2">
               {isWpcom ? t("hosting.wordpressComHelp") : t(`platform.${choice}.help`)}
             </p>
-            {choice === "lovable" && <LovablePrompt />}
             <ConnectGuide provider={isWpcom ? "wordpressCom" : choice} defaultOpen={false} />
             {isWpcom && wpcom.auth && (
               <WpcomSitePicker
@@ -369,7 +374,6 @@ export function IntegrationStep({ site, onContinue }: { site: Site; onContinue: 
                 {tWix("install")}
               </Button>
             )}
-            {choice === "lovable" && <p className="text-caption font-normal text-fg-3">{tLovable("validates")}</p>}
             {error && (
               <p role="alert" className="text-small text-danger">
                 {error}
@@ -379,11 +383,11 @@ export function IntegrationStep({ site, onContinue }: { site: Site; onContinue: 
               <Button
                 type="submit"
                 variant="primary"
-                loading={checking || create.isPending || redirecting}
+                loading={create.isPending || redirecting}
                 disabled={!isWpcom && !canConnect}
                 className="self-start"
               >
-                {isWpcom ? t("hosting.continue") : choice === "lovable" ? tLovable("testAndConnect") : t("connect")}
+                {isWpcom ? t("hosting.continue") : t("connect")}
               </Button>
             )}
           </motion.form>

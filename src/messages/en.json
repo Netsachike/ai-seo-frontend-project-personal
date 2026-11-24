@@ -3248,6 +3248,17 @@
       "lovableApiKey": "Paste your RANKOYA_API_KEY"
     },
     "lovable": {
+      "step1Title": "Step 1: Set up Rankoya in Lovable",
+      "step1Body": "Paste this prompt into your existing Lovable project. It adds a blog (or reuses yours), the Rankoya endpoints, and a Generate and Copy form for your RANKOYA_API_KEY.",
+      "step2Title": "Step 2: Make the endpoints live",
+      "step2Body": "Paste this into the same Lovable project once step 1 is done. It makes your site answer Rankoya with a real JSON API at this address:",
+      "step2Locked": "Enter your published website URL above to get this prompt. It is built for your site.",
+      "urlHelper": "Your published Lovable site, like museboard-mood-canvas.lovable.app.",
+      "urlFirst": "Enter your website URL first to get step 2.",
+      "keyRequired": "Paste the RANKOYA_API_KEY from your Lovable project.",
+      "checking": "Checking your site’s Rankoya endpoint…",
+      "live": "Your Rankoya API is live. Click Connect to finish.",
+      "rechecking": "We’ll keep checking every few seconds.",
       "promptTitle": "Setup prompt for Lovable",
       "promptBody": "Paste it into your existing Lovable project. It adds the endpoints Rankoya publishes to and shows you a RANKOYA_API_KEY to paste below.",
       "viewPrompt": "View prompt",
@@ -3259,7 +3270,7 @@
         "lovable_url": "Enter your Lovable site's full https:// URL, like https://yourapp.lovable.app.",
         "lovable_dns": "We couldn't find that site. Check the URL and that the app is published.",
         "lovable_auth": "Your Lovable app rejected this API key. Copy the RANKOYA_API_KEY from Lovable again and paste it here.",
-        "lovable_not_found": "Your Lovable app doesn't have Rankoya's routes yet. Paste the setup prompt into your project, publish the app, then try again.",
+        "lovable_not_found": "Your site doesn’t answer Rankoya’s health endpoint yet. Run both prompts in Lovable and publish the app.",
         "lovable_unavailable": "We couldn't reach your Lovable app. Check it's published, then try again."
       }
     },
@@ -3414,10 +3425,10 @@
         "note": "Make's free plan includes webhooks. Every published article runs the scenario once."
       },
       "lovable": {
-        "s1": "Click <b>Copy prompt</b> and paste it into the chat of your existing Lovable project.",
-        "s2": "Let Lovable finish. It adds the Rankoya endpoints to your app, tests them and deploys.",
-        "s3": "Copy your website's public URL and the <code>RANKOYA_API_KEY</code> Lovable shows you. It's only shown once.",
-        "s4": "Paste both below and click <b>Connect</b>.",
+        "s1": "Click <b>Copy prompt</b> on step 1 and paste it into the chat of your existing Lovable project. Lovable adds the Rankoya endpoints and a form to generate and copy your <code>RANKOYA_API_KEY</code>.",
+        "s2": "Enter your published website URL below. That unlocks step 2.",
+        "s3": "Copy the step 2 prompt into the same Lovable project. It makes the endpoints answer as a real JSON API on your site and redeploys.",
+        "s4": "Paste your <code>RANKOYA_API_KEY</code>. Rankoya checks your site every few seconds. When it shows live, click <b>Connect</b>.",
         "note": "Lovable keeps the key as a server-side secret, so it never reaches your visitors."
       },
       "replit": {
@@ -3863,7 +3874,7 @@
         "lovable": {
           "name": "Lovable",
           "detail": "Publish to your app's blog",
-          "help": "Copy the prompt into your Lovable project. When Lovable finishes, paste your website URL and the RANKOYA_API_KEY it shows you."
+          "help": "Run two prompts in your Lovable project: the first sets up Rankoya and gives you a RANKOYA_API_KEY, the second (built from your website URL) makes the endpoints live."
         },
         "replit": {
           "name": "Replit",

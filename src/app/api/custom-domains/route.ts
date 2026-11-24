@@ -6,11 +6,14 @@ import {
   demoVercel,
   isVercelConfigured,
   isVercelDemo,
+  requireSession,
   vercelUrl,
 } from "@/lib/vercel-domains";
 
 /** Adds a White Label domain to the Vercel project so its DNS records exist. */
 export async function POST(request: NextRequest) {
+  const unauthenticated = requireSession(request);
+  if (unauthenticated) return unauthenticated;
   try {
     if (!isVercelConfigured && !isVercelDemo) {
       console.error("Missing Vercel environment variables");

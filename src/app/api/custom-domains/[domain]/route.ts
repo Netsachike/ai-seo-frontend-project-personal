@@ -6,13 +6,16 @@ import {
   demoVercel,
   isVercelConfigured,
   isVercelDemo,
+  requireSession,
   vercelUrl,
 } from "@/lib/vercel-domains";
 
 const missingConfig = () => NextResponse.json({ error: "Vercel configuration is missing" }, { status: 500 });
 
 /** Ownership status of a domain on the Vercel project (TXT verification). */
-export async function GET(_request: NextRequest, ctx: { params: Promise<{ domain: string }> }) {
+export async function GET(request: NextRequest, ctx: { params: Promise<{ domain: string }> }) {
+  const unauthenticated = requireSession(request);
+  if (unauthenticated) return unauthenticated;
   try {
     if (!isVercelConfigured && !isVercelDemo) return missingConfig();
 
@@ -48,7 +51,9 @@ export async function GET(_request: NextRequest, ctx: { params: Promise<{ domain
  * Detaches the domain from the Vercel project. Runs before the backend record
  * is deleted so a host is never orphaned on the project.
  */
-export async function DELETE(_request: NextRequest, ctx: { params: Promise<{ domain: string }> }) {
+export async function DELETE(request: NextRequest, ctx: { params: Promise<{ domain: string }> }) {
+  const unauthenticated = requireSession(request);
+  if (unauthenticated) return unauthenticated;
   try {
     if (!isVercelConfigured && !isVercelDemo) return missingConfig();
 

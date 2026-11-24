@@ -69,6 +69,53 @@ export function useCreateConnection(siteId: number) {
   });
 }
 
+/** How often the details page re-tests its connections. */
+export const AUTO_TEST_INTERVAL_MS = 1500;
+
+/**
+ * Replaces the manual "Test connection" button: while mounted, tests each
+ * connection 1.5 s after the previous round finished (rounds never overlap)
+ * and pauses while the tab is hidden. The list is only refetched when a
+ * result disagrees with the status shown, so a steady connection costs one
+ * test request per tick and nothing else.
+ */
+export function useAutoTestConnections(siteId: number | undefined, connections: { id: number; active: boolean }[]) {
+  const queryClient = useQueryClient();
+  const ids = connections.map((c) => c.id).join(",");
+  const latest = React.useRef(connections);
+  React.useEffect(() => {
+    latest.current = connections;
+  });
+
+  React.useEffect(() => {
+    if (!siteId || !ids) return;
+    let cancelled = false;
+    let timer: ReturnType<typeof setTimeout>;
+    const round = async () => {
+      if (!document.hidden) {
+        let changed = false;
+        for (const connection of latest.current) {
+          try {
+            const result = (await publishingService.testConnection(siteId, connection.id)).data;
+            if (result.success !== connection.active) changed = true;
+          } catch {
+            // Couldn't test (the backend answers 422 when the platform is unreachable): it isn't active now.
+            if (connection.active) changed = true;
+          }
+          if (cancelled) return;
+        }
+        if (changed) await queryClient.invalidateQueries({ queryKey: publishingKeys.all(siteId) });
+      }
+      if (!cancelled) timer = setTimeout(round, AUTO_TEST_INTERVAL_MS);
+    };
+    void round();
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [siteId, ids, queryClient]);
+}
+
 /** Re-tests a connection (sets it `active` or `error`). */
 export function useTestConnection(siteId: number) {
   const queryClient = useQueryClient();

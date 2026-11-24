@@ -2,9 +2,12 @@
  * What the user pastes into their Lovable project so it exposes the routes
  * Rankoya's `lovable` connection calls (`GET /api/public/rankoya/health`,
  * `POST /api/public/rankoya/articles`, `PUT /api/public/rankoya/articles/{id}`),
- * checked with the `X-Rankoya-API-Key` header. Lovable then shows the
- * generated RANKOYA_API_KEY once, which goes into the connect form with the
- * site's URL. In English on purpose: it's an instruction for Lovable, not UI copy.
+ * checked with the `X-Rankoya-API-Key` header. Two prompts, in order:
+ * 1. LOVABLE_SETUP_PROMPT builds or reuses the blog, adds the routes and gives
+ *    the user a RANKOYA_API_KEY through a one-time Generate and Copy form;
+ * 2. lovableRoutingPrompt(origin) makes sure the routes answer JSON on the
+ *    published domain. It needs the site URL, so the UI unlocks it once entered.
+ * In English on purpose: they're instructions for Lovable, not UI copy.
  */
 /* Previous prompt (before Rankoya Publishing API v1), kept for reference:
 const LOVABLE_PROMPT_LEGACY = `# Connect this existing Lovable project to Rankoya
@@ -161,8 +164,8 @@ Do not claim success for any endpoint that has not actually been implemented and
 `;
 */
 
-/** Rankoya Publishing API v1: root-level article fields, `target_status`, idempotent by `rankoya_article_id`. */
-export const LOVABLE_PROMPT = `# Install Rankoya Publishing Integration v1 in This Existing Lovable Project
+/* v1 single prompt (before the two-step flow), kept for reference:
+const LOVABLE_PROMPT_V1 = `# Install Rankoya Publishing Integration v1 in This Existing Lovable Project
 
 I want to integrate this existing application with Rankoya, an SEO, content generation and publishing platform.
 
@@ -544,4 +547,370 @@ If an existing blog is detected:
 If the existing application has no blog, implement one using its existing architecture.
 
 Before making database changes, explain which existing tables and models will be reused and what minimal changes are necessary.
+`;
+*/
+
+/**
+ * Step 1 of 2 (Rankoya Lovable Publishing Integration v2): builds or reuses the
+ * blog, adds Rankoya's three routes and generates the RANKOYA_API_KEY through a
+ * one-time Generate and Copy form in the user's Lovable project.
+ */
+export const LOVABLE_SETUP_PROMPT = `Rankoya Lovable Publishing Integration v2
+Universal Installation Instructions for Existing Lovable Projects
+
+I want to connect this existing Lovable application to Rankoya, a content generation, SEO and publishing platform.
+This is an integration into an existing application, not a request to build a new application.
+The official Rankoya API specification below is mandatory. Follow it exactly.
+
+1. Inspect the existing application before implementation
+First inspect:
+- Existing framework and version.
+- Application routing and server-side capabilities.
+- Hosting and deployment architecture.
+- Database provider, tables and schema.
+- Existing blog, article, post or CMS functionality.
+- Existing article models and publishing workflows.
+- Existing authentication and authorization.
+- Existing public website routes and page layouts.
+- Existing image and media handling.
+- Existing server-side functions and secrets.
+Identify the existing blog and publishing architecture.
+If a blog already exists:
+- Reuse its existing database, tables, models and relationships.
+- Reuse its existing article creation and publishing workflows.
+- Reuse its existing public article pages and design.
+- Do not create a duplicate blog, editor or article table.
+If no blog exists, implement a simple blog using the existing application's architecture and design system.
+Before making database changes, explain which existing tables and models will be reused and which minimal changes are necessary.
+
+2. Mandatory customer-facing URL requirement
+The website owner must only need to provide:
+- Their published website URL.
+- Their Rankoya API key.
+Do not ask the website owner to provide a separate API URL, Supabase URL, Edge Function URL or backend URL.
+Example:
+Published website:
+https://example.lovable.app
+The following API endpoints must be accessible through that same published website domain:
+GET https://example.lovable.app/api/public/rankoya/health
+POST https://example.lovable.app/api/public/rankoya/articles
+PUT https://example.lovable.app/api/public/rankoya/articles/{rankoya_article_id}
+The published website URL must remain the single customer-facing base URL.
+Internal infrastructure such as Supabase, Edge Functions or server-side services may be used internally, but must never become an additional customer configuration requirement.
+
+3. Architecture-aware implementation
+Do not assume that every Lovable project uses the same framework, routing system or hosting architecture.
+Based on the initial inspection, select the implementation method that actually works with this project's architecture.
+Possible approaches include:
+- Native server-side application routes.
+- Server-side API handlers.
+- Secure server-side proxy or rewrite to an existing Edge Function.
+- An approved framework or hosting migration if technically necessary.
+Requirements:
+- Implement the three Rankoya endpoints on the published website's own domain.
+- If using an internal Edge Function, securely forward requests from the public website routes to that function.
+- Preserve the original HTTP method, request body and required authentication header.
+- Do not expose API secrets in browser code.
+- Do not return the website homepage for Rankoya API requests.
+- Do not use frontend JavaScript routing as a substitute for real API endpoints.
+- Do not claim that an internal function test proves that the public website endpoints work.
+- Do not automatically migrate the application or introduce a paid upgrade without explaining the technical reason, expected changes and possible costs and obtaining the owner's approval.
+If the existing architecture cannot expose these routes on the published website domain, stop and explain the limitation. Do not claim the integration is ready.
+
+4. Secure API key generation
+Generate a cryptographically secure random API key with at least 32 bytes of randomness.
+Store it as a server-side secret:
+RANKOYA_API_KEY
+Requirements:
+- Keep the key exclusively on the server.
+- Never expose it to the browser.
+- Never store it in public environment variables.
+- Never log it.
+- Authenticate every Rankoya endpoint using the X-Rankoya-API-Key header.
+- Compare keys securely.
+- Reject missing, invalid or empty keys with HTTP 401.
+For key delivery, use a secure one-time form with a Generate and Copy action. The website owner must be able to copy the key directly into Rankoya.
+Do not expose the key in chat messages, logs or public API responses.
+If a valid existing Rankoya key is already configured, preserve it unless the owner explicitly requests replacement.
+
+5. Official Rankoya API v1 specification
+All three endpoints must use the same authentication mechanism.
+
+A. Health check
+Method: GET
+Path:
+/api/public/rankoya/health
+Successful response — HTTP 200:
+{
+"success": true,
+"message": "Rankoya publishing API is operational",
+"integration": "rankoya",
+"api_version": "v1"
+}
+Invalid or missing authentication — HTTP 401:
+{
+"success": false,
+"message": "Invalid or missing API key"
+}
+The health endpoint must verify the actual API authentication and service availability.
+
+B. Create or publish an article
+Method: POST
+Path:
+/api/public/rankoya/articles
+Authentication:
+X-Rankoya-API-Key: <RANKOYA_API_KEY>
+Accept the following JSON structure. All fields are at the root level, not nested inside an article object.
+{
+"rankoya_article_id": "123",
+"title": "Example article",
+"content": "<h1>Example article</h1><p>Article content.</p>",
+"slug": "example-article",
+"meta_title": "Example SEO title",
+"meta_description": "Example SEO description",
+"excerpt": "An example excerpt.",
+"cover_image_url": "https://example.com/image.jpg",
+"status": "published",
+"target_status": "publish",
+"published_at": "2026-11-20T10:00:00+01:00",
+"url": null,
+"event": "article.published",
+"source": "rankoya",
+"delivery_id": "f6c84036-ee7f-4567-865e-a2f2712a8ef9",
+"sent_at": "2026-11-20T10:00:00+01:00",
+"site": {
+"id": 23,
+"name": "Example website",
+"domain": "example.com",
+"url": "https://example.com"
+}
+}
+Required fields:
+- rankoya_article_id: string or integer identifier.
+- title: non-empty string.
+- content: non-empty HTML string.
+- target_status: exactly draft or publish.
+Optional fields:
+- delivery_id
+- slug
+- meta_title
+- meta_description
+- excerpt
+- cover_image_url
+- status
+- published_at
+- url
+- event
+- source
+- sent_at
+- site
+Accept nullable optional fields and additional optional metadata without rejecting an otherwise valid request.
+Do not reject the payload merely because optional fields are null.
+
+C. Update an existing article
+Method: PUT
+Path:
+/api/public/rankoya/articles/{rankoya_article_id}
+The URL identifier is Rankoya's original article ID, not the destination database UUID.
+Accept the same root-level JSON structure as POST.
+Requirements:
+- Find the article using rankoya_article_id.
+- Update the existing article.
+- Never create another article through PUT.
+- Support switching between draft and published status.
+- Return HTTP 404 if the article does not exist.
+- Preserve existing article relationships and functionality.
+
+6. Article publishing and database mapping
+Map Rankoya's fields to the actual existing destination database schema.
+Do not assume the destination database has columns named title, content or slug without inspecting it.
+Requirements:
+- Save articles in the existing article system.
+- Store rankoya_article_id as a permanent external identifier.
+- Use a suitable existing integration or metadata field where possible.
+- Otherwise, add only the minimal required database changes.
+- Store delivery_id for duplicate delivery protection.
+- Never create duplicate articles for the same Rankoya article ID.
+- A repeated delivery must not create another article.
+- Do not allow an older delivery to overwrite a newer version.
+- Preserve existing slugs and URLs where possible.
+When target_status is draft:
+- Save as a draft.
+- Do not expose the article publicly.
+- Return a null public URL unless a legitimate draft preview URL exists.
+When target_status is publish:
+- Save and publish the article.
+- Make it available through the existing public blog.
+- Generate or preserve its slug.
+- Return its canonical public article URL.
+
+7. Mandatory successful response format
+All successful POST and PUT requests must return:
+{
+"success": true,
+"message": "Article published successfully",
+"data": {
+"id": "lovable-database-id",
+"rankoya_article_id": "123",
+"slug": "example-article",
+"status": "published",
+"url": "https://example.com/blog/example-article"
+},
+"duplicate": false,
+"api_version": "v1"
+}
+Requirements:
+- data.id must be the actual destination database ID, returned as a string.
+- data.rankoya_article_id must be the original Rankoya ID, returned as a string.
+- data.slug must be the final slug.
+- data.status must be exactly draft or published.
+- data.url must be the canonical public article URL for published articles and null for drafts without public URLs.
+- duplicate must be a boolean.
+- api_version must be v1.
+- Do not report success if the article was not actually saved.
+- Do not omit mandatory response fields.
+
+8. Error response format
+Validation errors must identify the exact failing field.
+Example:
+{
+"success": false,
+"message": "Invalid article payload",
+"errors": [
+{
+"field": "title",
+"message": "Required"
+}
+],
+"api_version": "v1"
+}
+Use:
+- HTTP 400 for invalid request data.
+- HTTP 401 for missing or invalid authentication.
+- HTTP 404 for an article not found during PUT.
+- HTTP 409 for genuine idempotency conflicts.
+- HTTP 500 for unexpected server errors.
+Never hide a known validation error behind a generic error response.
+Never expose credentials, stack traces or sensitive database information.
+
+9. Public blog integration
+- Published articles must appear on the existing public blog.
+- Drafts must remain private.
+- Use the existing website design.
+- Preserve existing public routes and navigation.
+- Support SEO title and meta description.
+- Support article slugs and featured images where available.
+- Do not interfere with existing authentication or permissions.
+
+10. Mandatory security requirements
+- Authenticate every Rankoya publishing request.
+- Keep the API key server-side.
+- Validate and sanitize incoming data appropriately.
+- Never expose the API key to visitors.
+- Do not weaken existing database security policies.
+- Public visitors must not be able to create, update or delete articles.
+- Public visitors must not access unpublished articles.
+- Ensure any internal proxy cannot be used to bypass authentication.
+
+11. Mandatory deployment and live testing
+Test the actual published website domain, not just internal functions.
+The following tests are mandatory:
+- GET health endpoint with a valid key returns HTTP 200 and api_version v1.
+- GET health endpoint with an invalid key returns HTTP 401.
+- GET health endpoint without a key returns HTTP 401.
+- POST creates a draft article.
+- POST publishes an article.
+- POST with an existing rankoya_article_id updates rather than duplicates.
+- PUT updates the existing article.
+- PUT with an unknown Rankoya article ID returns HTTP 404.
+- Repeated delivery IDs are handled correctly.
+- Published articles are publicly accessible.
+- Draft articles are not publicly accessible.
+- Successful responses contain all mandatory response fields.
+- Validation errors identify the exact failing fields.
+- No API key is exposed in browser responses or logs.
+Use safe test records and clean them up without deleting existing customer data.
+For authentication tests, use the configured server-side secret without displaying it.
+If a test cannot be completed, state that clearly. Never claim an untested endpoint passed.
+
+12. Final deployment report
+After implementation, deployment and live testing, report:
+- Published website URL.
+- Health endpoint URL.
+- Article creation endpoint URL.
+- Article update endpoint URL.
+- API version.
+- Hosting and routing implementation used.
+- Whether the application was deployed.
+- Which tests passed and failed.
+- Whether the existing blog was reused.
+- Whether the existing database and articles were preserved.
+- Whether the existing API key was preserved or a new one was generated.
+- Any required framework migration or additional hosting costs.
+- Any remaining limitations.
+The website owner must only need their published website URL and API key to connect Rankoya.
+Never require the owner to configure a second API URL.
+Do not claim the integration is ready until the actual published website endpoints have been verified.
+`;
+
+/**
+ * The site's origin from whatever the user typed ("museboard.lovable.app",
+ * "https://museboard.lovable.app/blog/"), or null when it isn't a usable
+ * public host. Step 2 and the health check both build on this origin.
+ */
+export function lovableOrigin(input: string): string | null {
+  const raw = input.trim();
+  if (!raw) return null;
+  try {
+    const url = new URL(/^[a-z][a-z\d+.-]*:\/\//i.test(raw) ? raw : `https://${raw}`);
+    if (url.protocol !== "https:" && url.protocol !== "http:") return null;
+    if (!/^[a-z\d-]+(\.[a-z\d-]+)+$/i.test(url.hostname)) return null;
+    return `https://${url.host.toLowerCase()}`;
+  } catch {
+    return null;
+  }
+}
+
+/** The health endpoint Rankoya checks, on the site's own domain. */
+export const lovableHealthUrl = (origin: string) => `${origin}/api/public/rankoya/health`;
+
+/**
+ * Step 2 of 2: makes Lovable register the three routes server-side (not in
+ * the SPA's HTML fallback) and verify the health endpoint on the published
+ * domain. Needs the site URL, which is why it stays locked until it's entered.
+ */
+export const lovableRoutingPrompt = (
+  origin: string,
+) => `My Rankoya health endpoint is currently returning this response:
+{
+"error": "Only HTML requests are supported here"
+}
+The URL is:
+${lovableHealthUrl(origin)}
+This is incorrect. Rankoya requires a real server-side JSON API endpoint, not an HTML page.
+Please inspect the existing implementation and fix the routing.
+Requirements:
+- Implement a real server-side GET route at /api/public/rankoya/health.
+- Implement POST /api/public/rankoya/articles.
+- Implement PUT /api/public/rankoya/articles/{rankoya_article_id}.
+- Ensure these routes are registered in the server-side routing system, not the frontend page router.
+- Ensure API requests are not intercepted by the website's HTML fallback, page router or SPA handler.
+- Return application/json responses for all three endpoints.
+- Read and validate the existing RANKOYA_API_KEY from server-side secrets using the X-Rankoya-API-Key header.
+- Preserve the existing API key. Do not generate another one.
+- Preserve the existing blog, database, articles, design and publishing logic.
+- Do not create another blog or duplicate article tables.
+The health endpoint must return HTTP 200 with this exact response for a valid key:
+{
+"success": true,
+"message": "Rankoya publishing API is operational",
+"integration": "rankoya",
+"api_version": "v1"
+}
+It must return HTTP 401 for a missing or invalid key.
+IMPORTANT:
+First identify why the current application returns "Only HTML requests are supported here".
+Do not simply change the error message or return a hardcoded success response.
+After fixing the implementation, deploy the application and test the actual published website URL using an authenticated GET request.
+Do not claim success until the public endpoint returns the correct JSON response.
 `;

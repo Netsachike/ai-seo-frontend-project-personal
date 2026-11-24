@@ -8,12 +8,27 @@
  * no Vercel credentials, the routes answer with the real "configuration is
  * missing" error instead.
  */
+import { NextResponse, type NextRequest } from "next/server";
+
+import { SESSION_COOKIE } from "@/lib/auth/session";
+
 export const VERCEL_TOKEN = process.env.VERCEL_TOKEN;
 export const VERCEL_PROJECT_ID = process.env.VERCEL_PROJECT_ID;
 export const VERCEL_TEAM_ID = process.env.VERCEL_TEAM_ID;
 
 export const isVercelConfigured = Boolean(VERCEL_TOKEN && VERCEL_PROJECT_ID);
 export const isVercelDemo = !isVercelConfigured && !process.env.NEXT_PUBLIC_API_BASE_URL;
+
+/**
+ * The routes act on Rankoya's Vercel project with its token, so only a
+ * signed-in user may call them (the backend still decides who owns a domain).
+ * Returns the 401 to send, or null to carry on.
+ */
+export function requireSession(request: NextRequest) {
+  return request.cookies.get(SESSION_COOKIE)?.value
+    ? null
+    : NextResponse.json({ error: "Unauthenticated" }, { status: 401 });
+}
 
 /** Adds `teamId` when the project belongs to a team. */
 export function vercelUrl(path: string) {

@@ -2,7 +2,7 @@
 
 // Make connects as a saved webhook connection (platform `make`) and publishes from the article page.
 import * as React from "react";
-import { CheckCircle2Icon, ChevronDownIcon, EyeIcon, PlugZapIcon, SendIcon } from "lucide-react";
+import { CheckCircle2Icon, ChevronDownIcon, EyeIcon, PlugZapIcon /* , SendIcon */ } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import type { Site } from "@/types/types";
@@ -60,7 +60,8 @@ export function WebhookConnect({
   // Make's signing secret is off for now: its requests go unsigned.
   const secret = isBuilder ? builderSecret : undefined;
   const [url, setUrl] = React.useState(() => readWebhookUrl(site.id, provider));
-  const [testing, setTesting] = React.useState(false);
+  // Read by the manual test button, which is commented out below.
+  const [, setTesting] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   // The URL that passed the test; editing the URL means testing again.
   const [testedUrl, setTestedUrl] = React.useState<string | null>(null);
@@ -292,12 +293,15 @@ export function WebhookConnect({
         )}
 
         <div className="flex flex-wrap justify-end gap-2">
+          {/* Manual "Send test article" is off: connections are tested automatically on their details page.
+          Lovable and Replit (the only builders) don't use this form any more; Enter still runs the test.
           {isBuilder ? (
             <Button type="submit" variant="secondary" loading={testing} disabled={!url.trim()}>
               <SendIcon />
               {tested ? t("testAgain") : t("test")}
             </Button>
-          ) : (
+          ) : ( */}
+          {!isBuilder && (
             <Button type="submit" variant="primary" loading={createConnection.isPending} disabled={!url.trim()}>
               <PlugZapIcon />
               {t("testAndConnect")}

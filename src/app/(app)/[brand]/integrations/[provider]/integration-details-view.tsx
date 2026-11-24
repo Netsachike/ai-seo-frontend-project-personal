@@ -9,7 +9,7 @@ import { toast } from "@/lib/toast";
 import { getErrorMessage } from "@/lib/errors";
 import { PROVIDERS, type IntegrationProvider } from "@/features/integrations/catalog";
 import { useProviderAccounts, type ProviderAccount } from "@/features/integrations/connections";
-import { useDeleteConnection /* , useTestConnection */ } from "@/features/publishing/hooks";
+import { useAutoTestConnections, useDeleteConnection /* , useTestConnection */ } from "@/features/publishing/hooks";
 import { ShopifyBlogPicker } from "@/features/publishing/shopify-blog-picker";
 import { WpcomSitePicker, useWpcomAuthorization } from "@/features/publishing/wpcom-site-picker";
 import { useGscOverview, useSyncGsc } from "@/features/search-console/hooks";
@@ -33,8 +33,9 @@ import {
 } from "@/components/ui/dialog";
 
 /**
- * Connected accounts for one provider. Publishing connections can be
- * re-tested, disconnected (a permanent delete in the backend) and Search
+ * Connected accounts for one provider. Publishing connections are re-tested
+ * automatically every 1.5 s while the page is open (no manual test button),
+ * can be disconnected (a permanent delete in the backend) and Search
  * Console re-synced. Search Console has no disconnect endpoint yet.
  */
 export function IntegrationDetailsView({ provider }: { provider: IntegrationProvider }) {
@@ -52,6 +53,18 @@ export function IntegrationDetailsView({ provider }: { provider: IntegrationProv
   const meta = PROVIDERS[provider];
   const name = t(`providers.${provider}.name`);
   const canConnect = workspaceRole(workspace) !== "viewer";
+  // Tested in the background instead of a "Test connection" button. Make is left out: its test sends a
+  // payload to the user's scenario, which would run it every 1.5 s. Copy-and-paste and the feed have no test.
+  useAutoTestConnections(
+    brand?.id,
+    meta.method === "credentials" || meta.method === "oauth"
+      ? accounts.flatMap((a) =>
+          a.connectionId !== undefined && provider !== "searchConsole"
+            ? [{ id: a.connectionId, active: a.status === "active" }]
+            : [],
+        )
+      : [],
+  );
   // Search Console holds one property per site.
   // One connection per platform per site for now. A site whose connection failed its test can still reconnect.
   // const canAddAnother = canConnect && provider !== "searchConsole" && !(meta.scope === "user" && accounts.length > 0);
@@ -74,7 +87,7 @@ export function IntegrationDetailsView({ provider }: { provider: IntegrationProv
       onError: (error) => toast.error(getErrorMessage(error, t("errors.disconnectFailed"))),
     });
   }
-  // "Test connection" is off: connecting tests in the background.
+  // "Test connection" is off: useAutoTestConnections above tests every 1.5 s instead.
   // function handleTest(account: ProviderAccount) {
   //   if (!account.connectionId) return;
   //   testConnection.mutate(account.connectionId, {
@@ -244,7 +257,10 @@ export function IntegrationDetailsView({ provider }: { provider: IntegrationProv
         <GscPerformanceCard siteId={brand.id} connectHref={brandHref(brandSlug, "integrations/searchConsole")} />
       )}
 
-      <Dialog open={removing !== null} onOpenChange={(open) => !open && !deleteConnection.isPending && setRemoving(null)}>
+      <Dialog
+        open={removing !== null}
+        onOpenChange={(open) => !open && !deleteConnection.isPending && setRemoving(null)}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{t("details.disconnectTitle", { name: removing?.name ?? name })}</DialogTitle>
