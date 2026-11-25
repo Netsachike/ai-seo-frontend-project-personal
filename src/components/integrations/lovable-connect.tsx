@@ -191,22 +191,6 @@ export function LovableConnect({
         <TooltipContent side="top">{t("lovable.urlFirst")}</TooltipContent>
       </Tooltip>
 
-      <LovablePromptCard
-        step={2}
-        title={t("lovable.step2Title")}
-        body={t("lovable.step2Body")}
-        lockedBody={t("lovable.step2Locked")}
-        prompt={origin ? lovableRoutingPrompt(origin) : null}
-        locked={locked}
-        {...nudgeProps}
-      >
-        {origin && (
-          <code dir="ltr" className="truncate rounded bg-surface-2 px-2 py-1.5 font-mono text-[12px] text-fg">
-            {lovableHealthUrl(origin)}
-          </code>
-        )}
-      </LovablePromptCard>
-
       <FormField label={t("fields.lovableApiKey")}>
         {(props) => (
           <PasswordInput
@@ -222,6 +206,22 @@ export function LovableConnect({
           />
         )}
       </FormField>
+
+      <LovablePromptCard
+        step={2}
+        title={t("lovable.step2Title")}
+        body={t("lovable.step2Body")}
+        lockedBody={t("lovable.step2Locked")}
+        prompt={origin ? lovableRoutingPrompt(origin) : null}
+        locked={locked}
+        {...nudgeProps}
+      >
+        {origin && (
+          <code dir="ltr" className="truncate rounded bg-surface-2 px-2 py-1.5 font-mono text-[12px] text-fg">
+            {lovableHealthUrl(origin)}
+          </code>
+        )}
+      </LovablePromptCard>
 
       {health.state !== "idle" && (
         <p
