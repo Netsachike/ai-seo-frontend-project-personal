@@ -6,6 +6,8 @@ import {
   isVercelConfigured,
   isVercelDemo,
   requireSession,
+  VERCEL_TIMEOUT_MS,
+  vercelFailure,
   vercelUrl,
 } from "@/lib/vercel-domains";
 
@@ -29,13 +31,13 @@ export async function GET(request: NextRequest, ctx: { params: Promise<{ domain:
       method: "GET",
       headers: { Authorization: `Bearer ${VERCEL_TOKEN}` },
       cache: "no-store",
+      signal: AbortSignal.timeout(VERCEL_TIMEOUT_MS),
     });
 
-    const data = await response.json();
+    const data = await response.json().catch(() => null);
 
     return NextResponse.json({ status: response.status, ok: response.ok, vercel: data }, { status: response.status });
   } catch (error) {
-    console.error("Vercel config error:", error);
-    return NextResponse.json({ error: "Something went wrong" }, { status: 500 });
+    return vercelFailure(error, "Vercel config error");
   }
 }

@@ -30,6 +30,41 @@ export function requireSession(request: NextRequest) {
     : NextResponse.json({ error: "Unauthenticated" }, { status: 401 });
 }
 
+/** How long a Vercel API call may take before the route gives up. */
+export const VERCEL_TIMEOUT_MS = 15_000;
+
+/**
+ * The answer for an error thrown while calling Vercel. A request that never
+ * connected (DNS, firewall, VPN, proxy, timeout) used to come back as a bare
+ * "Something went wrong"; it now says Vercel couldn't be reached and why, so
+ * it isn't mistaken for a bad token or a rejected domain.
+ */
+export function vercelFailure(error: unknown, label: string) {
+  console.error(`${label}:`, error);
+  const cause = (error as { cause?: { code?: string } } | null)?.cause;
+  const name = (error as { name?: string } | null)?.name;
+  if (name === "TimeoutError" || name === "AbortError" || cause?.code === "UND_ERR_CONNECT_TIMEOUT") {
+    return NextResponse.json(
+      {
+        error:
+          "Couldn't reach Vercel: the connection timed out. Check this server's internet access (VPN, proxy or firewall).",
+        code: cause?.code ?? "timeout",
+      },
+      { status: 504 },
+    );
+  }
+  if (error instanceof TypeError && cause) {
+    return NextResponse.json(
+      {
+        error: `Couldn't reach Vercel (${cause.code ?? "network error"}). Check this server's internet access.`,
+        code: cause.code ?? "network",
+      },
+      { status: 502 },
+    );
+  }
+  return NextResponse.json({ error: "Something went wrong" }, { status: 500 });
+}
+
 /** Adds `teamId` when the project belongs to a team. */
 export function vercelUrl(path: string) {
   const url = new URL(`https://api.vercel.com${path}`);
