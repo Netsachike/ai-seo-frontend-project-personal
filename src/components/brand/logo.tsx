@@ -1,6 +1,9 @@
+"use client";
+
 import Image, { type StaticImageData } from "next/image";
 
 import { cn } from "@/lib/utils";
+import { useBrandConfig } from "@/components/providers/brand-provider";
 import logoDark from "@/assets/brand/logo-dark.png";
 import logoLight from "@/assets/brand/logo-light.png";
 import markDark from "@/assets/brand/mark-dark.png";
@@ -60,6 +63,18 @@ function ThemedArtwork({
   );
 }
 
+/**
+ * On a White Label host, the reseller's own artwork, whichever of the two they
+ * uploaded (`prefer` first). Null on Rankoya's host or when they uploaded none.
+ */
+function useTenantArtwork(prefer: "logo" | "icon") {
+  const { brandConfig, isCustomDomain } = useBrandConfig();
+  if (!isCustomDomain) return null;
+  const { logo_url, logo_icon_url, brand_name } = brandConfig;
+  const src = prefer === "logo" ? logo_url || logo_icon_url : logo_icon_url || logo_url;
+  return { src, name: brand_name };
+}
+
 /** The R-and-arrow symbol on its own, in full colour. `size` is its height. */
 export function RankoyaMark({
   className,
@@ -70,6 +85,18 @@ export function RankoyaMark({
   size?: number;
   tone?: Tone;
 }) {
+  const tenant = useTenantArtwork("icon");
+  if (tenant) {
+    return tenant.src ? (
+      // eslint-disable-next-line @next/next/no-img-element -- tenant artwork comes from any origin
+      <img
+        src={tenant.src}
+        alt=""
+        style={{ height: size }}
+        className={cn("w-auto shrink-0 object-contain", className)}
+      />
+    ) : null;
+  }
   return <ThemedArtwork light={markLight} dark={markDark} height={size} tone={tone} alt="" className={className} />;
 }
 
@@ -78,6 +105,19 @@ export function RankoyaMark({
  * CSS mask filled with `currentColor`, so callers can recolour it with text-*.
  */
 export function RankoyaAvatar({ className, size = 28 }: { className?: string; size?: number }) {
+  const tenant = useTenantArtwork("icon");
+  if (tenant?.src) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element -- tenant artwork comes from any origin
+      <img
+        src={tenant.src}
+        alt=""
+        aria-hidden
+        style={{ width: size, height: size }}
+        className={cn("shrink-0 rounded-full bg-surface object-cover", className)}
+      />
+    );
+  }
   const glyph = Math.round(size * 0.52);
   return (
     <span
@@ -102,6 +142,31 @@ export function RankoyaAvatar({ className, size = 28 }: { className?: string; si
 
 /** Horizontal lockup: mark and wordmark. `height` is the mark's height. */
 export function Logo({ className, height = 26, tone = "auto" }: { className?: string; height?: number; tone?: Tone }) {
+  const tenant = useTenantArtwork("logo");
+  if (tenant) {
+    return (
+      <span className={cn("inline-flex min-w-0 items-center", className)} translate="no">
+        {tenant.src ? (
+          // eslint-disable-next-line @next/next/no-img-element -- tenant artwork comes from any origin
+          <img
+            src={tenant.src}
+            alt={tenant.name}
+            style={{ height }}
+            className="w-auto max-w-[180px] shrink-0 object-contain select-none"
+          />
+        ) : (
+          <span
+            className={cn(
+              "truncate text-[18px] leading-6 font-semibold tracking-[-0.02em]",
+              tone === "onDark" ? "text-white" : "text-fg",
+            )}
+          >
+            {tenant.name}
+          </span>
+        )}
+      </span>
+    );
+  }
   return (
     <span className={cn("inline-flex items-center", className)} translate="no">
       <ThemedArtwork light={logoLight} dark={logoDark} height={height} tone={tone} alt={WORDMARK} />

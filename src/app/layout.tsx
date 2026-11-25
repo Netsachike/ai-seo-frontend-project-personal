@@ -1,11 +1,12 @@
 import type { Metadata, Viewport } from "next";
-import { cookies, headers } from "next/headers";
+import { cookies } from "next/headers";
 import Script from "next/script";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getTranslations } from "next-intl/server";
 
 import { dirFor } from "@/i18n/config";
-import { isDefaultAppHost } from "@/config/brand";
+import { deriveTenantTokens, isDefaultAppHost } from "@/config/brand";
+import { requestHost, resolveTenantBrand } from "@/lib/brand-server";
 import { DEFAULT_THEME, THEME_COOKIE, isThemePreference } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 import { Providers } from "@/components/providers";
@@ -32,11 +33,32 @@ const TRANSLATE_POLYFILL = `
   }
 `;
 
+/** Rankoya's own icons, in /public so a tenant host can swap them for its own. */
+const VENDOR_ICONS: Metadata["icons"] = {
+  icon: [
+    { url: "/favicon.ico", sizes: "any" },
+    { url: "/icon.png", type: "image/png", sizes: "512x512" },
+  ],
+  apple: "/apple-icon.png",
+};
+
 export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations("meta");
+  const [t, brand] = await Promise.all([getTranslations("meta"), requestHost().then(resolveTenantBrand)]);
+  if (!brand) {
+    return {
+      title: { default: t("title"), template: t("titleTemplate") },
+      description: t("description"),
+      icons: VENDOR_ICONS,
+    };
+  }
+
+  // A White Label host: the reseller's name and icon from the very first HTML.
+  const name = brand.brand_name;
+  const icon = brand.favicon_url || brand.logo_icon_url;
   return {
-    title: { default: t("title"), template: t("titleTemplate") },
-    description: t("description"),
+    title: { default: name, template: `%s · ${name}` },
+    description: t("description").replace(/Rankoya/g, name),
+    icons: icon ? { icon, apple: brand.logo_icon_url || icon } : VENDOR_ICONS,
   };
 }
 
@@ -48,9 +70,16 @@ export const viewport: Viewport = {
 };
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
-  const [locale, cookieStore, headerStore] = await Promise.all([getLocale(), cookies(), headers()]);
-  const vendorHost = isDefaultAppHost(headerStore.get("x-forwarded-host") ?? headerStore.get("host"));
+  const [locale, cookieStore, host] = await Promise.all([getLocale(), cookies(), requestHost()]);
+  const vendorHost = isDefaultAppHost(host);
+  // Shares generateMetadata's request (memoised), so this costs no second call.
+  const tenantBrand = vendorHost ? null : await resolveTenantBrand(host);
   const script = localeFont(locale);
+  // The tenant palette goes on <html> from the server, so nothing paints in Rankoya blue first.
+  const rootStyle = {
+    ...(script ? { "--font-locale": script.family } : {}),
+    ...(tenantBrand ? deriveTenantTokens(tenantBrand) : {}),
+  } as React.CSSProperties;
   const savedTheme = cookieStore.get(THEME_COOKIE)?.value;
   // Light is the default for everyone; an explicit dark choice is rendered on the server.
   const serverThemeClass = savedTheme === "dark" ? "dark" : undefined;
@@ -61,7 +90,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       dir={dirFor(locale)}
       suppressHydrationWarning
       className={cn(geistSans.variable, geistMono.variable, script?.className, serverThemeClass)}
-      style={script ? ({ "--font-locale": script.family } as React.CSSProperties) : undefined}
+      style={Object.keys(rootStyle).length > 0 ? rootStyle : undefined}
     >
       <body className="min-h-dvh">
         {/*
@@ -77,6 +106,8 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
             locale={locale}
             initialTheme={isThemePreference(savedTheme) ? savedTheme : DEFAULT_THEME}
             vendorHost={vendorHost}
+            host={host}
+            initialBrand={tenantBrand}
           >
             {children}
           </Providers>

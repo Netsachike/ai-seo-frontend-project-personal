@@ -13,6 +13,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
 import { BrandGate } from "@/components/providers/brand-gate";
 import { BrandProvider } from "@/components/providers/brand-provider";
+import type { BrandConfig } from "@/config/brand";
 
 function makeQueryClient() {
   return new QueryClient({
@@ -60,12 +61,18 @@ export function Providers({
   locale,
   initialTheme,
   vendorHost,
+  host,
+  initialBrand,
 }: {
   children: React.ReactNode;
   locale: string;
   initialTheme: ThemePreference;
   /** False on a White Label tenant domain: the brand is resolved before the app shows. */
   vendorHost: boolean;
+  /** The request host, normalised on the server. */
+  host: string;
+  /** The tenant brand the server already resolved; null on Rankoya's host or when it couldn't. */
+  initialBrand: BrandConfig | null;
 }) {
   const queryClient = getQueryClient();
   const dir = dirFor(locale);
@@ -81,7 +88,7 @@ export function Providers({
       <ThemeCookieSync />
       <TimeZoneCookieSync />
       <QueryClientProvider client={queryClient}>
-        <BrandProvider>
+        <BrandProvider host={host} vendorHost={vendorHost} initialBrand={initialBrand}>
           <NuqsAdapter>
             <Direction.Provider dir={dir}>
               <TooltipProvider>
