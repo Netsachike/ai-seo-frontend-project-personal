@@ -8,15 +8,19 @@ import { useTranslations } from "next-intl";
 
 import { toast } from "@/lib/toast";
 import { getErrorMessage, mentionsUpgrade } from "@/lib/errors";
-import { hasWhiteLabel } from "@/lib/subscription";
+// White Label gate off for testing the custom domain flow; restore before launch.
+// import { hasWhiteLabel } from "@/lib/subscription";
 import { useWorkspaceStore, type Workspace } from "@/stores/workspace-store";
 import type { User } from "@/types/types";
 import { accountHref, type SettingsTab } from "@/features/account/routes";
-import { useSessionUser } from "@/features/account/use-session-user";
+// import { useSessionUser } from "@/features/account/use-session-user";
 import { getTeamMemberWorkspaceIds } from "@/features/account/use-team-members";
 import { ConfirmDialog } from "@/components/account/confirm-dialog";
-import { ConfigureWhiteLabelDialog, type WhiteLabelFormValues } from "@/components/account/configure-white-label-dialog";
-import { WhiteLabelUpgradeDialog } from "@/components/account/white-label-upgrade-dialog";
+import {
+  ConfigureWhiteLabelDialog,
+  type WhiteLabelFormValues,
+} from "@/components/account/configure-white-label-dialog";
+// import { WhiteLabelUpgradeDialog } from "@/components/account/white-label-upgrade-dialog";
 import { WorkspaceDialog, type WorkspaceFormValues } from "@/components/account/workspace-dialog";
 import { EmptyState } from "@/components/brand/empty-state";
 import { EntityAvatar } from "@/components/layout/avatars";
@@ -40,7 +44,8 @@ export function WorkspacesTab({
 }) {
   const t = useTranslations("account.workspaces");
   const router = useRouter();
-  const session = useSessionUser();
+  // Only the White Label gate read the session; restore with it.
+  // const session = useSessionUser();
 
   const {
     workspaces,
@@ -60,7 +65,7 @@ export function WorkspacesTab({
   const [isWorkspaceModalOpen, setIsWorkspaceModalOpen] = React.useState(false);
   const [workspaceToWhiteLabel, setWorkspaceToWhiteLabel] = React.useState<Workspace | null>(null);
   const [isWhiteLabelModalOpen, setIsWhiteLabelModalOpen] = React.useState(false);
-  const [isWhiteLabelUpgradeOpen, setIsWhiteLabelUpgradeOpen] = React.useState(false);
+  // const [isWhiteLabelUpgradeOpen, setIsWhiteLabelUpgradeOpen] = React.useState(false);
 
   const isWorkspaceMutating = isCreatingWorkspace || isUpdatingWorkspace || isDeletingWorkspace;
 
@@ -96,13 +101,14 @@ export function WorkspacesTab({
 
   // White Label is gated behind the reseller_seats add-on. Without it the
   // button opens the upgrade prompt instead.
-  const canWhiteLabel = hasWhiteLabel(session?.subscriptions);
+  // White Label gate off for testing the custom domain flow; restore before launch.
+  // const canWhiteLabel = hasWhiteLabel(session?.subscriptions);
 
   const openWhiteLabelModal = (workspace: Workspace) => {
-    if (!canWhiteLabel) {
-      setIsWhiteLabelUpgradeOpen(true);
-      return;
-    }
+    // if (!canWhiteLabel) {
+    //   setIsWhiteLabelUpgradeOpen(true);
+    //   return;
+    // }
     setWorkspaceToWhiteLabel(workspace);
     setIsWhiteLabelModalOpen(true);
   };
@@ -303,7 +309,8 @@ export function WorkspacesTab({
         onConfirm={handleDeleteWorkspaceConfirm}
       />
 
-      <WhiteLabelUpgradeDialog open={isWhiteLabelUpgradeOpen} onOpenChange={setIsWhiteLabelUpgradeOpen} />
+      {/* White Label gate off for testing the custom domain flow; restore before launch.
+      <WhiteLabelUpgradeDialog open={isWhiteLabelUpgradeOpen} onOpenChange={setIsWhiteLabelUpgradeOpen} /> */}
 
       <ConfigureWhiteLabelDialog
         open={isWhiteLabelModalOpen}
