@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { CheckCircle2Icon, Loader2Icon, PlugZapIcon } from "lucide-react";
+import { CheckCircle2Icon, EyeIcon, EyeOffIcon, Loader2Icon, PlugZapIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import type { Site } from "@/types/types";
@@ -17,11 +17,57 @@ import {
 } from "@/features/publishing/lovable";
 import { checkLovableHealth, type LovableError } from "@/features/publishing/lovable-health";
 import { FormField } from "@/components/forms/form-field";
-import { PasswordInput } from "@/components/forms/password-input";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { LovablePromptCard } from "./lovable-prompt";
+
+/**
+ * Attributes that keep browser and password-manager autofill out of these
+ * fields: Chrome offered saved emails and passwords here, which reads as
+ * "sign in" rather than "paste your site and key".
+ */
+const NO_AUTOFILL = {
+  autoComplete: "off",
+  autoCorrect: "off",
+  autoCapitalize: "off",
+  spellCheck: false,
+  "data-1p-ignore": true,
+  "data-lpignore": "true",
+  "data-bwignore": true,
+  "data-form-type": "other",
+} as const;
+
+/**
+ * The API key field. A plain text input masked with CSS rather than
+ * type="password", so the browser never treats the form as a login and never
+ * offers (or offers to save) a password.
+ */
+function ApiKeyInput({ className, ...props }: Omit<React.ComponentProps<typeof Input>, "type">) {
+  const t = useTranslations("integrations.lovable");
+  const [visible, setVisible] = React.useState(false);
+  return (
+    <div className="relative">
+      <Input
+        {...props}
+        {...NO_AUTOFILL}
+        type="text"
+        style={visible ? undefined : ({ WebkitTextSecurity: "disc" } as React.CSSProperties)}
+        className={cn("pe-12", className)}
+      />
+      <button
+        type="button"
+        aria-label={visible ? t("hideKey") : t("showKey")}
+        aria-pressed={visible}
+        onMouseDown={(e) => e.preventDefault()}
+        onClick={() => setVisible((v) => !v)}
+        className="absolute end-1.5 top-1/2 grid size-9 -translate-y-1/2 place-items-center rounded-md text-fg-3 hover:bg-surface-2 hover:text-fg"
+      >
+        {visible ? <EyeOffIcon aria-hidden className="size-4" /> : <EyeIcon aria-hidden className="size-4" />}
+      </button>
+    </div>
+  );
+}
 
 /** How often the health endpoint is re-checked while the user works in Lovable. */
 const HEALTH_INTERVAL_MS = 1500;
@@ -174,13 +220,15 @@ export function LovableConnect({
                   {...props}
                   ref={urlInput}
                   dir="ltr"
+                  {...NO_AUTOFILL}
                   type="text"
                   inputMode="url"
-                  autoComplete="off"
+                  name="lovable-site-address"
                   placeholder={t("placeholders.lovableUrl")}
                   value={url}
                   onChange={(event) => {
-                    setUrl(event.target.value);
+                    // A site address never has an @: typing or pasting an email can't get in.
+                    setUrl(event.target.value.replace(/@/g, ""));
                     setError(null);
                   }}
                 />
@@ -193,10 +241,10 @@ export function LovableConnect({
 
       <FormField label={t("fields.lovableApiKey")}>
         {(props) => (
-          <PasswordInput
+          <ApiKeyInput
             {...props}
             dir="ltr"
-            autoComplete="off"
+            name="lovable-rankoya-key"
             placeholder={t("placeholders.lovableApiKey")}
             value={apiKey}
             onChange={(event) => {
