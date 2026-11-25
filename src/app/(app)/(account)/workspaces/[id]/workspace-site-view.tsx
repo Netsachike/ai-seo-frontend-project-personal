@@ -21,20 +21,21 @@ import { useTranslations } from "next-intl";
 
 import { toast } from "@/lib/toast";
 import { cn } from "@/lib/utils";
-import { hasWhiteLabel } from "@/lib/subscription";
+// White Label gate off for testing the custom domain flow; restore before launch.
+// import { hasWhiteLabel } from "@/lib/subscription";
 import { DEFAULT_BRAND_COLORS, DEFAULT_LOGIN_CAROUSEL, normalizeCarousel } from "@/config/brand";
 import CustomDomainService, { type CustomDomainConfig } from "@/services/custom-domain";
 import { useWorkspaceStore } from "@/stores/workspace-store";
 import { accountHref } from "@/features/account/routes";
 import { accountKeys } from "@/features/account/query-keys";
-import { useSessionUser } from "@/features/account/use-session-user";
+// import { useSessionUser } from "@/features/account/use-session-user";
 import { ConfirmDialog } from "@/components/account/confirm-dialog";
 import {
   ConfigureWhiteLabelDialog,
   type WhiteLabelFormValues,
 } from "@/components/account/configure-white-label-dialog";
 import { DnsRecordsDialog } from "@/components/account/dns-records-dialog";
-import { WhiteLabelUpgradeDialog } from "@/components/account/white-label-upgrade-dialog";
+// import { WhiteLabelUpgradeDialog } from "@/components/account/white-label-upgrade-dialog";
 import { EmptyState } from "@/components/brand/empty-state";
 import { EntityAvatar } from "@/components/layout/avatars";
 import { Badge } from "@/components/ui/badge";
@@ -86,7 +87,8 @@ export function WorkspaceSiteView({ id }: { id: string }) {
   const t = useTranslations("account.site");
   const router = useRouter();
   const queryClient = useQueryClient();
-  const session = useSessionUser();
+  // Only the White Label gate read the session; restore with it.
+  // const session = useSessionUser();
   const { workspaces, hasLoaded, fetchWorkspaces } = useWorkspaceStore();
   const workspace = workspaces.find((w) => String(w.id) === id);
 
@@ -95,7 +97,7 @@ export function WorkspaceSiteView({ id }: { id: string }) {
   }, [fetchWorkspaces, hasLoaded]);
 
   const [isModalOpen, setIsModalOpen] = React.useState(false);
-  const [isUpgradeModalOpen, setIsUpgradeModalOpen] = React.useState(false);
+  // const [isUpgradeModalOpen, setIsUpgradeModalOpen] = React.useState(false);
   const [isDnsModalOpen, setIsDnsModalOpen] = React.useState(false);
   const [selectedDomain, setSelectedDomain] = React.useState<DomainRecord | null>(null);
   const [dnsDomain, setDnsDomain] = React.useState<DomainRecord | null>(null);
@@ -105,7 +107,8 @@ export function WorkspaceSiteView({ id }: { id: string }) {
   const [isDeleting, setIsDeleting] = React.useState(false);
   const [pendingDnsId, setPendingDnsId] = React.useState<string | null>(null);
 
-  const hasResellerSeats = hasWhiteLabel(session?.subscriptions);
+  // White Label gate off for testing the custom domain flow; restore before launch.
+  // const hasResellerSeats = hasWhiteLabel(session?.subscriptions);
 
   const domainsQuery = useQuery({
     queryKey: [...accountKeys.domains(), id],
@@ -173,19 +176,19 @@ export function WorkspaceSiteView({ id }: { id: string }) {
   }, []);
 
   const handleEditConfig = (domainData: DomainRecord) => {
-    if (!hasResellerSeats) {
-      setIsUpgradeModalOpen(true);
-      return;
-    }
+    // if (!hasResellerSeats) {
+    //   setIsUpgradeModalOpen(true);
+    //   return;
+    // }
     setSelectedDomain(domainData);
     setIsModalOpen(true);
   };
 
   const handleAddNewDomain = () => {
-    if (!hasResellerSeats) {
-      setIsUpgradeModalOpen(true);
-      return;
-    }
+    // if (!hasResellerSeats) {
+    //   setIsUpgradeModalOpen(true);
+    //   return;
+    // }
     setSelectedDomain(null);
     setIsModalOpen(true);
   };
@@ -633,7 +636,8 @@ export function WorkspaceSiteView({ id }: { id: string }) {
         </Card>
       </div>
 
-      <WhiteLabelUpgradeDialog open={isUpgradeModalOpen} onOpenChange={setIsUpgradeModalOpen} />
+      {/* White Label gate off for testing the custom domain flow; restore before launch.
+      <WhiteLabelUpgradeDialog open={isUpgradeModalOpen} onOpenChange={setIsUpgradeModalOpen} /> */}
       <DnsRecordsDialog open={isDnsModalOpen} domainData={dnsDomain} onOpenChange={setIsDnsModalOpen} />
       <ConfirmDialog
         open={Boolean(domainToDelete)}

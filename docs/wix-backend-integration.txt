@@ -18,6 +18,8 @@ Next .env (for reference, backend does not need these):
 HgwRmxlBjbh9nJBYcTWRQcoTd3K2vDoX8KMvdfePGkVYqnBK
 i5XNnBJ5Oly5RUVgc6jG8qlGvS1imbX76DOQOKwhlP9s1tex
 vM6hHUAe6R7rMVe5rRwbmJ1MLDhvj4RaX5LUeUHmPfR44S8n
+
+By:3@cs@SE-uv3Z
   INTEGRATIONS_STATE_SECRET=dfBQfr4AW02WWpSti8YZq8O43eV14IvC3qUFw3tVUMo=     # Next only, signs the state cookie
   APP_URL=https://app.rankoya.uk                  # Wix redirects back here
   BACKEND_INTERNAL_URL=https://api.rankoya.uk/api # must be the Laravel API, not the app host

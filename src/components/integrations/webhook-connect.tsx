@@ -2,7 +2,7 @@
 
 // Make connects as a saved webhook connection (platform `make`) and publishes from the article page.
 import * as React from "react";
-import { CheckCircle2Icon, ChevronDownIcon, EyeIcon, PlugZapIcon, SendIcon } from "lucide-react";
+import { CheckCircle2Icon, ChevronDownIcon, EyeIcon, PlugZapIcon /* , SendIcon */ } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import type { Site } from "@/types/types";
@@ -33,7 +33,7 @@ import { Input } from "@/components/ui/input";
  * endpoint and the blog pages, sign every request with a secret, and save the
  * connection (platform `custom`, method `webhook`, config.provider).
  *
- * Make: one "Test and connect" button. It saves the webhook as a connection
+ * Make: one "Connect" button. It saves the webhook as a connection
  * (platform `make`, method `webhook`, credentials.webhook_url,
  * config.send_full_content) and the backend's /test activates it. Articles are
  * then published to it from the article page like any other connection.
@@ -60,7 +60,8 @@ export function WebhookConnect({
   // Make's signing secret is off for now: its requests go unsigned.
   const secret = isBuilder ? builderSecret : undefined;
   const [url, setUrl] = React.useState(() => readWebhookUrl(site.id, provider));
-  const [testing, setTesting] = React.useState(false);
+  // Read by the manual test button, which is commented out below.
+  const [, setTesting] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   // The URL that passed the test; editing the URL means testing again.
   const [testedUrl, setTestedUrl] = React.useState<string | null>(null);
@@ -292,12 +293,15 @@ export function WebhookConnect({
         )}
 
         <div className="flex flex-wrap justify-end gap-2">
+          {/* Manual "Send test article" is off: connections are tested automatically on their details page.
+          Lovable and Replit (the only builders) don't use this form any more; Enter still runs the test.
           {isBuilder ? (
             <Button type="submit" variant="secondary" loading={testing} disabled={!url.trim()}>
               <SendIcon />
               {tested ? t("testAgain") : t("test")}
             </Button>
-          ) : (
+          ) : ( */}
+          {!isBuilder && (
             <Button type="submit" variant="primary" loading={createConnection.isPending} disabled={!url.trim()}>
               <PlugZapIcon />
               {t("testAndConnect")}
@@ -308,7 +312,7 @@ export function WebhookConnect({
             <UploadIcon />
             {t("publish", { name })}
           </Button> */}
-          {/* Make saves through "Test and connect" above; Lovable and Replit save after their test. */}
+          {/* Make saves through "Connect" above; Lovable and Replit save after their test. */}
           {isBuilder && (
             <Button
               type="button"

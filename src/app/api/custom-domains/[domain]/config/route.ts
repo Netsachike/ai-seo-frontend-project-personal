@@ -1,9 +1,18 @@
 import { NextResponse, type NextRequest } from "next/server";
 
-import { VERCEL_TOKEN, demoVercel, isVercelConfigured, isVercelDemo, vercelUrl } from "@/lib/vercel-domains";
+import {
+  VERCEL_TOKEN,
+  demoVercel,
+  isVercelConfigured,
+  isVercelDemo,
+  requireSession,
+  vercelUrl,
+} from "@/lib/vercel-domains";
 
 /** DNS routing state for a domain (CNAME / A records) and Vercel's recommended targets. */
-export async function GET(_request: NextRequest, ctx: { params: Promise<{ domain: string }> }) {
+export async function GET(request: NextRequest, ctx: { params: Promise<{ domain: string }> }) {
+  const unauthenticated = requireSession(request);
+  if (unauthenticated) return unauthenticated;
   try {
     if (!isVercelConfigured && !isVercelDemo) {
       return NextResponse.json({ error: "Vercel configuration is missing" }, { status: 500 });

@@ -16,9 +16,10 @@ import SubscriptionService from "@/services/subscriptions";
 import { PaddleContext } from "@/providers/paddle-provider";
 import { accountHref } from "@/features/account/routes";
 import { useSessionUser } from "@/features/account/use-session-user";
-import { useWhiteLabelAccess } from "@/features/account/use-white-label-access";
+// White Label gate off for testing the custom domain flow; restore before launch.
+// import { useWhiteLabelAccess } from "@/features/account/use-white-label-access";
 import { ConfirmDialog } from "@/components/account/confirm-dialog";
-import { WhiteLabelUpgradeDialog } from "@/components/account/white-label-upgrade-dialog";
+// import { WhiteLabelUpgradeDialog } from "@/components/account/white-label-upgrade-dialog";
 import { PageHeader } from "@/components/layout/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -176,16 +177,17 @@ export function UpgradeView() {
       : null;
 
   // The agency kit ships with the White Label add-on: cookie first, then the backend.
-  const { hasAccess: canAccessMarketingAssets } = useWhiteLabelAccess();
-  const [isWhiteLabelUpgradeOpen, setIsWhiteLabelUpgradeOpen] = React.useState(false);
+  // White Label gate off for testing the custom domain flow; restore before launch.
+  // const { hasAccess: canAccessMarketingAssets } = useWhiteLabelAccess();
+  // const [isWhiteLabelUpgradeOpen, setIsWhiteLabelUpgradeOpen] = React.useState(false);
 
   const openMarketingAssets = React.useCallback(() => {
-    if (!canAccessMarketingAssets) {
-      setIsWhiteLabelUpgradeOpen(true);
-      return;
-    }
+    // if (!canAccessMarketingAssets) {
+    //   setIsWhiteLabelUpgradeOpen(true);
+    //   return;
+    // }
     router.push(accountHref.agency());
-  }, [canAccessMarketingAssets, router]);
+  }, [router]);
 
   const [pendingPlan, setPendingPlan] = React.useState<PlanCard | null>(null);
   const [pendingAction, setPendingAction] = React.useState<PlanAction | null>(null);
@@ -374,7 +376,8 @@ export function UpgradeView() {
             </div>
             <Button variant="primary" className="shrink-0" onClick={openMarketingAssets}>
               <FolderDownIcon />
-              {canAccessMarketingAssets ? t("kit.open") : t("kit.view")}
+              {/* {canAccessMarketingAssets ? t("kit.open") : t("kit.view")} */}
+              {t("kit.open")}
             </Button>
           </section>
 
@@ -397,7 +400,8 @@ export function UpgradeView() {
         </TabsContent>
       </Tabs>
 
-      <WhiteLabelUpgradeDialog open={isWhiteLabelUpgradeOpen} onOpenChange={setIsWhiteLabelUpgradeOpen} />
+      {/* White Label gate off for testing the custom domain flow; restore before launch.
+      <WhiteLabelUpgradeDialog open={isWhiteLabelUpgradeOpen} onOpenChange={setIsWhiteLabelUpgradeOpen} /> */}
 
       <ConfirmDialog
         open={pendingAction !== null && pendingAction !== "current"}
