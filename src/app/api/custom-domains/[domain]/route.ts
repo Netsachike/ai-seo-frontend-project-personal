@@ -7,6 +7,8 @@ import {
   isVercelConfigured,
   isVercelDemo,
   requireSession,
+  VERCEL_TIMEOUT_MS,
+  vercelFailure,
   vercelUrl,
 } from "@/lib/vercel-domains";
 
@@ -28,10 +30,15 @@ export async function GET(request: NextRequest, ctx: { params: Promise<{ domain:
 
     const response = await fetch(
       vercelUrl(`/v9/projects/${VERCEL_PROJECT_ID}/domains/${encodeURIComponent(cleanDomain)}`),
-      { method: "GET", headers: { Authorization: `Bearer ${VERCEL_TOKEN}` }, cache: "no-store" },
+      {
+        method: "GET",
+        headers: { Authorization: `Bearer ${VERCEL_TOKEN}` },
+        cache: "no-store",
+        signal: AbortSignal.timeout(VERCEL_TIMEOUT_MS),
+      },
     );
 
-    const data = await response.json();
+    const data = await response.json().catch(() => null);
 
     if (!response.ok) {
       return NextResponse.json(
@@ -42,8 +49,7 @@ export async function GET(request: NextRequest, ctx: { params: Promise<{ domain:
 
     return NextResponse.json({ success: true, domain: cleanDomain, vercel: data });
   } catch (error) {
-    console.error("Domain status error:", error);
-    return NextResponse.json({ error: "Something went wrong" }, { status: 500 });
+    return vercelFailure(error, "Domain status error");
   }
 }
 
@@ -67,7 +73,12 @@ export async function DELETE(request: NextRequest, ctx: { params: Promise<{ doma
 
     const response = await fetch(
       vercelUrl(`/v9/projects/${VERCEL_PROJECT_ID}/domains/${encodeURIComponent(cleanDomain)}`),
-      { method: "DELETE", headers: { Authorization: `Bearer ${VERCEL_TOKEN}` }, cache: "no-store" },
+      {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${VERCEL_TOKEN}` },
+        cache: "no-store",
+        signal: AbortSignal.timeout(VERCEL_TIMEOUT_MS),
+      },
     );
 
     // A 404 means the domain is already off the project: treat it as done so
@@ -82,7 +93,6 @@ export async function DELETE(request: NextRequest, ctx: { params: Promise<{ doma
 
     return NextResponse.json({ success: true, domain: cleanDomain });
   } catch (error) {
-    console.error("Domain delete error:", error);
-    return NextResponse.json({ error: "Something went wrong" }, { status: 500 });
+    return vercelFailure(error, "Domain delete error");
   }
 }

@@ -7,6 +7,8 @@ import {
   isVercelConfigured,
   isVercelDemo,
   requireSession,
+  VERCEL_TIMEOUT_MS,
+  vercelFailure,
   vercelUrl,
 } from "@/lib/vercel-domains";
 
@@ -49,9 +51,10 @@ export async function POST(request: NextRequest) {
       },
       body: JSON.stringify({ name: cleanDomain }),
       cache: "no-store",
+      signal: AbortSignal.timeout(VERCEL_TIMEOUT_MS),
     });
 
-    const data = await response.json();
+    const data = await response.json().catch(() => null);
 
     if (!response.ok) {
       console.error("Vercel API error:", data);
@@ -63,7 +66,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, domain: cleanDomain, vercel: data });
   } catch (error) {
-    console.error("Custom domain error:", error);
-    return NextResponse.json({ error: "Something went wrong" }, { status: 500 });
+    return vercelFailure(error, "Custom domain error");
   }
 }

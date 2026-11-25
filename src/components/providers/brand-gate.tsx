@@ -20,10 +20,11 @@ const CURTAIN_MS = 420;
 export function BrandGate({ children, vendorHost }: { children: React.ReactNode; vendorHost: boolean }) {
   const { isBrandReady } = useBrandConfig();
   const [isOpen, setIsOpen] = React.useState(false);
-  const [isPresent, setIsPresent] = React.useState(!vendorHost);
+  // No curtain when the server already resolved the brand: the first paint is the tenant's.
+  const [isPresent, setIsPresent] = React.useState(() => !vendorHost && !isBrandReady);
 
   React.useEffect(() => {
-    if (!isBrandReady || vendorHost) return;
+    if (!isBrandReady || !isPresent) return;
     // One frame of "closed" first, so the browser has something to transition from.
     const frame = requestAnimationFrame(() => setIsOpen(true));
     const timer = window.setTimeout(() => setIsPresent(false), CURTAIN_MS + 80);
@@ -31,7 +32,7 @@ export function BrandGate({ children, vendorHost }: { children: React.ReactNode;
       cancelAnimationFrame(frame);
       window.clearTimeout(timer);
     };
-  }, [isBrandReady, vendorHost]);
+  }, [isBrandReady, isPresent]);
 
   return (
     <>

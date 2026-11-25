@@ -105,11 +105,29 @@ type BrandState = { config: BrandConfig; host: string; ready: boolean };
 /**
  * Resolves the White Label brand for the host the app is served from. On
  * Rankoya's own host (and localhost / previews) it keeps the stock identity
- * and is ready immediately; on a tenant host it paints the last known brand
- * from storage, then the backend's answer.
+ * and is ready immediately. On a tenant host the server has usually resolved
+ * the brand already (`initialBrand`), so the logo, favicon and colours are
+ * right in the first HTML; otherwise it paints the last known brand from
+ * storage. Either way the browser asks the backend again and applies any
+ * change the reseller has made since.
  */
-export function BrandProvider({ children }: { children: React.ReactNode }) {
-  const [state, setState] = React.useState<BrandState>({ config: DEFAULT_BRAND_CONFIG, host: "", ready: false });
+export function BrandProvider({
+  children,
+  host: serverHost,
+  vendorHost,
+  initialBrand,
+}: {
+  children: React.ReactNode;
+  host: string;
+  vendorHost: boolean;
+  initialBrand: BrandConfig | null;
+}) {
+  const [state, setState] = React.useState<BrandState>(() => ({
+    config: initialBrand ?? DEFAULT_BRAND_CONFIG,
+    host: serverHost,
+    ready: vendorHost || Boolean(initialBrand),
+  }));
+  const initialBrandRef = React.useRef(initialBrand);
 
   // Held in a ref so applying the tenant's default appearance doesn't make
   // the bootstrap effect depend on next-themes' identity.
@@ -127,8 +145,11 @@ export function BrandProvider({ children }: { children: React.ReactNode }) {
     // The vendor host never inherits a cached tenant brand. Tenant hosts
     // paint their last known brand straight away, so customers don't see a
     // flash of Rankoya while /resolve is in flight.
-    const stored = onDefaultHost ? DEFAULT_BRAND_CONFIG : readStoredBrandConfig(host);
+    // The server's answer wins over the cache; it's newer.
+    const fromServer = onDefaultHost ? null : initialBrandRef.current;
+    const stored = onDefaultHost ? DEFAULT_BRAND_CONFIG : (fromServer ?? readStoredBrandConfig(host));
     const initial = !onDefaultHost && !isVendorBranding(stored) ? stored : DEFAULT_BRAND_CONFIG;
+    if (fromServer) writeStoredBrandConfig(host, fromServer);
     if (initial !== DEFAULT_BRAND_CONFIG) {
       applyBrandColors(initial);
       applyFavicon(initial.favicon_url);
@@ -155,7 +176,7 @@ export function BrandProvider({ children }: { children: React.ReactNode }) {
     // The vendor host is never blocked on the lookup; it already looks right.
     // The state update happens in a microtask so it isn't a synchronous
     // setState inside this effect.
-    void Promise.resolve().then(() => publish(initial, onDefaultHost));
+    void Promise.resolve().then(() => publish(initial, onDefaultHost || Boolean(fromServer)));
 
     // Runs on every host: the backend answers "not found" for Rankoya's own
     // host, which is the signal to keep the stock palette.
