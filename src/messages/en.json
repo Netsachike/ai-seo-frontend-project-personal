@@ -3256,6 +3256,8 @@
       "urlHelper": "Your published Lovable site, like museboard-mood-canvas.lovable.app.",
       "urlFirst": "Enter your website URL first to get step 2.",
       "keyRequired": "Paste the RANKOYA_API_KEY from your Lovable project.",
+      "showKey": "Show API key",
+      "hideKey": "Hide API key",
       "checking": "Checking your site’s Rankoya endpoint…",
       "live": "Your Rankoya API is live. Click Connect to finish.",
       "rechecking": "We’ll keep checking every few seconds.",

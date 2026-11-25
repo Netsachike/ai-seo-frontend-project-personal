@@ -860,7 +860,8 @@ Do not claim the integration is ready until the actual published website endpoin
  */
 export function lovableOrigin(input: string): string | null {
   const raw = input.trim();
-  if (!raw) return null;
+  // An email (or user@host) is never a site URL.
+  if (!raw || raw.includes("@")) return null;
   try {
     const url = new URL(/^[a-z][a-z\d+.-]*:\/\//i.test(raw) ? raw : `https://${raw}`);
     if (url.protocol !== "https:" && url.protocol !== "http:") return null;
